@@ -220,6 +220,20 @@ export default function LeadManagement() {
     router.push('/')
   }
 
+  // Function to truncate email addresses
+  const truncateEmail = (email: string, maxLength: number = 20) => {
+    if (!email || email.length <= maxLength) return email
+    
+    const [localPart, domain] = email.split('@')
+    if (!domain) return email
+    
+    const maxLocalLength = Math.max(8, maxLength - domain.length - 3) // Reserve space for domain and "..."
+    if (localPart.length <= maxLocalLength) return email
+    
+    const truncatedLocal = localPart.substring(0, maxLocalLength - 3) + '...'
+    return `${truncatedLocal}@${domain}`
+  }
+
   // Redirect to home if not admin
   if (!isAdmin) {
     return null
@@ -420,34 +434,36 @@ export default function LeadManagement() {
                                   onClick={() => handleLeadClick(lead)}
                                   showClickButton={true}
                                   clickButtonText="View Details"
-                                  className="hover:shadow-md transition-shadow duration-200"
+                                  className="hover:shadow-md transition-shadow duration-200 w-full max-w-sm"
                                 >
-                                  <div className="space-y-3">
+                                  <div className="space-y-3 w-full">
                                      {/* Lead Header */}
                                      <div className="flex items-start justify-between">
-                                       <div>
-                                         <h4 className="font-semibold text-sm text-gray-900">{lead.name}</h4>
-                                         <p className="text-xs text-gray-600">{lead.company}</p>
+                                       <div className="min-w-0 flex-1">
+                                         <h4 className="font-semibold text-sm text-gray-900 truncate">{lead.name}</h4>
+                                         <p className="text-xs text-gray-600 truncate">{lead.company || 'Not specified'}</p>
                                        </div>
                                      </div>
 
                                      {/* Contact Info */}
                                      <div className="space-y-1">
                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                         <Mail className="w-3 h-3" />
-                                         <span className="truncate">{lead.email}</span>
+                                         <Mail className="w-3 h-3 flex-shrink-0" />
+                                         <span className="truncate min-w-0" title={lead.email || 'No email provided'}>
+                                           {truncateEmail(lead.email || 'No email provided', 18)}
+                                         </span>
                                        </div>
                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                         <Building className="w-3 h-3" />
-                                         <span>{lead.source}</span>
+                                         <Building className="w-3 h-3 flex-shrink-0" />
+                                         <span className="truncate min-w-0">{lead.source || 'Website'}</span>
                                        </div>
-                                       <div className="flex items-center gap-2 text-xs text-gray-600">
-                                         <Target className="w-3 h-3" />
-                                         <span>{lead.industry}</span>
+                                       <div className="flex items-start gap-2 text-xs text-gray-600">
+                                         <Target className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                                         <span className="line-clamp-2 min-w-0 leading-tight">{lead.industry || 'Not specified'}</span>
                                        </div>
                                        {lead.quoteCount > 0 && (
                                          <div className="flex items-center gap-2 text-xs text-lime-600">
-                                           <Star className="w-3 h-3" />
+                                           <Star className="w-3 h-3 flex-shrink-0" />
                                            <span>{lead.quoteCount} quote{lead.quoteCount > 1 ? 's' : ''}</span>
                                          </div>
                                        )}
@@ -456,19 +472,19 @@ export default function LeadManagement() {
                                     {/* Notes */}
                                     {lead.notes && (
                                       <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                                        {lead.notes}
+                                        <p className="truncate">{lead.notes}</p>
                                       </div>
                                     )}
 
                                     {/* Footer */}
                                     <div className="flex items-center justify-between text-xs text-gray-500">
-                                      <div className="flex items-center gap-1">
-                                        <Calendar className="w-3 h-3" />
-                                        <span>{new Date(lead.created).toLocaleDateString()}</span>
+                                      <div className="flex items-center gap-1 min-w-0">
+                                        <Calendar className="w-3 h-3 flex-shrink-0" />
+                                        <span className="truncate">{new Date(lead.created).toLocaleDateString()}</span>
                                       </div>
-                                      <div className="flex items-center gap-1">
-                                        <Clock className="w-3 h-3" />
-                                        <span>{new Date(lead.lastContact).toLocaleDateString()}</span>
+                                      <div className="flex items-center gap-1 min-w-0">
+                                        <Clock className="w-3 h-3 flex-shrink-0" />
+                                        <span className="truncate">{new Date(lead.lastContact).toLocaleDateString()}</span>
                                       </div>
                                     </div>
                                   </div>
