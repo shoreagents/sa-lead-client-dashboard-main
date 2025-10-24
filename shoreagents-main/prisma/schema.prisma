@@ -29,6 +29,7 @@ model User {
   interviewRequests   InterviewRequest[] @relation("UserInterviewRequests")
   pricingQuotes       PricingQuote[]     @relation("UserPricingQuotes")
   leadProgress        LeadProgress[]     @relation("UserLeadProgress")
+  enrichment          UserEnrichment?    @relation("UserEnrichmentData")
 
   @@index([company], map: "idx_users_company")
   @@index([country], map: "idx_users_country")
@@ -287,6 +288,57 @@ model AdminUser {
   @@index([email], map: "idx_admin_users_email")
   @@index([is_active], map: "idx_admin_users_is_active")
   @@map("admin_users")
+  @@schema("public")
+}
+
+model UserEnrichment {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id               String    @unique @map("user_id") @db.VarChar(255)
+  
+  // User Information
+  full_name             String?   @map("full_name") @db.VarChar(255)
+  job_title             String?   @map("job_title") @db.VarChar(255)
+  location              String?   @map("location") @db.VarChar(255)
+  bio                   String?   @map("bio") @db.Text
+  profile_picture_url   String?   @map("profile_picture_url") @db.VarChar(1000)
+  
+  // Company Information
+  company_name          String?   @map("company_name") @db.VarChar(255)
+  company_website       String?   @map("company_website") @db.VarChar(500)
+  company_domain        String?   @map("company_domain") @db.VarChar(255)
+  company_industry      String?   @map("company_industry") @db.VarChar(255)
+  company_size          String?   @map("company_size") @db.VarChar(100)
+  company_founded       String?   @map("company_founded") @db.VarChar(50)
+  company_description   String?   @map("company_description") @db.Text
+  company_headquarters  String?   @map("company_headquarters") @db.VarChar(255)
+  company_logo_url      String?   @map("company_logo_url") @db.VarChar(1000)
+  
+  // Social & Professional Links
+  linkedin_url          String?   @map("linkedin_url") @db.VarChar(500)
+  twitter_url           String?   @map("twitter_url") @db.VarChar(500)
+  facebook_url          String?   @map("facebook_url") @db.VarChar(500)
+  
+  // Contact Information
+  phone_number          String?   @map("phone_number") @db.VarChar(50)
+  additional_emails     String?   @map("additional_emails") @db.Text // JSON array
+  
+  // Search Results (raw data from Serper)
+  search_results        String?   @map("search_results") @db.Text // JSON
+  search_query          String?   @map("search_query") @db.VarChar(500)
+  
+  // Metadata
+  enriched_by           String?   @map("enriched_by") @db.VarChar(255) // Admin who triggered enrichment
+  enrichment_source     String    @default("serper_api") @map("enrichment_source") @db.VarChar(50)
+  confidence_score      Int?      @map("confidence_score") // 0-100
+  created_at            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  
+  user                  User      @relation("UserEnrichmentData", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  
+  @@index([user_id], map: "idx_user_enrichment_user_id")
+  @@index([company_name], map: "idx_user_enrichment_company")
+  @@index([enriched_by], map: "idx_user_enrichment_enriched_by")
+  @@map("user_enrichment")
   @@schema("public")
 }
 
