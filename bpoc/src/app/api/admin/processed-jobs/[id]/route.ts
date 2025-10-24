@@ -3,7 +3,7 @@ import pool from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = request.headers.get('x-user-id')
@@ -17,7 +17,7 @@ export async function GET(
       }
     }
 
-    const id = params.id
+    const { id } = await params
     const res = await pool.query(
       `SELECT p.*, m.company as company_name
        FROM processed_job_requests p

@@ -3,10 +3,11 @@ import pool from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const jobId = params.id
+    const { id } = await params
+    const jobId = id
 
     // Check if it's a recruiter job (starts with 'recruiter_')
     if (jobId.startsWith('recruiter_')) {

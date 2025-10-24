@@ -20,8 +20,8 @@ interface TypingHeroStats {
   total_sessions: number
   best_wpm: number
   best_accuracy: number
-  consistency_score: number
-  percentile_rank: number
+  avg_wpm: number
+  total_play_time: number
   last_played_at: string
   ai_analysis?: string
   created_at: string
@@ -41,7 +41,7 @@ interface DiscPersonalityStats {
   c: number
   primary_style: string
   secondary_style: string
-  consistency_index: number
+  best_confidence_score: number
   strengths: string[]
   blind_spots: string[]
   preferred_env: string[]
@@ -141,10 +141,6 @@ export default function GamesPage() {
     if (!matchesSearch) return false
     
     switch (filterType) {
-      case 'active':
-        return stat.last_played_at && new Date(stat.last_played_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      case 'inactive':
-        return !stat.last_played_at || new Date(stat.last_played_at) <= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       case 'high-wpm':
         return stat.best_wpm >= 50
       case 'high-accuracy':
@@ -165,12 +161,8 @@ export default function GamesPage() {
     if (!matchesSearch) return false
     
     switch (filterType) {
-      case 'active':
-        return stat.last_taken_at && new Date(stat.last_taken_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      case 'inactive':
-        return !stat.last_taken_at || new Date(stat.last_taken_at) <= new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      case 'high-consistency':
-        return stat.consistency_index >= 80
+      case 'high-confidence':
+        return stat.best_confidence_score >= 80
       case 'recent':
         return stat.last_taken_at && new Date(stat.last_taken_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       case 'all':
@@ -323,8 +315,6 @@ export default function GamesPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-gray-900 border-white/10">
                       <SelectItem value="all">All Players</SelectItem>
-                      <SelectItem value="active">Active Players</SelectItem>
-                      <SelectItem value="inactive">Inactive Players</SelectItem>
                       <SelectItem value="high-wpm">High WPM (50+)</SelectItem>
                       <SelectItem value="high-accuracy">High Accuracy (90%+)</SelectItem>
                       <SelectItem value="recent">Recently Active</SelectItem>
@@ -367,8 +357,8 @@ export default function GamesPage() {
                           <TableHead className="text-white font-medium">Sessions</TableHead>
                           <TableHead className="text-white font-medium">Best WPM</TableHead>
                           <TableHead className="text-white font-medium">Best Accuracy</TableHead>
-                          <TableHead className="text-white font-medium">Consistency</TableHead>
-                          <TableHead className="text-white font-medium">Percentile</TableHead>
+                          <TableHead className="text-white font-medium">Avg WPM</TableHead>
+                          <TableHead className="text-white font-medium">Total Play Time</TableHead>
                           <TableHead className="text-white font-medium">Last Played</TableHead>
                           <TableHead className="w-12"></TableHead>
                         </TableRow>
@@ -413,14 +403,16 @@ export default function GamesPage() {
                             </TableCell>
                             <TableCell>
                               <div className="text-center">
-                                <div className="font-medium text-white">{stat.consistency_score}</div>
-                                <div className="text-xs text-gray-400">consistency</div>
+                                <div className="font-medium text-white">{stat.avg_wpm || 'N/A'}</div>
+                                <div className="text-xs text-gray-400">avg wpm</div>
                               </div>
                             </TableCell>
                             <TableCell>
                               <div className="text-center">
-                                <div className="font-medium text-white">{stat.percentile_rank}%</div>
-                                <div className="text-xs text-gray-400">percentile</div>
+                                <div className="font-medium text-white">
+                                  {stat.total_play_time ? `${Math.floor(stat.total_play_time / 60)}m` : 'N/A'}
+                                </div>
+                                <div className="text-xs text-gray-400">play time</div>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -524,9 +516,7 @@ export default function GamesPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-gray-900 border-white/10">
                       <SelectItem value="all">All Players</SelectItem>
-                      <SelectItem value="active">Active Players</SelectItem>
-                      <SelectItem value="inactive">Inactive Players</SelectItem>
-                      <SelectItem value="high-consistency">High Consistency (80%+)</SelectItem>
+                      <SelectItem value="high-confidence">High Confidence (80%+)</SelectItem>
                       <SelectItem value="recent">Recently Active</SelectItem>
                     </SelectContent>
                   </Select>
@@ -569,7 +559,8 @@ export default function GamesPage() {
                           <TableHead className="text-white font-medium">S</TableHead>
                           <TableHead className="text-white font-medium">C</TableHead>
                           <TableHead className="text-white font-medium">Primary Style</TableHead>
-                          <TableHead className="text-white font-medium">Consistency</TableHead>
+                          <TableHead className="text-white font-medium">Secondary Style</TableHead>
+                          <TableHead className="text-white font-medium">Confidence</TableHead>
                           <TableHead className="text-white font-medium">Last Taken</TableHead>
                           <TableHead className="w-12"></TableHead>
                         </TableRow>
@@ -623,7 +614,15 @@ export default function GamesPage() {
                             </TableCell>
                             <TableCell>
                               <div className="text-center">
-                                <div className="font-medium text-white">{stat.consistency_index}</div>
+                                <Badge className="bg-purple-500/20 text-white border-purple-500/30">
+                                  {stat.secondary_style || 'N/A'}
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-center">
+                                <div className="font-medium text-white">{stat.best_confidence_score || 'N/A'}</div>
+                                <div className="text-xs text-gray-400">confidence</div>
                               </div>
                             </TableCell>
                             <TableCell>
@@ -1356,12 +1355,14 @@ export default function GamesPage() {
                           <p className="text-white text-xl font-bold">{selectedGameStat.average_completion_time ? `${Math.round(selectedGameStat.average_completion_time / 1000)}s` : 'N/A'}</p>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-300">Consistency Trend</label>
-                          <p className="text-white text-2xl font-bold text-white">{selectedGameStat.consistency_index || 'N/A'}</p>
+                          <label className="text-sm font-medium text-gray-300">Average WPM</label>
+                          <p className="text-white text-2xl font-bold text-white">{selectedGameStat.avg_wpm || 'N/A'}</p>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-sm font-medium text-gray-300">Percentile</label>
-                          <p className="text-white text-2xl font-bold text-white">{selectedGameStat.percentile ? `${selectedGameStat.percentile}%` : 'N/A'}</p>
+                          <label className="text-sm font-medium text-gray-300">Total Play Time</label>
+                          <p className="text-white text-2xl font-bold text-white">
+                            {selectedGameStat.total_play_time ? `${Math.floor(selectedGameStat.total_play_time / 60)} minutes` : 'N/A'}
+                          </p>
                         </div>
                       </div>
                     </div>

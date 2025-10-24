@@ -14,30 +14,58 @@ function formatSalary(currency: string, min: number | null, max: number | null, 
 
 export async function GET(_request: NextRequest) {
   try {
+    console.log('🔍 Starting combined jobs fetch...')
+    
+    // Check database connection first
+    await pool.query('SELECT 1')
+    console.log('✅ Database connection successful')
+
     // Fetch from processed_job_requests (existing jobs)
-    const processedJobsRes = await pool.query(`
-      SELECT p.*, m.company AS company_name
-      FROM processed_job_requests p
-      LEFT JOIN members m ON m.company_id = p.company_id
-      WHERE p.status = 'active'
-      ORDER BY p.created_at DESC
-    `)
+    console.log('🔍 Fetching processed_job_requests...')
+    let processedJobsRes
+    try {
+      processedJobsRes = await pool.query(`
+        SELECT p.*, m.company AS company_name
+        FROM processed_job_requests p
+        LEFT JOIN members m ON m.company_id = p.company_id
+        WHERE p.status = 'active'
+        ORDER BY p.created_at DESC
+      `)
+      console.log(`✅ Found ${processedJobsRes.rows.length} processed jobs`)
+    } catch (error) {
+      console.warn('⚠️ processed_job_requests table not found or error:', error)
+      processedJobsRes = { rows: [] }
+    }
 
     // Fetch from recruiter_jobs (new recruiter-posted jobs)
-    const recruiterJobsRes = await pool.query(`
-      SELECT 
-        rj.*, 
-        COALESCE(rj.company_id, u.company) AS company_name
-      FROM recruiter_jobs rj
-      LEFT JOIN users u ON u.id = rj.recruiter_id
-      WHERE rj.status = 'active'
-      ORDER BY rj.created_at DESC
-    `)
+    console.log('🔍 Fetching recruiter_jobs...')
+    let recruiterJobsRes
+    try {
+      recruiterJobsRes = await pool.query(`
+        SELECT 
+          rj.*, 
+          COALESCE(rj.company_id, u.company) AS company_name
+        FROM recruiter_jobs rj
+        LEFT JOIN users u ON u.id = rj.recruiter_id
+        WHERE rj.status = 'active'
+        ORDER BY rj.created_at DESC
+      `)
+      console.log(`✅ Found ${recruiterJobsRes.rows.length} recruiter jobs`)
+    } catch (error) {
+      console.warn('⚠️ recruiter_jobs table not found or error:', error)
+      recruiterJobsRes = { rows: [] }
+    }
 
     // Process processed_job_requests
     const processedJobs = await Promise.all(processedJobsRes.rows.map(async (row: any) => {
-      const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [row.id])
-      const realApplicants = apps.rows?.[0]?.cnt ?? 0
+      let realApplicants = 0
+      try {
+        const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [row.id])
+        realApplicants = apps.rows?.[0]?.cnt ?? 0
+      } catch (error) {
+        console.warn(`⚠️ Could not fetch application count for job ${row.id}:`, error)
+        realApplicants = 0
+      }
       const employmentType: string[] = []
       if (row.work_type) employmentType.push(capitalize(String(row.work_type)))
       if (row.experience_level) employmentType.push(capitalize(String(row.experience_level)))
@@ -103,8 +131,14 @@ export async function GET(_request: NextRequest) {
     // Process recruiter_jobs
     const recruiterJobs = await Promise.all(recruiterJobsRes.rows.map(async (row: any) => {
       // Get real application count from recruiter_applications table
-      const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM recruiter_applications WHERE job_id = $1', [row.id])
-      const realApplicants = apps.rows?.[0]?.cnt ?? 0
+      let realApplicants = 0
+      try {
+        const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM recruiter_applications WHERE job_id = $1', [row.id])
+        realApplicants = apps.rows?.[0]?.cnt ?? 0
+      } catch (error) {
+        console.warn(`⚠️ Could not fetch application count for recruiter job ${row.id}:`, error)
+        realApplicants = 0
+      }
       const employmentType: string[] = []
       if (row.work_type) employmentType.push(capitalize(String(row.work_type)))
       if (row.experience_level) employmentType.push(capitalize(String(row.experience_level)))
@@ -178,9 +212,18 @@ export async function GET(_request: NextRequest) {
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
 
+    console.log(`✅ Successfully combined ${allJobs.length} total jobs`)
     return NextResponse.json({ jobs: allJobs })
   } catch (e) {
-    console.error('Error fetching combined jobs:', e)
-    return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 })
+    console.error('❌ Error fetching combined jobs:', e)
+    console.error('❌ Error details:', {
+      message: e instanceof Error ? e.message : 'Unknown error',
+      stack: e instanceof Error ? e.stack : undefined,
+      name: e instanceof Error ? e.name : undefined
+    })
+    return NextResponse.json({ 
+      error: 'Failed to fetch jobs', 
+      details: e instanceof Error ? e.message : 'Unknown error'
+    }, { status: 500 })
   }
 }

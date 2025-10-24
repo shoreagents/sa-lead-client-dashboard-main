@@ -3,7 +3,7 @@ import pool from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = request.headers.get('x-user-id')
@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Admin only' }, { status: 403 })
     }
 
-    const id = params.id
+    const { id } = await params
     const res = await pool.query(
       `SELECT j.*, m.company as company_name
        FROM job_requests j

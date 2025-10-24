@@ -216,7 +216,16 @@ function JobMatchingContent() {
 
         // Combined endpoint for active jobs (includes both processed_job_requests and recruiter_jobs)
         const res = await fetch('/api/jobs/combined', { cache: 'no-store' })
-        if (!res.ok) throw new Error('Failed to load jobs')
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}))
+          console.error('❌ Jobs API Error:', {
+            status: res.status,
+            statusText: res.statusText,
+            error: errorData.error,
+            details: errorData.details
+          })
+          throw new Error(`Failed to load jobs: ${errorData.error || res.statusText} (${res.status})`)
+        }
         const data = await res.json()
         const active = data.jobs || []
         const mapped = active.map((row: any) => ({
@@ -583,10 +592,14 @@ function JobMatchingContent() {
       if (!user?.id || jobs.length === 0) return
       
       try {
+        console.log('🔍 Fetching applications for user:', user.id)
         const response = await fetch(`/api/applications?userId=${user?.id}`, { cache: 'no-store' })
+        
         if (response.ok) {
           const data = await response.json()
           const applications = data.applications || []
+          
+          console.log('✅ Applications fetched successfully:', applications.length)
           
           // Create a set of applied job IDs
           const appliedJobIds = new Set(applications.map((app: any) => String(app.jobId)))
@@ -599,15 +612,27 @@ function JobMatchingContent() {
           
           setAppliedMap(results)
         } else {
-          console.error('Failed to fetch applications:', response.status)
-          // Reset all to not applied
+          const errorData = await response.json().catch(() => ({}))
+          console.error('❌ Applications API Error:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData.error,
+            details: errorData.details
+          })
+          
+          // Show user-friendly error message
+          if (response.status === 500) {
+            console.warn('⚠️ Applications API is temporarily unavailable, showing all jobs as available')
+          }
+          
+          // Reset all to not applied (assume no applications)
           const results: Record<string, boolean> = {}
           for (const job of jobs) results[job.id] = false
           setAppliedMap(results)
         }
       } catch (error) {
-        console.error('Error fetching applications:', error)
-        // Reset all to not applied
+        console.error('❌ Network error fetching applications:', error)
+        // Reset all to not applied (assume no applications)
         const results: Record<string, boolean> = {}
         for (const job of jobs) results[job.id] = false
         setAppliedMap(results)
