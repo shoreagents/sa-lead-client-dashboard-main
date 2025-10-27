@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
         quote_number,
         candidate_recommendations
       `)
+      .order('updated_at', { ascending: false })
       .order('created_at', { ascending: false })
 
     if (error) {
