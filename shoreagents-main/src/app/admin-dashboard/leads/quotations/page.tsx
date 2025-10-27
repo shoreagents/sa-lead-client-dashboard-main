@@ -79,7 +79,18 @@ export default function LeadQuotations() {
     refetchOnWindowFocus: false
   })
 
-  const quotations = quotationsData?.data || []
+  // Sort quotations by updated_at (most recent first), then by created_at
+  const quotations = (quotationsData?.data || []).sort((a, b) => {
+    const dateA = new Date(a.updated_at).getTime()
+    const dateB = new Date(b.updated_at).getTime()
+    if (dateA !== dateB) {
+      return dateB - dateA // Most recent first
+    }
+    // If updated_at is the same, sort by created_at
+    const createdA = new Date(a.created_at).getTime()
+    const createdB = new Date(b.created_at).getTime()
+    return createdB - createdA
+  })
   const stats = quotationsData?.stats || {
     totalQuotes: 0,
     totalValue: 0,

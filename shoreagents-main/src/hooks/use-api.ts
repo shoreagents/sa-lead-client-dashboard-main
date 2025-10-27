@@ -55,11 +55,13 @@ interface CheckEmailData {
 }
 
 interface InterviewRequestData {
-  candidate_id: string;
-  candidate_name: string;
-  candidate_position: string;
-  candidate_avatar_url: string;
-  message: string;
+  candidateId: string;
+  candidateName: string;
+  candidatePosition: string;
+  requesterFirstName: string;
+  requesterLastName: string;
+  requesterEmail: string;
+  user_id: string;
 }
 
 interface DeleteQuotationData {
@@ -624,6 +626,46 @@ export const useUpdateLeadStatus = () => {
       // Invalidate and refetch leads data
       queryClient.invalidateQueries({ queryKey: ['leads'] });
     },
+  });
+};
+
+// Interview Request Hooks
+interface InterviewRequest {
+  id: string;
+  user_id: string;
+  candidate_id: string;
+  candidate_name: string;
+  candidate_position: string | null;
+  requester_first_name: string;
+  requester_last_name: string;
+  requester_email: string;
+  created_at: string;
+}
+
+interface InterviewRequestsResponse {
+  success: boolean;
+  data: InterviewRequest[];
+  count: number;
+}
+
+const fetchInterviewRequests = async (userId: string): Promise<InterviewRequestsResponse> => {
+  const response = await fetch(`/api/admin/interview-requests/${userId}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch interview requests');
+  }
+  
+  return response.json();
+};
+
+export const useInterviewRequests = (userId: string) => {
+  return useQuery<InterviewRequestsResponse>({
+    queryKey: ['interview-requests', userId],
+    queryFn: () => fetchInterviewRequests(userId),
+    enabled: !!userId, // Only run query if userId exists
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
   });
 };
 

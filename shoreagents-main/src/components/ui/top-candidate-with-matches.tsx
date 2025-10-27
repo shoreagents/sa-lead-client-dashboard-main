@@ -80,7 +80,7 @@ const TopCandidateSection = ({
                     <h4 className="font-semibold text-gray-900 text-sm truncate">
                       {displayData.name}
                     </h4>
-                    <p className="text-xs text-gray-600 truncate">
+                    <p className="font-semibold text-gray-900 text-sm truncate">
                       {displayData.position}
                     </p>
                   </div>
@@ -337,7 +337,7 @@ const BestMatchedCandidates = ({
                 />
               </button>
             </div>
-            <div className="text-xs text-gray-600 truncate" title={displayData.position}>
+            <div className="text-sm font-semibold text-gray-800 truncate" title={displayData.position}>
               {displayData.position}
             </div>
           </div>
@@ -475,11 +475,6 @@ export const TopCandidateWithMatches = ({
     >
       <CardContent className="p-4 h-full">
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center space-x-3 mb-4">
-            <Users className="w-5 h-5 text-lime-600" />
-            <h3 className="text-base font-semibold text-gray-900">Candidate Insights</h3>
-          </div>
 
           {/* Split into two equal sections */}
           <div className="flex-1 flex flex-col">

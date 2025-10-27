@@ -52,7 +52,7 @@ export default function QuotationPage() {
     isFetching,
     isStale
   } = useQuery({
-    queryKey: ['quotations', user?.user_id],
+    queryKey: ['user-quotations', user?.user_id],
     queryFn: async () => {
       if (!user?.user_id) {
         throw new Error('User not authenticated')
@@ -63,7 +63,16 @@ export default function QuotationPage() {
       
       if (result.success && result.data) {
         console.log('✅ Fetched quotations:', result.data.length)
-        return result.data
+        // Deduplicate at the API level as well
+        const uniqueQuotes = result.data.reduce((acc, current) => {
+          const existing = acc.find(quote => quote.id === current.id)
+          if (!existing) {
+            acc.push(current)
+          }
+          return acc
+        }, [] as typeof result.data)
+        console.log('🔍 After deduplication:', uniqueQuotes.length)
+        return uniqueQuotes
       } else {
         throw new Error('Failed to fetch quotations')
       }
@@ -73,8 +82,8 @@ export default function QuotationPage() {
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnWindowFocus: true,
-    refetchOnMount: true
+    refetchOnWindowFocus: false, // Disable to prevent multiple calls
+    refetchOnMount: false // Disable to prevent multiple calls
   })
 
   // TanStack Query mutation for deleting quotations
@@ -90,13 +99,13 @@ export default function QuotationPage() {
     },
     onMutate: async ({ quoteId }) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['quotations', user?.user_id] })
+      await queryClient.cancelQueries({ queryKey: ['user-quotations', user?.user_id] })
       
       // Snapshot the previous value
-      const previousQuotations = queryClient.getQueryData(['quotations', user?.user_id])
+      const previousQuotations = queryClient.getQueryData(['user-quotations', user?.user_id])
       
       // Optimistically update the quotations
-      queryClient.setQueryData(['quotations', user?.user_id], (old: UserQuoteSummary[] = []) =>
+      queryClient.setQueryData(['user-quotations', user?.user_id], (old: UserQuoteSummary[] = []) =>
         old.filter(quote => quote.id !== quoteId)
       )
       
@@ -105,13 +114,13 @@ export default function QuotationPage() {
     onError: (err, { quoteId }, context) => {
       // Revert the optimistic update
       if (context?.previousQuotations) {
-        queryClient.setQueryData(['quotations', user?.user_id], context.previousQuotations)
+        queryClient.setQueryData(['user-quotations', user?.user_id], context.previousQuotations)
       }
       console.error('❌ Error deleting quote:', err)
     },
     onSettled: () => {
       // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey: ['quotations', user?.user_id] })
+      queryClient.invalidateQueries({ queryKey: ['user-quotations', user?.user_id] })
     }
   })
 
@@ -208,8 +217,8 @@ export default function QuotationPage() {
   };
 
   // Convert UserQuoteSummary to display format
-  const formatQuotationForDisplay = (quote: UserQuoteSummary, index: number) => {
-    // Determine status based on age and position
+  const formatQuotationForDisplay = (quote: UserQuoteSummary) => {
+    // Determine status based on age
     const quoteDate = new Date(quote.created_at)
     const now = new Date()
     const daysSinceCreation = Math.floor((now.getTime() - quoteDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -219,8 +228,6 @@ export default function QuotationPage() {
       status = "Expired"
     } else if (daysSinceCreation > 14) {
       status = "Pending"
-    } else if (index === 0) {
-      status = "Latest"
     }
 
     return {
@@ -245,7 +252,8 @@ export default function QuotationPage() {
           }
         });
 
-        return Object.values(groupedRoles).map((groupedRole) => ({
+        return Object.values(groupedRoles).map((groupedRole, index) => ({
+          id: `${quote.id}-role-${index}`,
           name: groupedRole.count > 1 ? `${groupedRole.role.role_title} x${groupedRole.count}` : groupedRole.role.role_title,
           quantity: groupedRole.count,
           rate: Math.round(convertPrice(quote.total_monthly_cost / quote.roles_count)),
@@ -255,8 +263,38 @@ export default function QuotationPage() {
     }
   }
 
-  const displayQuotations = quotations.map(formatQuotationForDisplay)
-  const filteredQuotations = displayQuotations.filter(quote => 
+  // Debug: Check for duplicate IDs in quotations
+  const quotationIds = quotations.map(q => q.id)
+  const duplicateIds = quotationIds.filter((id, index) => quotationIds.indexOf(id) !== index)
+  if (duplicateIds.length > 0) {
+    console.warn('🚨 Found duplicate quotation IDs:', [...new Set(duplicateIds)])
+    console.log('📊 Total quotations:', quotations.length)
+    console.log('🔍 Unique quotations:', [...new Set(quotationIds)].length)
+  }
+
+  // More robust deduplication using Map for better performance
+  const quotationMap = new Map<string, typeof quotations[0]>()
+  quotations.forEach(quote => {
+    const existing = quotationMap.get(quote.id)
+    if (!existing || new Date(quote.created_at) > new Date(existing.created_at)) {
+      quotationMap.set(quote.id, quote)
+    }
+  })
+  const uniqueQuotations = Array.from(quotationMap.values())
+
+  const displayQuotations = uniqueQuotations.map(formatQuotationForDisplay)
+  
+  // Sort quotations by created_at (most recent first) and mark the first one as "Latest"
+  const sortedQuotations = displayQuotations.sort((a, b) => 
+    new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+  )
+  
+  // Mark the most recent quotation as "Latest"
+  if (sortedQuotations.length > 0) {
+    sortedQuotations[0].status = "Latest"
+  }
+  
+  const filteredQuotations = sortedQuotations.filter(quote => 
     selectedStatus === 'all' || quote.status.toLowerCase() === selectedStatus
   )
 
@@ -479,8 +517,8 @@ export default function QuotationPage() {
                           {/* Items List */}
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium">Items:</h4>
-                            {filteredQuotations[0].items.map((item, index) => (
-                              <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded">
+                            {filteredQuotations[0].items.map((item) => (
+                              <div key={item.id} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded">
                                 <div>
                                   <span className="font-medium">{item.name}</span>
                                   <span className="text-muted-foreground ml-2">x{item.quantity}</span>
