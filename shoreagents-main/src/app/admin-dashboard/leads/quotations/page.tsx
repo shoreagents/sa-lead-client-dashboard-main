@@ -4,8 +4,7 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/admin-auth-context'
 import { AdminGuard } from '@/components/auth/AdminGuard'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
+import { AdminNavbar } from '@/components/layout/AdminNavbar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -145,41 +144,16 @@ export default function LeadQuotations() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Lead Quotations</h1>
-              <Badge variant="secondary" className="text-xs">
-                Welcome back, {admin?.first_name}!
-              </Badge>
-            </div>
-          </header>
+          <AdminNavbar 
+            onRefresh={() => refetch()}
+            isLoading={isLoading}
+          />
           
-          <div className="flex flex-1 flex-col gap-4 p-4">
-            <div className="w-full">
-              {/* Action Buttons */}
-              <div className="flex justify-end items-center mb-6">
-                <div className="flex items-center gap-4">
-                  <Button
-                    onClick={() => refetch()}
-                    disabled={isLoading}
-                    variant="outline"
-                    className="border-lime-200 text-lime-700 hover:bg-lime-50"
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                  <Button
-                    onClick={handleLogout}
-                    variant="outline"
-                    className="border-lime-200 text-lime-700 hover:bg-lime-50"
-                  >
-                    Logout
-                  </Button>
-                </div>
-              </div>
-
-              {/* Summary Stats */}
+          {/* Add top padding to account for fixed navbar */}
+          <div className="pt-16">
+            <div className="flex flex-1 flex-col gap-4 p-4">
+              <div className="w-full">
+                {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <Card>
                   <CardContent className="p-6">
@@ -378,6 +352,7 @@ export default function LeadQuotations() {
                   )}
                 </CardContent>
               </Card>
+              </div>
             </div>
           </div>
         </SidebarInset>

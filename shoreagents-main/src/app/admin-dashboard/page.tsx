@@ -4,8 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/admin-auth-context'
 import { AdminGuard } from '@/components/auth/AdminGuard'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
+import { AdminNavbar } from '@/components/layout/AdminNavbar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +29,6 @@ import {
   Monitor,
   RefreshCw,
   CheckCircle,
-  LogOut,
   Table as TableIcon,
   ChevronDown,
   ChevronRight
@@ -225,56 +223,17 @@ export default function AdminDashboard() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Admin Dashboard</h1>
-              <Badge variant="secondary" className="text-xs">
-                Welcome back, {admin?.first_name}!
-              </Badge>
-            </div>
-          </header>
+          <AdminNavbar 
+            onRefresh={refreshData}
+            onClearCache={handleClearCache}
+            isLoading={isLoading}
+            lastUpdated={lastUpdated}
+          />
           
-          <div className="flex flex-1 flex-col gap-4 p-4">
-            <div className="max-w-7xl mx-auto w-full">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-2">Monitor your website performance and analytics</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-500">
-              Last updated: {lastUpdated.toLocaleTimeString()}
-            </div>
-            <Button 
-              onClick={handleClearCache}
-              variant="outline"
-              size="sm"
-              className="border-orange-200 text-orange-700 hover:bg-orange-50"
-              title="Clear all cached data and reload"
-            >
-              <Database className="w-4 h-4 mr-2" />
-              Clear Cache
-            </Button>
-            <Button 
-              onClick={refreshData} 
-              disabled={isLoading}
-              className="bg-lime-600 hover:bg-lime-700 text-white"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button 
-              onClick={handleLogout}
-              variant="outline"
-              className="border-lime-200 text-lime-700 hover:bg-lime-50"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </div>
+          {/* Add top padding to account for fixed navbar */}
+          <div className="pt-16">
+            <div className="flex flex-1 flex-col gap-4 p-4">
+              <div className="max-w-7xl mx-auto w-full">
 
         {/* Loading State */}
         {isLoading && !dashboardMetrics && !deviceStatsData && !userVisitsData && (
@@ -715,6 +674,7 @@ export default function AdminDashboard() {
         </Tabs>
         </>
          )}
+              </div>
             </div>
           </div>
         </SidebarInset>
