@@ -45,28 +45,40 @@ export async function GET(request: NextRequest) {
       }, { status: 500 })
     }
 
-    // Transform quotes into job postings
-    const jobs = quotes.flatMap(quote => {
-      if (!quote.roles || quote.roles.length === 0) return []
+    // Transform quotes into job postings - One job per quote, not per role
+    const jobs = quotes.map(quote => {
+      if (!quote.roles || quote.roles.length === 0) return null
       
-      return quote.roles.map((role: any) => ({
-        id: role.id,
+      // Get the primary role (first role) for the main job details
+      const primaryRole = quote.roles[0]
+      
+      // Create a combined description that includes all roles
+      const allRolesDescription = quote.roles.length === 1 
+        ? (primaryRole.role_description || `Looking for a ${primaryRole.role_title} with ${primaryRole.experience_level} experience to join our team.`)
+        : `We are looking to fill ${quote.roles.length} positions: ${quote.roles.map((role: any) => role.role_title).join(', ')}. Each role requires ${primaryRole.experience_level} experience level.`
+      
+      return {
+        id: `quote-${quote.id}`, // Use quote ID as job ID to ensure uniqueness
         quoteId: quote.id,
-        title: role.role_title,
+        title: quote.roles.length === 1 
+          ? primaryRole.role_title 
+          : `${quote.industry} Team (${quote.roles.length} positions)`,
         industry: quote.industry,
-        description: role.role_description || `Looking for a ${role.role_title} with ${role.experience_level} experience to join our team.`,
-        experienceLevel: role.experience_level,
-        workspaceType: role.workspace_type,
-        salary: `₱${Number(role.base_salary_php).toLocaleString()}/month`,
-        salaryAmount: Number(role.base_salary_php),
+        description: allRolesDescription,
+        experienceLevel: primaryRole.experience_level,
+        workspaceType: primaryRole.workspace_type,
+        salary: `₱${Number(quote.total_monthly_cost).toLocaleString()}/month`,
+        salaryAmount: Number(quote.total_monthly_cost),
         memberCount: quote.member_count,
         totalCost: Number(quote.total_monthly_cost),
         currencyCode: quote.currency_code,
         status: 'Active', // All jobs from pricing calculator are active
         createdAt: quote.created_at,
-        applicants: 0 // Will be populated when we add application tracking
-      }))
-    })
+        applicants: 0, // Will be populated when we add application tracking
+        rolesCount: quote.roles.length, // Track number of roles for display
+        allRoles: quote.roles // Include all roles for detailed view
+      }
+    }).filter(Boolean) // Remove any null entries
 
     console.log('✅ Jobs fetched:', jobs.length)
     return NextResponse.json({ success: true, data: jobs })

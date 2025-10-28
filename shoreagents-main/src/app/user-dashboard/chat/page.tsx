@@ -283,20 +283,10 @@ function ChatPageContent() {
     <UserGuard>
       <SidebarProvider>
         <UserDashboardSidebar />
-        <SidebarInset className="relative h-screen">
-          {/* Header - Standalone container, aligned to center content only */}
-          <header className="absolute top-0 left-0 right-80 z-20 h-14 bg-white border-b flex items-center gap-1 px-4">
-            <SidebarTrigger className="!size-8 hover:bg-lime-100 [&_svg]:!w-6 [&_svg]:!h-6" />
-            <div className="flex items-center gap-3">
-              <h1 className="text-lg font-semibold">Chat with Maya</h1>
-              <Badge variant="secondary" className="text-xs">
-                AI Assistant
-              </Badge>
-            </div>
-          </header>
+        <SidebarInset className="relative h-screen pt-16">
 
           {/* Input Area - Standalone container, aligned to center content only */}
-          <div className="absolute bottom-16 left-0 right-80 z-20 bg-white border-t p-4">
+          <div className="absolute bottom-0 left-0 right-80 z-20 bg-white border-t p-4">
             <div className="max-w-4xl mx-auto">
               <form onSubmit={handleSubmit} className="flex gap-3">
                 <div className="flex-1 relative">
@@ -376,7 +366,7 @@ function ChatPageContent() {
           </div>
 
           {/* Messages - Only this scrolls, like ChatGPT */}
-          <div className="absolute top-14 bottom-32 left-0 right-80 overflow-y-auto bg-gray-50">
+          <div className="absolute top-0 bottom-16 left-0 right-80 overflow-y-auto bg-gray-50">
             <div className="max-w-4xl mx-auto px-4">
               <AnimatePresence>
                 {messages.map(renderMessage)}

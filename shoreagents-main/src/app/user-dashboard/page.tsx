@@ -131,22 +131,12 @@ export default function UserDashboardPage() {
       <SidebarProvider>
         <UserDashboardSidebar onChatOpen={handleChatOpen} />
         <SidebarInset>
-          <header className="flex h-14 shrink-0 items-center gap-1 border-b">
-            <SidebarTrigger className="!size-8 hover:bg-lime-100 [&_svg]:!w-6 [&_svg]:!h-6" />
-            <div className="flex items-center gap-3">
-              <h1 className="text-lg font-semibold">Dashboard</h1>
-              <Badge variant="secondary" className="text-xs">
-                Welcome back, {user?.first_name}!
-              </Badge>
-            </div>
-          </header>
-          
-          <div className="flex flex-1 flex-col gap-4 p-4">
+          <div className="flex flex-1 flex-col gap-2 p-3 pt-16">
             {/* AI Recommendations Content */}
-            <div className="grid gap-4">
+            <div className="grid gap-2">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight">AI Recommendations</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl font-bold tracking-tight">AI Recommendations</h2>
+                <p className="text-sm text-muted-foreground">
                   Personalized suggestions based on your browsing behavior
                 </p>
               </div>
@@ -155,13 +145,13 @@ export default function UserDashboardPage() {
             {/* AI-Powered Sections - Grid Layout */}
             <div className="grid" style={{
               display: 'grid',
-              height: '75%',
+              height: '60%',
               width: '100%',
               gridTemplateColumns: 'repeat(3, 1fr)',
               gridTemplateRows: 'repeat(4, 1fr)',
-              gap: '16px',
+              gap: '12px',
               backgroundColor: '#ffffff',
-              padding: '8px',
+              padding: '6px',
               borderRadius: '8px',
             }}>
               

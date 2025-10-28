@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/admin-auth-context'
 import { AdminGuard } from '@/components/auth/AdminGuard'
-import { AdminNavbar } from '@/components/layout/AdminNavbar'
+import { AppSidebar } from '@/components/app-sidebar'
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +30,7 @@ import {
   Monitor,
   RefreshCw,
   CheckCircle,
+  LogOut,
   Table as TableIcon,
   ChevronDown,
   ChevronRight
@@ -223,17 +225,8 @@ export default function AdminDashboard() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <AdminNavbar 
-            onRefresh={refreshData}
-            onClearCache={handleClearCache}
-            isLoading={isLoading}
-            lastUpdated={lastUpdated}
-          />
-          
-          {/* Add top padding to account for fixed navbar */}
-          <div className="pt-16">
-            <div className="flex flex-1 flex-col gap-4 p-4">
-              <div className="max-w-7xl mx-auto w-full">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
+            <div className="max-w-7xl mx-auto w-full">
 
         {/* Loading State */}
         {isLoading && !dashboardMetrics && !deviceStatsData && !userVisitsData && (
@@ -674,7 +667,6 @@ export default function AdminDashboard() {
         </Tabs>
         </>
          )}
-              </div>
             </div>
           </div>
         </SidebarInset>

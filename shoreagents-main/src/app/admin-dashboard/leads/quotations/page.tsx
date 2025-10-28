@@ -4,7 +4,8 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/admin-auth-context'
 import { AdminGuard } from '@/components/auth/AdminGuard'
-import { AdminNavbar } from '@/components/layout/AdminNavbar'
+import { AppSidebar } from '@/components/app-sidebar'
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -144,16 +145,10 @@ export default function LeadQuotations() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <AdminNavbar 
-            onRefresh={() => refetch()}
-            isLoading={isLoading}
-          />
-          
-          {/* Add top padding to account for fixed navbar */}
-          <div className="pt-16">
-            <div className="flex flex-1 flex-col gap-4 p-4">
-              <div className="w-full">
-                {/* Summary Stats */}
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
+            <div className="w-full">
+
+              {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <Card>
                   <CardContent className="p-6">
@@ -352,7 +347,6 @@ export default function LeadQuotations() {
                   )}
                 </CardContent>
               </Card>
-              </div>
             </div>
           </div>
         </SidebarInset>

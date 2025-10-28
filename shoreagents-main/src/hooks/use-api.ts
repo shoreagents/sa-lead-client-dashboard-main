@@ -1022,6 +1022,8 @@ interface JobPosting {
   status: string;
   createdAt: string;
   applicants: number;
+  rolesCount: number;
+  allRoles: any[];
 }
 
 const fetchJobs = async (userId: string | null): Promise<JobPosting[]> => {

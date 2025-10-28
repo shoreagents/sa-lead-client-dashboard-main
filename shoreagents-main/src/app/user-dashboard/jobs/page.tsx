@@ -78,27 +78,7 @@ export default function JobsPage() {
       <SidebarProvider>
         <UserDashboardSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Jobs</h1>
-              <Badge variant="secondary" className="text-xs">
-                {filteredJobs.length} jobs found
-              </Badge>
-            </div>
-          </header>
-          
-          <div className="flex flex-1 flex-col gap-4 p-4">
-            {/* Action Button */}
-            <div className="flex justify-end items-center mb-6">
-              <Button 
-                onClick={handleCreateJob}
-                className="bg-lime-600 hover:bg-lime-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Quote for Job
-              </Button>
-            </div>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
 
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-4">
@@ -152,94 +132,79 @@ export default function JobsPage() {
               </div>
             )}
 
-            {/* Jobs List */}
+            {/* Jobs List - 3 Column Responsive Grid */}
             {!isLoading && !error && (
-              <div className="grid gap-4">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 {filteredJobs.map((job) => (
-                  <Card key={job.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <CardTitle className="text-xl">{job.title}</CardTitle>
-                            <Badge className={getStatusColor(job.status)}>
-                              {job.status}
-                            </Badge>
-                            <Badge className={getExperienceLevelColor(job.experienceLevel)}>
-                              {job.experienceLevel}
-                            </Badge>
+                  <Card key={job.id} className="hover:shadow-md transition-shadow h-fit">
+                    <CardHeader className="pb-3">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-lg leading-tight">{job.title}</CardTitle>
+                          <Badge className={getStatusColor(job.status)}>
+                            {job.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Building2 className="w-3 h-3" />
+                            {job.industry}
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                            <div className="flex items-center gap-1">
-                              <Building2 className="w-4 h-4" />
-                              {job.industry}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {job.workspaceType}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="w-4 h-4" />
-                              {job.salary}
-                            </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {job.workspaceType}
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => router.push(`/user-dashboard/jobs/${job.id}`)}
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View
-                          </Button>
+                        <div className="flex items-center gap-1 text-sm font-semibold text-lime-700">
+                          <DollarSign className="w-3 h-3" />
+                          {job.salary}
                         </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground">{job.description}</p>
+                    <CardContent className="space-y-3 pt-0">
+                      <p className="text-sm text-muted-foreground line-clamp-3">{job.description}</p>
                       
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1">
                         <Badge variant="secondary" className="text-xs bg-lime-50 text-lime-700 border-lime-200">
-                          {job.experienceLevel} Level
+                          {job.experienceLevel}
                         </Badge>
-                        <Badge variant="secondary" className="text-xs bg-lime-50 text-lime-700 border-lime-200">
-                          {job.workspaceType}
-                        </Badge>
-                        {job.memberCount > 1 && (
+                        {job.rolesCount > 1 && (
                           <Badge variant="secondary" className="text-xs bg-lime-50 text-lime-700 border-lime-200">
-                            {job.memberCount} positions
+                            {job.rolesCount} positions
                           </Badge>
                         )}
                       </div>
 
                       <div className="flex items-center justify-between pt-2 border-t">
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {job.applicants} applicants
+                            <Users className="w-3 h-3" />
+                            {job.applicants}
                           </div>
                           <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            Posted {new Date(job.createdAt).toLocaleDateString()}
+                            <Calendar className="w-3 h-3" />
+                            {new Date(job.createdAt).toLocaleDateString()}
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => router.push(`/user-dashboard/jobs/${job.id}/applicants`)}
-                          >
-                            View Applicants
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            className="bg-lime-600 hover:bg-lime-700"
-                            onClick={() => router.push(`/user-dashboard/quotation`)}
-                          >
-                            View Quote
-                          </Button>
-                        </div>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="flex-1 h-8 text-xs"
+                          onClick={() => router.push(`/user-dashboard/jobs/${job.id}`)}
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
+                          View
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="flex-1 h-8 text-xs bg-lime-600 hover:bg-lime-700"
+                          onClick={() => router.push(`/user-dashboard/quotation`)}
+                        >
+                          Quote
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

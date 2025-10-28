@@ -132,7 +132,7 @@ export default function ProfilePage() {
               <SidebarTrigger className="-ml-1" />
               <h1 className="text-lg font-semibold">Profile</h1>
             </header>
-            <div className="flex flex-1 items-center justify-center">
+            <div className="flex flex-1 items-center justify-center pt-20">
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-6 h-6 animate-spin text-lime-600" />
                 <span className="text-lime-600">Loading profile...</span>
@@ -152,17 +152,7 @@ export default function ProfilePage() {
       <SidebarProvider>
         <UserDashboardSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Profile</h1>
-              <Badge variant="secondary" className="text-xs">
-                Manage your account
-              </Badge>
-            </div>
-          </header>
-          
-          <div className="flex flex-1 flex-col gap-6 p-6">
+          <div className="flex flex-1 flex-col gap-6 p-6 pt-20">
             {/* Profile Header with Stats */}
             <div className="flex items-start justify-between">
               <div>
@@ -451,82 +441,6 @@ export default function ProfilePage() {
               </Card>
             </div>
 
-            {/* Activity & Engagement */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-lime-600" />
-                  Activity & Engagement
-                </CardTitle>
-                <CardDescription>
-                  Your platform usage and interaction history
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className={`w-5 h-5 ${profileData?.first_lead_capture ? 'text-lime-600' : 'text-gray-300'}`} />
-                      <Label className="text-sm font-medium">First Lead Capture</Label>
-                    </div>
-                    <p className="text-xs text-muted-foreground ml-7">
-                      {profileData?.first_lead_capture ? 'Completed' : 'Not completed'}
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className={`w-5 h-5 ${profileData?.second_lead_capture ? 'text-lime-600' : 'text-gray-300'}`} />
-                      <Label className="text-sm font-medium">Second Lead Capture</Label>
-                    </div>
-                    <p className="text-xs text-muted-foreground ml-7">
-                      {profileData?.second_lead_capture ? 'Completed' : 'Not completed'}
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className={`w-5 h-5 ${profileData?.third_lead_capture ? 'text-lime-600' : 'text-gray-300'}`} />
-                      <Label className="text-sm font-medium">Third Lead Capture</Label>
-                    </div>
-                    <p className="text-xs text-muted-foreground ml-7">
-                      {profileData?.third_lead_capture ? 'Completed' : 'Not completed'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-6 border-t">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Account Created</Label>
-                      <p className="text-sm font-semibold mt-1">
-                        {profileData?.created_at 
-                          ? new Date(profileData.created_at).toLocaleDateString('en-US', { 
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })
-                          : 'N/A'}
-                      </p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Last Updated</Label>
-                      <p className="text-sm font-semibold mt-1">
-                        {profileData?.updated_at 
-                          ? new Date(profileData.updated_at).toLocaleDateString('en-US', { 
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })
-                          : 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </SidebarInset>
       </SidebarProvider>

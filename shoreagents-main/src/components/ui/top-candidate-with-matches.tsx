@@ -55,7 +55,45 @@ const TopCandidateSection = ({
           <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-6 h-6" />
         </div>
       ) : (employeeProfile || topCandidate) ? (
-        <div className="space-y-3">
+        <div className="space-y-3 relative">
+          {/* Action buttons - Top Right */}
+          <div className="absolute top-0 right-0 flex gap-1 z-10">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-r-none"
+              style={{ 
+                borderColor: 'rgb(101, 163, 13)', 
+                backgroundColor: 'rgb(101, 163, 13)' 
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onAskForInterview && employeeProfile) {
+                  onAskForInterview(employeeProfile.user.id, employeeProfile.user.name, employeeProfile.user.position)
+                }
+              }}
+              title="Request Interview"
+            >
+              <MessageCircle className="w-3 h-3" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-l-none"
+              style={{ 
+                borderColor: 'rgb(101, 163, 13)', 
+                backgroundColor: 'rgb(101, 163, 13)' 
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onViewProfile()
+              }}
+              title="View Profile"
+            >
+              <Eye className="w-3 h-3" />
+            </Button>
+          </div>
+          
           {/* Use fallback data if employee profile is not available */}
           {(() => {
             const displayData = {
@@ -69,7 +107,7 @@ const TopCandidateSection = ({
             return (
               <>
                 {/* Candidate Info */}
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-3 mb-3 pr-16">
                   <Avatar className="w-12 h-12 flex-shrink-0">
                     <AvatarImage src={displayData.avatar} />
                     <AvatarFallback className="text-lg bg-lime-100 text-lime-600">
@@ -103,51 +141,14 @@ const TopCandidateSection = ({
                   </div>
                 )}
                 
-                {/* Action buttons */}
-                <div className="flex gap-2 w-full">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
-                    style={{ 
-                      borderColor: 'rgb(101, 163, 13)', 
-                      backgroundColor: 'rgb(101, 163, 13)' 
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (onAskForInterview && employeeProfile) {
-                        onAskForInterview(employeeProfile.user.id, employeeProfile.user.name, employeeProfile.user.position)
-                      }
-                    }}
-                  >
-                    <MessageCircle className="w-5 h-5 mr-1.5" />
-                    Interview
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
-                    style={{ 
-                      borderColor: 'rgb(101, 163, 13)', 
-                      backgroundColor: 'rgb(101, 163, 13)' 
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onViewProfile()
-                    }}
-                  >
-                    <Eye className="w-5 h-5 mr-1.5" />
-                    View Profile
-                  </Button>
-                </div>
               </>
             );
           })()}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-            <Users className="w-8 h-8 text-gray-400" />
+        <div className="text-center py-4">
+          <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+            <Users className="w-6 h-6 text-gray-400" />
           </div>
           <p className="text-sm text-gray-500">No viewing history yet</p>
           <p className="text-xs text-gray-400 mt-1">Start browsing to see recommendations</p>
@@ -298,26 +299,61 @@ const BestMatchedCandidates = ({
 
   return (
     <div className="space-y-3 h-full flex flex-col">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 mb-2">
         <Target className="w-4 h-4 text-lime-600" />
         <h4 className="text-sm font-semibold text-gray-900">AI Matched</h4>
       </div>
       
       {/* Current Candidate Card */}
-      <div className={`bg-gray-50 rounded-lg p-3 transition-all duration-300 ${
+      <div className={`bg-gray-50 rounded-lg p-2 transition-all duration-300 overflow-hidden relative ${
         isAnimating ? 'opacity-0 transform translate-x-2' : 'opacity-100 transform translate-x-0'
       }`}>
+        {/* Action buttons - Top Right */}
+        <div className="absolute top-2 right-2 flex gap-1">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-r-none"
+            style={{ 
+              borderColor: 'rgb(101, 163, 13)', 
+              backgroundColor: 'rgb(101, 163, 13)' 
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onAskForInterview?.(currentCandidate.id, currentCandidate.name)
+            }}
+            title="Request Interview"
+          >
+            <MessageCircle className="w-3 h-3" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-l-none"
+            style={{ 
+              borderColor: 'rgb(101, 163, 13)', 
+              backgroundColor: 'rgb(101, 163, 13)' 
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              onViewProfile?.(currentCandidate.id, currentCandidate.name)
+            }}
+            title="View Profile"
+          >
+            <Eye className="w-3 h-3" />
+          </Button>
+        </div>
         {/* Candidate Info */}
-        <div className="flex items-center gap-3 mb-3">
-          <Avatar className="w-12 h-12 flex-shrink-0">
+        <div className="flex items-center gap-2 mb-2 pr-16">
+          <Avatar className="w-10 h-10 flex-shrink-0">
             <AvatarImage src={displayData.avatar} />
-            <AvatarFallback className="text-lg bg-lime-100 text-lime-800">
+            <AvatarFallback className="text-sm bg-lime-100 text-lime-800">
               {displayData.name.split(' ').map(n => n[0]).join('').toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <div className="text-sm font-semibold text-gray-800 truncate" title={displayData.name}>
+              <div className="text-xs font-semibold text-gray-800 truncate" title={displayData.name}>
                 {displayData.name.split(' ')[0]}
               </div>
               <button
@@ -329,7 +365,7 @@ const BestMatchedCandidates = ({
                 title={isFavorite(currentCandidate.id) ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Heart 
-                  className={`w-3 h-3 transition-all duration-200 ${
+                  className={`w-2.5 h-2.5 transition-all duration-200 ${
                     isFavorite(currentCandidate.id) 
                       ? 'text-red-500 fill-current scale-110' 
                       : 'text-gray-400 hover:text-red-500 hover:scale-105'
@@ -337,7 +373,7 @@ const BestMatchedCandidates = ({
                 />
               </button>
             </div>
-            <div className="text-sm font-semibold text-gray-800 truncate" title={displayData.position}>
+            <div className="text-xs font-semibold text-gray-800 truncate" title={displayData.position}>
               {displayData.position}
             </div>
           </div>
@@ -345,15 +381,15 @@ const BestMatchedCandidates = ({
 
         {/* Bio and Expected Salary */}
         {displayData.bio && (
-          <div className="mb-3">
-            <div className="text-xs text-gray-600 line-clamp-2" title={displayData.bio}>
+          <div className="mb-2">
+            <div className="text-xs text-gray-600 line-clamp-1" title={displayData.bio}>
               {displayData.bio}
             </div>
           </div>
         )}
         
         {displayData.expectedSalary > 0 && (
-          <div className="mb-3">
+          <div className="mb-2">
             <div className="text-xs font-medium text-lime-600">
               Expected: ${displayData.expectedSalary.toLocaleString()}/month
             </div>
@@ -361,14 +397,14 @@ const BestMatchedCandidates = ({
         )}
 
         {/* Score Bar */}
-        <div className="w-full mb-3">
+        <div className="w-full mb-2">
           <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
             <span>Match Score</span>
             <span className="font-semibold">{Math.round(currentCandidate.score)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-gray-200 rounded-full h-1 overflow-hidden">
             <div 
-              className="h-1.5 rounded-full transition-all duration-700 ease-out" 
+              className="h-1 rounded-full transition-all duration-700 ease-out" 
               style={{ 
                 width: `${Math.min(currentCandidate.score, 100)}%`,
                 backgroundColor: 'rgb(101, 163, 13)',
@@ -377,42 +413,6 @@ const BestMatchedCandidates = ({
               }}
             ></div>
           </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex gap-2 w-full">
-          <Button
-            size="lg"
-            variant="outline"
-            className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
-            style={{ 
-              borderColor: 'rgb(101, 163, 13)', 
-              backgroundColor: 'rgb(101, 163, 13)' 
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onAskForInterview?.(currentCandidate.id, currentCandidate.name)
-            }}
-          >
-            <MessageCircle className="w-5 h-5 mr-1.5" />
-            Interview
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
-            style={{ 
-              borderColor: 'rgb(101, 163, 13)', 
-              backgroundColor: 'rgb(101, 163, 13)' 
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onViewProfile?.(currentCandidate.id, currentCandidate.name)
-            }}
-          >
-            <Eye className="w-5 h-5 mr-1.5" />
-            View Profile
-          </Button>
         </div>
       </div>
 
@@ -489,7 +489,7 @@ export const TopCandidateWithMatches = ({
             </div>
             
             {/* Horizontal Rule */}
-            <hr className="border-gray-200 my-4" />
+            <hr className="border-gray-200 my-2" />
             
             {/* Best Matched Candidates Section - 50% */}
             <div className="flex-1 flex flex-col">

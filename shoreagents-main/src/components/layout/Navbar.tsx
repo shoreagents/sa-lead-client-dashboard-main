@@ -77,8 +77,147 @@ export function Navbar() {
     )
   }
 
+  // Show custom dashboard navbar for admin and user dashboards
+  if (isAdminDashboard || isUserDashboard) {
   return (
-    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
+      <nav className="bg-lime-600 fixed top-0 left-0 right-0 z-50 transition-all duration-300 shadow-sm">
+        <div className="w-full relative">
+          <div className="flex items-center h-16">
+            {/* Logo - Left side */}
+            <div className="flex-shrink-0 absolute left-10 z-10">
+              <Link href="/" className="flex items-center">
+                <Image
+                  src="/ShoreAgents-Logo-Copy.png"
+                  alt="ShoreAgents Logo"
+                  width={180}
+                  height={40}
+                  className="h-10 w-auto lg:hidden brightness-0 invert"
+                />
+                <Image
+                  src="/ShoreAgents-Logo.png"
+                  alt="ShoreAgents Logo"
+                  width={180}
+                  height={40}
+                  className="h-10 w-auto hidden lg:block brightness-0 invert"
+                />
+              </Link>
+            </div>
+
+            {/* Dashboard Navigation - Centered */}
+            <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 flex-1 justify-center ml-[180px]">
+              {/* Navigation items removed - keeping only logo, currency, and auth */}
+            </div>
+
+            {/* Right side - Currency and Auth */}
+            <div className="hidden md:flex items-center space-x-2 absolute right-4 top-0 h-16">
+              {/* Currency Selector */}
+              <div className="relative group">
+                <div 
+                  className="flex items-center space-x-1 text-white hover:bg-lime-700 rounded-lg px-2 py-1.5 cursor-pointer transition-all duration-200 min-w-0 flex-shrink-0"
+                  title={isDetectingLocation ? "Detecting your location..." : `Current currency: ${selectedCurrency.code}${isAutoDetected ? ' (Auto-detected)' : hasUserSelectedCurrency ? ' (Manually selected)' : ''}`}
+                >
+                  {isAutoDetected && (
+                    <div className="w-2 h-2 bg-lime-300 rounded-full animate-pulse flex-shrink-0"></div>
+                  )}
+                  {hasUserSelectedCurrency && !isAutoDetected && (
+                    <div className="w-2 h-2 bg-blue-300 rounded-full flex-shrink-0"></div>
+                  )}
+                  {!isMounted ? (
+                    <>
+                      <span className="text-sm font-medium whitespace-nowrap text-white">USD</span>
+                    </>
+                  ) : isDetectingLocation ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white flex-shrink-0"></div>
+                      <span className="text-sm font-medium text-white">...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-sm font-medium whitespace-nowrap text-white">{selectedCurrency.code}</span>
+                    </>
+                  )}
+                  <ChevronDown className="h-3 w-3 flex-shrink-0 text-white transition-transform duration-200 group-hover:rotate-180" />
+                </div>
+                
+                {/* Currency Dropdown */}
+                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-300 ease-in-out z-50 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible">
+                  <div className="py-2">
+                    {/* Auto-detect option */}
+                    <div 
+                      className="flex items-center px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
+                      onClick={handleDetectLocation}
+                    >
+                      <div className="w-8 h-4 flex items-center justify-center">
+                        <div className="w-3 h-3 bg-lime-500 rounded-full animate-pulse"></div>
+                      </div>
+                      <span className="text-sm text-gray-700 font-medium">Auto-detect</span>
+                    </div>
+                    
+                    {/* Currency options */}
+                    {currencies.map((currency) => (
+                      <div 
+                        key={currency.code}
+                        className="flex items-center px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                        onClick={() => handleCurrencySelect(currency)}
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-sm font-semibold text-gray-900">{currency.code}</span>
+                          <span className="text-xs text-gray-500">{currencyCountryNames[currency.code]}</span>
+                        </div>
+                        {selectedCurrency.code === currency.code && isAutoDetected && (
+                          <span className="ml-auto text-xs text-lime-600">Auto</span>
+                        )}
+                        {selectedCurrency.code === currency.code && hasUserSelectedCurrency && !isAutoDetected && (
+                          <span className="ml-auto text-xs text-blue-600">Manual</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Auth Buttons */}
+              <AuthButtons />
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="lg:hidden absolute right-0 top-0 h-16 flex items-center space-x-1 pr-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleMobileMenu}
+                className="flex-shrink-0 text-white hover:bg-lime-700 transition-colors duration-200"
+              >
+                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Menu */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden">
+              <div className="max-h-[80vh] overflow-y-auto bg-white border-t border-gray-200">
+                <div className="px-2 pt-2 pb-3 space-y-1">
+                  {/* Dashboard Navigation Items */}
+                  {/* Navigation items removed - keeping only logo, currency, and auth */}
+
+                  {/* Auth Buttons - Mobile */}
+                  <div className="px-2 py-3 border-t border-gray-200">
+                    <div className="flex flex-col space-y-2">
+                      <AuthButtons />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+    )
+  }
+
+  return (
+    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} sticky top-0 z-50 transition-all duration-300 ${isMounted && isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
       <div className="w-full relative">
         <div className="flex items-center h-16">
           {/* Logo - Absolute left edge */}

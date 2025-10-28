@@ -349,87 +349,47 @@ export default function QuotationPage() {
       <SidebarProvider>
         <UserDashboardSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Quotations</h1>
-              <Badge variant="secondary" className="text-xs">
-                {filteredQuotations.length} quotations
-              </Badge>
-              {isStale && (
-                <Badge variant="outline" className="text-xs text-orange-600">
-                  Data may be outdated
-                </Badge>
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
-          </header>
-          
-          <div className="flex flex-1 flex-col gap-4 p-4">
-            {/* Header */}
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold tracking-tight">Quotation Management</h2>
-                  <p className="text-muted-foreground">
-                    Create, manage, and track your quotations
-                  </p>
-                </div>
-                <Button 
-                  className="bg-lime-600 hover:bg-lime-700"
-                  onClick={handleCreateQuotation}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Quotation
-                </Button>
-              </div>
-            </div>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
 
             {/* Filters */}
             <div className="flex gap-2 flex-wrap">
               <Button
+                size="sm"
                 variant={selectedStatus === 'all' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('all')}
-                className={selectedStatus === 'all' ? 'bg-lime-600 hover:bg-lime-700' : ''}
+                className={`h-8 text-sm ${selectedStatus === 'all' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
               >
                 All
               </Button>
               <Button
+                size="sm"
                 variant={selectedStatus === 'latest' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('latest')}
-                className={selectedStatus === 'latest' ? 'bg-lime-600 hover:bg-lime-700' : ''}
+                className={`h-8 text-sm ${selectedStatus === 'latest' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
               >
                 Latest
               </Button>
               <Button
+                size="sm"
                 variant={selectedStatus === 'active' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('active')}
-                className={selectedStatus === 'active' ? 'bg-lime-600 hover:bg-lime-700' : ''}
+                className={`h-8 text-sm ${selectedStatus === 'active' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
               >
                 Active
               </Button>
               <Button
+                size="sm"
                 variant={selectedStatus === 'pending' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('pending')}
-                className={selectedStatus === 'pending' ? 'bg-lime-600 hover:bg-lime-700' : ''}
+                className={`h-8 text-sm ${selectedStatus === 'pending' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
               >
                 Pending
               </Button>
               <Button
+                size="sm"
                 variant={selectedStatus === 'expired' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('expired')}
-                className={selectedStatus === 'expired' ? 'bg-lime-600 hover:bg-lime-700' : ''}
+                className={`h-8 text-sm ${selectedStatus === 'expired' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
               >
                 Expired
               </Button>
@@ -452,10 +412,11 @@ export default function QuotationPage() {
                   {error instanceof Error ? error.message : 'An unexpected error occurred'}
                 </p>
                 <Button 
+                  size="sm"
                   onClick={() => refetch()}
-                  className="bg-lime-600 hover:bg-lime-700"
+                  className="h-8 bg-lime-600 hover:bg-lime-700 text-sm"
                 >
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                  <RefreshCw className="w-3 h-3 mr-1" />
                   Try Again
                 </Button>
               </div>
@@ -538,8 +499,9 @@ export default function QuotationPage() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleViewQuote(filteredQuotations[0])}
+                                className="h-8 text-sm"
                               >
-                                <Eye className="w-4 h-4 mr-2" />
+                                <Eye className="w-3 h-3 mr-1" />
                                 View
                               </Button>
                               <Button 
@@ -551,7 +513,7 @@ export default function QuotationPage() {
                                 }}
                                 disabled={isDownloading === filteredQuotations[0].id}
                               >
-                                <Download className="w-4 h-4 mr-2" />
+                                <Download className="w-3 h-3 mr-1" />
                                 {isDownloading === filteredQuotations[0].id ? 'Downloading...' : 'Download PDF'}
                               </Button>
                               <Button 
@@ -563,7 +525,7 @@ export default function QuotationPage() {
                                 }}
                                 disabled={isSending === filteredQuotations[0].id}
                               >
-                                <Send className="w-4 h-4 mr-2" />
+                                <Send className="w-3 h-3 mr-1" />
                                 {isSending === filteredQuotations[0].id ? 'Sending...' : 'Send to Client'}
                               </Button>
                               <Button 
@@ -576,7 +538,7 @@ export default function QuotationPage() {
                                 {deleteQuotationMutation.isPending ? (
                                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                                 ) : (
-                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  <Trash2 className="w-3 h-3 mr-1" />
                                 )}
                                 {deleteQuotationMutation.isPending ? 'Deleting...' : 'Delete'}
                               </Button>

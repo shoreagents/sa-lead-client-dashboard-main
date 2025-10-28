@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/admin-auth-context'
 import { AdminGuard } from '@/components/auth/AdminGuard'
-import { AdminNavbar } from '@/components/layout/AdminNavbar'
+import { AppSidebar } from '@/components/app-sidebar'
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -243,16 +244,10 @@ export default function LeadManagement() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <AdminNavbar 
-            onRefresh={() => refetch()}
-            isLoading={isLoading}
-          />
-          
-          {/* Add top padding to account for fixed navbar */}
-          <div className="pt-16">
-            <div className="flex flex-1 flex-col gap-4 p-4">
-              <div className="w-full">
-                {/* Stats Cards */}
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
+            <div className="w-full">
+
+              {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
