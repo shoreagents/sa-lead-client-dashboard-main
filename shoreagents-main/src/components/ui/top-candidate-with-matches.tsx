@@ -104,11 +104,11 @@ const TopCandidateSection = ({
                 )}
                 
                 {/* Action buttons */}
-                <div className="flex gap-1 w-full">
+                <div className="flex gap-2 w-full">
                   <Button
-                    size="sm"
+                    size="lg"
                     variant="outline"
-                    className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
+                    className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
                     style={{ 
                       borderColor: 'rgb(101, 163, 13)', 
                       backgroundColor: 'rgb(101, 163, 13)' 
@@ -120,13 +120,13 @@ const TopCandidateSection = ({
                       }
                     }}
                   >
-                    <MessageCircle className="w-3 h-3 mr-1" />
+                    <MessageCircle className="w-5 h-5 mr-1.5" />
                     Interview
                   </Button>
                   <Button
-                    size="sm"
+                    size="lg"
                     variant="outline"
-                    className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
+                    className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
                     style={{ 
                       borderColor: 'rgb(101, 163, 13)', 
                       backgroundColor: 'rgb(101, 163, 13)' 
@@ -136,7 +136,7 @@ const TopCandidateSection = ({
                       onViewProfile()
                     }}
                   >
-                    <Eye className="w-3 h-3 mr-1" />
+                    <Eye className="w-5 h-5 mr-1.5" />
                     View Profile
                   </Button>
                 </div>
@@ -380,11 +380,11 @@ const BestMatchedCandidates = ({
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-1 w-full">
+        <div className="flex gap-2 w-full">
           <Button
-            size="sm"
+            size="lg"
             variant="outline"
-            className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
+            className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
             style={{ 
               borderColor: 'rgb(101, 163, 13)', 
               backgroundColor: 'rgb(101, 163, 13)' 
@@ -394,13 +394,13 @@ const BestMatchedCandidates = ({
               onAskForInterview?.(currentCandidate.id, currentCandidate.name)
             }}
           >
-            <MessageCircle className="w-3 h-3 mr-1" />
+            <MessageCircle className="w-5 h-5 mr-1.5" />
             Interview
           </Button>
           <Button
-            size="sm"
+            size="lg"
             variant="outline"
-            className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
+            className="flex-1 h-14 text-base px-3 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold"
             style={{ 
               borderColor: 'rgb(101, 163, 13)', 
               backgroundColor: 'rgb(101, 163, 13)' 
@@ -410,7 +410,7 @@ const BestMatchedCandidates = ({
               onViewProfile?.(currentCandidate.id, currentCandidate.name)
             }}
           >
-            <Eye className="w-3 h-3 mr-1" />
+            <Eye className="w-5 h-5 mr-1.5" />
             View Profile
           </Button>
         </div>

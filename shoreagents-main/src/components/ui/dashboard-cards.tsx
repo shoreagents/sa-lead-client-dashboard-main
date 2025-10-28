@@ -32,8 +32,8 @@ export const NextStepCard = ({ onSeePricing }: NextStepCardProps) => (
         <p className="text-sm text-gray-700 flex-grow">Based on your browsing:</p>
         <Button
           onClick={onSeePricing}
-          size="sm"
-          className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors"
+          size="lg"
+          className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors h-14 text-base font-semibold"
         >
           View Pricing
         </Button>
@@ -64,9 +64,9 @@ export const CaseStudyCard = ({ onReadMore }: CaseStudyCardProps) => (
         <p className="text-sm text-gray-700 flex-grow">Gallery Group Success</p>
         <Button
           onClick={onReadMore}
-          size="sm"
+          size="lg"
           variant="outline"
-          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors"
+          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors h-14 text-base font-semibold"
         >
           Read More
         </Button>
@@ -144,9 +144,9 @@ export const TopCandidateCard = ({
         )}
         <Button
           onClick={onViewProfile}
-          size="sm"
+          size="lg"
           variant="outline"
-          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors"
+          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors h-14 text-base font-semibold"
         >
           {topCandidate ? 'View Profile' : 'Browse Talent'}
         </Button>
@@ -189,17 +189,17 @@ export const RecentQuoteCard = ({
             </div>
             <div className="flex items-center space-x-2">
               <Button
-                size="sm"
+                size="lg"
                 variant="outline"
                 onClick={onViewQuote}
-                className="text-xs px-2 py-1 h-7 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors"
+                className="text-sm px-4 py-2 h-12 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors font-semibold"
               >
                 View All
               </Button>
               <Button
-                size="sm"
+                size="lg"
                 onClick={onCreateQuote}
-                className="text-xs px-2 py-1 h-7 bg-lime-600 hover:bg-lime-700 text-white"
+                className="text-sm px-4 py-2 h-12 bg-lime-600 hover:bg-lime-700 text-white font-semibold"
               >
                 + New Quote
               </Button>
