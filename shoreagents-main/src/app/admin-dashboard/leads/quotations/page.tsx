@@ -157,12 +157,8 @@ export default function LeadQuotations() {
           
           <div className="flex flex-1 flex-col gap-4 p-4">
             <div className="w-full">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Lead Quotations</h1>
-                  <p className="text-gray-600 mt-2">Track and manage pricing quotes from your leads</p>
-                </div>
+              {/* Action Buttons */}
+              <div className="flex justify-end items-center mb-6">
                 <div className="flex items-center gap-4">
                   <Button
                     onClick={() => refetch()}

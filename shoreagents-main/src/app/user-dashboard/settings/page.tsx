@@ -75,16 +75,6 @@ export default function SettingsPage() {
           </header>
           
           <div className="flex flex-1 flex-col gap-4 p-4">
-            {/* Header */}
-            <div className="grid gap-4">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Account Settings</h2>
-                <p className="text-muted-foreground">
-                  Customize your experience and manage your account preferences
-                </p>
-              </div>
-            </div>
-
             {/* Settings Sections */}
             <div className="grid gap-6">
               {/* Notifications */}

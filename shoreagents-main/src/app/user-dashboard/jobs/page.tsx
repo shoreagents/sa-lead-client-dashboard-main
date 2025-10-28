@@ -89,23 +89,15 @@ export default function JobsPage() {
           </header>
           
           <div className="flex flex-1 flex-col gap-4 p-4">
-            {/* Header */}
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold tracking-tight">Job Postings</h2>
-                  <p className="text-muted-foreground">
-                    Manage your job postings and track applications
-                  </p>
-                </div>
-                <Button 
-                  onClick={handleCreateJob}
-                  className="bg-lime-600 hover:bg-lime-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Quote for Job
-                </Button>
-              </div>
+            {/* Action Button */}
+            <div className="flex justify-end items-center mb-6">
+              <Button 
+                onClick={handleCreateJob}
+                className="bg-lime-600 hover:bg-lime-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Quote for Job
+              </Button>
             </div>
 
             {/* Search and Filters */}

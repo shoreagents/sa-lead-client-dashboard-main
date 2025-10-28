@@ -67,16 +67,6 @@ export default function CandidatesPage() {
           </header>
           
           <div className="flex flex-1 flex-col gap-4 p-4">
-            {/* Header */}
-            <div className="grid gap-4">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight">Browse Candidates</h2>
-                <p className="text-muted-foreground">
-                  Find the perfect talent for your business needs
-                </p>
-              </div>
-            </div>
-
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="relative flex-1">
