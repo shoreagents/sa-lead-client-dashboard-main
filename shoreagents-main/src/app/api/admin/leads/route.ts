@@ -21,6 +21,10 @@ export async function GET(request: NextRequest) {
         pricingQuotes: {
           orderBy: { created_at: 'desc' },
           take: 3 // Get latest 3 quotes
+        },
+        interviewRequests: {
+          orderBy: { created_at: 'desc' }
+          // Get all interview requests
         }
       },
       orderBy: { created_at: 'desc' }
@@ -29,7 +33,28 @@ export async function GET(request: NextRequest) {
     // Transform data to match the expected format
     const leads = usersWithProgress.map(user => {
       const currentProgress = user.leadProgress[0]
-      const currentStatus = currentProgress?.status || 'new_lead'
+      const hasInterviewRequest = user.interviewRequests.length > 0
+      
+      // Debug logging
+      console.log(`🔍 User ${user.user_id}:`, {
+        hasInterviewRequest,
+        interviewRequestCount: user.interviewRequests.length,
+        interviewRequests: user.interviewRequests
+      })
+      
+      // If user has an interview request, automatically set status to 'pending'
+      // unless they're already in a more advanced stage
+      let currentStatus = currentProgress?.status || 'new_lead'
+      if (hasInterviewRequest) {
+        const statusHierarchy = ['new_lead', 'stage_1', 'stage_2', 'pending', 'meeting_booked', 'signed_up', 'closed_won']
+        const currentIndex = statusHierarchy.indexOf(currentStatus)
+        const pendingIndex = statusHierarchy.indexOf('pending')
+        
+        // Only move to pending if current status is not more advanced than pending
+        if (currentIndex < pendingIndex) {
+          currentStatus = 'pending'
+        }
+      }
       
       // Determine status display name
       const statusMap: { [key: string]: string } = {
@@ -76,7 +101,10 @@ export async function GET(request: NextRequest) {
         industry: user.industry_name || 'Not specified',
         firstLeadCapture: user.first_lead_capture || false,
         secondLeadCapture: user.second_lead_capture || false,
-        thirdLeadCapture: user.third_lead_capture || false
+        thirdLeadCapture: user.third_lead_capture || false,
+        hasInterviewRequest: hasInterviewRequest,
+        interviewRequestCount: user.interviewRequests.length,
+        allInterviewRequests: user.interviewRequests || []
       }
     })
 

@@ -15,12 +15,20 @@ export interface UserQuoteSummary {
     workspace_type: string;
   }>;
   candidate_recommendations?: Array<{
-    id: string;
-    name: string;
-    position: string;
-    avatar?: string;
-    score: number;
-    isFavorite?: boolean;
+    roleTitle: string;
+    totalCandidates: number;
+    recommendedCandidates: Array<{
+      id: string;
+      name: string;
+      position: string;
+      expectedSalary: number;
+      experience: string;
+      skills: string[];
+      overallScore: number;
+      matchScore: number;
+      isRecommended: boolean;
+      avatar?: string | null;
+    }>;
   }>;
 }
 

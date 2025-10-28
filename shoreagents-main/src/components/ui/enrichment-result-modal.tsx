@@ -91,23 +91,6 @@ export function EnrichmentResultModal({
       <DialogContent className="!max-w-4xl sm:!max-w-4xl w-[90vw] max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader className="relative">
           <div className="flex flex-row items-center gap-4 mb-2">
-            <div className="flex items-center gap-3">
-              {enrichmentData.profile_picture_url ? (
-                <img 
-                  src={enrichmentData.profile_picture_url} 
-                  alt={userName}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-purple-200"
-                  onError={(e) => {
-                    // Fallback to default icon if image fails to load
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <div className={`w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center ${enrichmentData.profile_picture_url ? 'hidden' : ''}`}>
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
-            </div>
             <div className="flex-1 min-w-0">
               <DialogTitle className="text-2xl font-bold text-gray-900">
                 Enrichment Results
@@ -158,8 +141,8 @@ export function EnrichmentResultModal({
                     <p className="text-sm text-gray-700">{enrichmentData.job_title}</p>
                   )}
                   {enrichmentData.location && (
-                    <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
-                      <MapPin className="w-3 h-3" />
+                    <p className="text-xs text-gray-600 flex items-center justify-center gap-1 mt-1">
+                      <MapPin className="w-3 h-3 text-gray-600" />
                       {enrichmentData.location}
                     </p>
                   )}
@@ -179,13 +162,13 @@ export function EnrichmentResultModal({
                               href={enrichmentData.linkedin_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-colors"
+                              className="w-10 h-10 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
                             >
-                              <Linkedin className="w-5 h-5 text-white" />
+                              <Linkedin className="w-5 h-5 text-blue-600" />
                             </a>
                           ) : (
-                            <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center cursor-not-allowed">
-                              <Linkedin className="w-5 h-5 text-gray-500" />
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center cursor-not-allowed">
+                              <Linkedin className="w-5 h-5 text-gray-400" />
                             </div>
                           )}
                         </div>
@@ -205,13 +188,13 @@ export function EnrichmentResultModal({
                               href={enrichmentData.twitter_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-10 h-10 bg-sky-500 hover:bg-sky-600 rounded-lg flex items-center justify-center transition-colors"
+                              className="w-10 h-10 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
                             >
-                              <X className="w-5 h-5 text-white" />
+                              <X className="w-5 h-5 text-gray-700" />
                             </a>
                           ) : (
-                            <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center cursor-not-allowed">
-                              <X className="w-5 h-5 text-gray-500" />
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center cursor-not-allowed">
+                              <X className="w-5 h-5 text-gray-400" />
                             </div>
                           )}
                         </div>
@@ -231,13 +214,13 @@ export function EnrichmentResultModal({
                               href={enrichmentData.facebook_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-10 h-10 bg-blue-700 hover:bg-blue-800 rounded-lg flex items-center justify-center transition-colors"
+                              className="w-10 h-10 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
                             >
-                              <Facebook className="w-5 h-5 text-white" />
+                              <Facebook className="w-5 h-5 text-blue-600" />
                             </a>
                           ) : (
-                            <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center cursor-not-allowed">
-                              <Facebook className="w-5 h-5 text-gray-500" />
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center cursor-not-allowed">
+                              <Facebook className="w-5 h-5 text-gray-400" />
                             </div>
                           )}
                         </div>
@@ -257,13 +240,13 @@ export function EnrichmentResultModal({
                               href={enrichmentData.company_website}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-10 h-10 bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center transition-colors"
+                              className="w-10 h-10 hover:bg-gray-100 rounded-lg flex items-center justify-center transition-colors"
                             >
-                              <Globe className="w-5 h-5 text-white" />
+                              <Globe className="w-5 h-5 text-green-600" />
                             </a>
                           ) : (
-                            <div className="w-10 h-10 bg-gray-300 rounded-lg flex items-center justify-center cursor-not-allowed">
-                              <Globe className="w-5 h-5 text-gray-500" />
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center cursor-not-allowed">
+                              <Globe className="w-5 h-5 text-gray-400" />
                             </div>
                           )}
                         </div>
@@ -278,47 +261,103 @@ export function EnrichmentResultModal({
             </div>
 
             {/* BROCCOLI - Company Details (Top Right) */}
-            <div className="col-span-3 row-span-2 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+            <div className="col-span-3 row-span-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200 overflow-hidden flex flex-col">
               <div className="flex items-center gap-4 mb-4">
                 {enrichmentData.company_logo_url ? (
                   <img 
                     src={enrichmentData.company_logo_url} 
                     alt={enrichmentData.company_name || 'Company'}
-                    className="w-12 h-12 rounded-lg object-contain bg-white p-2 border border-blue-300"
+                    className="w-20 h-20 rounded-lg object-contain bg-white p-2 border border-blue-300"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
                 ) : (
-                  <Building className="w-12 h-12 text-blue-600 p-2 bg-white rounded-lg border border-blue-300" />
+                  <Building className="w-20 h-20 text-blue-600 p-2 bg-white rounded-lg border border-blue-300" />
                 )}
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">{enrichmentData.company_name || 'Company'}</h3>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-gray-900">{enrichmentData.company_name || 'Company'}</h3>
+                    {/* LinkedIn Icon for Company */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <a 
+                            href="https://ph.linkedin.com/company/shoreagents" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center w-6 h-6 text-blue-700 hover:text-blue-800 transition-colors"
+                          >
+                            <Linkedin className="w-4 h-4" />
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Visit ShoreAgents LinkedIn
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    {/* Website Icon */}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <a 
+                            href="https://www.shoreagents.com" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center w-6 h-6 text-blue-600 hover:text-blue-700 transition-colors"
+                          >
+                            <Globe className="w-4 h-4" />
+                          </a>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          Visit ShoreAgents Website
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   {enrichmentData.company_industry && (
                     <p className="text-sm text-gray-700">{enrichmentData.company_industry}</p>
                   )}
+                  {/* Company Email */}
+                  <div className="mt-1">
+                    <a 
+                      href="mailto:info@shoreagents.com"
+                      className="text-sm text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                    >
+                      <Mail className="w-3 h-3" />
+                      info@shoreagents.com
+                    </a>
+                  </div>
+                  
+                  {/* Company Phone */}
+                  <div className="mt-1">
+                    <a 
+                      href="tel:+1234567890"
+                      className="text-sm text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                    >
+                      <Phone className="w-3 h-3" />
+                      +1 (234) 567-890
+                    </a>
+                  </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {enrichmentData.company_website && (
-                  <div className="bg-white p-4 rounded-lg border border-blue-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Globe className="w-4 h-4 text-blue-600" />
-                      <span className="text-sm font-semibold text-gray-700">Website</span>
-                    </div>
-                    <a 
-                      href={enrichmentData.company_website} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                    >
-                      {enrichmentData.company_website}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
+              {/* About Company Section */}
+              {enrichmentData.company_description && (
+                <div className="bg-white p-4 rounded-lg border border-blue-200 mb-4 flex-1 overflow-hidden flex flex-col">
+                  <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-blue-600" />
+                    About {enrichmentData.company_name || 'Company'}
+                  </h4>
+                  <div className="overflow-y-auto flex-1">
+                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+                      {enrichmentData.company_description || 'No description available'}
+                    </p>
                   </div>
-                )}
-                
+                </div>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-shrink-0">
                 {enrichmentData.company_size && (
                   <div className="bg-white p-4 rounded-lg border border-blue-200">
                     <div className="flex items-center gap-2 mb-2">
@@ -351,22 +390,12 @@ export function EnrichmentResultModal({
               </div>
             </div>
 
-            {/* TAMAGO - Company Information (Bottom Right) */}
-            <div className="col-span-3 row-span-3 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
-              <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-emerald-700" />
-                About {enrichmentData.company_name || 'Company'}
-              </h3>
-              
-              {enrichmentData.company_description && (
-                <div className="bg-white p-3 rounded-lg border border-emerald-200 mb-3">
-                  <p className="text-sm text-gray-700 leading-relaxed">{enrichmentData.company_description}</p>
-                </div>
-              )}
+            {/* TAMAGO - Contact & Professional Information (Bottom Right) */}
+            <div className="col-span-3 row-span-2 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
 
               {/* Contact Information */}
               {(enrichmentData.phone_number || enrichmentData.additional_emails) && (
-                <div className="bg-white p-3 rounded-lg border border-emerald-200">
+                <div className="bg-white p-3 rounded-lg border border-emerald-200 mb-3">
                   <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
                     <Phone className="w-4 h-4 text-emerald-700" />
                     Contact Information
@@ -390,7 +419,7 @@ export function EnrichmentResultModal({
 
               {/* Bio Section */}
               {enrichmentData.bio && (
-                <div className="bg-white p-3 rounded-lg border border-emerald-200 mt-3">
+                <div className="bg-white p-3 rounded-lg border border-emerald-200">
                   <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
                     <User className="w-4 h-4 text-emerald-700" />
                     Professional Bio

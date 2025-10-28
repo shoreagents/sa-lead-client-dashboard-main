@@ -7,6 +7,9 @@ import { Badge } from './badge';
 import { UserQuoteSummary } from '@/lib/userQuoteService';
 import { useState } from 'react';
 import { useCurrency } from '@/lib/currencyContext';
+import { InterviewRequestModal, InterviewRequestData } from './interview-request-modal';
+import { useInterviewRequestMutation } from '@/hooks/use-api';
+import { useAuth } from '@/lib/auth-context';
 
 interface QuoteSummaryModalProps {
   isOpen: boolean;
@@ -16,8 +19,61 @@ interface QuoteSummaryModalProps {
 
 export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalProps) {
   const { formatPrice, convertPrice } = useCurrency();
+  const { appUser } = useAuth();
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  
+  // Interview request modal state
+  const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState<{
+    id: string;
+    name: string;
+    position: string;
+    avatar?: string;
+  } | null>(null);
+  
+  const interviewRequestMutation = useInterviewRequestMutation();
+
+  // Handle interview request
+  const handleInterviewRequest = (candidate: { id: string; name: string; position: string; avatar?: string }) => {
+    setSelectedCandidate(candidate);
+    setIsInterviewModalOpen(true);
+  };
+
+  const handleInterviewSubmit = async (data: InterviewRequestData) => {
+    if (!selectedCandidate) return;
+    
+    // Use authenticated user's ID, fallback to quote user_id if available
+    const userId = appUser?.user_id || quote.user_id;
+    
+    if (!userId) {
+      console.error('❌ No valid user ID available for interview request');
+      throw new Error('User authentication required to submit interview request');
+    }
+    
+    try {
+      await interviewRequestMutation.mutateAsync({
+        candidateId: selectedCandidate.id,
+        candidateName: selectedCandidate.name,
+        candidatePosition: selectedCandidate.position,
+        requesterFirstName: data.firstName,
+        requesterLastName: data.lastName,
+        requesterEmail: data.email,
+        user_id: userId
+      });
+      
+      setIsInterviewModalOpen(false);
+      setSelectedCandidate(null);
+    } catch (error) {
+      console.error('Failed to submit interview request:', error);
+      throw error; // Re-throw to let the interview modal handle the error display
+    }
+  };
+
+  const handleInterviewModalClose = () => {
+    setIsInterviewModalOpen(false);
+    setSelectedCandidate(null);
+  };
 
   if (!isOpen) return null;
 
@@ -135,8 +191,8 @@ export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalP
   }
 
   return (
-    <div className="fixed inset-0 bg-black/20 z-[9999] flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+    <div className={`fixed inset-0 bg-black/20 z-[9999] flex items-center justify-center p-4 ${isInterviewModalOpen ? 'backdrop-blur-sm' : ''}`}>
+      <div className={`bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transition-all duration-300 ${isInterviewModalOpen ? 'blur-sm opacity-75' : ''}`}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-3">
@@ -253,20 +309,28 @@ export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalP
                 }> = [];
 
                 if (quote.candidate_recommendations && quote.candidate_recommendations.length > 0) {
+                  const candidateMap = new Map<string, any>();
+                  
                   quote.candidate_recommendations.forEach((roleData: any) => {
                     if (roleData.recommendedCandidates && roleData.recommendedCandidates.length > 0) {
-                      const mappedCandidates = roleData.recommendedCandidates.map((candidate: any) => ({
-                        id: candidate.id,
-                        name: candidate.name,
-                        position: candidate.position,
-                        avatar: candidate.avatar,
-                        score: candidate.matchScore || candidate.overallScore || 0,
-                        bio: candidate.bio,
-                        expectedSalary: candidate.expectedSalary || 0
-                      }));
-                      allCandidates.push(...mappedCandidates);
+                      roleData.recommendedCandidates.forEach((candidate: any) => {
+                        // Only add if we haven't seen this candidate before
+                        if (!candidateMap.has(candidate.id)) {
+                          candidateMap.set(candidate.id, {
+                            id: candidate.id,
+                            name: candidate.name,
+                            position: candidate.position,
+                            avatar: candidate.avatar,
+                            score: candidate.matchScore || candidate.overallScore || 0,
+                            bio: candidate.bio,
+                            expectedSalary: candidate.expectedSalary || 0
+                          });
+                        }
+                      });
                     }
                   });
+                  
+                  allCandidates.push(...Array.from(candidateMap.values()));
                 }
 
                 // Check if we have any candidates
@@ -275,7 +339,8 @@ export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalP
                 return hasCandidates ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {allCandidates.map((candidate, index) => (
-                    <div key={candidate.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div key={`${candidate.id}-${index}`} className="border rounded-lg p-4 hover:shadow-md transition-shadow flex flex-col h-full">
+                      {/* Header Section */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center">
@@ -299,16 +364,19 @@ export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalP
                           <div className="text-xs text-gray-500">Match Score</div>
                         </div>
                       </div>
-                      {/* Additional candidate info */}
-                      {candidate.expectedSalary && candidate.expectedSalary > 0 && (
-                        <div className="mb-3 p-2 bg-lime-50 rounded-lg">
-                          <div className="text-sm font-medium text-lime-800">
-                            Expected: {formatPrice(convertPrice(candidate.expectedSalary))}/month
-                          </div>
-                        </div>
-                      )}
                       
-                      <div className="flex gap-2">
+                      {/* Salary Section - Always present for consistent spacing */}
+                      <div className="mb-3 p-2 bg-lime-50 rounded-lg flex-1">
+                        <div className="text-sm font-medium text-lime-800">
+                          {candidate.expectedSalary && candidate.expectedSalary > 0 
+                            ? `Expected: ${formatPrice(convertPrice(candidate.expectedSalary))}/month`
+                            : 'Salary: Not specified'
+                          }
+                        </div>
+                      </div>
+                      
+                      {/* Buttons Section - Always at bottom */}
+                      <div className="flex gap-2 mt-auto">
                         <Button 
                           size="sm" 
                           className="flex-1 bg-lime-600 hover:bg-lime-700 text-white"
@@ -321,6 +389,12 @@ export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalP
                           size="sm" 
                           variant="outline"
                           className="border-lime-300 text-lime-700 hover:bg-lime-50"
+                          onClick={() => handleInterviewRequest({
+                            id: candidate.id,
+                            name: candidate.name,
+                            position: candidate.position,
+                            avatar: candidate.avatar
+                          })}
                         >
                           <MessageCircle className="w-4 h-4" />
                         </Button>
@@ -434,6 +508,19 @@ export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalP
           </div>
         </div>
       </div>
+      
+      {/* Interview Request Modal */}
+      {selectedCandidate && (
+        <InterviewRequestModal
+          isOpen={isInterviewModalOpen}
+          onClose={handleInterviewModalClose}
+          candidateName={selectedCandidate.name}
+          candidatePosition={selectedCandidate.position}
+          candidateId={selectedCandidate.id}
+          candidateAvatar={selectedCandidate.avatar}
+          onSubmit={handleInterviewSubmit}
+        />
+      )}
     </div>
   );
 }

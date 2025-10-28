@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { EnrichmentResultModal, EnrichmentData } from '@/components/ui/enrichment-result-modal'
+import { useInterviewRequests } from '@/hooks/use-api'
 
 interface LeadDetailsModalProps {
   isOpen: boolean
@@ -42,6 +43,9 @@ interface LeadDetailsModalProps {
     firstLeadCapture: boolean
     secondLeadCapture: boolean
     thirdLeadCapture: boolean
+    hasInterviewRequest?: boolean
+    interviewRequestCount?: number
+    allInterviewRequests?: any[]
   } | null
 }
 
@@ -72,6 +76,13 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
   const [enrichmentSuccess, setEnrichmentSuccess] = useState(false)
   const [enrichmentData, setEnrichmentData] = useState<EnrichmentData | null>(null)
   const [showEnrichmentModal, setShowEnrichmentModal] = useState(false)
+
+  // Fetch interview requests using TanStack Query
+  const { 
+    data: interviewRequestsData, 
+    isLoading: isLoadingInterviewRequests, 
+    error: interviewRequestsError 
+  } = useInterviewRequests(lead?.userId || '')
 
   console.log('LeadDetailsModal props:', { isOpen, lead })
 
@@ -216,11 +227,11 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="!max-w-6xl sm:!max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="!max-w-5xl sm:!max-w-5xl max-h-[95vh] overflow-hidden">
+        <DialogHeader className="pb-2">
           <DialogTitle className="flex items-center gap-3">
-            <User className="w-6 h-6 text-lime-600" />
-            <span className="text-xl font-bold text-gray-900">{lead.name}</span>
+            <User className="w-5 h-5 text-lime-600" />
+            <span className="text-lg font-bold text-gray-900">{lead.name}</span>
             <Badge className={getPriorityColor(lead.priority)}>
               {lead.priority}
             </Badge>
@@ -246,75 +257,84 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
             </div>
           </div>
         ) : userDetails ? (
-          <div className="space-y-6">
+          <div className="space-y-4 overflow-y-auto max-h-[calc(95vh-120px)]">
           {/* Status and Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Status:</span>
+                <Target className="w-3 h-3 text-gray-500" />
+                <span className="text-xs font-medium text-gray-700">Status:</span>
                 <Badge className={getStatusColor(lead.status)}>
                   {lead.status}
                 </Badge>
               </div>
               
               <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Company:</span>
-                <span className="text-sm text-gray-600">{userDetails.company}</span>
+                <Building className="w-3 h-3 text-gray-500" />
+                <span className="text-xs font-medium text-gray-700">Company:</span>
+                <span className="text-xs text-gray-600">{userDetails.company}</span>
               </div>
 
               <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Industry:</span>
-                <span className="text-sm text-gray-600">{userDetails.industry}</span>
+                <Target className="w-3 h-3 text-gray-500" />
+                <span className="text-xs font-medium text-gray-700">Industry:</span>
+                <span className="text-xs text-gray-600">{userDetails.industry}</span>
               </div>
-
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Email:</span>
-                <span className="text-sm text-gray-600">{userDetails.email}</span>
+                <Mail className="w-3 h-3 text-gray-500" />
+                <span className="text-xs font-medium text-gray-700">Email:</span>
+                <span className="text-xs text-gray-600">{userDetails.email}</span>
               </div>
 
               <div className="flex items-center gap-2">
-                <Building className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">User Type:</span>
-                <span className="text-sm text-gray-600">{userDetails.userType}</span>
+                <Building className="w-3 h-3 text-gray-500" />
+                <span className="text-xs font-medium text-gray-700">User Type:</span>
+                <span className="text-xs text-gray-600">{userDetails.userType}</span>
               </div>
 
               {userDetails.totalQuotes > 0 && (
                 <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-lime-600" />
-                  <span className="text-sm font-medium text-gray-700">Quotes:</span>
-                  <span className="text-sm text-lime-600 font-medium">{userDetails.totalQuotes}</span>
+                  <Star className="w-3 h-3 text-lime-600" />
+                  <span className="text-xs font-medium text-gray-700">Quotes:</span>
+                  <span className="text-xs text-lime-600 font-medium">{userDetails.totalQuotes}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              {userDetails.totalValue > 0 && (
+                <div className="flex items-center gap-2">
+                  <Star className="w-3 h-3 text-green-600" />
+                  <span className="text-xs font-medium text-gray-700">Recent Quote:</span>
+                  <span className="text-xs text-green-600 font-medium">₱{userDetails.totalValue.toLocaleString()}</span>
                 </div>
               )}
 
-              {userDetails.totalValue > 0 && (
+              {/* Interview Request Information */}
+              {lead.hasInterviewRequest && (
                 <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-medium text-gray-700">Recent Quote:</span>
-                  <span className="text-sm text-green-600 font-medium">₱{userDetails.totalValue.toLocaleString()}</span>
+                  <Calendar className="w-3 h-3 text-orange-600" />
+                  <span className="text-xs font-medium text-gray-700">Interview Requests:</span>
+                  <span className="text-xs font-semibold text-orange-800">{lead.interviewRequestCount || 0}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Timeline */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Timeline</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-4 h-4 text-gray-500" />
+          <div className="border-t pt-2">
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Timeline</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-3 h-3 text-gray-500" />
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Created:</span>
-                  <span className="text-sm text-gray-600 ml-2">
+                  <span className="text-xs font-medium text-gray-700">Created:</span>
+                  <span className="text-xs text-gray-600 ml-1">
                     {new Date(userDetails.created).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
+                      month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit'
@@ -323,14 +343,13 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <Clock className="w-4 h-4 text-gray-500" />
+              <div className="flex items-center gap-2">
+                <Clock className="w-3 h-3 text-gray-500" />
                 <div>
-                  <span className="text-sm font-medium text-gray-700">Last Updated:</span>
-                  <span className="text-sm text-gray-600 ml-2">
+                  <span className="text-xs font-medium text-gray-700">Last Updated:</span>
+                  <span className="text-xs text-gray-600 ml-1">
                     {new Date(userDetails.updated).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
+                      month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit'
@@ -344,18 +363,17 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
 
           {/* Pricing Quotes */}
           {userDetails.pricingQuotes && userDetails.pricingQuotes.length > 0 && (
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Pricing Quotes</h3>
-              <div className="space-y-3">
+            <div className="border-t pt-2">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Pricing Quotes</h3>
+              <div className="space-y-1">
                 {userDetails.pricingQuotes.map((quote: any, index: number) => (
-                  <div key={quote.id} className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex justify-between items-start">
+                  <div key={quote.id} className="bg-gray-50 p-2 rounded">
+                    <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-sm font-medium text-gray-900">Quote #{quote.quote_number}</p>
+                        <p className="text-xs font-medium text-gray-900">Quote #{quote.quote_number}</p>
                         <p className="text-xs text-gray-600">
                           {new Date(quote.created_at).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
+                            month: 'short',
                             day: 'numeric'
                           })}
                         </p>
@@ -364,6 +382,7 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
                         <p className="text-sm font-bold text-lime-600">
                           {quote.currency_code} {parseFloat(quote.total_monthly_cost).toLocaleString()}
                         </p>
+                        <p className="text-xs text-gray-500">{quote.member_count || 0} members</p>
                       </div>
                     </div>
                   </div>
@@ -372,19 +391,104 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
             </div>
           )}
 
+          {/* Interview Request Details */}
+          {lead.hasInterviewRequest && (
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="bg-orange-100 p-1 rounded">
+                  <Calendar className="w-4 h-4 text-orange-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-orange-800">All Interview Requests</h3>
+                  <p className="text-xs text-orange-600">Complete request history</p>
+                </div>
+              </div>
+              
+              {isLoadingInterviewRequests ? (
+                <div className="text-center py-4">
+                  <Loader2 className="w-4 h-4 animate-spin text-orange-600 mx-auto mb-2" />
+                  <div className="text-sm text-orange-600">Loading interview requests...</div>
+                </div>
+              ) : interviewRequestsError ? (
+                <div className="text-center py-4">
+                  <div className="text-sm text-red-600">Failed to load interview requests</div>
+                </div>
+              ) : interviewRequestsData?.data && interviewRequestsData.data.length > 0 ? (
+                <div className="space-y-2">
+                  {interviewRequestsData.data.map((request: any, index: number) => (
+                    <div key={request.id || index} className="bg-white border border-orange-100 rounded p-2">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+                        {/* Candidate */}
+                        <div className="flex items-center gap-2">
+                          <User className="w-3 h-3 text-lime-600" />
+                          <div>
+                            <div className="text-xs font-medium text-gray-500">Candidate</div>
+                            <div className="text-sm font-semibold text-gray-900 truncate">{request.candidate_name}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Position */}
+                        <div className="flex items-center gap-2">
+                          <Target className="w-3 h-3 text-blue-600" />
+                          <div>
+                            <div className="text-xs font-medium text-gray-500">Position</div>
+                            <div className="text-sm font-semibold text-gray-900 truncate">{request.candidate_position || 'Not specified'}</div>
+                          </div>
+                        </div>
+
+                        {/* Requester */}
+                        <div className="flex items-center gap-2">
+                          <User className="w-3 h-3 text-purple-600" />
+                          <div>
+                            <div className="text-xs font-medium text-gray-500">Requester</div>
+                            <div className="text-sm font-semibold text-gray-900 truncate">
+                              {request.requester_first_name} {request.requester_last_name}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Request Timestamp */}
+                      <div className="mt-2 pt-2 border-t border-orange-100">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-3 h-3 text-gray-600" />
+                          <div>
+                            <div className="text-xs font-medium text-gray-500">Request #{index + 1} Submitted</div>
+                            <div className="text-sm font-semibold text-gray-900">
+                              {new Date(request.created_at).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="text-sm text-orange-600">No interview requests found</div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Notes */}
           {lead.notes && (
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Notes</h3>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-700">{lead.notes}</p>
+            <div className="border-t pt-2">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Notes</h3>
+              <div className="bg-gray-50 p-2 rounded">
+                <p className="text-xs text-gray-700">{lead.notes}</p>
               </div>
             </div>
           )}
 
           {/* Actions */}
-          <div className="border-t pt-4 flex justify-between items-center">
-            <div className="flex gap-3">
+          <div className="border-t pt-2 flex justify-between items-center">
+            <div className="flex gap-2">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -392,21 +496,22 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
                       <Button
                         onClick={handleEnrich}
                         disabled={!enrichmentStatus.enabled || isEnriching}
+                        size="sm"
                         className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isEnriching ? (
                           <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                             Enriching...
                           </>
                         ) : enrichmentSuccess ? (
                           <>
-                            <Sparkles className="w-4 h-4 mr-2" />
+                            <Sparkles className="w-3 h-3 mr-1" />
                             Enriched!
                           </>
                         ) : (
                           <>
-                            <Sparkles className="w-4 h-4 mr-2" />
+                            <Sparkles className="w-3 h-3 mr-1" />
                             Enrich
                           </>
                         )}
@@ -433,12 +538,12 @@ export function LeadDetailsModal({ isOpen, onClose, lead }: LeadDetailsModalProp
               </TooltipProvider>
             </div>
             
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={onClose}>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={onClose}>
                 Close
               </Button>
-              <Button className="bg-lime-600 hover:bg-lime-700 text-white">
-                <ExternalLink className="w-4 h-4 mr-2" />
+              <Button size="sm" className="bg-lime-600 hover:bg-lime-700 text-white">
+                <ExternalLink className="w-3 h-3 mr-1" />
                 View Full Profile
               </Button>
             </div>
