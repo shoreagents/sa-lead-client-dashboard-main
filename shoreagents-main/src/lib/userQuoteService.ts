@@ -11,6 +11,7 @@ export interface UserQuoteSummary {
   roles_count: number;
   roles_preview: Array<{
     role_title: string;
+    role_description?: string;
     experience_level: string;
     workspace_type: string;
   }>;
@@ -55,6 +56,7 @@ export class UserQuoteService {
           candidate_recommendations,
           roles:pricing_quote_roles(
             role_title,
+            role_description,
             experience_level,
             workspace_type
           )
@@ -85,6 +87,7 @@ export class UserQuoteService {
           roles_count: roles.length,
           roles_preview: roles.map((role: Record<string, unknown>) => ({
             role_title: String(role.role_title),
+            role_description: role.role_description ? String(role.role_description) : undefined,
             experience_level: String(role.experience_level),
             workspace_type: String(role.workspace_type)
           })),

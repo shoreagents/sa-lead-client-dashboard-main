@@ -39,31 +39,37 @@ const adminNavItems = [
     title: "Dashboard",
     url: "/admin-dashboard",
     icon: LayoutDashboard,
+    disabled: false,
   },
   {
     title: "Lead Management",
     url: "/admin-dashboard/leads",
     icon: Users,
+    disabled: false,
   },
   {
     title: "Analytics",
     url: "/admin-dashboard/analytics",
     icon: BarChart3,
+    disabled: true, // Disabled
   },
   {
     title: "Reports",
     url: "/admin-dashboard/reports",
     icon: FileText,
+    disabled: true, // Disabled
   },
   {
     title: "Database",
     url: "/admin-dashboard/database",
     icon: Database,
+    disabled: true, // Disabled
   },
   {
     title: "Settings",
     url: "/admin-dashboard/settings",
     icon: Settings,
+    disabled: false,
   },
 ]
 
@@ -169,17 +175,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={item.title}
-                      className={`${pathname === item.url ? '!bg-lime-600 !text-white hover:!bg-lime-700 h-10 data-[active=true]:!bg-lime-600 data-[active=true]:!text-white' : 'hover:!bg-lime-100 hover:!text-lime-800'} text-base h-10 w-full data-[collapsible=icon]:!w-10 data-[collapsible=icon]:!h-10 data-[collapsible=icon]:!p-2`}
-                    >
-                      <Link href={item.url}>
+                    {item.disabled ? (
+                      <SidebarMenuButton
+                        disabled
+                        tooltip={`${item.title} (Coming Soon)`}
+                        className="text-base h-10 w-full data-[collapsible=icon]:!w-10 data-[collapsible=icon]:!h-10 data-[collapsible=icon]:!p-2 opacity-50 cursor-not-allowed hover:!bg-transparent"
+                      >
                         <item.icon className="w-5 h-5 data-[collapsible=icon]:!w-6 data-[collapsible=icon]:!h-6" />
                         <span className="text-base font-medium data-[collapsible=icon]:!hidden">{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                      </SidebarMenuButton>
+                    ) : (
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.url}
+                        tooltip={item.title}
+                        className={`${pathname === item.url ? '!bg-lime-600 !text-white hover:!bg-lime-700 h-10 data-[active=true]:!bg-lime-600 data-[active=true]:!text-white' : 'hover:!bg-lime-100 hover:!text-lime-800'} text-base h-10 w-full data-[collapsible=icon]:!w-10 data-[collapsible=icon]:!h-10 data-[collapsible=icon]:!p-2`}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="w-5 h-5 data-[collapsible=icon]:!w-6 data-[collapsible=icon]:!h-6" />
+                          <span className="text-base font-medium data-[collapsible=icon]:!hidden">{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    )}
                   </SidebarMenuItem>
                 )
               })}

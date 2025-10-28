@@ -97,11 +97,11 @@ export default function LeadManagement() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'High':
-        return 'bg-red-100 text-red-800 border-red-300'
+        return 'bg-lime-200 text-lime-900 border-lime-400'
       case 'Medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-300'
+        return 'bg-lime-100 text-lime-800 border-lime-300'
       case 'Low':
-        return 'bg-green-100 text-green-800 border-green-300'
+        return 'bg-lime-50 text-lime-700 border-lime-200'
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300'
     }
@@ -273,22 +273,6 @@ export default function LeadManagement() {
                     Refresh
                   </Button>
                   <Button 
-                    onClick={() => {
-                      console.log('🧪 Test modal button clicked')
-                      setPendingChange({
-                        leadId: 'test',
-                        leadName: 'Test Lead',
-                        fromColumn: 'new_lead',
-                        toColumn: 'stage_1'
-                      })
-                      setIsChangeReasonModalOpen(true)
-                    }}
-                    variant="outline"
-                    className="border-blue-200 text-blue-700 hover:bg-blue-50"
-                  >
-                    Test Modal
-                  </Button>
-                  <Button 
                     onClick={handleLogout}
                     variant="outline"
                     className="border-lime-200 text-lime-700 hover:bg-lime-50"
@@ -315,13 +299,13 @@ export default function LeadManagement() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-blue-500 bg-gradient-to-t from-blue-50/50 to-white shadow-sm">
+                <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">New Leads</CardTitle>
-                    <UserPlus className="h-4 w-4 text-blue-600" />
+                    <UserPlus className="h-4 w-4 text-lime-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-2xl font-bold text-lime-600">
                       {isLoading ? '...' : stats.new}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -330,13 +314,13 @@ export default function LeadManagement() {
                   </CardContent>
                 </Card>
 
-                <Card className="border-l-4 border-l-yellow-500 bg-gradient-to-t from-yellow-50/50 to-white shadow-sm">
+                <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-                    <Clock className="h-4 w-4 text-yellow-600" />
+                    <Clock className="h-4 w-4 text-lime-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-yellow-600">
+                    <div className="text-2xl font-bold text-lime-600">
                       {isLoading ? '...' : stats.stage1 + stats.stage2 + stats.pending + stats.meeting_booked + stats.signed_up}
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -383,8 +367,8 @@ export default function LeadManagement() {
                   ) : error ? (
                     <div className="flex items-center justify-center h-[600px]">
                       <div className="text-center">
-                        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                        <p className="text-red-600 font-medium">Failed to load leads</p>
+                        <AlertCircle className="w-12 h-12 text-lime-500 mx-auto mb-4" />
+                        <p className="text-lime-600 font-medium">Failed to load leads</p>
                         <p className="text-sm text-gray-600 mt-2">Please try refreshing the page</p>
                         <Button 
                           onClick={() => refetch()} 

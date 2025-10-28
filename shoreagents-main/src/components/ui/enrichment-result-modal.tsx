@@ -329,16 +329,25 @@ export function EnrichmentResultModal({
                     </a>
                   </div>
                   
-                  {/* Company Phone */}
-                  <div className="mt-1">
-                    <a 
-                      href="tel:+1234567890"
-                      className="text-sm text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
-                    >
-                      <Phone className="w-3 h-3" />
-                      +1 (234) 567-890
-                    </a>
-                  </div>
+                  {/* Company Phone - Only show if available from enrichment data */}
+                  {enrichmentData.phone_number ? (
+                    <div className="mt-1">
+                      <a 
+                        href={`tel:${enrichmentData.phone_number.replace(/\s/g, '')}`}
+                        className="text-sm text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1"
+                      >
+                        <Phone className="w-3 h-3" />
+                        {enrichmentData.phone_number}
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="mt-1">
+                      <span className="text-sm text-gray-500 flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        No phone number found
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               
