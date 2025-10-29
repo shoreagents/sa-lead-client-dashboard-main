@@ -241,10 +241,12 @@ export async function GET(request: NextRequest) {
 async function analyzeJobMatchWithAI(data: any) {
   try {
     // Check if API key is available
-    const apiKey = process.env.CLAUDE_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
     if (!apiKey) {
-      console.error('CLAUDE_API_KEY not found in environment variables');
-      throw new Error('API key not configured');
+      console.error('❌ CLAUDE_API_KEY not found in environment variables');
+      console.error('🔧 Please set CLAUDE_API_KEY in your .env.local file or environment variables');
+      console.error('📖 See AI_SETUP_GUIDE.md for detailed instructions');
+      throw new Error('Claude API key not configured. Please set CLAUDE_API_KEY environment variable.');
     }
 
     // Clean and prepare data for analysis - handle different data types safely
@@ -472,12 +474,268 @@ SCORING GUIDELINES:
   } catch (error: any) {
     console.error('Error calling Anthropic API:', error);
     
-    // Return error response instead of fallback
+    // Use comprehensive fallback scoring instead of returning 0
+    console.log('⚠️ AI analysis failed, using improved fallback scoring for job:', data.job.title);
+    console.log('🔧 This is likely due to missing CLAUDE_API_KEY - see AI_SETUP_GUIDE.md for setup instructions');
+    const fallbackScore = calculateComprehensiveFallbackScore(data);
+    
     return {
-      score: 0,
-      reasoning: `AI analysis failed: ${error.message}`,
-      breakdown: {},
-      error: true
+      score: fallbackScore.score,
+      reasoning: fallbackScore.reasoning,
+      breakdown: fallbackScore.breakdown,
+      error: false // Don't mark as error since we have a fallback
     };
   }
+}
+
+// Comprehensive fallback scoring function (same as in batch-match)
+function calculateComprehensiveFallbackScore(data: any) {
+  let totalScore = 0;
+  let maxScore = 0;
+  const breakdown: { [key: string]: number } = {};
+  
+  // 1. Skills Match (25% weight)
+  const skillsScore = calculateSkillsMatch(data.user.skills || [], data.job.skills || []);
+  totalScore += skillsScore * 0.25;
+  maxScore += 100 * 0.25;
+  breakdown.skillsMatch = skillsScore;
+  
+  // 2. Experience Level Match (20% weight)
+  const experienceScore = calculateExperienceMatch(data.user.workStatus?.workStatus, data.job.experienceLevel);
+  totalScore += experienceScore * 0.20;
+  maxScore += 100 * 0.20;
+  breakdown.experienceMatch = experienceScore;
+  
+  // 3. Work Setup Match (15% weight)
+  const workSetupScore = calculateWorkSetupMatch(data.user.workStatus?.workSetup, data.job.workArrangement);
+  totalScore += workSetupScore * 0.15;
+  maxScore += 100 * 0.15;
+  breakdown.workSetupMatch = workSetupScore;
+  
+  // 4. Location Match (10% weight)
+  const locationScore = calculateLocationMatch(data.user.locationDetails?.distanceKm);
+  totalScore += locationScore * 0.10;
+  maxScore += 100 * 0.10;
+  breakdown.locationMatch = locationScore;
+  
+  // 5. Salary Match (10% weight)
+  const salaryScore = calculateSalaryMatch(data.user.workStatus?.expectedSalary, data.job.salaryRange);
+  totalScore += salaryScore * 0.10;
+  maxScore += 100 * 0.10;
+  breakdown.salaryMatch = salaryScore;
+  
+  // 6. Industry Match (10% weight)
+  const industryScore = calculateIndustryMatch(data.user.experience || [], data.job.industry);
+  totalScore += industryScore * 0.10;
+  maxScore += 100 * 0.10;
+  breakdown.industryMatch = industryScore;
+  
+  // 7. Shift Match (5% weight)
+  const shiftScore = calculateShiftMatch(data.user.workStatus?.preferredShift, data.job.shift);
+  totalScore += shiftScore * 0.05;
+  maxScore += 100 * 0.05;
+  breakdown.shiftMatch = shiftScore;
+  
+  // 8. Career Progression (5% weight)
+  const careerScore = calculateCareerProgression(data.user.workStatus?.currentPosition, data.job.title);
+  totalScore += careerScore * 0.05;
+  maxScore += 100 * 0.05;
+  breakdown.careerMatch = careerScore;
+  
+  // Calculate final weighted score
+  const finalScore = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 50;
+  
+  // Ensure score is within reasonable bounds
+  const clampedScore = Math.min(95, Math.max(25, finalScore));
+  
+  return {
+    score: clampedScore,
+    reasoning: generateFallbackReasoning(clampedScore, breakdown, data),
+    breakdown: breakdown
+  };
+}
+
+// Helper functions for individual scoring components (same as in batch-match)
+function calculateSkillsMatch(userSkills: string[], jobSkills: string[]): number {
+  if (!userSkills.length || !jobSkills.length) return 50;
+  
+  const userSkillsLower = userSkills.map(s => s.toLowerCase().trim());
+  const jobSkillsLower = jobSkills.map(s => s.toLowerCase().trim());
+  
+  let matches = 0;
+  for (const jobSkill of jobSkillsLower) {
+    if (userSkillsLower.some(userSkill => 
+      userSkill.includes(jobSkill) || jobSkill.includes(userSkill)
+    )) {
+      matches++;
+    }
+  }
+  
+  return Math.round((matches / jobSkillsLower.length) * 100);
+}
+
+function calculateExperienceMatch(userStatus: string, jobLevel: string): number {
+  if (!userStatus || !jobLevel) return 50;
+  
+  const status = userStatus.toLowerCase();
+  const level = jobLevel.toLowerCase();
+  
+  if (level.includes('entry') && (status.includes('student') || status.includes('fresh'))) return 85;
+  if (level.includes('entry') && status.includes('employed')) return 70;
+  if (level.includes('mid') && status.includes('employed')) return 80;
+  if (level.includes('senior') && status.includes('employed')) return 85;
+  if (level.includes('senior') && status.includes('student')) return 30;
+  
+  return 60; // Default for unclear matches
+}
+
+function calculateWorkSetupMatch(userSetup: string, jobSetup: string): number {
+  if (!userSetup || !jobSetup) return 50;
+  
+  const user = userSetup.toLowerCase();
+  const job = jobSetup.toLowerCase();
+  
+  if (user === job) return 90;
+  if ((user === 'hybrid' && job === 'remote') || (user === 'remote' && job === 'hybrid')) return 75;
+  if ((user === 'onsite' && job === 'hybrid') || (user === 'hybrid' && job === 'onsite')) return 70;
+  
+  return 40; // Poor match
+}
+
+function calculateLocationMatch(distanceKm: number): number {
+  if (!distanceKm) return 50;
+  
+  if (distanceKm <= 5) return 95;
+  if (distanceKm <= 15) return 85;
+  if (distanceKm <= 30) return 70;
+  if (distanceKm <= 50) return 50;
+  return 30;
+}
+
+function calculateSalaryMatch(expectedSalary: string, jobSalaryRange: string): number {
+  if (!expectedSalary || !jobSalaryRange) return 50;
+  
+  const expected = parseFloat(expectedSalary.replace(/[^\d.]/g, ''));
+  const rangeMatch = jobSalaryRange.match(/(\d+)[^\d]*(\d+)/);
+  
+  if (!expected || !rangeMatch) return 50;
+  
+  const minSalary = parseFloat(rangeMatch[1]);
+  const maxSalary = parseFloat(rangeMatch[2]);
+  
+  if (expected >= minSalary && expected <= maxSalary) return 90;
+  if (expected >= minSalary * 0.8 && expected <= maxSalary * 1.2) return 75;
+  if (expected >= minSalary * 0.6 && expected <= maxSalary * 1.4) return 60;
+  
+  return 40;
+}
+
+function calculateIndustryMatch(userExperience: string[], jobIndustry: string): number {
+  if (!userExperience.length || !jobIndustry) return 50;
+  
+  const experienceText = userExperience.join(' ').toLowerCase();
+  const industry = jobIndustry.toLowerCase();
+  
+  if (experienceText.includes(industry)) return 85;
+  
+  // Check for related industries
+  const relatedIndustries: { [key: string]: string[] } = {
+    'technology': ['software', 'it', 'tech', 'digital', 'computer'],
+    'healthcare': ['medical', 'health', 'hospital', 'clinic'],
+    'finance': ['banking', 'financial', 'accounting', 'investment'],
+    'retail': ['sales', 'commerce', 'ecommerce', 'shopping']
+  };
+  
+  for (const [mainIndustry, related] of Object.entries(relatedIndustries)) {
+    if (industry.includes(mainIndustry) && related.some(rel => experienceText.includes(rel))) {
+      return 70;
+    }
+  }
+  
+  return 50;
+}
+
+function calculateShiftMatch(userShift: string, jobShift: string): number {
+  if (!userShift || !jobShift) return 50;
+  
+  const user = userShift.toLowerCase();
+  const job = jobShift.toLowerCase();
+  
+  if (user === job) return 90;
+  return 40;
+}
+
+function calculateCareerProgression(currentPosition: string, jobTitle: string): number {
+  if (!currentPosition || !jobTitle) return 50;
+  
+  const current = currentPosition.toLowerCase();
+  const job = jobTitle.toLowerCase();
+  
+  // Check for career progression keywords
+  const progressionKeywords = {
+    'junior': ['senior', 'lead', 'manager', 'director'],
+    'associate': ['senior', 'lead', 'manager', 'director'],
+    'coordinator': ['manager', 'director', 'head'],
+    'analyst': ['senior', 'lead', 'manager', 'director'],
+    'developer': ['senior', 'lead', 'architect', 'manager']
+  };
+  
+  for (const [currentLevel, nextLevels] of Object.entries(progressionKeywords)) {
+    if (current.includes(currentLevel)) {
+      if (nextLevels.some(level => job.includes(level))) return 85;
+    }
+  }
+  
+  return 60; // Neutral progression
+}
+
+function generateFallbackReasoning(score: number, breakdown: any, data: any): string {
+  const reasons: string[] = [];
+  
+  if (breakdown.skillsMatch >= 80) {
+    reasons.push('• Strong skills alignment with job requirements');
+  } else if (breakdown.skillsMatch >= 60) {
+    reasons.push('• Some skills match job requirements');
+  } else {
+    reasons.push('• Limited skills overlap with job requirements');
+  }
+  
+  if (breakdown.experienceMatch >= 80) {
+    reasons.push('• Experience level matches job expectations well');
+  } else if (breakdown.experienceMatch >= 60) {
+    reasons.push('• Experience level is somewhat compatible');
+  } else {
+    reasons.push('• Experience level may not align with job requirements');
+  }
+  
+  if (breakdown.workSetupMatch >= 80) {
+    reasons.push('• Work setup preferences align perfectly');
+  } else if (breakdown.workSetupMatch >= 60) {
+    reasons.push('• Work setup preferences are mostly compatible');
+  } else {
+    reasons.push('• Work setup preferences may not match');
+  }
+  
+  if (breakdown.locationMatch >= 80) {
+    reasons.push('• Location is very convenient for this role');
+  } else if (breakdown.locationMatch >= 60) {
+    reasons.push('• Location is reasonably accessible');
+  } else {
+    reasons.push('• Location may require significant commute');
+  }
+  
+  if (score >= 80) {
+    reasons.push('• Overall, this appears to be a strong match for your profile');
+  } else if (score >= 65) {
+    reasons.push('• This could be a good opportunity worth considering');
+  } else if (score >= 50) {
+    reasons.push('• This role has some potential but may not be ideal');
+  } else {
+    reasons.push('• This role may not be the best fit for your current profile');
+  }
+  
+  // Add note about fallback analysis
+  reasons.push('• Note: This analysis uses fallback scoring (AI analysis unavailable)');
+  
+  return reasons.join('\n');
 }

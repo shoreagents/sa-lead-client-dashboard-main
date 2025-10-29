@@ -180,15 +180,22 @@ async function getNewLeaderboard(
 
 	const total = Number(countRes.rows[0]?.c || 0)
 	
-	// Debug: Log sample scores
+	// Debug: Log sample scores and user data
 	if (res.rows.length > 0) {
 		console.log('📊 Sample scores for category', category, ':')
 		res.rows.slice(0, 3).forEach((r: any, i: number) => {
+			const userData = users[r.user_id]
 			console.log(`  ${i + 1}. User: ${r.user_id}`)
 			console.log(`     Overall: ${r.overall_score}, Tier: ${r.tier}`)
 			console.log(`     Typing: ${r.typing_hero_score}, DISC: ${r.disc_personality_score}`)
 			console.log(`     Profile: ${r.profile_completion_score}, Resume: ${r.resume_building_score}`)
 			console.log(`     Applications: ${r.application_activity_score}`)
+			console.log(`     User Data:`, {
+				full_name: userData?.full_name,
+				avatar_url: userData?.avatar_url,
+				username: userData?.username,
+				slug: userData?.slug
+			})
 		})
 	}
 	

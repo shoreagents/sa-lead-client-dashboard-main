@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
       const user = userResult.rows[0];
 
       // Separate job IDs by type (processed jobs are integers, recruiter jobs are UUIDs)
-      const processedJobIds = jobIds.filter(id => !id.includes('-') && !isNaN(Number(id)));
-      const recruiterJobIds = jobIds.filter(id => id.includes('-') || isNaN(Number(id)));
+      const processedJobIds = jobIds.filter((id: string) => !id.includes('-') && !isNaN(Number(id)));
+      const recruiterJobIds = jobIds.filter((id: string) => id.includes('-') || isNaN(Number(id)));
       
       console.log('🔍 Separated job IDs:', { processedJobIds, recruiterJobIds });
 
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
               rj.id, rj.job_title, rj.job_description, rj.requirements, 
               rj.responsibilities, rj.benefits, rj.skills, rj.experience_level,
               rj.industry, rj.department, rj.work_arrangement, rj.salary_min, rj.salary_max,
-              COALESCE(rj.company_id, u.company) as company_name, 'recruiter_jobs' as source
+              COALESCE(rj.company_id::text, u.company) as company_name, 'recruiter_jobs' as source
             FROM recruiter_jobs rj
             LEFT JOIN users u ON u.id = rj.recruiter_id
             WHERE rj.id = ANY($1)
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
 
       // Process only non-cached jobs
       const uncachedJobs = jobs.filter(job => !cachedMap.has(job.id));
-      const results = {};
+      const results: Record<string, any> = {};
 
       // Add cached results
       cachedMap.forEach((value, jobId) => {
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
 
         // Cache the new results (only cache successful analyses)
         for (const result of analysisResults) {
-          if (result.score !== null && !result.failed) {
+          if (result.score !== null && !(result as any).failed) {
             await client.query(`
               INSERT INTO job_match_results (user_id, job_id, score, reasoning, breakdown, analyzed_at)
               VALUES ($1, $2, $3, $4, $5, NOW())
@@ -241,14 +241,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in batch job matching:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    const errorName = error instanceof Error ? error.name : 'Unknown';
     console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: errorMessage,
+      stack: errorStack,
+      name: errorName
     });
     return NextResponse.json({ 
       error: 'Failed to analyze job matches',
-      details: error.message 
+      details: errorMessage 
     }, { status: 500 });
   }
 }
@@ -270,10 +273,12 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 async function analyzeJobMatchWithAI(data: any) {
   try {
     // Check if API key is available
-    const apiKey = process.env.CLAUDE_API_KEY;
+    const apiKey = process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY;
     if (!apiKey) {
-      console.error('CLAUDE_API_KEY not found in environment variables');
-      throw new Error('API key not configured');
+      console.error('❌ CLAUDE_API_KEY not found in environment variables');
+      console.error('🔧 Please set CLAUDE_API_KEY in your .env.local file or environment variables');
+      console.error('📖 See AI_SETUP_GUIDE.md for detailed instructions');
+      throw new Error('Claude API key not configured. Please set CLAUDE_API_KEY environment variable.');
     }
 
     // Clean and prepare data for analysis - handle different data types safely
@@ -379,7 +384,23 @@ SCORING GUIDELINES:
 
 **IMPORTANT:** Always calculate the weighted score using the provided formula and use that as the final score.`;
 
-    console.log('Calling Anthropic API for batch analysis');
+    console.log('🔍 Calling Anthropic API for batch analysis');
+    console.log('🔍 API Key available:', !!apiKey);
+    console.log('🔍 API Key length:', apiKey ? apiKey.length : 0);
+    console.log('🔍 User data summary:', {
+      name: data.user.name,
+      skills: data.user.skills?.length || 0,
+      experience: data.user.experience?.length || 0,
+      workStatus: data.user.workStatus?.workStatus,
+      location: data.user.locationDetails?.distanceDescription
+    });
+    console.log('🔍 Job data summary:', {
+      title: data.job.title,
+      company: data.job.company,
+      experienceLevel: data.job.experienceLevel,
+      workArrangement: data.job.workArrangement,
+      skills: data.job.skills?.length || 0
+    });
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -415,9 +436,10 @@ SCORING GUIDELINES:
     // Extract JSON from the response with better error handling
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
+      let jsonStr = '';
       try {
         // Clean the JSON string by removing control characters and fixing common issues
-        let jsonStr = jsonMatch[0]
+        jsonStr = jsonMatch[0]
           .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
           .replace(/\n/g, ' ') // Replace newlines with spaces
           .replace(/\s+/g, ' ') // Replace multiple spaces with single space
@@ -547,6 +569,272 @@ SCORING GUIDELINES:
     }
   } catch (error) {
     console.error('Error in analyzeJobMatchWithAI:', error);
-    throw error;
+    
+    // Provide a reasonable fallback score instead of throwing
+    console.log('⚠️ AI analysis failed, using improved fallback scoring for job:', data.job.title);
+    console.log('🔧 This is likely due to missing CLAUDE_API_KEY - see AI_SETUP_GUIDE.md for setup instructions');
+    
+    // Calculate a comprehensive fallback score based on multiple criteria
+    const fallbackScore = calculateComprehensiveFallbackScore(data);
+    
+    console.log(`🔍 Fallback score calculated: ${fallbackScore.score} for job: ${data.job.title}`);
+    
+    return {
+      score: fallbackScore.score,
+      reasoning: fallbackScore.reasoning,
+      breakdown: fallbackScore.breakdown
+    };
   }
+}
+
+// Comprehensive fallback scoring function
+function calculateComprehensiveFallbackScore(data: any) {
+  let totalScore = 0;
+  let maxScore = 0;
+  const breakdown: { [key: string]: number } = {};
+  
+  // 1. Skills Match (25% weight)
+  const skillsScore = calculateSkillsMatch(data.user.skills || [], data.job.skills || []);
+  totalScore += skillsScore * 0.25;
+  maxScore += 100 * 0.25;
+  breakdown.skillsMatch = skillsScore;
+  
+  // 2. Experience Level Match (20% weight)
+  const experienceScore = calculateExperienceMatch(data.user.workStatus?.workStatus, data.job.experienceLevel);
+  totalScore += experienceScore * 0.20;
+  maxScore += 100 * 0.20;
+  breakdown.experienceMatch = experienceScore;
+  
+  // 3. Work Setup Match (15% weight)
+  const workSetupScore = calculateWorkSetupMatch(data.user.workStatus?.workSetup, data.job.workArrangement);
+  totalScore += workSetupScore * 0.15;
+  maxScore += 100 * 0.15;
+  breakdown.workSetupMatch = workSetupScore;
+  
+  // 4. Location Match (10% weight)
+  const locationScore = calculateLocationMatch(data.user.locationDetails?.distanceKm);
+  totalScore += locationScore * 0.10;
+  maxScore += 100 * 0.10;
+  breakdown.locationMatch = locationScore;
+  
+  // 5. Salary Match (10% weight)
+  const salaryScore = calculateSalaryMatch(data.user.workStatus?.expectedSalary, data.job.salaryRange);
+  totalScore += salaryScore * 0.10;
+  maxScore += 100 * 0.10;
+  breakdown.salaryMatch = salaryScore;
+  
+  // 6. Industry Match (10% weight)
+  const industryScore = calculateIndustryMatch(data.user.experience || [], data.job.industry);
+  totalScore += industryScore * 0.10;
+  maxScore += 100 * 0.10;
+  breakdown.industryMatch = industryScore;
+  
+  // 7. Shift Match (5% weight)
+  const shiftScore = calculateShiftMatch(data.user.workStatus?.preferredShift, data.job.shift);
+  totalScore += shiftScore * 0.05;
+  maxScore += 100 * 0.05;
+  breakdown.shiftMatch = shiftScore;
+  
+  // 8. Career Progression (5% weight)
+  const careerScore = calculateCareerProgression(data.user.workStatus?.currentPosition, data.job.title);
+  totalScore += careerScore * 0.05;
+  maxScore += 100 * 0.05;
+  breakdown.careerMatch = careerScore;
+  
+  // Calculate final weighted score
+  const finalScore = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 50;
+  
+  // Ensure score is within reasonable bounds
+  const clampedScore = Math.min(95, Math.max(25, finalScore));
+  
+  return {
+    score: clampedScore,
+    reasoning: generateFallbackReasoning(clampedScore, breakdown, data),
+    breakdown: breakdown
+  };
+}
+
+// Helper functions for individual scoring components
+function calculateSkillsMatch(userSkills: string[], jobSkills: string[]): number {
+  if (!userSkills.length || !jobSkills.length) return 50;
+  
+  const userSkillsLower = userSkills.map(s => s.toLowerCase().trim());
+  const jobSkillsLower = jobSkills.map(s => s.toLowerCase().trim());
+  
+  let matches = 0;
+  for (const jobSkill of jobSkillsLower) {
+    if (userSkillsLower.some(userSkill => 
+      userSkill.includes(jobSkill) || jobSkill.includes(userSkill)
+    )) {
+      matches++;
+    }
+  }
+  
+  return Math.round((matches / jobSkillsLower.length) * 100);
+}
+
+function calculateExperienceMatch(userStatus: string, jobLevel: string): number {
+  if (!userStatus || !jobLevel) return 50;
+  
+  const status = userStatus.toLowerCase();
+  const level = jobLevel.toLowerCase();
+  
+  if (level.includes('entry') && (status.includes('student') || status.includes('fresh'))) return 85;
+  if (level.includes('entry') && status.includes('employed')) return 70;
+  if (level.includes('mid') && status.includes('employed')) return 80;
+  if (level.includes('senior') && status.includes('employed')) return 85;
+  if (level.includes('senior') && status.includes('student')) return 30;
+  
+  return 60; // Default for unclear matches
+}
+
+function calculateWorkSetupMatch(userSetup: string, jobSetup: string): number {
+  if (!userSetup || !jobSetup) return 50;
+  
+  const user = userSetup.toLowerCase();
+  const job = jobSetup.toLowerCase();
+  
+  if (user === job) return 90;
+  if ((user === 'hybrid' && job === 'remote') || (user === 'remote' && job === 'hybrid')) return 75;
+  if ((user === 'onsite' && job === 'hybrid') || (user === 'hybrid' && job === 'onsite')) return 70;
+  
+  return 40; // Poor match
+}
+
+function calculateLocationMatch(distanceKm: number): number {
+  if (!distanceKm) return 50;
+  
+  if (distanceKm <= 5) return 95;
+  if (distanceKm <= 15) return 85;
+  if (distanceKm <= 30) return 70;
+  if (distanceKm <= 50) return 50;
+  return 30;
+}
+
+function calculateSalaryMatch(expectedSalary: string, jobSalaryRange: string): number {
+  if (!expectedSalary || !jobSalaryRange) return 50;
+  
+  const expected = parseFloat(expectedSalary.replace(/[^\d.]/g, ''));
+  const rangeMatch = jobSalaryRange.match(/(\d+)[^\d]*(\d+)/);
+  
+  if (!expected || !rangeMatch) return 50;
+  
+  const minSalary = parseFloat(rangeMatch[1]);
+  const maxSalary = parseFloat(rangeMatch[2]);
+  
+  if (expected >= minSalary && expected <= maxSalary) return 90;
+  if (expected >= minSalary * 0.8 && expected <= maxSalary * 1.2) return 75;
+  if (expected >= minSalary * 0.6 && expected <= maxSalary * 1.4) return 60;
+  
+  return 40;
+}
+
+function calculateIndustryMatch(userExperience: string[], jobIndustry: string): number {
+  if (!userExperience.length || !jobIndustry) return 50;
+  
+  const experienceText = userExperience.join(' ').toLowerCase();
+  const industry = jobIndustry.toLowerCase();
+  
+  if (experienceText.includes(industry)) return 85;
+  
+  // Check for related industries
+  const relatedIndustries: { [key: string]: string[] } = {
+    'technology': ['software', 'it', 'tech', 'digital', 'computer'],
+    'healthcare': ['medical', 'health', 'hospital', 'clinic'],
+    'finance': ['banking', 'financial', 'accounting', 'investment'],
+    'retail': ['sales', 'commerce', 'ecommerce', 'shopping']
+  };
+  
+  for (const [mainIndustry, related] of Object.entries(relatedIndustries)) {
+    if (industry.includes(mainIndustry) && related.some(rel => experienceText.includes(rel))) {
+      return 70;
+    }
+  }
+  
+  return 50;
+}
+
+function calculateShiftMatch(userShift: string, jobShift: string): number {
+  if (!userShift || !jobShift) return 50;
+  
+  const user = userShift.toLowerCase();
+  const job = jobShift.toLowerCase();
+  
+  if (user === job) return 90;
+  return 40;
+}
+
+function calculateCareerProgression(currentPosition: string, jobTitle: string): number {
+  if (!currentPosition || !jobTitle) return 50;
+  
+  const current = currentPosition.toLowerCase();
+  const job = jobTitle.toLowerCase();
+  
+  // Check for career progression keywords
+  const progressionKeywords = {
+    'junior': ['senior', 'lead', 'manager', 'director'],
+    'associate': ['senior', 'lead', 'manager', 'director'],
+    'coordinator': ['manager', 'director', 'head'],
+    'analyst': ['senior', 'lead', 'manager', 'director'],
+    'developer': ['senior', 'lead', 'architect', 'manager']
+  };
+  
+  for (const [currentLevel, nextLevels] of Object.entries(progressionKeywords)) {
+    if (current.includes(currentLevel)) {
+      if (nextLevels.some(level => job.includes(level))) return 85;
+    }
+  }
+  
+  return 60; // Neutral progression
+}
+
+function generateFallbackReasoning(score: number, breakdown: any, data: any): string {
+  const reasons: string[] = [];
+  
+  if (breakdown.skillsMatch >= 80) {
+    reasons.push('• Strong skills alignment with job requirements');
+  } else if (breakdown.skillsMatch >= 60) {
+    reasons.push('• Some skills match job requirements');
+  } else {
+    reasons.push('• Limited skills overlap with job requirements');
+  }
+  
+  if (breakdown.experienceMatch >= 80) {
+    reasons.push('• Experience level matches job expectations well');
+  } else if (breakdown.experienceMatch >= 60) {
+    reasons.push('• Experience level is somewhat compatible');
+  } else {
+    reasons.push('• Experience level may not align with job requirements');
+  }
+  
+  if (breakdown.workSetupMatch >= 80) {
+    reasons.push('• Work setup preferences align perfectly');
+  } else if (breakdown.workSetupMatch >= 60) {
+    reasons.push('• Work setup preferences are mostly compatible');
+  } else {
+    reasons.push('• Work setup preferences may not match');
+  }
+  
+  if (breakdown.locationMatch >= 80) {
+    reasons.push('• Location is very convenient for this role');
+  } else if (breakdown.locationMatch >= 60) {
+    reasons.push('• Location is reasonably accessible');
+  } else {
+    reasons.push('• Location may require significant commute');
+  }
+  
+  if (score >= 80) {
+    reasons.push('• Overall, this appears to be a strong match for your profile');
+  } else if (score >= 65) {
+    reasons.push('• This could be a good opportunity worth considering');
+  } else if (score >= 50) {
+    reasons.push('• This role has some potential but may not be ideal');
+  } else {
+    reasons.push('• This role may not be the best fit for your current profile');
+  }
+  
+  // Add note about fallback analysis
+  reasons.push('• Note: This analysis uses fallback scoring (AI analysis unavailable)');
+  
+  return reasons.join('\n');
 }

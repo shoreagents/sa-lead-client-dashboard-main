@@ -216,16 +216,7 @@ function JobMatchingContent() {
 
         // Combined endpoint for active jobs (includes both processed_job_requests and recruiter_jobs)
         const res = await fetch('/api/jobs/combined', { cache: 'no-store' })
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}))
-          console.error('❌ Jobs API Error:', {
-            status: res.status,
-            statusText: res.statusText,
-            error: errorData.error,
-            details: errorData.details
-          })
-          throw new Error(`Failed to load jobs: ${errorData.error || res.statusText} (${res.status})`)
-        }
+        if (!res.ok) throw new Error('Failed to load jobs')
         const data = await res.json()
         const active = data.jobs || []
         const mapped = active.map((row: any) => ({
@@ -592,14 +583,10 @@ function JobMatchingContent() {
       if (!user?.id || jobs.length === 0) return
       
       try {
-        console.log('🔍 Fetching applications for user:', user.id)
         const response = await fetch(`/api/applications?userId=${user?.id}`, { cache: 'no-store' })
-        
         if (response.ok) {
           const data = await response.json()
           const applications = data.applications || []
-          
-          console.log('✅ Applications fetched successfully:', applications.length)
           
           // Create a set of applied job IDs
           const appliedJobIds = new Set(applications.map((app: any) => String(app.jobId)))
@@ -612,27 +599,15 @@ function JobMatchingContent() {
           
           setAppliedMap(results)
         } else {
-          const errorData = await response.json().catch(() => ({}))
-          console.error('❌ Applications API Error:', {
-            status: response.status,
-            statusText: response.statusText,
-            error: errorData.error,
-            details: errorData.details
-          })
-          
-          // Show user-friendly error message
-          if (response.status === 500) {
-            console.warn('⚠️ Applications API is temporarily unavailable, showing all jobs as available')
-          }
-          
-          // Reset all to not applied (assume no applications)
+          console.error('Failed to fetch applications:', response.status)
+          // Reset all to not applied
           const results: Record<string, boolean> = {}
           for (const job of jobs) results[job.id] = false
           setAppliedMap(results)
         }
       } catch (error) {
-        console.error('❌ Network error fetching applications:', error)
-        // Reset all to not applied (assume no applications)
+        console.error('Error fetching applications:', error)
+        // Reset all to not applied
         const results: Record<string, boolean> = {}
         for (const job of jobs) results[job.id] = false
         setAppliedMap(results)
@@ -854,7 +829,7 @@ function JobMatchingContent() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent) => {
                               e.stopPropagation();
                               setShareJobId(shareJobId === job.id ? null : job.id);
                             }}
@@ -971,9 +946,9 @@ function JobMatchingContent() {
                                 AI Failed
                               </Badge>
                             ) : (
-                                                             <Badge className={`${getMatchColor(matchScores[job.id].score)} px-3 py-1 text-sm`}>
-                                 {getMatchLabel(matchScores[job.id].score)}
-                               </Badge>
+                              <Badge className={`${getMatchColor(matchScores[job.id].score)} px-3 py-1 text-sm`}>
+                                {getMatchLabel(matchScores[job.id].score)}
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -1007,7 +982,7 @@ function JobMatchingContent() {
                     {/* Quick Apply Button */}
                     <Button 
                       className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 disabled:opacity-60 disabled:cursor-not-allowed"
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
                         setSelectedJob(job.id);
                       }}
@@ -1181,9 +1156,9 @@ function JobMatchingContent() {
                               AI Failed
                             </Badge>
                           ) : (
-                                                         <Badge className={`${getMatchColor(matchScores[selectedJobData.id].score)} px-3 py-1 text-sm`}>
-                               {getMatchLabel(matchScores[selectedJobData.id].score)}
-                             </Badge>
+                            <Badge className={`${getMatchColor(matchScores[selectedJobData.id].score)} px-3 py-1 text-sm`}>
+                              {getMatchLabel(matchScores[selectedJobData.id].score)}
+                            </Badge>
                           )
                         ) : (
                           <Badge className="bg-gray-500/20 text-gray-300 border-gray-500/30 px-3 py-1 text-sm">

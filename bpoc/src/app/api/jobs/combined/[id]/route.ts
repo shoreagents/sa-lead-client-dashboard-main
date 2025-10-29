@@ -3,11 +3,10 @@ import pool from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
-    const jobId = id
+    const jobId = params.id
 
     // Check if it's a recruiter job (starts with 'recruiter_')
     if (jobId.startsWith('recruiter_')) {
@@ -16,7 +15,7 @@ export async function GET(
       const result = await pool.query(`
         SELECT 
           rj.*, 
-          COALESCE(rj.company_id, u.company) AS company_name
+          COALESCE(rj.company_id::text, u.company) AS company_name
         FROM recruiter_jobs rj
         LEFT JOIN users u ON u.id = rj.recruiter_id
         WHERE rj.id = $1
@@ -59,14 +58,14 @@ export async function GET(
           views: row.views || 0,
           created_at: row.created_at,
           updated_at: row.updated_at,
-          requirements: Array.isArray(row.requirements) ? row.requirements.flatMap(item => 
-            typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+          requirements: Array.isArray(row.requirements) ? row.requirements.flatMap((item: any) => 
+            typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
           ) : [],
-          responsibilities: Array.isArray(row.responsibilities) ? row.responsibilities.flatMap(item => 
-            typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+          responsibilities: Array.isArray(row.responsibilities) ? row.responsibilities.flatMap((item: any) => 
+            typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
           ) : [],
-          benefits: Array.isArray(row.benefits) ? row.benefits.flatMap(item => 
-            typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+          benefits: Array.isArray(row.benefits) ? row.benefits.flatMap((item: any) => 
+            typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
           ) : [],
           skills: row.skills || []
         }
@@ -120,14 +119,14 @@ export async function GET(
           views: row.views || 0,
           created_at: row.created_at,
           updated_at: row.updated_at,
-          requirements: Array.isArray(row.requirements) ? row.requirements.flatMap(item => 
-            typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+          requirements: Array.isArray(row.requirements) ? row.requirements.flatMap((item: any) => 
+            typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
           ) : [],
-          responsibilities: Array.isArray(row.responsibilities) ? row.responsibilities.flatMap(item => 
-            typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+          responsibilities: Array.isArray(row.responsibilities) ? row.responsibilities.flatMap((item: any) => 
+            typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
           ) : [],
-          benefits: Array.isArray(row.benefits) ? row.benefits.flatMap(item => 
-            typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+          benefits: Array.isArray(row.benefits) ? row.benefits.flatMap((item: any) => 
+            typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
           ) : [],
           skills: row.skills || []
         }

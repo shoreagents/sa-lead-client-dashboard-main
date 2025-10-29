@@ -695,7 +695,7 @@ export default function Hero() {
               <div className="flex items-center space-x-2">
                 <Award className="w-5 h-5 text-yellow-400" />
                 <div>
-                  <div className="text-sm font-medium text-white">Level 12</div>
+                  <div className="text-sm font-medium text-white">Gold Rank</div>
                   <div className="text-xs text-gray-400">+150 XP</div>
                 </div>
               </div>

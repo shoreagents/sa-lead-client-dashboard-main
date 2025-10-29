@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     
+    console.log('🚀 ===== APPLICATIONS API DEBUG START =====');
     console.log('🔍 Applications API called with userId:', userId);
     
     if (!userId) {
@@ -153,11 +154,28 @@ export async function GET(request: NextRequest) {
           jobType: row.jobType 
         })));
 
-        let processedJobsResult = { rows: [] };
-        let recruiterJobsResult = { rows: [] };
+        let processedJobsResult: { rows: any[] } = { rows: [] };
+        let recruiterJobsResult: { rows: any[] } = { rows: [] };
+
+        // First, let's check what's actually in the database tables
+        console.log('🔍 Checking database tables...');
+        try {
+          const processedCount = await client.query('SELECT COUNT(*) as count FROM processed_job_requests');
+          const recruiterCount = await client.query('SELECT COUNT(*) as count FROM recruiter_jobs');
+          console.log('📊 Database table counts - Processed jobs:', processedCount.rows[0].count, 'Recruiter jobs:', recruiterCount.rows[0].count);
+          
+          // Show sample data from both tables
+          const sampleProcessed = await client.query('SELECT id, job_title FROM processed_job_requests LIMIT 3');
+          const sampleRecruiter = await client.query('SELECT id, job_title FROM recruiter_jobs LIMIT 3');
+          console.log('📊 Sample processed jobs:', sampleProcessed.rows.map(j => ({ id: j.id, title: j.job_title })));
+          console.log('📊 Sample recruiter jobs:', sampleRecruiter.rows.map(j => ({ id: j.id, title: j.job_title })));
+        } catch (error) {
+          console.warn('⚠️ Error checking database tables:', error);
+        }
 
         // Fetch processed jobs
         if (processedJobIds.length > 0) {
+          console.log('🔍 Fetching processed jobs for IDs:', processedJobIds);
           try {
             processedJobsResult = await client.query(
               `SELECT 
@@ -176,11 +194,9 @@ export async function GET(request: NextRequest) {
                 p.industry,
                 p.department,
                 p.application_deadline,
-                COALESCE(m.company, c.name, 'ShoreAgents') as company_name,
+                'ShoreAgents' as company_name,
                 (SELECT COUNT(*) FROM applications WHERE job_id = p.id) as candidate_count
                FROM processed_job_requests p
-               LEFT JOIN members m ON p.company_id = m.company_id
-               LEFT JOIN companies c ON p.company_id = c.id
                WHERE p.id = ANY($1)`,
               [processedJobIds]
             );
@@ -191,6 +207,17 @@ export async function GET(request: NextRequest) {
               title: job.job_title,
               company: job.company_name
             })));
+            
+            // If no results, let's check if the table exists and has data
+            if (processedJobsResult.rows.length === 0) {
+              console.log('⚠️ No processed jobs found, checking table...');
+              const tableCheck = await client.query('SELECT COUNT(*) as count FROM processed_job_requests');
+              console.log('📊 Total processed jobs in table:', tableCheck.rows[0].count);
+              
+              // Check if any of the job IDs exist
+              const idCheck = await client.query('SELECT id FROM processed_job_requests WHERE id = ANY($1)', [processedJobIds]);
+              console.log('📊 Job IDs that exist in processed_job_requests:', idCheck.rows.map(r => r.id));
+            }
           } catch (error) {
             console.warn('⚠️ Processed jobs query failed:', error);
             processedJobsResult = { rows: [] };
@@ -199,7 +226,10 @@ export async function GET(request: NextRequest) {
 
          // Fetch recruiter jobs
          if (recruiterJobIds.length > 0) {
+           console.log('🔍 Fetching recruiter jobs for IDs:', recruiterJobIds);
            try {
+             // Try a different approach - use IN clause instead of ANY
+             const placeholders = recruiterJobIds.map((_, index) => `$${index + 1}`).join(',');
              recruiterJobsResult = await client.query(
                `SELECT 
                  rj.id,
@@ -217,16 +247,15 @@ export async function GET(request: NextRequest) {
                  rj.industry,
                  rj.department,
                  rj.application_deadline,
-                 COALESCE(u.company, c.name, rj.company_id, 'Recruiter Company') as company_name,
+                 COALESCE(c.company_name, u.company, 'Recruiter Company') as company_name,
                  u.location as recruiter_location,
                  u.full_name as recruiter_name,
-                 c.name as company_table_name,
                  (SELECT COUNT(*) FROM recruiter_applications WHERE job_id = rj.id) as candidate_count
                 FROM recruiter_jobs rj
                 LEFT JOIN users u ON u.id = rj.recruiter_id
                 LEFT JOIN companies c ON c.id = rj.company_id
-                WHERE rj.id = ANY($1)`,
-               [recruiterJobIds]
+                WHERE rj.id IN (${placeholders})`,
+               recruiterJobIds
              );
              console.log('✅ Recruiter jobs query successful');
              console.log('🔍 Recruiter jobs found:', recruiterJobsResult.rows.length);
@@ -236,6 +265,22 @@ export async function GET(request: NextRequest) {
                company: job.company_name,
                recruiter: job.recruiter_name
              })));
+             
+             // Debug the actual query being executed
+             console.log('🔍 Query placeholders:', placeholders);
+             console.log('🔍 Query parameters:', recruiterJobIds);
+             console.log('🔍 Full recruiter jobs result:', JSON.stringify(recruiterJobsResult.rows, null, 2));
+             
+             // If no results, let's check if the table exists and has data
+             if (recruiterJobsResult.rows.length === 0) {
+               console.log('⚠️ No recruiter jobs found, checking table...');
+               const tableCheck = await client.query('SELECT COUNT(*) as count FROM recruiter_jobs');
+               console.log('📊 Total recruiter jobs in table:', tableCheck.rows[0].count);
+               
+               // Check if any of the job IDs exist
+               const idCheck = await client.query('SELECT id FROM recruiter_jobs WHERE id = ANY($1)', [recruiterJobIds]);
+               console.log('📊 Job IDs that exist in recruiter_jobs:', idCheck.rows.map(r => r.id));
+             }
            } catch (error) {
              console.warn('⚠️ Recruiter jobs query failed:', error);
              recruiterJobsResult = { rows: [] };
@@ -243,10 +288,10 @@ export async function GET(request: NextRequest) {
          }
 
         // Combine job results and add source information
-        const jobsResult = {
+        const jobsResult: { rows: any[] } = {
           rows: [
-            ...processedJobsResult.rows.map(job => ({ ...job, source: 'processed' })),
-            ...recruiterJobsResult.rows.map(job => ({ ...job, source: 'recruiter' }))
+            ...processedJobsResult.rows.map((job: any) => ({ ...job, source: 'processed' })),
+            ...recruiterJobsResult.rows.map((job: any) => ({ ...job, source: 'recruiter' }))
           ]
         };
         
@@ -269,6 +314,21 @@ export async function GET(request: NextRequest) {
           jobDetailsMap.set(String(job.id), job);
           jobDetailsMap.set(Number(job.id), job);
         });
+        
+        console.log('🔍 Job details map created with', jobDetailsMap.size, 'entries');
+        console.log('🔍 Map keys:', Array.from(jobDetailsMap.keys()));
+        console.log('🔍 Available jobs:', jobsResult.rows.map(j => ({ id: j.id, title: j.job_title, company: j.company_name })));
+        console.log('🔍 Application job IDs:', simpleResult.rows.map(r => ({ jobId: r.jobId, jobIdType: typeof r.jobId, jobType: r.jobType })));
+        
+        // Debug what's in the jobsResult for recruiter jobs specifically
+        const recruiterJobsInResult = jobsResult.rows.filter(j => j.source === 'recruiter');
+        console.log('🔍 Recruiter jobs in jobsResult:', recruiterJobsInResult.length);
+        console.log('🔍 Recruiter jobs details:', recruiterJobsInResult.map(j => ({
+          id: j.id,
+          title: j.job_title,
+          company: j.company_name,
+          source: j.source
+        })));
         
         console.log('🔍 Job details map created with keys:', Array.from(jobDetailsMap.keys()));
         console.log('🔍 Job details map size:', jobDetailsMap.size);
@@ -307,6 +367,8 @@ export async function GET(request: NextRequest) {
           if (!jobDetails) {
             console.warn('⚠️ Job details not found for jobId:', appRow.jobId, 'jobType:', appRow.jobType);
             
+            // Don't create fallback data - let the direct queries handle it
+            
             // Try to fetch job details directly based on job type
             try {
               if (appRow.jobType === 'processed') {
@@ -315,10 +377,8 @@ export async function GET(request: NextRequest) {
                 // Try multiple approaches for processed jobs
                 let directResult = await client.query(
                   `SELECT p.*, 
-                          COALESCE(m.company, c.name, 'ShoreAgents') as company_name
+                          'ShoreAgents' as company_name
                    FROM processed_job_requests p
-                   LEFT JOIN members m ON m.company_id = p.company_id
-                   LEFT JOIN companies c ON p.company_id = c.id
                    WHERE p.id = $1`,
                   [appRow.jobId]
                 );
@@ -328,12 +388,22 @@ export async function GET(request: NextRequest) {
                   console.log('🔍 Trying with string conversion for processed job');
                   directResult = await client.query(
                     `SELECT p.*, 
-                            COALESCE(m.company, c.name, 'ShoreAgents') as company_name
+                            'ShoreAgents' as company_name
                      FROM processed_job_requests p
-                     LEFT JOIN members m ON m.company_id = p.company_id
-                     LEFT JOIN companies c ON p.company_id = c.id
                      WHERE p.id::text = $1`,
                     [String(appRow.jobId)]
+                  );
+                }
+                
+                // If still not found, try with integer conversion
+                if (directResult.rows.length === 0) {
+                  console.log('🔍 Trying with integer conversion for processed job');
+                  directResult = await client.query(
+                    `SELECT p.*, 
+                            'ShoreAgents' as company_name
+                     FROM processed_job_requests p
+                     WHERE p.id = $1`,
+                    [parseInt(appRow.jobId)]
                   );
                 }
                 
@@ -343,6 +413,9 @@ export async function GET(request: NextRequest) {
                   console.log('✅ Found job details via direct query:', finalJobDetails.job_title);
                 } else {
                   console.warn('⚠️ No processed job found with ID:', appRow.jobId);
+                  // Check what IDs actually exist
+                  const allProcessedJobs = await client.query('SELECT id, job_title FROM processed_job_requests LIMIT 5');
+                  console.log('📊 Available processed job IDs:', allProcessedJobs.rows.map(j => ({ id: j.id, title: j.job_title })));
                 }
                } else if (appRow.jobType === 'recruiter') {
                  console.log('🔍 Attempting direct query for recruiter job:', appRow.jobId);
@@ -350,15 +423,14 @@ export async function GET(request: NextRequest) {
                  // Try multiple approaches for recruiter jobs
                  let directResult = await client.query(
                    `SELECT rj.*, 
-                           COALESCE(u.company, c.name, rj.company_id, 'Recruiter Company') as company_name, 
+                           COALESCE(c.company_name, u.company, 'Recruiter Company') as company_name, 
                            u.location as recruiter_location,
-                           u.full_name as recruiter_name,
-                           c.name as company_table_name
+                           u.full_name as recruiter_name
                     FROM recruiter_jobs rj
                     LEFT JOIN users u ON u.id = rj.recruiter_id
                     LEFT JOIN companies c ON c.id = rj.company_id
-                    WHERE rj.id = $1`,
-                   [appRow.jobId]
+                    WHERE rj.id::text = $1`,
+                   [String(appRow.jobId)]
                  );
                  
                  // If not found, try with string conversion
@@ -366,15 +438,14 @@ export async function GET(request: NextRequest) {
                    console.log('🔍 Trying with string conversion for recruiter job');
                    directResult = await client.query(
                      `SELECT rj.*, 
-                             COALESCE(u.company, c.name, rj.company_id, 'Recruiter Company') as company_name, 
+                             COALESCE(c.company_name, u.company, 'Recruiter Company') as company_name, 
                              u.location as recruiter_location,
-                             u.full_name as recruiter_name,
-                             c.name as company_table_name
+                             u.full_name as recruiter_name
                       FROM recruiter_jobs rj
                       LEFT JOIN users u ON u.id = rj.recruiter_id
                       LEFT JOIN companies c ON c.id = rj.company_id
-                      WHERE rj.id::text = $1`,
-                     [String(appRow.jobId)]
+                      WHERE rj.id = $1::uuid`,
+                     [appRow.jobId]
                    );
                  }
                  
@@ -384,6 +455,9 @@ export async function GET(request: NextRequest) {
                    console.log('✅ Found job details via direct query:', finalJobDetails.job_title, 'Company:', finalJobDetails.company_name);
                  } else {
                    console.warn('⚠️ No recruiter job found with ID:', appRow.jobId);
+                   // Check what IDs actually exist
+                   const allRecruiterJobs = await client.query('SELECT id, job_title FROM recruiter_jobs LIMIT 5');
+                   console.log('📊 Available recruiter job IDs:', allRecruiterJobs.rows.map(j => ({ id: j.id, title: j.job_title })));
                  }
                }
             } catch (error) {
@@ -429,25 +503,60 @@ export async function GET(request: NextRequest) {
             jobTitle: finalJobTitle,
             companyName: finalCompanyName,
             jobType: appRow.jobType,
-            hasJobDetails: !!finalJobDetails
+            hasJobDetails: !!finalJobDetails,
+            jobId: appRow.jobId,
+            jobIdType: typeof appRow.jobId,
+            finalJobDetailsKeys: finalJobDetails ? Object.keys(finalJobDetails) : 'none',
+            finalJobDetailsValues: finalJobDetails ? {
+              id: finalJobDetails.id,
+              job_title: finalJobDetails.job_title,
+              company_name: finalJobDetails.company_name
+            } : 'none'
           });
           
           if (!finalJobTitle) {
-            console.warn('⚠️ No job title found, using fallback');
-            finalJobTitle = appRow.jobType === 'processed' ? 'ShoreAgents Position' : 'Recruiter Position';
+            console.warn('⚠️ No job title found for jobId:', appRow.jobId, 'jobType:', appRow.jobType);
+            console.warn('⚠️ Job details found:', !!finalJobDetails);
+            console.warn('⚠️ Available job details keys:', finalJobDetails ? Object.keys(finalJobDetails) : 'none');
+            
+            // Try to get job title from the job details if available
+            if (finalJobDetails?.job_title) {
+              finalJobTitle = finalJobDetails.job_title;
+              console.log('✅ Found job title in finalJobDetails:', finalJobTitle);
+            } else {
+              finalJobTitle = appRow.jobType === 'processed' ? 'ShoreAgents Position' : 'Recruiter Position';
+              console.warn('⚠️ Using fallback job title:', finalJobTitle);
+            }
           }
           
           if (!finalCompanyName) {
-            console.warn('⚠️ No company name found, using fallback');
-            // Try to get company name from finalJobDetails if available
-            if (finalJobDetails?.company_table_name) {
-              finalCompanyName = finalJobDetails.company_table_name;
-              console.log('✅ Using company table name:', finalCompanyName);
-            } else if (finalJobDetails?.recruiter_name) {
-              finalCompanyName = `${finalJobDetails.recruiter_name}'s Company`;
-              console.log('✅ Using recruiter-based company name:', finalCompanyName);
+            console.warn('⚠️ No company name found for jobId:', appRow.jobId);
+            console.warn('⚠️ Available company fields:', finalJobDetails ? {
+              company_name: finalJobDetails.company_name,
+              company_table_name: finalJobDetails.company_table_name,
+              recruiter_name: finalJobDetails.recruiter_name
+            } : 'none');
+            
+            // For processed jobs, always use ShoreAgents
+            // For recruiter jobs, try to get the actual company name
+            if (appRow.jobType === 'processed') {
+              finalCompanyName = 'ShoreAgents';
+              console.log('✅ Using ShoreAgents for processed job');
             } else {
-              finalCompanyName = appRow.jobType === 'processed' ? 'ShoreAgents' : 'Recruiter Company';
+              // Try to get company name from finalJobDetails if available
+              if (finalJobDetails?.company_name) {
+                finalCompanyName = finalJobDetails.company_name;
+                console.log('✅ Using company_name:', finalCompanyName);
+              } else if (finalJobDetails?.company_table_name) {
+                finalCompanyName = finalJobDetails.company_table_name;
+                console.log('✅ Using company table name:', finalCompanyName);
+              } else if (finalJobDetails?.recruiter_name) {
+                finalCompanyName = `${finalJobDetails.recruiter_name}'s Company`;
+                console.log('✅ Using recruiter-based company name:', finalCompanyName);
+              } else {
+                finalCompanyName = 'Recruiter Company';
+                console.warn('⚠️ Using fallback company name:', finalCompanyName);
+              }
             }
           }
           
@@ -462,8 +571,11 @@ export async function GET(request: NextRequest) {
           if (finalJobTitle === 'Job Position' || finalJobTitle === 'ShoreAgents Position') {
             console.warn('⚠️ Using generic job title fallback for application:', appRow.id);
           }
-          if (finalCompanyName === 'Company' || finalCompanyName === 'ShoreAgents' || finalCompanyName === 'Recruiter Company') {
-            console.warn('⚠️ Using generic company name fallback for application:', appRow.id);
+          if (appRow.jobType === 'processed' && finalCompanyName !== 'ShoreAgents') {
+            console.warn('⚠️ Processed job should show ShoreAgents as company name for application:', appRow.id);
+          }
+          if (appRow.jobType === 'recruiter' && (finalCompanyName === 'Company' || finalCompanyName === 'ShoreAgents')) {
+            console.warn('⚠️ Using generic company name fallback for recruiter job application:', appRow.id);
           }
 
           return {
@@ -479,11 +591,11 @@ export async function GET(request: NextRequest) {
             appliedDate: appRow.appliedDate,
             lastUpdated: appRow.appliedDate,
             jobDescription: finalJobDetails?.job_description || 'No description available',
-            requirements: Array.isArray(finalJobDetails?.requirements) ? finalJobDetails.requirements.flatMap(item => 
-              typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+            requirements: Array.isArray(finalJobDetails?.requirements) ? finalJobDetails.requirements.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
             ) : [],
-            benefits: Array.isArray(finalJobDetails?.benefits) ? finalJobDetails.benefits.flatMap(item => 
-              typeof item === 'string' ? item.split('\n\n').filter(s => s.trim()) : [item]
+            benefits: Array.isArray(finalJobDetails?.benefits) ? finalJobDetails.benefits.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
             ) : [],
             skills: finalJobDetails?.skills || [],
             workArrangement: finalJobDetails?.work_arrangement,
@@ -497,6 +609,7 @@ export async function GET(request: NextRequest) {
 
         console.log('✅ Processed applications:', applications.length);
         console.log('✅ Sample processed application:', applications[0]);
+        console.log('🚀 ===== APPLICATIONS API DEBUG END =====');
 
         return NextResponse.json({
           applications,

@@ -200,14 +200,14 @@ export default function TalentSearchPage() {
                         <img 
                           src={candidate.avatar} 
                           alt={candidate.name}
-                          className={`w-24 h-24 rounded-full object-cover border-4 mx-auto mt-4 shadow-lg group-hover:scale-105 transition-transform duration-300 ${
-                            getRank(candidate.overallScore).rank === '💎 Diamond' ? 'border-cyan-500/50' :
-                            getRank(candidate.overallScore).rank === '🥈 Platinum' ? 'border-slate-400/60' :
-                            getRank(candidate.overallScore).rank === '🥇 Gold' ? 'border-yellow-400' :
-                            getRank(candidate.overallScore).rank === '🥉 Silver' ? 'border-gray-400/60' :
-                            getRank(candidate.overallScore).rank === '🏅 Bronze' ? 'border-orange-400' :
-                            'border-white/20'
-                          }`}
+                           className={`w-24 h-24 rounded-full object-cover border-4 mx-auto mt-4 shadow-lg group-hover:scale-105 transition-transform duration-300 ${
+                             getRank(candidate.overallScore).rank === '💎 Diamond' ? 'border-cyan-400 ring-2 ring-cyan-400/30' :
+                             getRank(candidate.overallScore).rank === '🥈 Platinum' ? 'border-slate-300 ring-2 ring-slate-300/30' :
+                             getRank(candidate.overallScore).rank === '🥇 Gold' ? 'border-yellow-400 ring-2 ring-yellow-400/30' :
+                             getRank(candidate.overallScore).rank === '🥉 Silver' ? 'border-gray-300 ring-2 ring-gray-300/30' :
+                             getRank(candidate.overallScore).rank === '🏅 Bronze' ? 'border-orange-400 ring-2 ring-orange-400/30' :
+                             'border-white/20'
+                           }`}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
@@ -215,14 +215,14 @@ export default function TalentSearchPage() {
                           }}
                         />
                       ) : null}
-                      <div className={`w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mt-4 shadow-lg group-hover:scale-105 transition-transform duration-300 border-4 bg-gradient-to-br from-cyan-500 to-purple-600 ${
-                        getRank(candidate.overallScore).rank === '💎 Diamond' ? 'border-cyan-500/50' :
-                        getRank(candidate.overallScore).rank === '🥈 Platinum' ? 'border-slate-400/60' :
-                        getRank(candidate.overallScore).rank === '🥇 Gold' ? 'border-yellow-400' :
-                        getRank(candidate.overallScore).rank === '🥉 Silver' ? 'border-gray-400/60' :
-                        getRank(candidate.overallScore).rank === '🏅 Bronze' ? 'border-orange-400' :
-                        'border-white/20'
-                      } ${candidate.avatar && candidate.avatar.startsWith('http') ? 'hidden' : ''}`}>
+                       <div className={`w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-xl mx-auto mt-4 shadow-lg group-hover:scale-105 transition-transform duration-300 border-4 bg-gradient-to-br from-cyan-500 to-purple-600 ${
+                         getRank(candidate.overallScore).rank === '💎 Diamond' ? 'border-cyan-400 ring-2 ring-cyan-400/30' :
+                         getRank(candidate.overallScore).rank === '🥈 Platinum' ? 'border-slate-300 ring-2 ring-slate-300/30' :
+                         getRank(candidate.overallScore).rank === '🥇 Gold' ? 'border-yellow-400 ring-2 ring-yellow-400/30' :
+                         getRank(candidate.overallScore).rank === '🥉 Silver' ? 'border-gray-300 ring-2 ring-gray-300/30' :
+                         getRank(candidate.overallScore).rank === '🏅 Bronze' ? 'border-orange-400 ring-2 ring-orange-400/30' :
+                         'border-white/20'
+                       } ${candidate.avatar && candidate.avatar.startsWith('http') ? 'hidden' : ''}`}>
                         {candidate.name.split(' ')[0][0].toUpperCase()}
                       </div>
                     </div>
@@ -301,3 +301,5 @@ export default function TalentSearchPage() {
     </>
   )
 }
+
+
