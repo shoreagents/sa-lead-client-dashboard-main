@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import pool from '@/lib/database'
 
+function capitalize(s: string): string { return !s ? s : s.charAt(0).toUpperCase() + s.slice(1) }
+
 export async function GET(request: NextRequest) {
   try {
-    const result = await pool.query(`
+    console.log('🔍 Starting admin jobs API...');
+    
+    // Get jobs from job_requests table (only unprocessed ones)
+    console.log('📊 Fetching unprocessed job_requests...');
+    let jobRequestsResult;
+    try {
+      jobRequestsResult = await pool.query(`
       SELECT 
         j.*, 
         m.company AS company_name,
-        COALESCE(app_counts.applicant_count, 0) AS real_applicants
+        COALESCE(app_counts.applicant_count, 0) AS real_applicants,
+        'job_requests' as source_table
       FROM job_requests j
       LEFT JOIN members m ON m.company_id = j.company_id
       LEFT JOIN (
@@ -15,106 +24,203 @@ export async function GET(request: NextRequest) {
         FROM applications
         GROUP BY job_id
       ) app_counts ON app_counts.job_id = j.id
-      WHERE j.status <> 'processed'
+      WHERE j.status IN ('active', 'processed', 'inactive', 'closed')
+        AND NOT EXISTS (
+          SELECT 1 FROM processed_job_requests p WHERE p.id = j.id
+        )
       ORDER BY j.created_at DESC
     `)
-
-    const normalizeStatus = (raw: any): 'job-request' | 'approved' | 'hiring' | 'closed' => {
-      const s = String(raw ?? '').toLowerCase().replace(/[_\s]+/g, '-').trim()
-      if (!s) return 'job-request'
-      if (['job-request', 'job_request', 'request', 'new', 'pending', 'submitted', 'to-review'].includes(s)) return 'job-request'
-      if (['approved', 'in-review', 'review', 'screened'].includes(s)) return 'approved'
-      if (['hiring', 'open', 'active', 'interview', 'ongoing', 'posting'].includes(s)) return 'hiring'
-      if (['closed', 'filled', 'cancelled', 'canceled', 'archived', 'rejected', 'done'].includes(s)) return 'closed'
-      return 'job-request'
+      console.log(`✅ unprocessed job_requests query completed: ${jobRequestsResult.rows.length} rows`);
+    } catch (error) {
+      console.error('❌ Error in job_requests query:', error);
+      throw error;
     }
 
-    const jobs = result.rows.map((row: any) => {
-      const employmentTypeRaw = row.employment_type
-      let employmentType: string[] = []
-      // Our DDL uses work_type (text) and experience_level (enum); build a small array label
-      const workType = String(row.work_type || '').trim()
-      const experienceLevel = String(row.experience_level || '').trim()
-      if (workType) employmentType.push(capitalize(workType))
-      if (experienceLevel) employmentType.push(capitalize(experienceLevel))
-      if (employmentType.length === 0) employmentType = ['Full-time']
-
-      // Compute posted days
-      const createdAt = row.created_at ? new Date(row.created_at) : new Date()
-      const ms = Date.now() - createdAt.getTime()
-      const postedDays = Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)))
-
-      // Map work_arrangement enum to UI locationType
-      const locationType = String(row.work_arrangement || 'on-site').toLowerCase().replace(/\s+/g, '-')
-      const normalizedLocationType = ['on-site', 'onsite', 'remote', 'hybrid'].includes(locationType)
-        ? locationType
-        : 'on-site'
-      const finalLocationType = normalizedLocationType === 'onsite' ? 'on-site' : (normalizedLocationType as 'on-site' | 'remote' | 'hybrid')
-
-      // We do not have priority in the DDL; derive a lightweight one from applicants/views
-      const derivedPriority = ((): 'low' | 'medium' | 'high' => {
-        const applicants = Number(row.applicants ?? 0)
-        if (applicants >= 50) return 'high'
-        if (applicants >= 10) return 'medium'
-        return 'low'
-      })()
-
-      // Format salary
-      const currency = String(row.currency || 'PHP').toUpperCase()
-      const salaryType = String(row.salary_type || 'monthly').toLowerCase()
-      const min = row.salary_min != null ? Number(row.salary_min) : null
-      const max = row.salary_max != null ? Number(row.salary_max) : null
-      const salary = formatSalary(currency, min, max, salaryType)
-
-      return {
-        id: String(row.id),
-        company: row.company_name || 'Unknown Company',
-        companyLogo: row.company_logo || '🏢',
-        title: row.title || row.position || row.job_title || '',
-        location: row.location || row.city || row["location"] || '',
-        locationType: finalLocationType,
-        salary,
-        employmentType,
-        postedDays,
-        applicants: row.real_applicants ?? 0,
-        status: mapStatusFromEnum(row.status),
-        priority: (row.priority as any) || derivedPriority,
-        source: 'original',
-        applicationDeadline: row.application_deadline || null,
-      }
-    })
-
-    // fetch processed jobs with real applicant counts
-    const processedRes = await pool.query(`
+    // Get jobs from processed_job_requests table
+    console.log('📊 Fetching processed_job_requests...');
+    let processedJobsResult;
+    try {
+      processedJobsResult = await pool.query(`
       SELECT 
         p.*, 
         m.company AS company_name,
-        COALESCE(p.priority, j.priority) AS merged_priority,
-        COALESCE(app_counts.applicant_count, 0) AS real_applicants
+        COALESCE(app_counts.applicant_count, 0) AS real_applicants,
+        'processed_job_requests' as source_table
       FROM processed_job_requests p
       LEFT JOIN members m ON m.company_id = p.company_id
-      LEFT JOIN job_requests j ON j.id = p.id
       LEFT JOIN (
         SELECT job_id, COUNT(*) as applicant_count
         FROM applications
         GROUP BY job_id
       ) app_counts ON app_counts.job_id = p.id
+      WHERE p.status IN ('active', 'closed', 'processed')
       ORDER BY p.created_at DESC
     `)
-    const processedJobs = processedRes.rows.map((row: any) => ({
-      ...rowToJobCard({ ...row, priority: row.merged_priority ?? row.priority, applicants: row.real_applicants }),
-      job_description: row.job_description,
-      requirements: row.requirements,
-      responsibilities: row.responsibilities,
-      benefits: row.benefits,
-      skills: row.skills,
-      source: 'processed' as const
+      console.log(`✅ processed_job_requests query completed: ${processedJobsResult.rows.length} rows`);
+    } catch (error) {
+      console.error('❌ Error in processed_job_requests query:', error);
+      throw error;
+    }
+
+    // Process job_requests (admin jobs)
+    console.log('🔄 Processing job_requests...');
+    const jobRequests = await Promise.all(jobRequestsResult.rows.map(async (row: any) => {
+      const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [row.id])
+      const realApplicants = apps.rows?.[0]?.cnt ?? 0
+      const employmentType: string[] = []
+      if (row.work_type) employmentType.push(capitalize(String(row.work_type)))
+      if (row.experience_level) employmentType.push(capitalize(String(row.experience_level)))
+      const salary = formatSalary(String(row.currency || 'PHP'), row.salary_min != null ? Number(row.salary_min) : null, row.salary_max != null ? Number(row.salary_max) : null, String(row.salary_type || 'monthly'))
+      const createdAt = row.created_at ? new Date(row.created_at) : new Date()
+      const ms = Date.now() - createdAt.getTime()
+      const minutes = Math.floor(ms / (1000 * 60))
+      const hours = Math.floor(minutes / 60)
+      const days = Math.floor(hours / 24)
+      
+      let postedDays: number
+      if (days > 0) {
+        postedDays = days
+      } else if (hours > 0) {
+        postedDays = 0 // Will show as "Just now" in frontend
+      } else if (minutes > 0) {
+        postedDays = 0 // Will show as "Just now" in frontend
+      } else {
+        postedDays = 0 // Will show as "Just now" in frontend
+      }
+      const locationType = String(row.work_arrangement || 'onsite')
+      const priorityFromDb = String(row.priority ?? '').toLowerCase()
+      const priority: 'low' | 'medium' | 'high' | 'urgent' =
+        ['low', 'medium', 'high', 'urgent'].includes(priorityFromDb)
+          ? (priorityFromDb as any)
+          : ((): 'low' | 'medium' | 'high' => {
+              if (realApplicants >= 50) return 'high'
+              if (realApplicants >= 10) return 'medium'
+              return 'low'
+            })()
+
+      return {
+        id: `job_requests_${row.id}`,
+        originalId: String(row.id),
+        source: 'job_requests',
+        company: 'ShoreAgents',
+        companyLogo: row.company_logo || '🏢',
+        title: row.job_title || 'Untitled Role',
+        location: row.location || row['location'] || '',
+        locationType: locationType === 'onsite' ? 'on-site' : locationType,
+        salary,
+        employmentType,
+        postedDays,
+        applicants: realApplicants,
+        status: mapStatusFromEnum(row.status),
+        priority,
+        createdAt: row.created_at,
+        applicationDeadline: row.application_deadline,
+        experienceLevel: row.experience_level,
+        workArrangement: row.work_arrangement,
+        shift: row.shift,
+        industry: row.industry,
+        department: row.department,
+        workType: row.work_type,
+        currency: row.currency,
+        salaryType: row.salary_type,
+        salary_min: row.salary_min,
+        salary_max: row.salary_max,
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      }
     }))
 
-    return NextResponse.json({ jobs: [...processedJobs, ...jobs] })
+    // Process processed_job_requests
+    console.log('🔄 Processing processed_job_requests...');
+    const processedJobs = await Promise.all(processedJobsResult.rows.map(async (row: any) => {
+      const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [row.id])
+      const realApplicants = apps.rows?.[0]?.cnt ?? 0
+      const employmentType: string[] = []
+      if (row.work_type) employmentType.push(capitalize(String(row.work_type)))
+      if (row.experience_level) employmentType.push(capitalize(String(row.experience_level)))
+      const salary = formatSalary(String(row.currency || 'PHP'), row.salary_min != null ? Number(row.salary_min) : null, row.salary_max != null ? Number(row.salary_max) : null, String(row.salary_type || 'monthly'))
+      const createdAt = row.created_at ? new Date(row.created_at) : new Date()
+      const ms = Date.now() - createdAt.getTime()
+      const minutes = Math.floor(ms / (1000 * 60))
+      const hours = Math.floor(minutes / 60)
+      const days = Math.floor(hours / 24)
+      
+      let postedDays: number
+      if (days > 0) {
+        postedDays = days
+      } else if (hours > 0) {
+        postedDays = 0 // Will show as "Just now" in frontend
+      } else if (minutes > 0) {
+        postedDays = 0 // Will show as "Just now" in frontend
+      } else {
+        postedDays = 0 // Will show as "Just now" in frontend
+      }
+      const locationType = String(row.work_arrangement || 'onsite')
+      const priorityFromDb = String(row.priority ?? '').toLowerCase()
+      const priority: 'low' | 'medium' | 'high' | 'urgent' =
+        ['low', 'medium', 'high', 'urgent'].includes(priorityFromDb)
+          ? (priorityFromDb as any)
+          : ((): 'low' | 'medium' | 'high' => {
+              if (realApplicants >= 50) return 'high'
+              if (realApplicants >= 10) return 'medium'
+              return 'low'
+            })()
+
+      return {
+        id: `processed_job_requests_${row.id}`,
+        originalId: String(row.id),
+        source: 'processed_job_requests',
+        company: 'ShoreAgents',
+        companyLogo: row.company_logo || '🏢',
+        title: row.job_title || 'Untitled Role',
+        location: row.location || row['location'] || '',
+        locationType: locationType === 'onsite' ? 'on-site' : locationType,
+        salary,
+        employmentType,
+        postedDays,
+        applicants: realApplicants,
+        status: mapStatusFromEnum(row.status),
+        priority,
+        createdAt: row.created_at,
+        applicationDeadline: row.application_deadline,
+        experienceLevel: row.experience_level,
+        workArrangement: row.work_arrangement,
+        shift: row.shift,
+        industry: row.industry,
+        department: row.department,
+        workType: row.work_type,
+        currency: row.currency,
+        salaryType: row.salary_type,
+        salary_min: row.salary_min,
+        salary_max: row.salary_max,
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      }
+    }))
+
+    // Combine all jobs and sort by creation date
+    const allJobs = [...jobRequests, ...processedJobs].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    )
+
+    console.log(`🔍 Admin Jobs API: Found ${jobRequests.length} jobs from job_requests, ${processedJobs.length} jobs from processed_job_requests`)
+    console.log(`📊 Total: ${allJobs.length} active jobs`)
+
+    // Jobs are already processed, just return them
+    const jobs = allJobs
+
+    return NextResponse.json({ jobs })
   } catch (error) {
-    console.error('Error fetching job requests:', error)
-    return NextResponse.json({ error: 'Failed to fetch job requests' }, { status: 500 })
+    console.error('❌ Error fetching job requests:', error)
+    console.error('❌ Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    })
+    return NextResponse.json({ 
+      error: 'Failed to fetch job requests',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
@@ -302,10 +408,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function capitalize(s: string): string {
-  if (!s) return s
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
 
 function formatSalary(currency: string, min: number | null, max: number | null, type: string): string {
   const symbol = currency.toUpperCase() === 'PHP' ? '₱' : currency.toUpperCase() + ' '
@@ -368,7 +470,7 @@ function rowToJobCard(row: any) {
       ? (priorityFromDb as any)
       : derivedPriority
   return {
-    id: String(row.id),
+    id: `${row.source_table || 'job_requests'}_${row.id}`,
     company: row.company_name || 'Unknown Company',
     companyLogo: row.company_logo || '🏢',
     title: row.job_title || 'Untitled Role',
@@ -380,6 +482,7 @@ function rowToJobCard(row: any) {
     applicants: row.applicants ?? 0,
     status: mapStatusFromEnum(row.status),
     priority,
+    createdAt: row.created_at,
     shift: row.shift || 'day',
     applicationDeadline: row.application_deadline || null,
   }

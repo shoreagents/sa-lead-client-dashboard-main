@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     // Verify user is a recruiter
     const user = await (prisma as any).user.findUnique({
       where: { id: userId },
-      select: { admin_level: true }
+      select: { admin_level: true, company_id: true, is_company_admin: true }
     })
     
     if (!user) {
@@ -23,44 +23,85 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Recruiter access required' }, { status: 403 })
     }
 
-    // Fetch from recruiter_jobs table for the current recruiter
+    // Fetch from recruiter_jobs table
+    // If user is company admin, show all company jobs; otherwise show only their own
     console.log('🔍 Fetching jobs for userId:', userId)
+    console.log('🔍 Is company admin:', user.is_company_admin)
+    console.log('🔍 Company ID:', user.company_id)
+    
+    const whereClause = user.is_company_admin && user.company_id
+      ? { company_id: user.company_id }
+      : { recruiter_id: userId }
+    
     const recruiterJobs = await (prisma as any).RecruiterJob.findMany({
-      where: { recruiter_id: userId },
+      where: whereClause,
+      include: {
+        recruiter: {
+          select: {
+            id: true,
+            full_name: true,
+            company: true,
+            company_id: true
+          }
+        },
+        companies: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      },
       orderBy: { created_at: 'desc' }
     })
 
     console.log('🔍 Database query result:', {
       rowCount: recruiterJobs.length,
-      rows: recruiterJobs
+      rows: recruiterJobs.map((job: any) => ({
+        id: job.id,
+        title: job.job_title,
+        recruiter: job.recruiter,
+        company: job.recruiter?.company
+      }))
     })
 
-    let jobs = recruiterJobs.map((row: any, index: number) => ({
-      id: `recruiter_jobs_${row.id}_${index}`, // Create unique ID by combining source table, original ID, and index
-      originalId: String(row.id), // Keep original ID for reference
-      title: row.job_title || 'Untitled Role',
-      description: row.job_description || 'No description available',
-      industry: row.industry || 'Not Specified',
-      department: row.department || 'Not Specified',
-      experienceLevel: row.experience_level || 'Not Specified',
-      salaryMin: row.salary_min || 0,
-      salaryMax: row.salary_max || 0,
-      status: row.status || 'inactive',
-      company: row.company_id || 'Unknown Company',
-      created_at: row.created_at,
-      work_type: row.work_type,
-      work_arrangement: row.work_arrangement,
-      shift: row.shift,
-      priority: row.priority,
-      currency: row.currency,
-      salary_type: row.salary_type,
-      application_deadline: row.application_deadline,
-      requirements: row.requirements || [],
-      responsibilities: row.responsibilities || [],
-      benefits: row.benefits || [],
-      skills: row.skills || [],
-      source_table: 'recruiter_jobs'
-    }))
+    let jobs = recruiterJobs.map((row: any, index: number) => {
+      console.log('🔍 Processing job row:', {
+        id: row.id,
+        title: row.job_title,
+        recruiter: row.recruiter,
+        company: row.recruiter?.company,
+        company_id: row.company_id,
+        companies: row.companies,
+        finalCompany: row.recruiter?.company || row.companies?.name || row.company_id || 'Unknown Company'
+      });
+      
+      return {
+        id: `recruiter_jobs_${row.id}_${index}`, // Create unique ID by combining source table, original ID, and index
+        originalId: String(row.id), // Keep original ID for reference
+        title: row.job_title || 'Untitled Role',
+        description: row.job_description || 'No description available',
+        industry: row.industry || 'Not Specified',
+        department: row.department || 'Not Specified',
+        experienceLevel: row.experience_level || 'Not Specified',
+        salaryMin: row.salary_min || 0,
+        salaryMax: row.salary_max || 0,
+        status: row.status || 'inactive',
+        company: row.recruiter?.company || row.companies?.name || row.company_id || 'Unknown Company',
+        created_at: row.created_at,
+        work_type: row.work_type,
+        work_arrangement: row.work_arrangement,
+        shift: row.shift,
+        priority: row.priority,
+        currency: row.currency,
+        salary_type: row.salary_type,
+        application_deadline: row.application_deadline,
+        requirements: row.requirements || [],
+        responsibilities: row.responsibilities || [],
+        benefits: row.benefits || [],
+        skills: row.skills || [],
+        source_table: 'recruiter_jobs'
+      };
+    });
 
     console.log('🔍 Final jobs array:', jobs)
 
@@ -88,7 +129,7 @@ export async function POST(request: NextRequest) {
     // Verify user is a recruiter
     const user = await (prisma as any).user.findUnique({
       where: { id: userId },
-      select: { admin_level: true, company: true }
+      select: { admin_level: true, company_id: true, is_company_admin: true }
     })
     
     console.log('🔍 User found:', user)
@@ -113,15 +154,15 @@ export async function POST(request: NextRequest) {
     
     // Get the recruiter user ID and company from the authenticated user
     const recruiterId = userId
-    const recruiterCompany = user.company
+    const recruiterCompanyId = user.company_id
     console.log('🔍 Recruiter ID:', recruiterId)
-    console.log('🔍 Recruiter Company:', recruiterCompany)
+    console.log('🔍 Recruiter Company ID:', recruiterCompanyId)
     
-    // Check if company is set
-    if (!recruiterCompany) {
-      console.log('❌ Recruiter company not set!')
+    // Check if company is set (required for new B2B model)
+    if (!recruiterCompanyId) {
+      console.log('❌ Recruiter not linked to a company!')
       return NextResponse.json({ 
-        error: 'Company information is required. Please update your profile with company details.' 
+        error: 'You must be associated with a company to post jobs. Please register your company first or use an invite code to join an existing company.' 
       }, { status: 400 })
     }
     
@@ -183,7 +224,7 @@ export async function POST(request: NextRequest) {
     // Prepare job data for insertion
     const jobData = {
       recruiter_id: recruiterId,
-      company_id: recruiterCompany,
+      company_id: recruiterCompanyId,
       job_title: body.job_title,
       job_description: body.job_description,
       industry: body.industry,
@@ -225,8 +266,8 @@ export async function POST(request: NextRequest) {
       console.log('🔄 Attempting fallback with raw SQL...')
       
       // Fallback: Use raw SQL if Prisma fails
-      const { pool } = await import('@/lib/database')
-      const client = await pool.connect()
+      const pool = await import('@/lib/database')
+      const client = await pool.default.connect()
       
       try {
         const insertQuery = `

@@ -8,53 +8,60 @@ datasource db {
 }
 
 model User {
-  id                      String                   @id @default(uuid()) @db.Uuid
-  email                   String                   @unique
-  first_name              String
-  last_name               String
-  full_name               String
-  location                String
-  avatar_url              String?
-  created_at              DateTime?                @default(now()) @db.Timestamp(6)
-  updated_at              DateTime?                @default(now()) @db.Timestamp(6)
-  phone                   String?
-  bio                     String?
-  position                String?
-  admin_level             String?                  @default("user") @db.VarChar(10)
-  completed_data          Boolean                  @default(false)
-  birthday                DateTime?                @db.Date
-  slug                    String?                  @unique
-  gender                  String?
-  gender_custom           String?
-  location_place_id       String?
-  location_lat            Float?
-  location_lng            Float?
-  location_city           String?
-  location_province       String?
-  location_country        String?
-  location_barangay       String?
-  location_region         String?
-  username                String?                  @unique
-  company                 String?                  @db.VarChar(255)
-  aiAnalysisResults       AiAnalysisResults?
-  applications            Application[]
-  bpocCulturalResults     BpocCulturalResults?
-  bpocCulturalSessions    BpocCulturalSession[]
-  bpocCulturalStats       BpocCulturalStats?
-  discPersonalitySessions DiscPersonalitySession[]
-  discPersonalityStats    DiscPersonalityStats?
-  privacySettings         PrivacySettings?
-  recruiterApplications   RecruiterApplication[]
-  recruiterJobs           RecruiterJob[]
-  resumesExtracted        ResumesExtracted?
-  resumesGenerated        ResumesGenerated?
-  savedResumes            SavedResume[]
-  typingHeroSessions      TypingHeroSession[]
-  typingHeroStats         TypingHeroStats?
-  ultimateSessions        UltimateSession[]
-  ultimateStats           UltimateStats?
-  leaderboardScore        UserLeaderboardScores?
-  workStatus              UserWorkStatus?
+  id                                        String                   @id @default(uuid()) @db.Uuid
+  email                                     String                   @unique
+  first_name                                String
+  last_name                                 String
+  full_name                                 String
+  location                                  String
+  avatar_url                                String?
+  created_at                                DateTime?                @default(now()) @db.Timestamp(6)
+  updated_at                                DateTime?                @default(now()) @db.Timestamp(6)
+  phone                                     String?
+  bio                                       String?
+  position                                  String?
+  admin_level                               String?                  @default("user") @db.VarChar(10)
+  completed_data                            Boolean                  @default(false)
+  birthday                                  DateTime?                @db.Date
+  slug                                      String?                  @unique
+  gender                                    String?
+  gender_custom                             String?
+  location_place_id                         String?
+  location_lat                              Float?
+  location_lng                              Float?
+  location_city                             String?
+  location_province                         String?
+  location_country                          String?
+  location_barangay                         String?
+  location_region                           String?
+  username                                  String?                  @unique
+  company                                   String?                  @db.VarChar(255)
+  company_id                                String?                  @db.Uuid
+  is_company_admin                          Boolean                  @default(false)
+  aiAnalysisResults                         AiAnalysisResults?
+  applications                              Application[]
+  bpocCulturalResults                       BpocCulturalResults?
+  bpocCulturalSessions                      BpocCulturalSession[]
+  bpocCulturalStats                         BpocCulturalStats?
+  discPersonalitySessions                   DiscPersonalitySession[]
+  discPersonalityStats                      DiscPersonalityStats?
+  interviews_interviews_candidate_idTousers interviews[]             @relation("interviews_candidate_idTousers")
+  interviews_interviews_recruiter_idTousers interviews[]             @relation("interviews_recruiter_idTousers")
+  messages_messages_recipient_idTousers     messages[]               @relation("messages_recipient_idTousers")
+  messages_messages_sender_idTousers        messages[]               @relation("messages_sender_idTousers")
+  privacySettings                           PrivacySettings?
+  recruiterApplications                     RecruiterApplication[]
+  recruiterJobs                             RecruiterJob[]
+  resumesExtracted                          ResumesExtracted?
+  resumesGenerated                          ResumesGenerated?
+  savedResumes                              SavedResume[]
+  typingHeroSessions                        TypingHeroSession[]
+  typingHeroStats                           TypingHeroStats?
+  ultimateSessions                          UltimateSession[]
+  ultimateStats                             UltimateStats?
+  leaderboardScore                          UserLeaderboardScores?
+  workStatus                                UserWorkStatus?
+  companies                                 companies?               @relation(fields: [company_id], references: [id], onUpdate: NoAction)
 
   @@map("users")
 }
@@ -552,17 +559,23 @@ model Application {
 }
 
 model RecruiterApplication {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id     String       @db.Uuid
-  job_id      String       @db.Uuid
-  resume_id   String       @db.Uuid
-  resume_slug String
-  status      String       @default("submitted")
-  created_at  DateTime     @default(now()) @db.Timestamptz(6)
-  updated_at  DateTime?    @default(now()) @db.Timestamptz(6)
-  job         RecruiterJob @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  resume      SavedResume  @relation(fields: [resume_id], references: [id], onUpdate: NoAction)
-  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id          String       @db.Uuid
+  job_id           String       @db.Uuid
+  resume_id        String       @db.Uuid
+  resume_slug      String
+  status           String       @default("submitted")
+  created_at       DateTime     @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime?    @default(now()) @db.Timestamptz(6)
+  feedback         String?
+  hire_status      String?
+  hired_at         DateTime?    @db.Timestamptz(6)
+  interview_status String?      @default("not_requested")
+  rejected_at      DateTime?    @db.Timestamptz(6)
+  interviews       interviews[]
+  job              RecruiterJob @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  resume           SavedResume  @relation(fields: [resume_id], references: [id], onUpdate: NoAction)
+  user             User         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([user_id, job_id], map: "recruiter_applications_user_job_uidx")
   @@map("recruiter_applications")
@@ -645,7 +658,6 @@ model ProcessedJobRequest {
 
 model RecruiterJob {
   id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id           String?
   job_title            String
   work_arrangement     work_arrangement_enum?
   salary_min           Int?
@@ -670,7 +682,10 @@ model RecruiterJob {
   priority             priority_enum          @default(medium)
   shift                shift_enum             @default(day)
   recruiter_id         String                 @db.Uuid
+  company_id           String?                @db.Uuid
+  interviews           interviews[]
   applications         RecruiterApplication[]
+  companies            companies?             @relation(fields: [company_id], references: [id], onUpdate: NoAction)
   recruiter            User                   @relation(fields: [recruiter_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([company_id], map: "idx_recruiter_jobs_company_id")
@@ -717,6 +732,135 @@ model JobMatchResult {
   @@index([score], map: "idx_job_match_results_score")
   @@index([user_id], map: "idx_job_match_results_user")
   @@map("job_match_results")
+}
+
+model companies {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_name        String
+  registration_number String?
+  tin                 String?
+  address             String?
+  city                String?
+  province            String?
+  logo_url            String?
+  status              String              @default("pending_verification")
+  trial_end_date      DateTime?           @db.Date
+  subscription_status String              @default("trial")
+  payment_method      String?
+  payment_customer_id String?
+  admin_notes         String?
+  verified_by         String?             @db.Uuid
+  verified_at         DateTime?           @db.Timestamptz(6)
+  created_at          DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
+  company_documents   company_documents[]
+  company_invites     company_invites[]
+  interviews          interviews[]
+  recruiter_jobs      RecruiterJob[]
+  users               User[]
+
+  @@index([created_at(sort: Desc)], map: "idx_companies_created_at")
+  @@index([status], map: "idx_companies_status")
+  @@index([subscription_status], map: "idx_companies_subscription_status")
+  @@index([trial_end_date], map: "idx_companies_trial_end_date")
+}
+
+model company_documents {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id      String    @db.Uuid
+  document_type   String
+  file_url        String
+  file_name       String?
+  file_size       BigInt?
+  mime_type       String?
+  verified_status String    @default("pending")
+  admin_notes     String?
+  verified_by     String?   @db.Uuid
+  verified_at     DateTime? @db.Timestamptz(6)
+  uploaded_at     DateTime  @default(now()) @db.Timestamptz(6)
+  companies       companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([company_id], map: "idx_company_documents_company_id")
+  @@index([document_type], map: "idx_company_documents_document_type")
+  @@index([verified_status], map: "idx_company_documents_verified_status")
+}
+
+model company_invites {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id  String    @db.Uuid
+  invite_code String    @unique
+  created_by  String    @db.Uuid
+  used_by     String?   @db.Uuid
+  used_at     DateTime? @db.Timestamptz(6)
+  expires_at  DateTime  @db.Timestamptz(6)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamptz(6)
+  companies   companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([invite_code], map: "idx_company_invites_code")
+  @@index([company_id], map: "idx_company_invites_company_id")
+  @@index([expires_at], map: "idx_company_invites_expires")
+}
+
+model interviews {
+  id                                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id                       String               @db.Uuid
+  job_id                               String               @db.Uuid
+  candidate_id                         String               @db.Uuid
+  recruiter_id                         String               @db.Uuid
+  company_id                           String?              @db.Uuid
+  status                               String               @default("requested")
+  scheduled_date                       DateTime?            @db.Timestamptz(6)
+  duration_minutes                     Int?                 @default(60)
+  daily_co_room_url                    String?
+  daily_co_room_name                   String?
+  daily_co_room_token                  String?
+  recording_url                        String?
+  recording_started_at                 DateTime?            @db.Timestamptz(6)
+  recording_ended_at                   DateTime?            @db.Timestamptz(6)
+  notes                                String?
+  candidate_notes                      String?
+  interview_type                       String               @default("initial")
+  created_at                           DateTime             @default(now()) @db.Timestamptz(6)
+  updated_at                           DateTime             @default(now()) @db.Timestamptz(6)
+  recruiter_applications               RecruiterApplication @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_interviews_candidate_idTousers User                 @relation("interviews_candidate_idTousers", fields: [candidate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  companies                            companies?           @relation(fields: [company_id], references: [id], onUpdate: NoAction)
+  recruiter_jobs                       RecruiterJob         @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_interviews_recruiter_idTousers User                 @relation("interviews_recruiter_idTousers", fields: [recruiter_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([application_id], map: "idx_interviews_application_id")
+  @@index([candidate_id], map: "idx_interviews_candidate_id")
+  @@index([company_id], map: "idx_interviews_company_id")
+  @@index([job_id], map: "idx_interviews_job_id")
+  @@index([recruiter_id], map: "idx_interviews_recruiter_id")
+  @@index([scheduled_date], map: "idx_interviews_scheduled_date")
+  @@index([status], map: "idx_interviews_status")
+}
+
+model messages {
+  id                                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  application_id                     String?   @db.Uuid
+  job_id                             String?   @db.Uuid
+  sender_id                          String    @db.Uuid
+  recipient_id                       String    @db.Uuid
+  message                            String
+  message_type                       String    @default("text")
+  read                               Boolean   @default(false)
+  read_at                            DateTime? @db.Timestamptz(6)
+  parent_message_id                  String?   @db.Uuid
+  attachments                        Json?
+  created_at                         DateTime  @default(now()) @db.Timestamptz(6)
+  users_messages_recipient_idTousers User      @relation("messages_recipient_idTousers", fields: [recipient_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_messages_sender_idTousers    User      @relation("messages_sender_idTousers", fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([application_id], map: "idx_messages_application_id")
+  @@index([application_id, created_at], map: "idx_messages_conversation")
+  @@index([created_at(sort: Desc)], map: "idx_messages_created_at")
+  @@index([job_id], map: "idx_messages_job_id")
+  @@index([recipient_id, read], map: "idx_messages_read")
+  @@index([recipient_id], map: "idx_messages_recipient_id")
+  @@index([sender_id], map: "idx_messages_sender_id")
 }
 
 enum application_status_enum {

@@ -3,8 +3,11 @@ import pool from '@/lib/database'
 
 export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> | { id: string } }) {
   try {
-    const userId = request.headers.get('x-user-id')
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Check for Authorization token
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const { id } = await context.params
     const res = await pool.query(`
       SELECT c.id, c.user_id, c.comment, c.created_at,
@@ -22,8 +25,11 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> | { id: string } }) {
   try {
-    const userId = request.headers.get('x-user-id')
-    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Check for Authorization token
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     const { id } = await context.params
     const body = await request.json()
     const text = (body?.comment || '').toString().trim()

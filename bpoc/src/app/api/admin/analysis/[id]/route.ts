@@ -3,10 +3,11 @@ import pool from '@/lib/database'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('API: Starting to fetch analysis details for ID:', params.id)
+    const { id } = await params;
+    console.log('API: Starting to fetch analysis details for ID:', id)
     
     // Query ai_analysis_results with user information
     const result = await pool.query(`
@@ -32,7 +33,7 @@ export async function GET(
       FROM ai_analysis_results aar
       LEFT JOIN users u ON aar.user_id = u.id
       WHERE aar.id = $1
-    `, [params.id])
+    `, [id])
 
     if (result.rows.length === 0) {
       return NextResponse.json({ error: 'Analysis not found' }, { status: 404 })

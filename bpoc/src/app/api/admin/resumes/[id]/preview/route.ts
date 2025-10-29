@@ -59,10 +59,11 @@ function generateResumeHtml(content: any, title: string): string {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('API: Starting to fetch resume preview for ID:', params.id)
+    const { id } = await params;
+    console.log('API: Starting to fetch resume preview for ID:', id)
     
          // Query saved_resumes with user information
      const result = await pool.query(`
@@ -81,7 +82,7 @@ export async function GET(
        FROM saved_resumes sr
        LEFT JOIN users u ON sr.user_id = u.id
        WHERE sr.id = $1
-     `, [params.id])
+     `, [id])
 
     if (result.rows.length === 0) {
       return NextResponse.json({ error: 'Resume not found' }, { status: 404 })

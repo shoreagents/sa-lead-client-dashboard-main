@@ -21,7 +21,11 @@ import {
   FileText,
   Sparkles,
   Trophy,
-  Award
+  Award,
+  Upload,
+  X,
+  Camera,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +41,7 @@ import Header from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { getSessionToken } from '@/lib/auth-helpers';
 import { cleanupLocalStorageAfterSave } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 interface ResumeTemplate {
   id: string;
@@ -184,6 +189,107 @@ export default function ResumeBuilderPage() {
   const [hasSavedResume, setHasSavedResume] = useState(false);
   const [isDeletingSaved, setIsDeletingSaved] = useState(false);
   const [showProfileTooltip, setShowProfileTooltip] = useState(true);
+  
+  // Profile photo states
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  const [photoUploading, setPhotoUploading] = useState(false);
+
+  // Photo upload functions
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+
+      setPhotoUploading(true);
+      
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert('Please log in to upload photos');
+          setPhotoUploading(false);
+          return;
+        }
+
+        // Create unique filename
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+        const filePath = `resume_headshots/${fileName}`;
+
+        // Upload to Supabase Storage
+        const { data, error } = await supabase.storage
+          .from('resume_headshot')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (error) {
+          console.error('Upload error:', error);
+          alert('Failed to upload photo. Please try again.');
+          setPhotoUploading(false);
+          return;
+        }
+
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('resume_headshot')
+          .getPublicUrl(filePath);
+
+        if (urlData?.publicUrl) {
+          setProfilePhoto(urlData.publicUrl);
+          console.log('✅ Photo uploaded successfully:', urlData.publicUrl);
+        } else {
+          throw new Error('Failed to get public URL');
+        }
+
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Failed to upload photo. Please try again.');
+      } finally {
+        setPhotoUploading(false);
+        setShowPhotoUpload(false);
+      }
+    }
+  };
+
+  const removePhoto = async () => {
+    if (profilePhoto && profilePhoto.includes('supabase')) {
+      try {
+        // Extract file path from Supabase URL
+        const url = new URL(profilePhoto);
+        const pathParts = url.pathname.split('/');
+        const bucketName = pathParts[pathParts.length - 2];
+        const fileName = pathParts[pathParts.length - 1];
+        const filePath = `resume_headshots/${fileName}`;
+
+        // Delete from Supabase Storage
+        const { error } = await supabase.storage
+          .from('resume_headshot')
+          .remove([filePath]);
+
+        if (error) {
+          console.error('Delete error:', error);
+          // Still remove from UI even if delete fails
+        } else {
+          console.log('✅ Photo deleted from Supabase');
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+      }
+    }
+    
+    setProfilePhoto(null);
+  };
 
   useEffect(() => {
     // First check for existing generated resume data from database
@@ -207,6 +313,13 @@ export default function ResumeBuilderPage() {
         if (res.ok && data?.success && data?.hasGeneratedResume && data?.generatedResumeData) {
           console.log('✅ Found existing generated resume data, loading it');
           setImprovedResume(data.generatedResumeData);
+          
+          // Load profile photo if it exists
+          if (data.generatedResumeData.profilePhoto) {
+            setProfilePhoto(data.generatedResumeData.profilePhoto);
+            console.log('✅ Loaded existing profile photo');
+          }
+          
           setIsLoading(false);
           return true; // Found generated resume data
         }
@@ -231,6 +344,13 @@ export default function ResumeBuilderPage() {
             // When editing existing resume, use the data directly without API call
             console.log('Editing existing resume - using data directly');
             setImprovedResume(parsedData);
+            
+            // Load profile photo if it exists
+            if (parsedData.profilePhoto) {
+              setProfilePhoto(parsedData.profilePhoto);
+              console.log('✅ Loaded existing profile photo from localStorage');
+            }
+            
             setIsLoading(false);
             // Clear the editing flag
             localStorage.removeItem('editingExistingResume');
@@ -1025,7 +1145,7 @@ export default function ResumeBuilderPage() {
 
       console.log('💾 Saving resume to profile...');
       
-      // Prepare the complete resume data (content + template + colors)
+      // Prepare the complete resume data (content + template + colors + profile photo)
       const completeResumeData = {
         content: improvedResume,
         template: {
@@ -1034,7 +1154,8 @@ export default function ResumeBuilderPage() {
           secondaryColor: customColors.secondary
         },
         sections: sections,
-        headerInfo: getHeaderInfo()
+        headerInfo: getHeaderInfo(),
+        profilePhoto: profilePhoto // Include the profile photo in saved data
       };
       
       console.log('📦 Complete resume data being saved:', {
@@ -2204,7 +2325,7 @@ export default function ResumeBuilderPage() {
                     >
                       {/* Header */}
                       <div 
-                        className="text-center mb-8 pb-6 border-b-2" 
+                        className="mb-8 pb-6 border-b-2" 
                         style={{ 
                           borderColor: customColors.primary,
                           ...(selectedTemplate.id === 'executive' && {
@@ -2225,27 +2346,84 @@ export default function ResumeBuilderPage() {
                           })
                         }}
                       >
-                        <Tooltip open={showProfileTooltip}>
-                          <TooltipTrigger asChild>
-                            <div>
-                              <h1 className="text-3xl font-bold text-gray-900 mb-2">{getHeaderInfo().name}</h1>
-                              <p className="text-lg font-semibold text-gray-800" style={{ color: customColors.secondary }}>
-                                {getHeaderInfo().title}
-                              </p>
+                        {/* Header Content - Dynamic layout based on photo presence */}
+                        <div className="relative">
+                          {/* Dynamic Text Content - Centered when no photo, Left-aligned when photo exists */}
+                          <div className={profilePhoto ? "text-left" : "text-center"}>
+                            <Tooltip open={showProfileTooltip}>
+                              <TooltipTrigger asChild>
+                                <div>
+                                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{getHeaderInfo().name}</h1>
+                                  <p className="text-lg font-semibold text-gray-800 mb-2" style={{ color: customColors.secondary }}>
+                                    {getHeaderInfo().title}
+                                  </p>
+                                  {getHeaderInfo().location && (
+                                    <p className="text-gray-600">{getHeaderInfo().location}</p>
+                                  )}
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Name, job title, and location can be changed via profile link</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            {/* Email and phone hidden for confidentiality */}
+                            {/* <p className="text-gray-600">
+                              <span>{getHeaderInfo().email}</span>
+                              {' '}
+                              •{' '}
+                              <span>{getHeaderInfo().phone}</span>
+                            </p> */}
+                          </div>
+
+                          {/* Profile Photo - Positioned absolutely on the right when photo exists */}
+                          {profilePhoto ? (
+                            <div className="absolute top-0 right-0">
+                              <div className="relative group">
+                                <img 
+                                  src={profilePhoto} 
+                                  alt="Profile" 
+                                  className="w-24 h-24 rounded-lg object-cover border-4 shadow-lg"
+                                  style={{ borderColor: customColors.primary }}
+                                />
+                                <button
+                                  onClick={removePhoto}
+                                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
                             </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Name, job title, and location can be changed via profile link</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        {/* Email and phone hidden for confidentiality */}
-                        {/* <p className="text-gray-600">
-                          <span>{getHeaderInfo().email}</span>
-                          {' '}
-                          •{' '}
-                          <span>{getHeaderInfo().phone}</span>
-                        </p> */}
+                          ) : (
+                            <div className="absolute top-0 right-0">
+                              <div className="relative">
+                                <div 
+                                  className="w-24 h-24 rounded-lg border-4 border-dashed flex items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer group"
+                                  style={{ borderColor: customColors.primary }}
+                                  onClick={() => setShowPhotoUpload(true)}
+                                >
+                                  {photoUploading ? (
+                                    <div className="w-6 h-6 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                                  ) : (
+                                    <div className="text-center">
+                                      <Camera className="w-6 h-6 mx-auto text-gray-400 group-hover:text-gray-600 mb-1" />
+                                      <p className="text-xs text-gray-500 group-hover:text-gray-700">Add Photo</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Divider */}
+                      <div 
+                        className="w-full h-0.5 my-6" 
+                        style={{ 
+                          backgroundColor: customColors.primary,
+                          opacity: 0.3
+                        }}
+                      ></div>
 
                       {/* Sections - Inline Editable */}
                       <AnimatePresence>
@@ -2542,6 +2720,58 @@ export default function ResumeBuilderPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Photo Upload Modal */}
+      <Dialog open={showPhotoUpload} onOpenChange={setShowPhotoUpload}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="w-5 h-5" />
+              Add Professional Headshot
+            </DialogTitle>
+            <DialogDescription>
+              Upload a professional headshot for your resume. Recommended: 400x400px, JPG or PNG format, max 5MB.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+                id="photo-upload"
+              />
+              <label
+                htmlFor="photo-upload"
+                className="cursor-pointer flex flex-col items-center gap-2"
+              >
+                <Upload className="w-8 h-8 text-gray-400" />
+                <span className="text-sm text-gray-600">
+                  Click to upload or drag and drop
+                </span>
+                <span className="text-xs text-gray-500">
+                  PNG, JPG up to 5MB
+                </span>
+              </label>
+            </div>
+            
+            {photoUploading && (
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                Uploading...
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPhotoUpload(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

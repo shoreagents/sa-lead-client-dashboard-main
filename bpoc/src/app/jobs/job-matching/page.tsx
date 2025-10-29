@@ -829,7 +829,7 @@ function JobMatchingContent() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent) => {
                               e.stopPropagation();
                               setShareJobId(shareJobId === job.id ? null : job.id);
                             }}
@@ -946,9 +946,9 @@ function JobMatchingContent() {
                                 AI Failed
                               </Badge>
                             ) : (
-                                                             <Badge className={`${getMatchColor(matchScores[job.id].score)} px-3 py-1 text-sm`}>
-                                 {getMatchLabel(matchScores[job.id].score)}
-                               </Badge>
+                              <Badge className={`${getMatchColor(matchScores[job.id].score)} px-3 py-1 text-sm`}>
+                                {getMatchLabel(matchScores[job.id].score)}
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -982,7 +982,7 @@ function JobMatchingContent() {
                     {/* Quick Apply Button */}
                     <Button 
                       className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white border-0 disabled:opacity-60 disabled:cursor-not-allowed"
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
                         setSelectedJob(job.id);
                       }}
@@ -1156,9 +1156,9 @@ function JobMatchingContent() {
                               AI Failed
                             </Badge>
                           ) : (
-                                                         <Badge className={`${getMatchColor(matchScores[selectedJobData.id].score)} px-3 py-1 text-sm`}>
-                               {getMatchLabel(matchScores[selectedJobData.id].score)}
-                             </Badge>
+                            <Badge className={`${getMatchColor(matchScores[selectedJobData.id].score)} px-3 py-1 text-sm`}>
+                              {getMatchLabel(matchScores[selectedJobData.id].score)}
+                            </Badge>
                           )
                         ) : (
                           <Badge className="bg-gray-500/20 text-gray-300 border-gray-500/30 px-3 py-1 text-sm">

@@ -730,28 +730,64 @@ function HomePageContent() {
       
       <Hero />
 
-      {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 mb-4">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Platform Features
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Everything You Need to 
-              <span className="gradient-text"> Succeed in BPO</span>
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Our comprehensive platform combines AI technology with industry expertise 
-              to accelerate your BPO career journey.
-            </p>
-          </motion.div>
+        {/* Features Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-slate-900/50 via-blue-900/20 to-purple-900/30">
+          {/* Enhanced Animated Background Elements */}
+          <div className="absolute inset-0">
+            {/* Large floating orbs */}
+            <div className="absolute top-20 left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-xl animate-pulse"></div>
+            <div className="absolute top-40 right-20 w-24 h-24 bg-purple-500/10 rounded-full blur-xl animate-pulse delay-1000"></div>
+            <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-green-500/10 rounded-full blur-xl animate-pulse delay-2000"></div>
+            
+            {/* Additional smaller particles */}
+            <div className="absolute top-10 right-1/3 w-16 h-16 bg-pink-500/8 rounded-full blur-2xl animate-pulse delay-500"></div>
+            <div className="absolute bottom-10 right-1/4 w-20 h-20 bg-blue-500/8 rounded-full blur-2xl animate-pulse delay-1500"></div>
+            <div className="absolute top-1/2 left-10 w-12 h-12 bg-yellow-500/8 rounded-full blur-2xl animate-pulse delay-3000"></div>
+            
+            
+            {/* Gradient mesh */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5"></div>
+          </div>
+          
+          <div className="container mx-auto relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              >
+                <Badge className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border-cyan-500/30 mb-4 px-6 py-2 text-sm font-semibold shadow-lg shadow-cyan-500/10">
+                  <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                  Platform Features
+                </Badge>
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl md:text-5xl font-bold mb-6"
+              >
+                Everything You Need to 
+                <span className="gradient-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse"> Succeed in BPO</span>
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+              >
+                Our comprehensive platform combines AI technology with industry expertise 
+                to accelerate your BPO career journey.
+              </motion.p>
+            </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
@@ -831,45 +867,96 @@ function HomePageContent() {
                 isComingSoon: true
               }
             ].map((feature, index) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="glass-card border-white/10 h-full hover:border-white/20 transition-all duration-300 group">
-                  <CardHeader>
-                    <div className={`w-12 h-12 ${feature.bgColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                      <feature.icon className={`w-6 h-6 ${feature.color}`} />
-                    </div>
-                    <CardTitle className="text-xl text-white">{feature.title}</CardTitle>
-                    <CardDescription className="text-gray-300">
-                      {feature.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 mb-4">
-                      {feature.features.map((item) => (
-                        <div key={item} className="flex items-center space-x-2">
-                          <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm text-gray-300">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {feature.hasButton && (
-                      <Button
-                        onClick={feature.buttonAction}
-                        disabled={feature.isComingSoon}
-                        className={`w-full text-white border-0 shadow-lg transition-all duration-300 ${!feature.isComingSoon ? 'group-hover:scale-105' : ''} ${feature.buttonColor}`}
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ 
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 15
+                  }}
+                  whileHover={{ 
+                    y: -8,
+                    transition: { duration: 0.2 }
+                  }}
+                  className="group"
+                >
+                  <Card className="glass-card border-white/10 h-full hover:border-white/30 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-cyan-500/10 relative overflow-hidden">
+                    {/* Animated gradient border */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg"></div>
+                    
+                    {/* Floating particles effect */}
+                    <div className="absolute top-4 right-4 w-2 h-2 bg-cyan-400/30 rounded-full animate-ping"></div>
+                    <div className="absolute top-8 right-8 w-1 h-1 bg-purple-400/40 rounded-full animate-ping delay-1000"></div>
+                    
+                    <CardHeader className="relative z-10">
+                      <motion.div 
+                        className={`w-12 h-12 ${feature.bgColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-all duration-300 relative overflow-hidden`}
+                        whileHover={{ rotate: 5 }}
                       >
-                        {feature.buttonText}
-                        {!feature.isComingSoon && <ArrowRight className="w-4 h-4 ml-2" />}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-lg"></div>
+                        <feature.icon className={`w-6 h-6 ${feature.color} relative z-10`} />
+                      </motion.div>
+                      <CardTitle className="text-xl text-white group-hover:text-cyan-300 transition-colors duration-300">
+                        {feature.title}
+                      </CardTitle>
+                      <CardDescription className="text-gray-300 group-hover:text-gray-200 transition-colors duration-300">
+                        {feature.description}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="relative z-10">
+                      <div className="space-y-2 mb-4">
+                        {feature.features.map((item, featureIndex) => (
+                          <motion.div 
+                            key={item} 
+                            className="flex items-center space-x-2 group/item"
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: (index * 0.1) + (featureIndex * 0.05) }}
+                          >
+                            <motion.div
+                              whileHover={{ scale: 1.2, rotate: 10 }}
+                              transition={{ type: "spring", stiffness: 400 }}
+                            >
+                              <CheckCircle className="w-4 h-4 text-green-400" />
+                            </motion.div>
+                            <span className="text-sm text-gray-300 group-hover/item:text-white transition-colors duration-200">{item}</span>
+                          </motion.div>
+                        ))}
+                      </div>
+                      {feature.hasButton && (
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Button
+                            onClick={feature.buttonAction}
+                            disabled={feature.isComingSoon}
+                            className={`w-full text-white border-0 shadow-lg transition-all duration-300 relative overflow-hidden group/btn ${!feature.isComingSoon ? 'group-hover:scale-105' : ''} ${feature.buttonColor}`}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                            <span className="relative z-10 flex items-center justify-center">
+                              {feature.buttonText}
+                              {!feature.isComingSoon && (
+                                <motion.div
+                                  className="ml-2"
+                                  animate={{ x: [0, 4, 0] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                >
+                                  <ArrowRight className="w-4 h-4" />
+                                </motion.div>
+                              )}
+                            </span>
+                          </Button>
+                        </motion.div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
             ))}
           </div>
         </div>
@@ -877,44 +964,76 @@ function HomePageContent() {
 
 
 
-      {/* Why Choose BPOC.IO Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white/5">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 mb-4">
-              <Target className="w-4 h-4 mr-2" />
-              Competitive Analysis
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Why Choose <span className="gradient-text">BPOC.IO</span>
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              See how we compare to traditional job platforms and other career games.
-            </p>
-          </motion.div>
+        {/* Why Choose BPOC.IO Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white/5 via-purple-500/5 to-cyan-500/5 relative overflow-hidden">
+          {/* Animated background elements */}
+          <div className="absolute inset-0">
+            <div className="absolute top-10 right-10 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-10 left-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="container mx-auto relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-16"
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              >
+                <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 border-purple-500/30 mb-4 px-6 py-2 text-sm font-semibold shadow-lg shadow-purple-500/10">
+                  <Target className="w-4 h-4 mr-2 animate-pulse" />
+                  Competitive Analysis
+                </Badge>
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl md:text-5xl font-bold mb-6"
+              >
+                Why Choose <span className="gradient-text bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">BPOC.IO</span>
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+              >
+                See how we compare to traditional job platforms and other career games.
+              </motion.p>
+            </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {/* Traditional Job Sites */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, x: -30, scale: 0.9 }}
+              whileInView={{ opacity: 1, x: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -5, scale: 1.02 }}
               className="group"
             >
-              <Card className="glass-card border-white/10 hover:border-red-400/20 h-full transition-all duration-300 group-hover:scale-[1.02] opacity-80 group-hover:opacity-90">
-                <CardHeader className="text-center pb-6">
-                  <CardTitle className="text-xl text-white mb-2 flex items-center justify-center gap-2">
-                    <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
-                      <X className="w-4 h-4 text-red-400" />
-                    </div>
-                    Traditional Job Sites
-                  </CardTitle>
+              <Card className="glass-card border-white/10 hover:border-red-400/30 h-full transition-all duration-500 group-hover:shadow-xl group-hover:shadow-red-500/10 relative overflow-hidden">
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <CardHeader className="text-center pb-6 relative z-10">
+                  <div className="group/icon">
+                    <CardTitle className="text-xl text-white mb-2 flex items-center justify-center gap-2 group-hover/icon:scale-105 transition-transform duration-300">
+                      <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center group-hover:bg-red-500/30 transition-colors duration-300">
+                        <X className="w-4 h-4 text-red-400" />
+                      </div>
+                      Traditional Job Sites
+                    </CardTitle>
+                  </div>
                   <div className="w-12 h-px bg-gradient-to-r from-transparent via-red-400/30 to-transparent mx-auto"></div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -954,23 +1073,41 @@ function HomePageContent() {
 
             {/* BPOC.IO - Center Column with Recommendation Badge */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -8, scale: 1.03 }}
               className="relative group"
             >
               {/* Recommended Badge */}
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
-                <Badge className="bg-gradient-to-r from-red-500 to-pink-600 text-white border-0 px-6 py-2 text-sm font-bold shadow-lg shadow-red-500/25">
-                  ✨ RECOMMENDED
+              <motion.div 
+                className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20"
+                animate={{ 
+                  y: [0, -3, 0],
+                  scale: [1, 1.05, 1]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                <Badge className="bg-gradient-to-r from-red-500 to-pink-600 text-white border-0 px-6 py-2 text-sm font-bold shadow-lg shadow-red-500/25 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-pulse"></div>
+                  <span className="relative z-10">✨ RECOMMENDED</span>
                 </Badge>
-              </div>
+              </motion.div>
               
-              <Card className="glass-card border-red-500/40 hover:border-red-400/60 h-full relative overflow-hidden transition-all duration-300 group-hover:scale-[1.01] shadow-xl shadow-red-500/10 group-hover:shadow-red-500/20">
+              <Card className="glass-card border-red-500/40 hover:border-red-400/60 h-full relative overflow-hidden transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-red-500/20">
                 {/* Enhanced Glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-purple-500/5 to-pink-500/10 rounded-xl"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-xl"></div>
+                
+                {/* Animated particles */}
+                <div className="absolute top-4 right-4 w-2 h-2 bg-red-400/40 rounded-full animate-ping"></div>
+                <div className="absolute bottom-4 left-4 w-1 h-1 bg-pink-400/60 rounded-full animate-ping delay-1000"></div>
+                <div className="absolute top-1/2 right-6 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-ping delay-2000"></div>
                 
                 <CardHeader className="text-center pb-6 relative z-10">
                   <CardTitle className="text-2xl text-white mb-2 flex items-center justify-center gap-3">
@@ -1072,60 +1209,124 @@ function HomePageContent() {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/30 mb-4">
-              <Zap className="w-4 h-4 mr-2" />
-              Simple Process
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              How It<span className="gradient-text"> Works</span> 
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Get your dream BPO job in just 5 simple steps with our AI-powered platform.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-5 gap-4 max-w-7xl mx-auto relative">
-            {/* Step 1 - Sign Up */}
+        {/* How It Works Section */}
+        <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-emerald-900/30 via-teal-900/20 to-cyan-900/40">
+          {/* Enhanced animated background elements */}
+          <div className="absolute inset-0">
+            {/* Main floating orbs */}
+            <div className="absolute top-20 left-20 w-40 h-40 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-20 right-20 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+            <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-yellow-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+            
+            {/* Additional particles */}
+            <div className="absolute top-10 right-10 w-20 h-20 bg-emerald-500/8 rounded-full blur-2xl animate-pulse delay-500"></div>
+            <div className="absolute bottom-10 left-10 w-16 h-16 bg-teal-500/8 rounded-full blur-2xl animate-pulse delay-1500"></div>
+            <div className="absolute top-1/3 right-1/4 w-14 h-14 bg-cyan-500/8 rounded-full blur-2xl animate-pulse delay-3000"></div>
+            <div className="absolute bottom-1/3 left-1/2 w-18 h-18 bg-lime-500/8 rounded-full blur-2xl animate-pulse delay-2500"></div>
+            
+            {/* Circuit pattern overlay */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-green-400/20 rounded-full"></div>
+              <div className="absolute top-1/2 right-1/4 w-24 h-24 border border-blue-400/20 rounded-full"></div>
+              <div className="absolute bottom-1/4 left-1/2 w-20 h-20 border border-yellow-400/20 rounded-full"></div>
+            </div>
+            
+            {/* Diagonal gradient lines */}
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-blue-500/5"></div>
+            <div className="absolute inset-0 bg-gradient-to-tl from-yellow-500/5 via-transparent to-cyan-500/5"></div>
+          </div>
+          
+          <div className="container mx-auto relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
+              className="text-center mb-16"
+            >
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                whileInView={{ scale: 1, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              >
+                <Badge className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-400 border-green-500/30 mb-4 px-6 py-2 text-sm font-semibold shadow-lg shadow-green-500/10">
+                  <Zap className="w-4 h-4 mr-2 animate-pulse" />
+                  Simple Process
+                </Badge>
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+                className="text-4xl md:text-5xl font-bold mb-6"
+              >
+                How It<span className="gradient-text bg-gradient-to-r from-green-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"> Works</span> 
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+              >
+                Get your dream BPO job in just 5 simple steps with our AI-powered platform.
+              </motion.p>
+            </motion.div>
+
+          <div className="grid md:grid-cols-5 gap-4 max-w-7xl mx-auto relative">
+            {/* Step 1 - Sign Up */}
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -8, scale: 1.05 }}
               className="relative group"
             >
-              <Card className="glass-card border-white/10 hover:border-blue-400/30 h-full transition-all duration-300 group-hover:scale-105 relative overflow-hidden p-6">
-                <div className="absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg z-10">
-                  1
-                </div>
+              <Card className="glass-card border-white/10 hover:border-blue-400/40 h-full transition-all duration-500 group-hover:shadow-xl group-hover:shadow-blue-500/20 relative overflow-hidden p-6">
+                {/* Animated background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
-                <CardContent className="p-0 text-center">
+                {/* Floating particles */}
+                <div className="absolute top-2 right-2 w-1 h-1 bg-blue-400/40 rounded-full animate-ping"></div>
+                <div className="absolute bottom-2 left-2 w-1.5 h-1.5 bg-indigo-400/30 rounded-full animate-ping delay-1000"></div>
+                
+                <motion.div 
+                  className="absolute -top-3 -right-3 w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg z-10"
+                  whileHover={{ rotate: 10, scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
+                  1
+                </motion.div>
+                
+                <CardContent className="p-0 text-center relative z-10">
                   <div className="mb-6">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-all duration-300">
-                      <Users className="w-10 h-10 text-white" />
-                    </div>
+                    <motion.div 
+                      className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-all duration-300 relative overflow-hidden"
+                      whileHover={{ rotate: 5, scale: 1.1 }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-full"></div>
+                      <Users className="w-10 h-10 text-white relative z-10" />
+                    </motion.div>
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-3">Sign Up</h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">
+                  <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-blue-300 transition-colors duration-300">Sign Up</h3>
+                  <p className="text-gray-300 text-sm leading-relaxed group-hover:text-gray-200 transition-colors duration-300">
                     Create your BPOC.IO account to access all platform features and tools.
                   </p>
                 </CardContent>
               </Card>
               
               {/* Arrow 1 */}
-              <div className="hidden md:flex absolute -right-2 top-1/2 transform -translate-y-1/2 z-20">
-                <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
+              <motion.div 
+                className="hidden md:flex absolute -right-2 top-1/2 transform -translate-y-1/2 z-20"
+                animate={{ x: [0, 3, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-cyan-400/50 transition-all duration-300">
                   <ArrowRight className="w-4 h-4 text-white" />
                 </div>
-              </div>
+              </motion.div>
             </motion.div>
 
             {/* Step 2 - Upload Resume */}
@@ -1266,22 +1467,68 @@ function HomePageContent() {
       </section>
 
       {/* Top Users */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-white/5">
-        <div className="container mx-auto">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-amber-900/30 via-yellow-900/20 to-orange-900/40 relative overflow-hidden">
+        {/* Enhanced animated background elements */}
+        <div className="absolute inset-0">
+          {/* Trophy-themed floating orbs */}
+          <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute top-20 right-20 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-10 left-1/3 w-28 h-28 bg-amber-500/10 rounded-full blur-2xl animate-pulse delay-2000"></div>
+          <div className="absolute bottom-20 right-1/4 w-20 h-20 bg-red-500/10 rounded-full blur-2xl animate-pulse delay-1500"></div>
+          
+          {/* Additional particles */}
+          <div className="absolute top-1/3 left-1/4 w-16 h-16 bg-yellow-400/8 rounded-full blur-xl animate-pulse delay-500"></div>
+          <div className="absolute bottom-1/3 right-1/3 w-14 h-14 bg-orange-400/8 rounded-full blur-xl animate-pulse delay-3000"></div>
+          <div className="absolute top-1/2 right-10 w-12 h-12 bg-amber-400/8 rounded-full blur-xl animate-pulse delay-2500"></div>
+          
+          {/* Trophy pattern overlay */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-1/4 left-1/4 text-6xl">🏆</div>
+            <div className="absolute top-1/2 right-1/4 text-4xl">🥇</div>
+            <div className="absolute bottom-1/4 left-1/2 text-5xl">🏅</div>
+          </div>
+          
+          {/* Gradient mesh */}
+          <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 via-transparent to-orange-500/5"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 via-transparent to-red-500/5"></div>
+        </div>
+        
+        <div className="container mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-8"
           >
-            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 mb-4">
-              <Trophy className="w-4 h-4 mr-2" />
-              Our top users
-            </Badge>
-            <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            >
+              <Badge className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-400 border-yellow-500/30 mb-4 px-6 py-2 text-sm font-semibold shadow-lg shadow-yellow-500/10">
+                <Trophy className="w-4 h-4 mr-2 animate-pulse" />
+                Our top users
+              </Badge>
+            </motion.div>
+            <motion.h2 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent"
+            >
               🏆 Top 5 Overall
-            </h2>
-            <p className="text-gray-300 mt-2">Recognizing the most engaged candidates across games, applications, and engagement.</p>
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="text-gray-300 mt-2 leading-relaxed"
+            >
+              Recognizing the most engaged candidates across games, applications, and engagement.
+            </motion.p>
           </motion.div>
 
           <motion.div 
@@ -1380,7 +1627,7 @@ function HomePageContent() {
                               }
                               const data = await r.json()
                               if (data?.slug) {
-                                router.push(`/${data.slug}?mode=profile`)
+                                router.push(`/${data.slug}`)
                               } else {
                                 setShowProfileModal(true)
                               }
@@ -1417,24 +1664,73 @@ function HomePageContent() {
       </section>
 
       {/* Success Stories */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-pink-900/40 relative overflow-hidden">
+        {/* Enhanced animated background elements */}
+        <div className="absolute inset-0">
+          {/* Success-themed floating orbs */}
+          <div className="absolute top-10 left-10 w-36 h-36 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-20 right-20 w-28 h-28 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-10 left-1/4 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute bottom-20 right-1/3 w-24 h-24 bg-violet-500/10 rounded-full blur-3xl animate-pulse delay-1500"></div>
+          
+          {/* Additional particles */}
+          <div className="absolute top-1/3 left-1/3 w-20 h-20 bg-indigo-400/8 rounded-full blur-2xl animate-pulse delay-500"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-16 h-16 bg-purple-400/8 rounded-full blur-2xl animate-pulse delay-3000"></div>
+          <div className="absolute top-1/2 right-10 w-14 h-14 bg-pink-400/8 rounded-full blur-2xl animate-pulse delay-2500"></div>
+          <div className="absolute bottom-1/2 left-10 w-18 h-18 bg-violet-400/8 rounded-full blur-2xl animate-pulse delay-3500"></div>
+          
+          {/* Success pattern overlay */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-1/4 left-1/4 text-6xl">✨</div>
+            <div className="absolute top-1/2 right-1/4 text-4xl">🌟</div>
+            <div className="absolute bottom-1/4 left-1/2 text-5xl">💫</div>
+            <div className="absolute top-1/3 right-1/3 text-3xl">⭐</div>
+          </div>
+          
+          {/* Gradient mesh */}
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-transparent to-purple-500/5"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-pink-500/5 via-transparent to-violet-500/5"></div>
+          
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+        </div>
+        
+        <div className="container mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 mb-4">
-              <Trophy className="w-4 h-4 mr-2" />
-              Testimonials
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="gradient-text">Success</span> Stories 
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            >
+              <Badge className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-400 border-indigo-500/30 mb-4 px-6 py-2 text-sm font-semibold shadow-lg shadow-indigo-500/10">
+                <Trophy className="w-4 h-4 mr-2 animate-pulse" />
+                Testimonials
+              </Badge>
+            </motion.div>
+            <motion.h2 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-4xl md:text-5xl font-bold mb-6"
+            >
+              <span className="gradient-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Success</span> Stories 
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+            >
               See how BPOC.IO has helped thousands of Filipino BPO professionals advance their careers.
-            </p>
+            </motion.p>
           </motion.div>
 
           {/* Testimonials Carousel */}
@@ -1531,53 +1827,104 @@ function HomePageContent() {
       </section>
 
       {/* CTA Section */}
-      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-red-900/20 to-purple-900/20">
-        <div className="container mx-auto">
+      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-red-900/20 via-purple-900/20 to-pink-900/20 relative overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-10 w-64 h-64 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-10 right-10 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/5 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center"
           >
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              initial={{ opacity: 0, y: 20, scale: 0.8 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             >
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium mb-8">
-                <Zap className="w-4 h-4 mr-2" />
+              <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/30 text-red-400 text-sm font-semibold mb-8 shadow-lg shadow-red-500/10">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                </motion.div>
                 Ready to Transform Your Career?
               </div>
             </motion.div>
             
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
+            <motion.h2 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="text-4xl md:text-6xl font-bold mb-6"
+            >
               Start Your Journey 
-              <span className="gradient-text"> Today </span>
-            </h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+              <span className="gradient-text bg-gradient-to-r from-red-400 via-pink-400 to-purple-400 bg-clip-text text-transparent"> Today </span>
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="text-xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed"
+            >
               Join thousands of Filipino BPO professionals who have already transformed their careers with BPOC.IO. It's completely free to get started.
-            </p>
+            </motion.p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button 
-                size="lg" 
-                onClick={handleBuildResume}
-                className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-lg shadow-red-500/25 text-lg px-8 py-4"
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
+            >
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Build Your Resume Now 
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              {!user && (
                 <Button 
                   size="lg" 
-                  variant="outline" 
-                  onClick={handleCreateAccount}
-                  className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 bg-transparent text-lg px-8 py-4"
+                  onClick={handleBuildResume}
+                  className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white border-0 shadow-lg shadow-red-500/25 text-lg px-8 py-4 relative overflow-hidden group/btn"
                 >
-                  Create Free Account
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                  <span className="relative z-10 flex items-center">
+                    Build Your Resume Now 
+                    <motion.div
+                      className="ml-2"
+                      animate={{ x: [0, 4, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <ArrowRight className="w-5 h-5" />
+                    </motion.div>
+                  </span>
                 </Button>
+              </motion.div>
+              {!user && (
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    onClick={handleCreateAccount}
+                    className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 bg-transparent text-lg px-8 py-4 relative overflow-hidden group/btn"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                    <span className="relative z-10">Create Free Account</span>
+                  </Button>
+                </motion.div>
               )}
-            </div>
+            </motion.div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-w-4xl mx-auto">
               <div className="text-center">

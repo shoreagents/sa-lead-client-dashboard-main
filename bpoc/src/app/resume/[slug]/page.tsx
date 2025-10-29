@@ -1,6 +1,47 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
+// Client-side only particles component to avoid hydration mismatch
+function ClientParticles() {
+  const [particles, setParticles] = useState<Array<{
+    left: number;
+    top: number;
+    animationDelay: number;
+    animationDuration: number;
+    opacity: number;
+  }>>([]);
+
+  useEffect(() => {
+    // Generate particles only on client side
+    const newParticles = [...Array(50)].map(() => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      animationDelay: Math.random() * 3,
+      animationDuration: 2 + Math.random() * 2,
+      opacity: 0.3 + Math.random() * 0.7
+    }));
+    setParticles(newParticles);
+  }, []);
+
+  return (
+    <div className="absolute inset-0">
+      {particles.map((particle, i) => (
+        <div
+          key={i}
+          className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+          style={{
+            left: `${particle.left}%`,
+            top: `${particle.top}%`,
+            animationDelay: `${particle.animationDelay}s`,
+            animationDuration: `${particle.animationDuration}s`,
+            opacity: particle.opacity
+          }}
+        ></div>
+      ))}
+    </div>
+  );
+}
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { PacmanLoader } from 'react-spinners';
@@ -88,11 +129,9 @@ import {
   Maximize,
   Minimize,
   Fullscreen,
-  FullscreenExit,
   ZoomIn,
   ZoomOut,
   RotateCw,
-  RotateCcw as RotateCcwIcon,
   FlipHorizontal,
   FlipVertical,
   Crop,
@@ -109,15 +148,10 @@ import {
   Folder,
   Archive,
   Inbox,
-  Outbox,
   Trash,
   Recycle,
-  Restore,
   Undo,
   Redo,
-  Cut,
-  Copy as CopyIcon,
-  Paste,
   Clipboard,
   ClipboardCheck,
   ClipboardList,
@@ -127,43 +161,6 @@ import {
   ClipboardMinus,
   ClipboardPlus,
   ClipboardEdit,
-  ClipboardSearch,
-  ClipboardDownload,
-  ClipboardUpload,
-  ClipboardShare,
-  ClipboardHeart,
-  ClipboardStar,
-  ClipboardFlag,
-  ClipboardBookmark,
-  ClipboardLock,
-  ClipboardUnlock,
-  ClipboardSettings,
-  ClipboardRefresh,
-  ClipboardSave,
-  ClipboardUpload as ClipboardUploadIcon,
-  ClipboardDownload as ClipboardDownloadIcon,
-  ClipboardShare as ClipboardShareIcon,
-  ClipboardHeart as ClipboardHeartIcon,
-  ClipboardStar as ClipboardStarIcon,
-  ClipboardFlag as ClipboardFlagIcon,
-  ClipboardBookmark as ClipboardBookmarkIcon,
-  ClipboardLock as ClipboardLockIcon,
-  ClipboardUnlock as ClipboardUnlockIcon,
-  ClipboardSettings as ClipboardSettingsIcon,
-  ClipboardRefresh as ClipboardRefreshIcon,
-  ClipboardSave as ClipboardSaveIcon,
-  ClipboardUpload as ClipboardUploadIcon2,
-  ClipboardDownload as ClipboardDownloadIcon2,
-  ClipboardShare as ClipboardShareIcon2,
-  ClipboardHeart as ClipboardHeartIcon2,
-  ClipboardStar as ClipboardStarIcon2,
-  ClipboardFlag as ClipboardFlagIcon2,
-  ClipboardBookmark as ClipboardBookmarkIcon2,
-  ClipboardLock as ClipboardLockIcon2,
-  ClipboardUnlock as ClipboardUnlockIcon2,
-  ClipboardSettings as ClipboardSettingsIcon2,
-  ClipboardRefresh as ClipboardRefreshIcon2,
-  ClipboardSave as ClipboardSaveIcon2,
   Facebook,
   Twitter,
   Instagram,
@@ -182,7 +179,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+// import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/components/ui/toast';
 import { formatNumber, generateInitials } from '@/lib/utils';
 
@@ -477,21 +474,7 @@ export default function ResumeSlugPage() {
           <div className="absolute inset-0 bg-gradient-radial from-blue-900/15 via-transparent to-pink-900/15"></div>
           
           {/* Starfield */}
-          <div className="absolute inset-0">
-            {[...Array(50)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                  animationDelay: `${Math.random() * 3}s`,
-                  animationDuration: `${2 + Math.random() * 2}s`,
-                  opacity: 0.3 + Math.random() * 0.7
-                }}
-              ></div>
-            ))}
-          </div>
+          <ClientParticles />
           
           {/* Floating Space Debris */}
           <div className="absolute top-20 left-10 w-3 h-3 bg-cyan-400/40 rounded-full animate-bounce"></div>
@@ -771,41 +754,54 @@ export default function ResumeSlugPage() {
                   }}
                 >
                   {/* Header */}
-                  <div className="text-center mb-8">
-                     <h1 
-                       className="text-2xl font-bold mb-2 text-gray-900"
-                       style={{ color: resume.data.template?.primaryColor || '#1f2937' }}
-                     >
-                       {resume.user.fullName || resume.data.content?.name || resume.data.headerInfo?.name || 'Professional'}
-                     </h1>
-                     <p 
-                       className="text-lg font-semibold mb-4 text-gray-800"
-                       style={{ color: resume.data.template?.secondaryColor || '#374151' }}
-                     >
-                       {resume.user.position || resume.data.content?.bestJobTitle || resume.data.headerInfo?.title || 'Professional'}
-                     </p>
-                    <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-sm text-gray-600">
-                      {/* Email and phone hidden for confidentiality */}
-                      {/* {(resume.data.headerInfo?.email || resume.data.content?.email) && (
-                        <div className="flex items-center gap-1 hover:text-purple-600 transition-colors">
-                          <Mail className="h-4 w-4" />
-                          <span className="break-all">{resume.data.headerInfo?.email || resume.data.content?.email}</span>
-                        </div>
-                      )}
-                      {(resume.data.headerInfo?.phone || resume.data.content?.phone) && (
-                        <div className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-                          <Phone className="h-4 w-4" />
-                          <span className="break-all">{resume.data.headerInfo?.phone || resume.data.content?.phone}</span>
-                        </div>
-                      )} */}
-                      {(resume.user.location || resume.data.headerInfo?.location || resume.data.content?.location) && (
-                        <div className="flex items-center gap-1 hover:text-green-600 transition-colors">
-                          <MapPin className="h-4 w-4" />
-                          <span className="break-all">{resume.user.location || resume.data.headerInfo?.location || resume.data.content?.location}</span>
+                  <div className="mb-8">
+                    {/* Header Content - Dynamic layout based on photo presence */}
+                    <div className="relative">
+                      {/* Dynamic Text Content - Centered when no photo, Left-aligned when photo exists */}
+                      <div className={resume.data.profilePhoto ? "text-left" : "text-center"}>
+                        <h1 
+                          className="text-2xl font-bold mb-2 text-gray-900"
+                          style={{ color: resume.data.template?.primaryColor || '#1f2937' }}
+                        >
+                          {resume.user.fullName || resume.data.content?.name || resume.data.headerInfo?.name || 'Professional'}
+                        </h1>
+                        <p 
+                          className="text-lg font-semibold mb-2 text-gray-800"
+                          style={{ color: resume.data.template?.secondaryColor || '#374151' }}
+                        >
+                          {resume.user.position || resume.data.content?.bestJobTitle || resume.data.headerInfo?.title || 'Professional'}
+                        </p>
+                        {(resume.user.location || resume.data.headerInfo?.location || resume.data.content?.location) && (
+                          <p className="text-gray-600">
+                            {resume.user.location || resume.data.headerInfo?.location || resume.data.content?.location}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Profile Photo - Positioned absolutely on the right */}
+                      {resume.data.profilePhoto && (
+                        <div className="absolute -top-2 right-0">
+                          <div className="relative">
+                            <img 
+                              src={resume.data.profilePhoto} 
+                              alt="Profile" 
+                              className="w-32 h-32 rounded-lg object-cover border-4 shadow-lg"
+                              style={{ borderColor: resume.data.template?.primaryColor || '#6366f1' }}
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
                   </div>
+
+                  {/* Divider */}
+                  <div 
+                    className="w-full h-0.5 my-6" 
+                    style={{ 
+                      backgroundColor: resume.data.template?.primaryColor || '#6366f1',
+                      opacity: 0.3
+                    }}
+                  ></div>
 
                    {/* Professional Summary */}
                    {resume.data.content?.summary && (

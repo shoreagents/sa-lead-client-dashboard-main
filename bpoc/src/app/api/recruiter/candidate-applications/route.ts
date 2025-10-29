@@ -104,14 +104,20 @@ export async function GET(request: NextRequest) {
         let companyName = 'Unknown Company';
         
         try {
-          // Get job details from recruiter_jobs table
-          const jobQuery = 'SELECT job_title, company_id FROM recruiter_jobs WHERE id = $1';
+          // Get job details from recruiter_jobs table with company name
+          const jobQuery = `
+            SELECT rj.job_title, COALESCE(c.company_name, u.company, 'Unknown Company') as company_name
+            FROM recruiter_jobs rj
+            LEFT JOIN users u ON u.id = rj.recruiter_id
+            LEFT JOIN companies c ON c.id = rj.company_id
+            WHERE rj.id = $1
+          `;
           const jobResult = await client.query(jobQuery, [row.job_id]);
           
           if (jobResult.rows.length > 0) {
             const job = jobResult.rows[0];
             jobTitle = job.job_title || `Job ${row.job_id}`;
-            companyName = job.company_id || 'Unknown Company';
+            companyName = job.company_name || 'Unknown Company';
           }
         } catch (jobError) {
           console.error('❌ Error fetching job details:', jobError);

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { getSessionToken } from '@/lib/auth-helpers'
 import { Plus, MoreHorizontal, Edit, Trash2, MapPin, User, CheckCircle, AlertCircle, Pause, X, Loader2, Briefcase } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -19,6 +20,29 @@ const industryOptions = [
 const departmentOptions = [
   'Engineering','Information Technology (IT)','Sales','Marketing','Human Resources','Finance/Accounting','Operations','Customer Service','Administration','Research & Development','Legal','Design/Creative','Project Management','Quality Assurance','Business Development','Supply Chain','Others',
 ]
+
+// Helper function to format time display
+const formatTimeAgo = (postedDays: number, createdAt?: string) => {
+  if (postedDays > 0) {
+    return `${postedDays}d ago`
+  }
+  
+  if (createdAt) {
+    const now = new Date()
+    const created = new Date(createdAt)
+    const diffMs = now.getTime() - created.getTime()
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffMinutes = Math.floor(diffMs / (1000 * 60))
+    
+    if (diffHours > 0) {
+      return `${diffHours}h ago`
+    } else if (diffMinutes > 0) {
+      return `${diffMinutes}m ago`
+    }
+  }
+  
+  return 'Just now'
+}
 
 interface JobCard {
   id: string
@@ -91,6 +115,20 @@ function JobsPage() {
   })
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isValidating, setIsValidating] = useState(false)
+
+  // Format salary input with commas for better readability
+  const formatSalaryInput = (value: string) => {
+    // Remove all non-numeric characters except decimal points
+    const numericValue = value.replace(/[^\d.]/g, '')
+    // Add commas for thousands separator
+    if (numericValue) {
+      const parts = numericValue.split('.')
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+      return parts.join('.')
+    }
+    return numericValue
+  }
   const [newStatusData, setNewStatusData] = useState({
     title: '',
     color: 'bg-blue-500'
@@ -165,10 +203,13 @@ function JobsPage() {
     e.preventDefault()
     if (!draggedJob) return
     const jobId = draggedJob
-      setDraggedJob(null)
+    setDraggedJob(null)
 
     const job = jobs.find(j => j.id === jobId)
     if (!job) return
+
+    // Extract numeric ID from prefixed ID (e.g., "job_requests_123" -> "123")
+    const numericId = jobId.replace(/^(job_requests_|processed_job_requests_)/, '')
 
     // Once in Closed, do not allow moving anywhere
     if (job.status === 'closed') return
@@ -189,7 +230,7 @@ function JobsPage() {
         const res = await fetch('/api/admin/jobs/process', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ id: jobId, asIs: true })
+          body: JSON.stringify({ id: numericId, asIs: true })
         })
         if (!res.ok) throw new Error('Failed to process job')
         const data = await res.json()
@@ -202,7 +243,7 @@ function JobsPage() {
         })
         // Immediately hydrate with full processed fields
         try {
-          const fres = await fetch(`/api/admin/processed-jobs/${jobId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+          const fres = await fetch(`/api/admin/processed-jobs/${numericId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
           if (fres.ok) {
             const fdata = await fres.json()
             const pj = fdata.job
@@ -243,11 +284,32 @@ function JobsPage() {
         try {
           const token = await getSessionToken()
           if (!token) throw new Error('Not authenticated')
-          const res = await fetch('/api/admin/processed-jobs', {
+          
+          // First, try to update in processed_job_requests
+          let res = await fetch('/api/admin/processed-jobs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ action: 'update', data: { id: jobId, status: 'closed' } })
+            body: JSON.stringify({ action: 'update', data: { id: numericId, status: 'closed' } })
           })
+          
+          // If job not found in processed_job_requests, process it first then close
+          if (!res.ok && res.status === 404) {
+            console.log('Job not found in processed_job_requests, processing first...')
+            const processRes = await fetch('/api/admin/jobs/process', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ id: numericId, asIs: true, to: 'active' })
+            })
+            if (!processRes.ok) throw new Error('Failed to process job before closing')
+            
+            // Now try to close it
+            res = await fetch('/api/admin/processed-jobs', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ action: 'update', data: { id: numericId, status: 'closed' } })
+            })
+          }
+          
           if (!res.ok) throw new Error('Failed to close processed job')
         } catch (err) {
           console.error(err)
@@ -267,11 +329,11 @@ function JobsPage() {
           const res = await fetch('/api/admin/processed-jobs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ action: 'update', data: { id: jobId, status: newProcessedStatus } })
+            body: JSON.stringify({ action: 'update', data: { id: numericId, status: newProcessedStatus } })
           })
           if (!res.ok) throw new Error('Failed to move processed job')
           // Reload processed fields to hydrate card
-          const fres = await fetch(`/api/admin/processed-jobs/${jobId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+          const fres = await fetch(`/api/admin/processed-jobs/${numericId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
           if (fres.ok) {
             const fdata = await fres.json()
             const pj = fdata.job
@@ -307,9 +369,13 @@ function JobsPage() {
         const res = await fetch('/api/admin/jobs/process', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ id: jobId, asIs: true, to: 'active' })
+          body: JSON.stringify({ id: numericId, asIs: true, to: 'active' })
         })
-        if (!res.ok) throw new Error('Failed to activate job')
+        if (!res.ok) {
+          const errorText = await res.text()
+          console.error('❌ API error response:', errorText)
+          throw new Error(`Failed to activate job: ${res.status} - ${errorText}`)
+        }
         const data = await res.json()
         // Replace original with processed card and set as active/hiring
         setJobs(prevJobs => {
@@ -357,7 +423,7 @@ function JobsPage() {
       const res = await fetch('/api/admin/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ action: 'move', data: { id: jobId, toStatus: status } })
+        body: JSON.stringify({ action: 'move', data: { id: numericId, toStatus: status } })
       })
       if (!res.ok) throw new Error('Failed to move')
     } catch (err) {
@@ -366,76 +432,330 @@ function JobsPage() {
     }
   }
 
+  // Real-time validation for individual fields
+  const validateField = (field: string, value: any) => {
+    const errors: Record<string, string> = {}
+    
+    switch (field) {
+      case 'company':
+        if (!value?.trim()) {
+          errors.company = 'Please select a company'
+        }
+        break
+        
+      case 'title':
+        if (!value?.trim()) {
+          errors.title = 'Job title is required'
+        } else if (value.trim().length < 3) {
+          errors.title = 'Job title must be at least 3 characters'
+        } else if (value.trim().length > 100) {
+          errors.title = 'Job title must be less than 100 characters'
+        }
+        break
+        
+      case 'jobDescription':
+        if (value?.trim() && value.length < 50) {
+          errors.jobDescription = 'Job description must be at least 50 characters if provided'
+        } else if (value?.trim() && value.length > 2000) {
+          errors.jobDescription = 'Job description must be less than 2000 characters'
+        }
+        break
+        
+      case 'experienceLevel':
+        if (!value) {
+          errors.experienceLevel = 'Please select an experience level'
+        }
+        break
+        
+      case 'workArrangement':
+        if (!value) {
+          errors.workArrangement = 'Please select a work arrangement'
+        }
+        break
+        
+      case 'shift':
+        if (!value) {
+          errors.shift = 'Please select a shift'
+        }
+        break
+        
+      case 'applicationDeadline':
+        if (!value) {
+          errors.applicationDeadline = 'Application deadline is required'
+        } else {
+          // Parse date in YYYY-MM-DD format (from HTML date input)
+          const deadline = new Date(value + 'T00:00:00')
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          
+          console.log('🔍 Date Debug:', {
+            inputValue: value,
+            deadline: deadline,
+            today: today,
+            deadlineTime: deadline.getTime(),
+            todayTime: today.getTime(),
+            isDeadlineValid: !isNaN(deadline.getTime()),
+            isDeadlineAfterToday: deadline > today,
+            comparison: deadline <= today
+          })
+          
+          if (isNaN(deadline.getTime())) {
+            errors.applicationDeadline = 'Please enter a valid date'
+          } else if (deadline <= today) {
+            errors.applicationDeadline = 'Deadline must be a future date'
+          } else {
+            const oneYearFromNow = new Date()
+            oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
+            if (deadline > oneYearFromNow) {
+              errors.applicationDeadline = 'Deadline cannot be more than 1 year in the future'
+            } else {
+              const daysDiff = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+              if (daysDiff < 7) {
+                errors.applicationDeadline = 'Deadline should be at least 7 days from now'
+              }
+            }
+          }
+        }
+        break
+        
+      case 'salary':
+        // Parse salary values, removing all non-numeric characters except decimal points
+        const min = parseFloat(String(newJobData.salaryMin || '').replace(/[^\d.]/g, ''))
+        const max = parseFloat(String(newJobData.salaryMax || '').replace(/[^\d.]/g, ''))
+        
+        // Only validate if both fields have reasonable values (not just single digits)
+        const minStr = String(newJobData.salaryMin || '')
+        const maxStr = String(newJobData.salaryMax || '')
+        
+        // Skip validation if max is clearly incomplete (less than 4 digits)
+        if (maxStr.length < 4 && maxStr.length > 0) {
+          console.log('🔍 Skipping validation - max value appears incomplete:', { maxStr, max })
+          return errors
+        }
+        
+        // Skip validation if min is clearly incomplete (less than 4 digits)
+        if (minStr.length < 4 && minStr.length > 0) {
+          console.log('🔍 Skipping validation - min value appears incomplete:', { minStr, min })
+          return errors
+        }
+        
+        // Debug logging to see what's happening
+        console.log('🔍 Salary Debug:', {
+          rawMin: newJobData.salaryMin,
+          rawMax: newJobData.salaryMax,
+          parsedMin: min,
+          parsedMax: max,
+          isMinValid: !isNaN(min),
+          isMaxValid: !isNaN(max),
+          comparison: min < max,
+          equal: min === max,
+          difference: max - min,
+          bothPresent: !!(newJobData.salaryMin && newJobData.salaryMax),
+          validationChecks: {
+            bothValid: !isNaN(min) && !isNaN(max),
+            minValid: min >= 10000 && min <= 1000000,
+            maxValid: max >= 10000 && max <= 1000000,
+            maxGreaterThanMin: max >= min,
+            rangeValid: max - min >= 1000 || max === min
+          },
+          stateValues: {
+            salaryMin: newJobData.salaryMin,
+            salaryMax: newJobData.salaryMax
+          }
+        })
+        
+        if (newJobData.salaryMin && newJobData.salaryMax) {
+          console.log('🔍 Running salary validation with:', { min, max })
+          
+          if (isNaN(min) || isNaN(max)) {
+            console.log('❌ Invalid numbers:', { min, max })
+            errors.salary = 'Salary values must be valid numbers'
+          } else if (min < 0 || max < 0) {
+            console.log('❌ Negative values:', { min, max })
+            errors.salary = 'Salary values must be positive'
+          } else if (min < 10000) {
+            console.log('❌ Min too low:', { min })
+            errors.salary = 'Minimum salary should be at least ₱10,000'
+          } else if (max > 1000000) {
+            console.log('❌ Max too high:', { max })
+            errors.salary = 'Maximum salary should not exceed ₱1,000,000'
+          } else if (max < min) {
+            console.log('❌ Max less than min:', { min, max, difference: max - min })
+            errors.salary = 'Maximum salary must be greater than or equal to minimum salary'
+          } else if (max - min < 1000 && max !== min) {
+            console.log('❌ Range too small:', { min, max, difference: max - min })
+            errors.salary = 'Salary range should be at least ₱1,000 apart'
+          } else {
+            console.log('✅ Salary validation passed:', { min, max })
+          }
+          
+          // If all validations pass, ensure no salary error is set
+          if (!errors.salary) {
+            delete errors.salary
+          }
+        } else if (newJobData.salaryMin && !newJobData.salaryMax) {
+          if (isNaN(min)) {
+            errors.salary = 'Minimum salary must be a valid number'
+          } else if (min < 10000) {
+            errors.salary = 'Minimum salary should be at least ₱10,000'
+          } else {
+            errors.salary = 'Please provide both minimum and maximum salary'
+          }
+        } else if (newJobData.salaryMax && !newJobData.salaryMin) {
+          if (isNaN(max)) {
+            errors.salary = 'Maximum salary must be a valid number'
+          } else if (max > 1000000) {
+            errors.salary = 'Maximum salary should not exceed ₱1,000,000'
+          } else {
+            errors.salary = 'Please provide both minimum and maximum salary'
+          }
+        }
+        break
+        
+      case 'requirements':
+      case 'responsibilities':
+      case 'benefits':
+      case 'skills':
+        if (value && value.length > 2000) {
+          const fieldName = field.charAt(0).toUpperCase() + field.slice(1)
+          errors[field] = `${fieldName} must be less than 2000 characters (currently ${value.length})`
+        }
+        break
+    }
+    
+    return errors
+  }
+
   const validateJobForm = () => {
     const errors: Record<string, string> = {}
     
     // Required fields
     if (!newJobData.company?.trim()) {
-      errors.company = 'Company is required'
+      errors.company = 'Please select a company'
     }
     
     if (!newJobData.title?.trim()) {
       errors.title = 'Job title is required'
+    } else if (newJobData.title.trim().length < 3) {
+      errors.title = 'Job title must be at least 3 characters'
+    } else if (newJobData.title.trim().length > 100) {
+      errors.title = 'Job title must be less than 100 characters'
     }
     
     if (newJobData.jobDescription?.trim() && newJobData.jobDescription.length < 50) {
       errors.jobDescription = 'Job description must be at least 50 characters if provided'
+    } else if (newJobData.jobDescription?.trim() && newJobData.jobDescription.length > 2000) {
+      errors.jobDescription = 'Job description must be less than 2000 characters'
     }
     
     if (!newJobData.experienceLevel) {
-      errors.experienceLevel = 'Experience level is required'
+      errors.experienceLevel = 'Please select an experience level'
     }
     
     if (!newJobData.workArrangement) {
-      errors.workArrangement = 'Work arrangement is required'
+      errors.workArrangement = 'Please select a work arrangement'
     }
     
     if (!newJobData.shift) {
-      errors.shift = 'Shift is required'
+      errors.shift = 'Please select a shift'
     }
     
     if (!newJobData.applicationDeadline) {
       errors.applicationDeadline = 'Application deadline is required'
     }
     
-    // Salary validation
+    // Enhanced salary validation
     if (newJobData.salaryMin && newJobData.salaryMax) {
-      const min = parseFloat(String(newJobData.salaryMin))
-      const max = parseFloat(String(newJobData.salaryMax))
+      const min = parseFloat(String(newJobData.salaryMin).replace(/[^\d.]/g, ''))
+      const max = parseFloat(String(newJobData.salaryMax).replace(/[^\d.]/g, ''))
+      
+      console.log('🔍 Main Validation Debug:', {
+        rawMin: newJobData.salaryMin,
+        rawMax: newJobData.salaryMax,
+        parsedMin: min,
+        parsedMax: max,
+        isMinValid: !isNaN(min),
+        isMaxValid: !isNaN(max),
+        comparison: min < max,
+        equal: min === max,
+        difference: max - min
+      })
+      
       if (isNaN(min) || isNaN(max)) {
-        errors.salary = 'Salary must be valid numbers'
-      } else if (max <= min) {
-        errors.salary = 'Maximum salary must be greater than minimum'
+        errors.salary = 'Salary values must be valid numbers'
       } else if (min < 0 || max < 0) {
         errors.salary = 'Salary values must be positive'
+      } else if (min < 10000) {
+        errors.salary = 'Minimum salary should be at least ₱10,000'
+      } else if (max > 1000000) {
+        errors.salary = 'Maximum salary should not exceed ₱1,000,000'
+      } else if (max < min) {
+        errors.salary = 'Maximum salary must be greater than or equal to minimum salary'
+      } else if (max - min < 1000 && max !== min) {
+        errors.salary = 'Salary range should be at least ₱1,000 apart'
       }
-    } else if (newJobData.salaryMin || newJobData.salaryMax) {
-      errors.salary = 'Please provide both minimum and maximum salary'
+      // If all validations pass, ensure no salary error is set
+      if (!errors.salary) {
+        delete errors.salary
+      }
+    } else if (newJobData.salaryMin && !newJobData.salaryMax) {
+      const min = parseFloat(String(newJobData.salaryMin).replace(/[^\d.]/g, ''))
+      if (isNaN(min)) {
+        errors.salary = 'Minimum salary must be a valid number'
+      } else if (min < 10000) {
+        errors.salary = 'Minimum salary should be at least ₱10,000'
+      } else {
+        errors.salary = 'Please provide both minimum and maximum salary'
+      }
+    } else if (newJobData.salaryMax && !newJobData.salaryMin) {
+      const max = parseFloat(String(newJobData.salaryMax).replace(/[^\d.]/g, ''))
+      if (isNaN(max)) {
+        errors.salary = 'Maximum salary must be a valid number'
+      } else if (max > 1000000) {
+        errors.salary = 'Maximum salary should not exceed ₱1,000,000'
+      } else {
+        errors.salary = 'Please provide both minimum and maximum salary'
+      }
     }
     
-    // Deadline validation
+    // Enhanced deadline validation
     if (newJobData.applicationDeadline) {
-      const deadline = new Date(newJobData.applicationDeadline)
+      // Parse date in YYYY-MM-DD format (from HTML date input)
+      const deadline = new Date(newJobData.applicationDeadline + 'T00:00:00')
       const today = new Date()
-      today.setHours(0, 0, 0, 0) // Reset time to start of day
+      today.setHours(0, 0, 0, 0)
       
-      if (deadline <= today) {
+      if (isNaN(deadline.getTime())) {
+        errors.applicationDeadline = 'Please enter a valid date'
+      } else if (deadline <= today) {
         errors.applicationDeadline = 'Deadline must be a future date'
-      }
-      
-      const oneYearFromNow = new Date()
-      oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
-      if (deadline > oneYearFromNow) {
-        errors.applicationDeadline = 'Deadline cannot be more than 1 year in the future'
+      } else {
+        const oneYearFromNow = new Date()
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1)
+        if (deadline > oneYearFromNow) {
+          errors.applicationDeadline = 'Deadline cannot be more than 1 year in the future'
+        }
+        
+        // Check if deadline is too close (less than 7 days)
+        const daysDiff = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+        if (daysDiff < 7) {
+          errors.applicationDeadline = 'Deadline should be at least 7 days from now'
+        }
       }
     }
     
-    // Text area validations
-    const textAreas = ['requirements', 'responsibilities', 'benefits', 'skills']
-    textAreas.forEach(field => {
+    // Enhanced text area validations
+    const textAreas = [
+      { field: 'requirements', name: 'Requirements' },
+      { field: 'responsibilities', name: 'Responsibilities' },
+      { field: 'benefits', name: 'Benefits' },
+      { field: 'skills', name: 'Skills' }
+    ]
+    
+    textAreas.forEach(({ field, name }) => {
       const value = newJobData[field as keyof typeof newJobData] as string
       if (value && value.length > 2000) {
-        errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} must be less than 2000 characters`
+        errors[field] = `${name} must be less than 2000 characters (currently ${value.length})`
       }
     })
     
@@ -450,6 +770,11 @@ function JobsPage() {
     const errors = validateJobForm()
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors)
+      // Scroll to top to show error banner
+      const modalContent = document.querySelector('.job-modal-scroll')
+      if (modalContent) {
+        modalContent.scrollTo({ top: 0, behavior: 'smooth' })
+      }
       return
     }
     
@@ -527,11 +852,15 @@ function JobsPage() {
     try {
       const token = await getSessionToken()
       if (!token) throw new Error('Not authenticated')
+      
+      // Extract numeric ID from prefixed ID (e.g., "job_requests_123" -> "123")
+      const numericId = job.id.replace(/^(job_requests_|processed_job_requests_)/, '')
+      
       // Always prefer processed row if exists; fallback to original
       let jobData: any = null
       let isProcessedSource = false
       try {
-        const resProcessed = await fetch(`/api/admin/processed-jobs/${job.id}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+        const resProcessed = await fetch(`/api/admin/processed-jobs/${numericId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
         if (resProcessed.ok) {
           const pdata = await resProcessed.json()
           jobData = pdata.job
@@ -539,7 +868,7 @@ function JobsPage() {
         }
       } catch {}
       if (!jobData) {
-        const resOrig = await fetch(`/api/admin/jobs/${job.id}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+        const resOrig = await fetch(`/api/admin/jobs/${numericId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
         const odata = await resOrig.json()
         if (!resOrig.ok) throw new Error(odata.error || 'Failed to load job')
         jobData = odata.job
@@ -547,7 +876,7 @@ function JobsPage() {
       // also load comments
       let comments: any[] = []
       try {
-        const cres = await fetch(`/api/admin/jobs/${job.id}/comments`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+        const cres = await fetch(`/api/admin/jobs/${numericId}/comments`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
         if (cres.ok) { const cdata = await cres.json(); comments = cdata.comments || [] }
       } catch {}
       setEditingJob({ ...(jobData||{}), __comments: comments, __source: isProcessedSource ? 'processed' : 'original' })
@@ -678,9 +1007,27 @@ function JobsPage() {
       setJobs(prev => prev.map(j => j.id === String(editingJob.id)
         ? {
             ...j,
+            // Update all fields that could have been changed
             title: (pendingChanges.title ?? j.title),
             location: (pendingChanges.location ?? j.location),
-            priority: (pendingChanges.priority ?? j.priority)
+            priority: (pendingChanges.priority ?? j.priority),
+            salary: (pendingChanges.salary ?? j.salary),
+            workArrangement: (pendingChanges.workArrangement ?? j.workArrangement),
+            experienceLevel: (pendingChanges.experienceLevel ?? j.experienceLevel),
+            shift: (pendingChanges.shift ?? j.shift),
+            industry: (pendingChanges.industry ?? j.industry),
+            department: (pendingChanges.department ?? j.department),
+            applicationDeadline: (pendingChanges.application_deadline ?? j.applicationDeadline),
+            jobDescription: (pendingChanges.jobDescription ?? j.jobDescription),
+            requirements: (pendingChanges.requirements ?? j.requirements),
+            responsibilities: (pendingChanges.responsibilities ?? j.responsibilities),
+            benefits: (pendingChanges.benefits ?? j.benefits),
+            skills: (pendingChanges.skills ?? j.skills),
+            // Update company info if changed
+            company: (pendingChanges.companyId ? 
+              (members.find(m => m.company_id === pendingChanges.companyId)?.company ?? j.company) : 
+              j.company
+            )
           }
         : j
       ))
@@ -715,7 +1062,7 @@ function JobsPage() {
       const res = await fetch('/api/admin/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ action: 'delete', data: { id: jobId } })
+        body: JSON.stringify({ action: 'delete', data: { id: numericId } })
       })
       if (!res.ok) throw new Error('Failed to delete')
     } catch (err) {
@@ -774,7 +1121,7 @@ function JobsPage() {
       <div className="space-y-8">
 
         {/* Kanban Board */}
-        <div className="flex gap-6 overflow-x-auto pb-4 mt-12">
+        <div className="flex gap-6 overflow-x-auto pb-4 mt-12 min-h-[80vh]">
           {columns.map((column) => {
             const columnJobs: JobCard[] =
               column.id === 'job-request'
@@ -791,7 +1138,7 @@ function JobsPage() {
             return (
                              <div
                  key={column.id}
-                 className="flex-shrink-0 w-80 border-2 border-dashed border-transparent hover:border-white/20 transition-colors"
+                 className="flex-shrink-0 w-80 min-h-[70vh] border-2 border-dashed border-transparent hover:border-white/20 transition-colors"
                  onDragOver={handleDragOver}
                  onDrop={(e) => handleDrop(e, column.id)}
                >
@@ -801,7 +1148,7 @@ function JobsPage() {
                     <div className={`w-3 h-3 rounded-full ${column.color}`}></div>
                     <h3 className="text-lg font-semibold text-white">{column.title}</h3>
                     <Badge className="bg-white/10 text-white border-white/20">
-                       {column.id === 'job-request' ? columnJobs.length : 0}
+                       {columnJobs.length}
                     </Badge>
                   </div>
                   {column.id === 'job-request' ? (
@@ -817,7 +1164,8 @@ function JobsPage() {
                   )}
                 </div>
                 {column.id === 'job-request' || column.id === 'approved' || column.id === 'hiring' || column.id === 'closed' ? (
-                <div className="space-y-3">
+                <div className="relative">
+                  <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-2 pb-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
                   {columnJobs.map((job) => (
                                                              <div
                       key={job.id}
@@ -880,7 +1228,7 @@ function JobsPage() {
                               <span className="font-medium">₱{job.salary.replace('₱', '')}</span>
                             </div>
                             <div className="flex items-center justify-between text-xs text-gray-400">
-                              <span>{job.postedDays}d ago</span>
+                              <span>{formatTimeAgo(job.postedDays, job.createdAt)}</span>
                               <span>{job.applicants} applicants</span>
                             </div>
                             {job.applicationDeadline && (
@@ -908,6 +1256,10 @@ function JobsPage() {
                       </Card>
                     </div>
                   ))}
+                  </div>
+                  {/* Gradient indicators for scrollable content */}
+                  <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-[#0b0b0d] to-transparent pointer-events-none z-10"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-[#0b0b0d] to-transparent pointer-events-none z-10"></div>
                 </div>
                 ) : (
                   <div className="min-h-[120px] rounded-lg border border-white/10 bg-white/5" />
@@ -934,6 +1286,36 @@ function JobsPage() {
               <DialogTitle className="text-2xl font-bold text-white">Create Job Request</DialogTitle>
               <DialogDescription className="text-gray-300">Provide details for the new job request. All fields can be edited later.</DialogDescription>
             </DialogHeader>
+            
+            {/* Sticky Error Banner */}
+            {Object.keys(formErrors).length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="sticky top-0 z-50 bg-red-500/10 border border-red-400/30 rounded-lg p-4 mb-4"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center mt-0.5">
+                    <span className="text-red-400 text-sm">!</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-red-400 font-semibold text-sm mb-2">
+                      Please fix the following errors:
+                    </h4>
+                    <ul className="space-y-1">
+                      {Object.entries(formErrors).map(([field, error]) => (
+                        <li key={field} className="text-red-300 text-xs flex items-center gap-2">
+                          <span className="w-1 h-1 bg-red-400 rounded-full flex-shrink-0"></span>
+                          <span className="capitalize">{field.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                          <span>{error}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            
             <div className="space-y-5 overflow-y-auto max-h-[75vh] pr-2 job-modal-scroll">
               {/* Member & Title */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -947,14 +1329,20 @@ function JobsPage() {
                     }`}
                     value={newJobData.company}
                     onChange={(e)=> {
-                      setNewJobData(p=> ({...p, company: e.target.value}))
-                      if (formErrors.company) {
-                        setFormErrors(prev => {
-                          const newErrors = { ...prev }
+                      const value = e.target.value
+                      setNewJobData(p=> ({...p, company: value}))
+                      
+                      // Real-time validation
+                      const fieldErrors = validateField('company', value)
+                      setFormErrors(prev => {
+                        const newErrors = { ...prev }
+                        if (fieldErrors.company) {
+                          newErrors.company = fieldErrors.company
+                        } else {
                           delete newErrors.company
-                          return newErrors
-                        })
-                      }
+                        }
+                        return newErrors
+                      })
                     }}
                   >
                     <option value="">Select company</option>
@@ -973,10 +1361,20 @@ function JobsPage() {
                   <Input 
                     value={newJobData.title} 
                     onChange={(e)=> {
-                      setNewJobData(p=> ({...p, title: e.target.value}))
-                      if (formErrors.title) {
-                        setFormErrors(prev => ({ ...prev, title: '' }))
-                      }
+                      const value = e.target.value
+                      setNewJobData(p=> ({...p, title: value}))
+                      
+                      // Real-time validation
+                      const fieldErrors = validateField('title', value)
+                      setFormErrors(prev => {
+                        const newErrors = { ...prev }
+                        if (fieldErrors.title) {
+                          newErrors.title = fieldErrors.title
+                        } else {
+                          delete newErrors.title
+                        }
+                        return newErrors
+                      })
                     }} 
                     placeholder="Enter job title" 
                     className={`bg-white/10 border text-white placeholder:text-gray-400 ${
@@ -998,18 +1396,21 @@ function JobsPage() {
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">₱</span>
                     )}
                     <Input 
-                      value={newJobData.salaryMin} 
+                      value={formatSalaryInput(newJobData.salaryMin)} 
                       onChange={(e)=> {
-                        setNewJobData(p=> ({...p, salaryMin: e.target.value}))
-                        if (formErrors.salary) {
-                          setFormErrors(prev => {
-                            const newErrors = { ...prev }
-                            delete newErrors.salary
-                            return newErrors
-                          })
-                        }
+                        const value = e.target.value
+                        // Store the raw numeric value for validation
+                        const numericValue = value.replace(/[^\d.]/g, '')
+                        setNewJobData(p=> ({...p, salaryMin: numericValue}))
+                        
+                        // Clear any existing salary errors when user starts typing
+                        setFormErrors(prev => {
+                          const newErrors = { ...prev }
+                          delete newErrors.salary
+                          return newErrors
+                        })
                       }} 
-                      placeholder="e.g., 20000" 
+                      placeholder="e.g., 20,000" 
                       className={`bg-white/10 border text-white ${newJobData.salaryMin ? 'pl-8' : ''} ${
                         formErrors.salary ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                       }`} 
@@ -1023,18 +1424,21 @@ function JobsPage() {
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">₱</span>
                     )}
                     <Input 
-                      value={newJobData.salaryMax} 
+                      value={formatSalaryInput(newJobData.salaryMax)} 
                       onChange={(e)=> {
-                        setNewJobData(p=> ({...p, salaryMax: e.target.value}))
-                        if (formErrors.salary) {
-                          setFormErrors(prev => {
-                            const newErrors = { ...prev }
-                            delete newErrors.salary
-                            return newErrors
-                          })
-                        }
+                        const value = e.target.value
+                        // Store the raw numeric value for validation
+                        const numericValue = value.replace(/[^\d.]/g, '')
+                        setNewJobData(p=> ({...p, salaryMax: numericValue}))
+                        
+                        // Clear any existing salary errors when user starts typing
+                        setFormErrors(prev => {
+                          const newErrors = { ...prev }
+                          delete newErrors.salary
+                          return newErrors
+                        })
                       }} 
-                      placeholder="e.g., 25000" 
+                      placeholder="e.g., 25,000" 
                       className={`bg-white/10 border text-white ${newJobData.salaryMax ? 'pl-8' : ''} ${
                         formErrors.salary ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                       }`} 
@@ -1065,10 +1469,20 @@ function JobsPage() {
                     }`} 
                     value={newJobData.workArrangement} 
                     onChange={(e)=> {
-                      setNewJobData(p=> ({...p, workArrangement: e.target.value}))
-                      if (formErrors.workArrangement) {
-                        setFormErrors(prev => ({ ...prev, workArrangement: '' }))
-                      }
+                      const value = e.target.value
+                      setNewJobData(p=> ({...p, workArrangement: value}))
+                      
+                      // Real-time validation
+                      const fieldErrors = validateField('workArrangement', value)
+                      setFormErrors(prev => {
+                        const newErrors = { ...prev }
+                        if (fieldErrors.workArrangement) {
+                          newErrors.workArrangement = fieldErrors.workArrangement
+                        } else {
+                          delete newErrors.workArrangement
+                        }
+                        return newErrors
+                      })
                     }}
                   >
                     <option value="onsite">Onsite</option>
@@ -1089,10 +1503,20 @@ function JobsPage() {
                     }`} 
                     value={newJobData.experienceLevel} 
                     onChange={(e)=> {
-                      setNewJobData(p=> ({...p, experienceLevel: e.target.value as any}))
-                      if (formErrors.experienceLevel) {
-                        setFormErrors(prev => ({ ...prev, experienceLevel: '' }))
-                      }
+                      const value = e.target.value
+                      setNewJobData(p=> ({...p, experienceLevel: value as any}))
+                      
+                      // Real-time validation
+                      const fieldErrors = validateField('experienceLevel', value)
+                      setFormErrors(prev => {
+                        const newErrors = { ...prev }
+                        if (fieldErrors.experienceLevel) {
+                          newErrors.experienceLevel = fieldErrors.experienceLevel
+                        } else {
+                          delete newErrors.experienceLevel
+                        }
+                        return newErrors
+                      })
                     }}
                   >
                     <option value="">Select level</option>
@@ -1111,10 +1535,20 @@ function JobsPage() {
                   <select 
                     value={newJobData.shift} 
                     onChange={(e)=> {
-                      setNewJobData(p=> ({...p, shift: e.target.value as 'day' | 'night'}))
-                      if (formErrors.shift) {
-                        setFormErrors(prev => ({ ...prev, shift: '' }))
-                      }
+                      const value = e.target.value
+                      setNewJobData(p=> ({...p, shift: value as 'day' | 'night'}))
+                      
+                      // Real-time validation
+                      const fieldErrors = validateField('shift', value)
+                      setFormErrors(prev => {
+                        const newErrors = { ...prev }
+                        if (fieldErrors.shift) {
+                          newErrors.shift = fieldErrors.shift
+                        } else {
+                          delete newErrors.shift
+                        }
+                        return newErrors
+                      })
                     }} 
                     className={`w-full job-select border rounded-lg px-3 py-2 ${
                       formErrors.shift ? 'border-red-400 bg-red-500/10' : 'border-white/20'
@@ -1134,24 +1568,35 @@ function JobsPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-300">
                     Application Deadline <span className="text-red-400">*</span>
+                    <span className="text-xs text-gray-400 ml-2">(DD/MM/YY)</span>
                   </label>
                   <Input 
                     type="date" 
                     value={newJobData.applicationDeadline} 
                     onChange={(e)=> {
-                      setNewJobData(p=> ({...p, applicationDeadline: e.target.value}))
-                      // Clear error when user starts typing
-                      if (formErrors.applicationDeadline) {
-                        setFormErrors(prev => {
-                          const newErrors = { ...prev }
+                      const value = e.target.value
+                      console.log('🔍 Date Input Change:', { value, length: value.length })
+                      setNewJobData(p=> ({...p, applicationDeadline: value}))
+                      
+                      // Real-time validation
+                      const fieldErrors = validateField('applicationDeadline', value)
+                      setFormErrors(prev => {
+                        const newErrors = { ...prev }
+                        if (fieldErrors.applicationDeadline) {
+                          newErrors.applicationDeadline = fieldErrors.applicationDeadline
+                        } else {
                           delete newErrors.applicationDeadline
-                          return newErrors
-                        })
-                      }
+                        }
+                        return newErrors
+                      })
                     }} 
                     className={`bg-white/10 border text-white ${
                       formErrors.applicationDeadline ? 'border-red-400 bg-red-500/10' : 'border-white/20'
-                    }`} 
+                    }`}
+                    style={{
+                      textAlign: 'left',
+                      paddingRight: '40px'
+                    }}
                   />
                   {formErrors.applicationDeadline && (
                     <p className="text-red-400 text-xs mt-1">{formErrors.applicationDeadline}</p>
@@ -1192,12 +1637,22 @@ function JobsPage() {
                 </label>
                 <textarea 
                   value={newJobData.jobDescription} 
-                                      onChange={(e)=> {
-                      setNewJobData(p=> ({...p, jobDescription: e.target.value}))
-                      if (formErrors.jobDescription) {
-                        setFormErrors(prev => ({ ...prev, jobDescription: '' }))
+                  onChange={(e)=> {
+                    const value = e.target.value
+                    setNewJobData(p=> ({...p, jobDescription: value}))
+                    
+                    // Real-time validation
+                    const fieldErrors = validateField('jobDescription', value)
+                    setFormErrors(prev => {
+                      const newErrors = { ...prev }
+                      if (fieldErrors.jobDescription) {
+                        newErrors.jobDescription = fieldErrors.jobDescription
+                      } else {
+                        delete newErrors.jobDescription
                       }
-                    }} 
+                      return newErrors
+                    })
+                  }} 
                   className={`w-full min-h-[100px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
                     formErrors.jobDescription ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
@@ -1214,12 +1669,22 @@ function JobsPage() {
                 <label className="text-sm font-medium text-gray-300">Requirements (one per line)</label>
                 <textarea 
                   value={newJobData.requirements} 
-                                      onChange={(e)=> {
-                      setNewJobData(p=> ({...p, requirements: e.target.value}))
-                      if (formErrors.requirements) {
-                        setFormErrors(prev => ({ ...prev, requirements: '' }))
+                  onChange={(e)=> {
+                    const value = e.target.value
+                    setNewJobData(p=> ({...p, requirements: value}))
+                    
+                    // Real-time validation
+                    const fieldErrors = validateField('requirements', value)
+                    setFormErrors(prev => {
+                      const newErrors = { ...prev }
+                      if (fieldErrors.requirements) {
+                        newErrors.requirements = fieldErrors.requirements
+                      } else {
+                        delete newErrors.requirements
                       }
-                    }} 
+                      return newErrors
+                    })
+                  }} 
                   className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
                     formErrors.requirements ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
@@ -1234,12 +1699,22 @@ function JobsPage() {
                 <label className="text-sm font-medium text-gray-300">Responsibilities (one per line)</label>
                 <textarea 
                   value={newJobData.responsibilities} 
-                                      onChange={(e)=> {
-                      setNewJobData(p=> ({...p, responsibilities: e.target.value}))
-                      if (formErrors.responsibilities) {
-                        setFormErrors(prev => ({ ...prev, responsibilities: '' }))
+                  onChange={(e)=> {
+                    const value = e.target.value
+                    setNewJobData(p=> ({...p, responsibilities: value}))
+                    
+                    // Real-time validation
+                    const fieldErrors = validateField('responsibilities', value)
+                    setFormErrors(prev => {
+                      const newErrors = { ...prev }
+                      if (fieldErrors.responsibilities) {
+                        newErrors.responsibilities = fieldErrors.responsibilities
+                      } else {
+                        delete newErrors.responsibilities
                       }
-                    }} 
+                      return newErrors
+                    })
+                  }} 
                   className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
                     formErrors.responsibilities ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
@@ -1254,12 +1729,22 @@ function JobsPage() {
                 <label className="text-sm font-medium text-gray-300">Benefits (one per line)</label>
                 <textarea 
                   value={newJobData.benefits} 
-                                      onChange={(e)=> {
-                      setNewJobData(p=> ({...p, benefits: e.target.value}))
-                      if (formErrors.benefits) {
-                        setFormErrors(prev => ({ ...prev, benefits: '' }))
+                  onChange={(e)=> {
+                    const value = e.target.value
+                    setNewJobData(p=> ({...p, benefits: value}))
+                    
+                    // Real-time validation
+                    const fieldErrors = validateField('benefits', value)
+                    setFormErrors(prev => {
+                      const newErrors = { ...prev }
+                      if (fieldErrors.benefits) {
+                        newErrors.benefits = fieldErrors.benefits
+                      } else {
+                        delete newErrors.benefits
                       }
-                    }} 
+                      return newErrors
+                    })
+                  }} 
                   className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
                     formErrors.benefits ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
@@ -1274,12 +1759,22 @@ function JobsPage() {
                 <label className="text-sm font-medium text-gray-300">Skills (one per line)</label>
                 <textarea 
                   value={newJobData.skills} 
-                                      onChange={(e)=> {
-                      setNewJobData(p=> ({...p, skills: e.target.value}))
-                      if (formErrors.skills) {
-                        setFormErrors(prev => ({ ...prev, skills: '' }))
+                  onChange={(e)=> {
+                    const value = e.target.value
+                    setNewJobData(p=> ({...p, skills: value}))
+                    
+                    // Real-time validation
+                    const fieldErrors = validateField('skills', value)
+                    setFormErrors(prev => {
+                      const newErrors = { ...prev }
+                      if (fieldErrors.skills) {
+                        newErrors.skills = fieldErrors.skills
+                      } else {
+                        delete newErrors.skills
                       }
-                    }} 
+                      return newErrors
+                    })
+                  }} 
                   className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
                     formErrors.skills ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
@@ -1944,12 +2439,20 @@ function JobsPage() {
              </AlertDialogHeader>
              <AlertDialogAction 
                className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white"
-               onClick={() => setShowSuccessAlert(false)}
+               onClick={() => {
+                 setShowSuccessAlert(false)
+                 // Also close the edit job dialog if it's a success message
+                 if (!successMessage.includes('Error')) {
+                   setIsEditJobDialogOpen(false)
+                   setEditingJob(null)
+                 }
+               }}
              >
                OK
              </AlertDialogAction>
            </AlertDialogContent>
          </AlertDialog>
+
         </div>
       </AdminLayout>
     )
