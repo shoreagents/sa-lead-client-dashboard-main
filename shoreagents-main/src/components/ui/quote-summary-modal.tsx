@@ -4,7 +4,7 @@ import { X, Users, CheckCircle, Eye, Download, Send, MessageCircle } from 'lucid
 import { Button } from './button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './card';
 import { Badge } from './badge';
-import { UserQuoteSummary } from '@/lib/userQuoteService';
+import { UserQuoteSummary } from '@/hooks/use-api';
 import { useState } from 'react';
 import { useCurrency } from '@/lib/currencyContext';
 import { InterviewRequestModal, InterviewRequestData } from './interview-request-modal';

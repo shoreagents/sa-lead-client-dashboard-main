@@ -18,6 +18,17 @@ export function UserGuard({
   const { user, loading, isAuthenticated, isVerified } = useUserAuth()
   const router = useRouter()
 
+  // Debug logging
+  console.log('🔍 UserGuard Debug:', JSON.stringify({
+    user: user?.user_id,
+    loading,
+    isAuthenticated,
+    isVerified,
+    requireVerification,
+    willRedirect: !loading && !isAuthenticated,
+    showFallback: loading || !isAuthenticated || (requireVerification && !isVerified)
+  }, null, 2))
+
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {

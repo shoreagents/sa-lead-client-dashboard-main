@@ -115,9 +115,9 @@ export default function LeadQuotations() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800">Completed</Badge>
+        return <Badge className="bg-lime-100 text-lime-800">Completed</Badge>
       case 'in_progress':
-        return <Badge className="bg-yellow-100 text-yellow-800">In Progress</Badge>
+        return <Badge className="bg-lime-50 text-lime-700">In Progress</Badge>
       case 'draft':
         return <Badge className="bg-gray-100 text-gray-800">Draft</Badge>
       default:
@@ -145,43 +145,8 @@ export default function LeadQuotations() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Lead Quotations</h1>
-              <Badge variant="secondary" className="text-xs">
-                Welcome back, {admin?.first_name}!
-              </Badge>
-            </div>
-          </header>
-          
-          <div className="flex flex-1 flex-col gap-4 p-4">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
             <div className="w-full">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Lead Quotations</h1>
-                  <p className="text-gray-600 mt-2">Track and manage pricing quotes from your leads</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Button
-                    onClick={() => refetch()}
-                    disabled={isLoading}
-                    variant="outline"
-                    className="border-lime-200 text-lime-700 hover:bg-lime-50"
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                  <Button
-                    onClick={handleLogout}
-                    variant="outline"
-                    className="border-lime-200 text-lime-700 hover:bg-lime-50"
-                  >
-                    Logout
-                  </Button>
-                </div>
-              </div>
 
               {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -254,8 +219,8 @@ export default function LeadQuotations() {
                   ) : error ? (
                     <div className="flex items-center justify-center py-8">
                       <div className="text-center">
-                        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                        <p className="text-red-600 font-medium">Failed to load quotations</p>
+                        <AlertCircle className="w-12 h-12 text-lime-500 mx-auto mb-4" />
+                        <p className="text-lime-600 font-medium">Failed to load quotations</p>
                         <p className="text-sm text-gray-600 mt-2">Please try refreshing the page</p>
                         <Button 
                           onClick={() => refetch()} 
@@ -328,9 +293,9 @@ export default function LeadQuotations() {
                               </div>
 
                               {/* Progress Steps */}
-                              <div className="space-y-4 border-r border-gray-200 pr-6 bg-blue-50/30 p-4 rounded-lg">
+                              <div className="space-y-4 border-r border-gray-200 pr-6 bg-lime-50/30 p-4 rounded-lg">
                                 <div className="flex items-center gap-2 mb-3">
-                                  <TrendingUp className="w-4 h-4 text-blue-600" />
+                                  <TrendingUp className="w-4 h-4 text-lime-600" />
                                   <h4 className="font-medium text-gray-900">Progress</h4>
                                 </div>
                                 <div className="space-y-2">

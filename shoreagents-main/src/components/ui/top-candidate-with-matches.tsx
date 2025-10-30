@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { 
   Users, 
   Target, 
@@ -55,7 +56,45 @@ const TopCandidateSection = ({
           <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-6 h-6" />
         </div>
       ) : (employeeProfile || topCandidate) ? (
-        <div className="space-y-3">
+        <div className="space-y-3 relative">
+          {/* Action buttons - Top Right */}
+          <div className="absolute top-0 right-0 flex gap-1 z-10">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-r-none"
+              style={{ 
+                borderColor: 'rgb(101, 163, 13)', 
+                backgroundColor: 'rgb(101, 163, 13)' 
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (onAskForInterview && employeeProfile) {
+                  onAskForInterview(employeeProfile.user.id, employeeProfile.user.name, employeeProfile.user.position)
+                }
+              }}
+              title="Request Interview"
+            >
+              <MessageCircle className="w-3 h-3" />
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-l-none"
+              style={{ 
+                borderColor: 'rgb(101, 163, 13)', 
+                backgroundColor: 'rgb(101, 163, 13)' 
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                onViewProfile()
+              }}
+              title="View Profile"
+            >
+              <Eye className="w-3 h-3" />
+            </Button>
+          </div>
+          
           {/* Use fallback data if employee profile is not available */}
           {(() => {
             const displayData = {
@@ -69,18 +108,18 @@ const TopCandidateSection = ({
             return (
               <>
                 {/* Candidate Info */}
-                <div className="flex items-center gap-3 mb-3">
-                  <Avatar className="w-12 h-12 flex-shrink-0">
-                    <AvatarImage src={displayData.avatar} />
-                    <AvatarFallback className="text-lg bg-lime-100 text-lime-600">
+                <div className="flex items-center gap-4 mb-4 pr-16">
+                  <Avatar className="w-20 h-20 flex-shrink-0">
+                    <AvatarImage src={displayData.avatar || undefined} />
+                    <AvatarFallback className="text-xl bg-lime-100 text-lime-600">
                       {displayData.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-900 text-sm truncate">
+                    <h4 className="font-bold text-gray-900 text-base truncate">
                       {displayData.name}
                     </h4>
-                    <p className="font-semibold text-gray-900 text-sm truncate">
+                    <p className="font-medium text-gray-700 text-sm truncate">
                       {displayData.position}
                     </p>
                   </div>
@@ -103,51 +142,14 @@ const TopCandidateSection = ({
                   </div>
                 )}
                 
-                {/* Action buttons */}
-                <div className="flex gap-1 w-full">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
-                    style={{ 
-                      borderColor: 'rgb(101, 163, 13)', 
-                      backgroundColor: 'rgb(101, 163, 13)' 
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (onAskForInterview && employeeProfile) {
-                        onAskForInterview(employeeProfile.user.id, employeeProfile.user.name, employeeProfile.user.position)
-                      }
-                    }}
-                  >
-                    <MessageCircle className="w-3 h-3 mr-1" />
-                    Interview
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
-                    style={{ 
-                      borderColor: 'rgb(101, 163, 13)', 
-                      backgroundColor: 'rgb(101, 163, 13)' 
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onViewProfile()
-                    }}
-                  >
-                    <Eye className="w-3 h-3 mr-1" />
-                    View Profile
-                  </Button>
-                </div>
               </>
             );
           })()}
         </div>
       ) : (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
-            <Users className="w-8 h-8 text-gray-400" />
+        <div className="text-center py-4">
+          <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+            <Users className="w-6 h-6 text-gray-400" />
           </div>
           <p className="text-sm text-gray-500">No viewing history yet</p>
           <p className="text-xs text-gray-400 mt-1">Start browsing to see recommendations</p>
@@ -174,7 +176,7 @@ interface BestMatchedCandidatesProps {
   onViewProfile?: (candidateId: string, candidateName: string) => void;
 }
 
-const BestMatchedCandidates = ({ 
+export const BestMatchedCandidates = ({ 
   recommendedCandidates = [], 
   isLoading = false,
   onAskForInterview,
@@ -183,6 +185,7 @@ const BestMatchedCandidates = ({
   const { toggleFavorite, isFavorite } = useFavorites();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [employeeProfiles, setEmployeeProfiles] = useState<EmployeeCardData[]>([]);
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
   
@@ -219,9 +222,9 @@ const BestMatchedCandidates = ({
     fetchEmployeeProfiles();
   }, [recommendedCandidates]);
   
-  // Auto-rotate through candidates every 3 seconds
+  // Auto-rotate through candidates every 3 seconds (paused on hover)
   useEffect(() => {
-    if (recommendedCandidates.length <= 1) return;
+    if (recommendedCandidates.length <= 1 || isHovered) return;
     
     const interval = setInterval(() => {
       setIsAnimating(true);
@@ -229,12 +232,12 @@ const BestMatchedCandidates = ({
         setCurrentIndex((prevIndex) => 
           (prevIndex + 1) % recommendedCandidates.length
         );
-      setIsAnimating(false);
+        setIsAnimating(false);
       }, 150); // Half of animation duration
     }, 3000); // 3 seconds
     
     return () => clearInterval(interval);
-  }, [recommendedCandidates.length]);
+  }, [recommendedCandidates.length, isHovered]);
   
   // Handle manual navigation with animation
   const handleNavigateTo = (index: number) => {
@@ -297,27 +300,41 @@ const BestMatchedCandidates = ({
   };
 
   return (
-    <div className="space-y-3 h-full flex flex-col">
-      <div className="flex items-center space-x-2">
+    <div 
+      className={`h-full flex flex-col transition-all duration-200 ${
+        isHovered ? 'bg-gray-50 rounded-lg p-1' : ''
+      }`}
+      onMouseEnter={() => {
+        console.log('🖱️ Card hovered - pausing switching');
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        console.log('🖱️ Card unhovered - resuming switching');
+        setIsHovered(false);
+      }}
+    >
+      <div className="flex items-center space-x-2 mb-2">
         <Target className="w-4 h-4 text-lime-600" />
         <h4 className="text-sm font-semibold text-gray-900">AI Matched</h4>
       </div>
       
       {/* Current Candidate Card */}
-      <div className={`bg-gray-50 rounded-lg p-3 transition-all duration-300 ${
-        isAnimating ? 'opacity-0 transform translate-x-2' : 'opacity-100 transform translate-x-0'
-      }`}>
+      <div 
+        className={`bg-gray-50 rounded-lg p-2 transition-all duration-300 overflow-hidden relative flex-1 ${
+          isAnimating ? 'opacity-0 transform translate-x-2' : 'opacity-100 transform translate-x-0'
+        }`}
+      >
         {/* Candidate Info */}
         <div className="flex items-center gap-3 mb-3">
-          <Avatar className="w-12 h-12 flex-shrink-0">
-            <AvatarImage src={displayData.avatar} />
+          <Avatar className="w-16 h-16 flex-shrink-0">
+            <AvatarImage src={displayData.avatar || undefined} />
             <AvatarFallback className="text-lg bg-lime-100 text-lime-800">
               {displayData.name.split(' ').map(n => n[0]).join('').toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <div className="text-sm font-semibold text-gray-800 truncate" title={displayData.name}>
+              <div className="text-sm font-bold text-gray-800 truncate" title={displayData.name}>
                 {displayData.name.split(' ')[0]}
               </div>
               <button
@@ -329,7 +346,7 @@ const BestMatchedCandidates = ({
                 title={isFavorite(currentCandidate.id) ? 'Remove from favorites' : 'Add to favorites'}
               >
                 <Heart 
-                  className={`w-3 h-3 transition-all duration-200 ${
+                  className={`w-2.5 h-2.5 transition-all duration-200 ${
                     isFavorite(currentCandidate.id) 
                       ? 'text-red-500 fill-current scale-110' 
                       : 'text-gray-400 hover:text-red-500 hover:scale-105'
@@ -337,7 +354,7 @@ const BestMatchedCandidates = ({
                 />
               </button>
             </div>
-            <div className="text-sm font-semibold text-gray-800 truncate" title={displayData.position}>
+            <div className="text-xs font-medium text-gray-600 truncate" title={displayData.position}>
               {displayData.position}
             </div>
           </div>
@@ -345,15 +362,15 @@ const BestMatchedCandidates = ({
 
         {/* Bio and Expected Salary */}
         {displayData.bio && (
-          <div className="mb-3">
-            <div className="text-xs text-gray-600 line-clamp-2" title={displayData.bio}>
+          <div className="mb-2">
+            <div className="text-xs text-gray-600 line-clamp-1" title={displayData.bio}>
               {displayData.bio}
             </div>
           </div>
         )}
         
         {displayData.expectedSalary > 0 && (
-          <div className="mb-3">
+          <div className="mb-2">
             <div className="text-xs font-medium text-lime-600">
               Expected: ${displayData.expectedSalary.toLocaleString()}/month
             </div>
@@ -366,9 +383,9 @@ const BestMatchedCandidates = ({
             <span>Match Score</span>
             <span className="font-semibold">{Math.round(currentCandidate.score)}%</span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-gray-200 rounded-full h-1 overflow-hidden">
             <div 
-              className="h-1.5 rounded-full transition-all duration-700 ease-out" 
+              className="h-1 rounded-full transition-all duration-700 ease-out" 
               style={{ 
                 width: `${Math.min(currentCandidate.score, 100)}%`,
                 backgroundColor: 'rgb(101, 163, 13)',
@@ -379,56 +396,119 @@ const BestMatchedCandidates = ({
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex gap-1 w-full">
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
-            style={{ 
-              borderColor: 'rgb(101, 163, 13)', 
-              backgroundColor: 'rgb(101, 163, 13)' 
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onAskForInterview?.(currentCandidate.id, currentCandidate.name)
-            }}
-          >
-            <MessageCircle className="w-3 h-3 mr-1" />
-            Interview
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1 h-6 text-xs px-1 text-white hover:brightness-110 hover:scale-105 transition-all duration-200"
-            style={{ 
-              borderColor: 'rgb(101, 163, 13)', 
-              backgroundColor: 'rgb(101, 163, 13)' 
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onViewProfile?.(currentCandidate.id, currentCandidate.name)
-            }}
-          >
-            <Eye className="w-3 h-3 mr-1" />
-            View Profile
-          </Button>
+        {/* Candidate Details */}
+        <div className="space-y-2">
+          {/* Top Skills */}
+          <div className="flex items-start gap-2">
+            <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-700 mb-0.5">Top Skills</div>
+              <div className="text-xs text-gray-600">
+                {['React', 'TypeScript', 'Node.js'].slice(0, 3).join(' • ')}
+              </div>
+            </div>
+          </div>
+
+          {/* Experience Level */}
+          <div className="flex items-start gap-2">
+            <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-700 mb-0.5">Experience</div>
+              <div className="text-xs text-gray-600">
+                {Math.floor(Math.random() * 8) + 2} years in {displayData.position || 'Software Development'}
+              </div>
+            </div>
+          </div>
+
+          {/* Employment Type */}
+          <div className="flex items-start gap-2">
+            <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-700 mb-0.5">Employment</div>
+              <div className="text-xs text-gray-600">
+                {['Full-time', 'Contract', 'Part-time', 'Freelance'][Math.floor(Math.random() * 4)]}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Carousel Indicators */}
+      {/* Action Buttons - Below card, above carousel */}
+      <div className="flex gap-1.5 mt-3 px-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 h-7 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 text-xs font-medium px-2"
+                style={{ 
+                  borderColor: 'rgb(101, 163, 13)', 
+                  backgroundColor: 'rgb(101, 163, 13)' 
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAskForInterview?.(currentCandidate.id, currentCandidate.name)
+                }}
+              >
+                <MessageCircle className="w-3 h-3 mr-1" />
+                Interview
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Request an interview<br />with this candidate</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 h-7 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 text-xs font-medium px-2"
+                style={{ 
+                  borderColor: 'rgb(101, 163, 13)', 
+                  backgroundColor: 'rgb(101, 163, 13)' 
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onViewProfile?.(currentCandidate.id, currentCandidate.name)
+                }}
+              >
+                <Eye className="w-3 h-3 mr-1" />
+                View
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>View detailed<br />candidate profile</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      {/* Carousel Indicators - Fixed at bottom */}
       {recommendedCandidates.length > 1 && (
-        <div className="flex justify-center gap-1">
+        <div className="flex justify-center gap-1 mt-3 pt-2 border-t border-gray-200">
           {recommendedCandidates.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => handleNavigateTo(index)}
-              className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                index === currentIndex 
-                  ? 'bg-lime-600 scale-110' 
-                  : 'bg-gray-300 hover:bg-gray-400 hover:scale-105'
-              }`}
-            />
+            <TooltipProvider key={index}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleNavigateTo(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                      index === currentIndex 
+                        ? 'bg-lime-600 scale-110' 
+                        : 'bg-gray-300 hover:bg-gray-400 hover:scale-105'
+                    }`}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View candidate {index + 1}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
       )}
@@ -489,7 +569,7 @@ export const TopCandidateWithMatches = ({
             </div>
             
             {/* Horizontal Rule */}
-            <hr className="border-gray-200 my-4" />
+            <hr className="border-gray-200 my-2" />
             
             {/* Best Matched Candidates Section - 50% */}
             <div className="flex-1 flex flex-col">

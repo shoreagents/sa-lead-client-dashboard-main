@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from './supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { generateUserId } from '@/lib/userEngagementService'
@@ -323,18 +323,50 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchUserData])
 
+  // Authentication effect - check session and listen for changes
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: { user: User } | null) => {
+    // Skip on server side
+    if (typeof window === 'undefined') return
+
+    let mounted = true
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return
+      
       if (session?.user) {
-        const userData = await fetchUserData(session.user)
-        setUser(userData)
+        fetchUserData(session.user).then(userData => {
+          if (mounted) {
+            setUser(userData)
+            setLoading(false)
+          }
+        })
       } else {
         setUser(null)
+        setLoading(false)
       }
-      setLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return
+      
+      if (session?.user) {
+        const userData = await fetchUserData(session.user)
+        if (mounted) {
+          setUser(userData)
+        }
+      } else {
+        if (mounted) {
+          setUser(null)
+        }
+      }
+    })
+
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [fetchUserData])
 
   // User-specific computed properties

@@ -150,7 +150,7 @@ export const KanbanCard = <T extends KanbanItemProps = KanbanItemProps>({
       <div style={style} ref={setNodeRef}>
         <Card
           className={cn(
-            'gap-4 rounded-md p-3 shadow-sm relative cursor-grab hover:shadow-md transition-shadow duration-200 w-full max-w-sm',
+            'gap-4 rounded-md p-3 shadow-sm relative cursor-grab hover:shadow-md transition-shadow duration-200',
             isDragging && 'pointer-events-none cursor-grabbing opacity-30',
             className
           )}
@@ -204,7 +204,7 @@ export const KanbanCard = <T extends KanbanItemProps = KanbanItemProps>({
         <t.In>
           <Card
             className={cn(
-              'gap-4 rounded-md p-3 shadow-sm ring-2 ring-primary relative cursor-grab w-full max-w-sm',
+              'gap-4 rounded-md p-3 shadow-sm ring-2 ring-primary relative cursor-grab',
               isDragging && 'cursor-grabbing',
               className
             )}
@@ -278,7 +278,7 @@ export const KanbanCards = <T extends KanbanItemProps = KanbanItemProps>({
     <ScrollArea className="overflow-hidden">
       <SortableContext items={items}>
         <div
-          className={cn('flex flex-grow flex-col gap-2 p-2 w-full', className)}
+          className={cn('flex flex-grow flex-col gap-2 p-2', className)}
           {...props}
         >
           {filteredData.map(children)}
