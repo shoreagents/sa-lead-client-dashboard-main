@@ -8,7 +8,8 @@ import {
   BookOpen, 
   Users 
 } from 'lucide-react'
-import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
+import { UserQuoteService } from '@/lib/userQuoteService'
+import { UserQuoteSummary } from '@/hooks/use-api'
 
 // Next Step Card Component
 interface NextStepCardProps {

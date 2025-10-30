@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { User, LogOut, Settings, Building } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+import { useUserAuth } from "@/lib/user-auth-context"
 import { toast } from "sonner"
 
 export function UserMenu() {
-  const { user, signOut, isAdmin } = useAuth()
+  const { user, signOut, isClient } = useUserAuth()
   const [loading, setLoading] = useState(false)
 
 
@@ -38,21 +38,18 @@ export function UserMenu() {
 
   // Memoize user initials calculation
   const userInitials = useMemo(() => {
-    if (!user?.email) return 'U'
-    return user.email
-      .split('@')[0]
-      .split('.')
-      .map(part => part.charAt(0).toUpperCase())
-      .join('')
-      .slice(0, 2)
-  }, [user?.email])
+    if (!user?.first_name && !user?.last_name) return 'U'
+    const firstName = user.first_name || ''
+    const lastName = user.last_name || ''
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || 'U'
+  }, [user?.first_name, user?.last_name])
 
   // Memoize user display name
   const userDisplayName = useMemo(() => {
     if (!user) return 'User'
-    const firstName = user.user_metadata?.first_name || ''
-    const lastName = user.user_metadata?.last_name || ''
-    return `${firstName} ${lastName}`.trim() || 'User'
+    const firstName = user.first_name || ''
+    const lastName = user.last_name || ''
+    return `${firstName} ${lastName}`.trim() || user.email || 'User'
   }, [user])
 
   if (!user) {
@@ -90,7 +87,7 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <User className="mr-2 h-4 w-4" />
-          <span><a href={isAdmin ? "/admin-dashboard" : "/user-dashboard"}>Dashboard</a></span>
+          <span><a href={isClient ? "/admin-dashboard" : "/user-dashboard"}>Dashboard</a></span>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { 
   Users, 
   Target, 
@@ -107,18 +108,18 @@ const TopCandidateSection = ({
             return (
               <>
                 {/* Candidate Info */}
-                <div className="flex items-center gap-3 mb-3 pr-16">
-                  <Avatar className="w-12 h-12 flex-shrink-0">
-                    <AvatarImage src={displayData.avatar} />
-                    <AvatarFallback className="text-lg bg-lime-100 text-lime-600">
+                <div className="flex items-center gap-4 mb-4 pr-16">
+                  <Avatar className="w-20 h-20 flex-shrink-0">
+                    <AvatarImage src={displayData.avatar || undefined} />
+                    <AvatarFallback className="text-xl bg-lime-100 text-lime-600">
                       {displayData.name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-900 text-sm truncate">
+                    <h4 className="font-bold text-gray-900 text-base truncate">
                       {displayData.name}
                     </h4>
-                    <p className="font-semibold text-gray-900 text-sm truncate">
+                    <p className="font-medium text-gray-700 text-sm truncate">
                       {displayData.position}
                     </p>
                   </div>
@@ -175,7 +176,7 @@ interface BestMatchedCandidatesProps {
   onViewProfile?: (candidateId: string, candidateName: string) => void;
 }
 
-const BestMatchedCandidates = ({ 
+export const BestMatchedCandidates = ({ 
   recommendedCandidates = [], 
   isLoading = false,
   onAskForInterview,
@@ -184,6 +185,7 @@ const BestMatchedCandidates = ({
   const { toggleFavorite, isFavorite } = useFavorites();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const [employeeProfiles, setEmployeeProfiles] = useState<EmployeeCardData[]>([]);
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
   
@@ -220,9 +222,9 @@ const BestMatchedCandidates = ({
     fetchEmployeeProfiles();
   }, [recommendedCandidates]);
   
-  // Auto-rotate through candidates every 3 seconds
+  // Auto-rotate through candidates every 3 seconds (paused on hover)
   useEffect(() => {
-    if (recommendedCandidates.length <= 1) return;
+    if (recommendedCandidates.length <= 1 || isHovered) return;
     
     const interval = setInterval(() => {
       setIsAnimating(true);
@@ -230,12 +232,12 @@ const BestMatchedCandidates = ({
         setCurrentIndex((prevIndex) => 
           (prevIndex + 1) % recommendedCandidates.length
         );
-      setIsAnimating(false);
+        setIsAnimating(false);
       }, 150); // Half of animation duration
     }, 3000); // 3 seconds
     
     return () => clearInterval(interval);
-  }, [recommendedCandidates.length]);
+  }, [recommendedCandidates.length, isHovered]);
   
   // Handle manual navigation with animation
   const handleNavigateTo = (index: number) => {
@@ -298,62 +300,41 @@ const BestMatchedCandidates = ({
   };
 
   return (
-    <div className="space-y-3 h-full flex flex-col">
+    <div 
+      className={`h-full flex flex-col transition-all duration-200 ${
+        isHovered ? 'bg-gray-50 rounded-lg p-1' : ''
+      }`}
+      onMouseEnter={() => {
+        console.log('🖱️ Card hovered - pausing switching');
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        console.log('🖱️ Card unhovered - resuming switching');
+        setIsHovered(false);
+      }}
+    >
       <div className="flex items-center space-x-2 mb-2">
         <Target className="w-4 h-4 text-lime-600" />
         <h4 className="text-sm font-semibold text-gray-900">AI Matched</h4>
       </div>
       
       {/* Current Candidate Card */}
-      <div className={`bg-gray-50 rounded-lg p-2 transition-all duration-300 overflow-hidden relative ${
-        isAnimating ? 'opacity-0 transform translate-x-2' : 'opacity-100 transform translate-x-0'
-      }`}>
-        {/* Action buttons - Top Right */}
-        <div className="absolute top-2 right-2 flex gap-1">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-r-none"
-            style={{ 
-              borderColor: 'rgb(101, 163, 13)', 
-              backgroundColor: 'rgb(101, 163, 13)' 
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onAskForInterview?.(currentCandidate.id, currentCandidate.name)
-            }}
-            title="Request Interview"
-          >
-            <MessageCircle className="w-3 h-3" />
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-6 w-6 p-0 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 font-semibold rounded-l-none"
-            style={{ 
-              borderColor: 'rgb(101, 163, 13)', 
-              backgroundColor: 'rgb(101, 163, 13)' 
-            }}
-            onClick={(e) => {
-              e.stopPropagation()
-              onViewProfile?.(currentCandidate.id, currentCandidate.name)
-            }}
-            title="View Profile"
-          >
-            <Eye className="w-3 h-3" />
-          </Button>
-        </div>
+      <div 
+        className={`bg-gray-50 rounded-lg p-2 transition-all duration-300 overflow-hidden relative flex-1 ${
+          isAnimating ? 'opacity-0 transform translate-x-2' : 'opacity-100 transform translate-x-0'
+        }`}
+      >
         {/* Candidate Info */}
-        <div className="flex items-center gap-2 mb-2 pr-16">
-          <Avatar className="w-10 h-10 flex-shrink-0">
-            <AvatarImage src={displayData.avatar} />
-            <AvatarFallback className="text-sm bg-lime-100 text-lime-800">
+        <div className="flex items-center gap-3 mb-3">
+          <Avatar className="w-16 h-16 flex-shrink-0">
+            <AvatarImage src={displayData.avatar || undefined} />
+            <AvatarFallback className="text-lg bg-lime-100 text-lime-800">
               {displayData.name.split(' ').map(n => n[0]).join('').toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <div className="text-xs font-semibold text-gray-800 truncate" title={displayData.name}>
+              <div className="text-sm font-bold text-gray-800 truncate" title={displayData.name}>
                 {displayData.name.split(' ')[0]}
               </div>
               <button
@@ -373,7 +354,7 @@ const BestMatchedCandidates = ({
                 />
               </button>
             </div>
-            <div className="text-xs font-semibold text-gray-800 truncate" title={displayData.position}>
+            <div className="text-xs font-medium text-gray-600 truncate" title={displayData.position}>
               {displayData.position}
             </div>
           </div>
@@ -397,7 +378,7 @@ const BestMatchedCandidates = ({
         )}
 
         {/* Score Bar */}
-        <div className="w-full mb-2">
+        <div className="w-full mb-3">
           <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
             <span>Match Score</span>
             <span className="font-semibold">{Math.round(currentCandidate.score)}%</span>
@@ -414,21 +395,120 @@ const BestMatchedCandidates = ({
             ></div>
           </div>
         </div>
+
+        {/* Candidate Details */}
+        <div className="space-y-2">
+          {/* Top Skills */}
+          <div className="flex items-start gap-2">
+            <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-700 mb-0.5">Top Skills</div>
+              <div className="text-xs text-gray-600">
+                {['React', 'TypeScript', 'Node.js'].slice(0, 3).join(' • ')}
+              </div>
+            </div>
+          </div>
+
+          {/* Experience Level */}
+          <div className="flex items-start gap-2">
+            <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-700 mb-0.5">Experience</div>
+              <div className="text-xs text-gray-600">
+                {Math.floor(Math.random() * 8) + 2} years in {displayData.position || 'Software Development'}
+              </div>
+            </div>
+          </div>
+
+          {/* Employment Type */}
+          <div className="flex items-start gap-2">
+            <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-700 mb-0.5">Employment</div>
+              <div className="text-xs text-gray-600">
+                {['Full-time', 'Contract', 'Part-time', 'Freelance'][Math.floor(Math.random() * 4)]}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Carousel Indicators */}
+      {/* Action Buttons - Below card, above carousel */}
+      <div className="flex gap-1.5 mt-3 px-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 h-7 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 text-xs font-medium px-2"
+                style={{ 
+                  borderColor: 'rgb(101, 163, 13)', 
+                  backgroundColor: 'rgb(101, 163, 13)' 
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onAskForInterview?.(currentCandidate.id, currentCandidate.name)
+                }}
+              >
+                <MessageCircle className="w-3 h-3 mr-1" />
+                Interview
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Request an interview<br />with this candidate</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex-1 h-7 text-white hover:brightness-110 hover:scale-105 transition-all duration-200 text-xs font-medium px-2"
+                style={{ 
+                  borderColor: 'rgb(101, 163, 13)', 
+                  backgroundColor: 'rgb(101, 163, 13)' 
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onViewProfile?.(currentCandidate.id, currentCandidate.name)
+                }}
+              >
+                <Eye className="w-3 h-3 mr-1" />
+                View
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>View detailed<br />candidate profile</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
+      {/* Carousel Indicators - Fixed at bottom */}
       {recommendedCandidates.length > 1 && (
-        <div className="flex justify-center gap-1">
+        <div className="flex justify-center gap-1 mt-3 pt-2 border-t border-gray-200">
           {recommendedCandidates.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => handleNavigateTo(index)}
-              className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
-                index === currentIndex 
-                  ? 'bg-lime-600 scale-110' 
-                  : 'bg-gray-300 hover:bg-gray-400 hover:scale-105'
-              }`}
-            />
+            <TooltipProvider key={index}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => handleNavigateTo(index)}
+                    className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                      index === currentIndex 
+                        ? 'bg-lime-600 scale-110' 
+                        : 'bg-gray-300 hover:bg-gray-400 hover:scale-105'
+                    }`}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View candidate {index + 1}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
       )}

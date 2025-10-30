@@ -8,6 +8,40 @@ export const clearAllCaches = (queryClient: QueryClient) => {
   console.log('✅ All caches cleared')
 };
 
+// Chat Types
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  contextSnapshot?: any;
+}
+
+export interface ChatConversation {
+  id: string;
+  title: string;
+  lastMessage: string;
+  timestamp: Date;
+  messageCount: number;
+  conversationType: 'anonymous' | 'authenticated';
+  contextData?: any;
+  migratedAt?: Date;
+}
+
+export interface ConversationContext {
+  deviceId: string;
+  userId?: string;
+  conversationType: 'anonymous' | 'authenticated';
+  title: string;
+  contextData: {
+    userPreferences: any;
+    conversationHistory: any;
+    systemState: any;
+    metadata: any;
+  };
+  contextSnapshot: any;
+}
+
 // Types
 interface UserFormStatus {
   hasFilledForm: boolean;
@@ -1054,5 +1088,269 @@ export const useJobs = (userId: string | null) => {
     staleTime: 1 * 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
+  });
+};
+
+// Chat API Functions
+const fetchConversations = async (deviceId?: string, userId?: string): Promise<ChatConversation[]> => {
+  const params = new URLSearchParams();
+  if (deviceId) params.append('deviceId', deviceId);
+  if (userId) params.append('userId', userId);
+  
+  const response = await fetch(`/api/chat/conversations?${params.toString()}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch conversations');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch conversations');
+  }
+  
+  return result.conversations || [];
+};
+
+const fetchMessages = async (conversationId: string): Promise<ChatMessage[]> => {
+  const response = await fetch(`/api/chat/messages?conversationId=${conversationId}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch messages');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch messages');
+  }
+  
+  return result.messages || [];
+};
+
+const fetchConversationContext = async (conversationId: string): Promise<ConversationContext | null> => {
+  const response = await fetch(`/api/chat/context/${conversationId}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch conversation context');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch conversation context');
+  }
+  
+  return result.context || null;
+};
+
+const createConversation = async (data: {
+  deviceId: string;
+  conversationType?: 'anonymous' | 'authenticated';
+  title?: string;
+  contextData?: any;
+}): Promise<ChatConversation> => {
+  const response = await fetch('/api/chat/conversations', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create conversation');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to create conversation');
+  }
+  
+  return result.conversation;
+};
+
+const sendMessage = async (data: {
+  conversationId: string;
+  userId: string; // Device ID
+  role: 'user' | 'assistant';
+  content: string;
+  contextSnapshot?: any;
+}): Promise<ChatMessage> => {
+  const response = await fetch('/api/chat/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to send message');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to send message');
+  }
+  
+  return result.message;
+};
+
+const migrateConversations = async (data: {
+  userId: string;
+  deviceId: string;
+}): Promise<{ migratedCount: number }> => {
+  const response = await fetch('/api/chat/migrate', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to migrate conversations');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to migrate conversations');
+  }
+  
+  return { migratedCount: result.migratedCount };
+};
+
+const updateConversationContext = async (conversationId: string, data: {
+  contextData?: any;
+  title?: string;
+}): Promise<ConversationContext> => {
+  const response = await fetch(`/api/chat/context/${conversationId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to update conversation context');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to update conversation context');
+  }
+  
+  return result.context;
+};
+
+// Chat Hooks
+export const useConversations = (deviceId?: string, userId?: string, options?: any) => {
+  return useQuery<ChatConversation[]>({
+    queryKey: ['conversations', deviceId, userId],
+    queryFn: () => fetchConversations(deviceId, userId),
+    enabled: !!(deviceId || userId),
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    ...options, // Merge user-provided options
+  });
+};
+
+export const useMessages = (conversationId: string | null) => {
+  return useQuery<ChatMessage[]>({
+    queryKey: ['messages', conversationId],
+    queryFn: () => fetchMessages(conversationId!),
+    enabled: !!conversationId,
+    staleTime: 10 * 1000, // 10 seconds
+    gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useConversationContext = (conversationId: string | null) => {
+  return useQuery<ConversationContext | null>({
+    queryKey: ['conversationContext', conversationId],
+    queryFn: () => fetchConversationContext(conversationId!),
+    enabled: !!conversationId,
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useCreateConversation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: createConversation,
+    onSuccess: (data, variables) => {
+      // Invalidate conversations cache
+      queryClient.invalidateQueries({ 
+        queryKey: ['conversations', variables.deviceId] 
+      });
+    },
+  });
+};
+
+export const useSendMessage = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: sendMessage,
+    onSuccess: (data, variables) => {
+      // Invalidate messages cache for this conversation
+      queryClient.invalidateQueries({ 
+        queryKey: ['messages', variables.conversationId] 
+      });
+      // Also invalidate conversations to update last message
+      queryClient.invalidateQueries({ 
+        queryKey: ['conversations'] 
+      });
+    },
+  });
+};
+
+export const useMigrateConversations = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: migrateConversations,
+    onSuccess: (data, variables) => {
+      // Invalidate all conversation-related caches
+      queryClient.invalidateQueries({ 
+        queryKey: ['conversations'] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['messages'] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['conversationContext'] 
+      });
+    },
+  });
+};
+
+export const useUpdateConversationContext = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ conversationId, ...data }: { conversationId: string } & { contextData?: any; title?: string }) => 
+      updateConversationContext(conversationId, data),
+    onSuccess: (data, variables) => {
+      // Invalidate conversation context cache
+      queryClient.invalidateQueries({ 
+        queryKey: ['conversationContext', variables.conversationId] 
+      });
+      // Also invalidate conversations to update title if changed
+      queryClient.invalidateQueries({ 
+        queryKey: ['conversations'] 
+      });
+    },
   });
 };

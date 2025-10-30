@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import ChatConsole from '@/components/ui/ai-chat-console'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { 
   NextStepCard, 
   CaseStudyCard, 
@@ -20,7 +20,7 @@ import { InterviewRequestModal, InterviewRequestData } from '@/components/ui/int
 import { useTopCandidate, useRecentQuotes, useRecommendedCandidates } from '@/hooks/use-api'
 
 export default function UserDashboardPage() {
-  const { user } = useUserAuth()
+  const { user, loading: userLoading } = useUserAuth()
   const router = useRouter()
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false)
@@ -28,7 +28,8 @@ export default function UserDashboardPage() {
   const [selectedCandidate, setSelectedCandidate] = useState<{ name: string; id: string; position?: string } | null>(null)
 
   // Get user ID - either from authenticated user or device ID for anonymous users
-  const getUserId = useCallback(() => {
+  // Memoize to prevent unnecessary re-renders and query refetches
+  const userId = useMemo(() => {
     if (user?.user_id) {
       return user.user_id
     }
@@ -42,10 +43,12 @@ export default function UserDashboardPage() {
   }, [user?.user_id])
 
   // Use TanStack Query hooks for data fetching
-  const userId = getUserId()
-  const { data: topCandidate, isLoading: isLoadingCandidate } = useTopCandidate(userId)
-  const { data: recentQuotes = [], isLoading: isLoadingQuote } = useRecentQuotes(userId)
-  const { data: recommendedCandidates = [], isLoading: isLoadingRecommended } = useRecommendedCandidates(userId)
+  const { data: topCandidate, isLoading: isLoadingCandidate, error: topCandidateError } = useTopCandidate(userId)
+  const { data: recentQuotes = [], isLoading: isLoadingQuote, error: recentQuotesError } = useRecentQuotes(userId)
+  const { data: recommendedCandidates = [], isLoading: isLoadingRecommended, error: recommendedCandidatesError } = useRecommendedCandidates(userId)
+
+  // Show loading state while user auth is loading, data is being fetched, or while userId is being determined
+  const isLoading = userLoading || !userId || isLoadingCandidate || isLoadingQuote || isLoadingRecommended
 
   const handleChatWithClaude = useCallback(() => {
     // // recordInteraction('chat')
@@ -131,9 +134,18 @@ export default function UserDashboardPage() {
       <SidebarProvider>
         <UserDashboardSidebar onChatOpen={handleChatOpen} />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-2 p-3 pt-16">
-            {/* AI Recommendations Content */}
-            <div className="grid gap-2">
+          <div className="flex flex-1 flex-col gap-2 p-3 pt-20">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-500"></div>
+                  <span className="text-lg">Loading your dashboard...</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* AI Recommendations Content */}
+                <div className="grid gap-2">
               <div>
                 <h2 className="text-xl font-bold tracking-tight">AI Recommendations</h2>
                 <p className="text-sm text-muted-foreground">
@@ -163,7 +175,7 @@ export default function UserDashboardPage() {
 
               {/* Section 3: Top Candidate with Matches - 1x4 */}
               <TopCandidateWithMatches 
-                topCandidate={topCandidate}
+                topCandidate={topCandidate as Record<string, unknown> | null}
                 isLoadingCandidate={isLoadingCandidate}
                 onViewProfile={handleViewCandidateProfile}
                 recommendedCandidates={recommendedCandidates}
@@ -184,6 +196,8 @@ export default function UserDashboardPage() {
               <ReservedCard />
 
             </div>
+              </>
+            )}
           </div>
           
           {/* AI Chat Console */}

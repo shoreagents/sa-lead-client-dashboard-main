@@ -1,12 +1,23 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { X, Send, ChevronDown, ChevronUp, ExternalLink, Sparkles, MoreVertical, Pin, PinOff } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useChatContext, Message } from '@/lib/chat-context';
+import { useAuth } from '@/lib/auth-context';
 import { MayaTextField, MayaNameFields, MayaAnonymousUserForm, MayaTalentSearchModal, MayaPricingCalculatorModal, MayaPricingForm } from '@/components/maya';
 import { generateUserId } from '@/lib/userEngagementService';
+import { 
+  useConversations, 
+  useMessages, 
+  useCreateConversation, 
+  useSendMessage,
+  useConversationContext,
+  useUpdateConversationContext,
+  ChatConversation,
+  ChatMessage
+} from '@/hooks/use-api';
 
 
 interface ChatConsoleProps {
@@ -58,13 +69,50 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     clearMessages,
     isLoading,
     setIsLoading,
-    generateAIResponse
+    generateAIResponse,
+    deviceId,
+    getDeviceId,
+    currentContext,
+    setCurrentContext,
+    updateContext,
+    saveContextSnapshot,
+    createAnonymousConversation,
+    currentConversationId,
+    setCurrentConversationId,
+    clearAllChatHistory,
+    conversations
   } = useChatContext();
   
-  // Use the same user ID generation logic as AnonymousUserButton
-  const userId = useMemo(() => generateUserId(), []);
-  console.log('🎯 Chat Console using userId:', userId);
+  // Get user authentication
+  const { appUser } = useAuth();
   
+  // Get device ID and determine the correct user ID to use
+  const currentDeviceId = deviceId || '';
+  const userId = appUser?.user_id || currentDeviceId; // Use actual user ID if authenticated, otherwise device ID
+  
+  // TanStack Query hooks
+  // Note: conversations are managed by ChatContext, no need to fetch here
+  const { data: dbMessages = [] } = useMessages(currentConversationId, {
+    enabled: !!currentConversationId,
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.warn('Failed to fetch messages:', error);
+    }
+  });
+  const { data: conversationContext } = useConversationContext(currentConversationId, {
+    enabled: !!currentConversationId,
+    retry: 2,
+    retryDelay: 1000,
+    onError: (error) => {
+      console.warn('Failed to fetch conversation context:', error);
+    }
+  });
+  const createConversationMutation = useCreateConversation();
+  const sendMessageMutation = useSendMessage();
+  const updateContextMutation = useUpdateConversationContext();
+  
+  // Local state
   const [inputValue, setInputValue] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -80,9 +128,37 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
   const [isPricingCalculatorOpen, setIsPricingCalculatorOpen] = useState(false);
   const [isCollectingPricing, setIsCollectingPricing] = useState(false);
   const [isDirectTeamCreation, setIsDirectTeamCreation] = useState(false);
+  
+  // Track greeted conversations to prevent duplicates
+  const greetedConversations = useRef(new Set<string>());
+  
+  // Load greeted conversations from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('greetedConversations');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          greetedConversations.current = new Set(parsed);
+          console.log('📱 Bottom nav loaded greeted conversations from localStorage:', Array.from(greetedConversations.current));
+        } catch (error) {
+          console.error('Error loading greeted conversations:', error);
+        }
+      }
+    }
+  }, []);
+  
+  // Save greeted conversations to localStorage whenever it changes
+  const saveGreetedConversations = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const array = Array.from(greetedConversations.current);
+      localStorage.setItem('greetedConversations', JSON.stringify(array));
+      console.log('💾 Bottom nav saved greeted conversations to localStorage:', array);
+    }
+  }, []);
   const [pricingStep, setPricingStep] = useState<'teamSize' | 'roleType' | 'industry' | 'individualRoles' | 'experience' | 'description' | 'workplaceSetup' | 'workplaceType' | 'workplaceIndividual' | 'workplace' | null>(null);
   const [pricingData, setPricingData] = useState<{teamSize?: string; roleType?: string; roles?: string; experience?: string; description?: string; workplaceSetup?: string; workplaceType?: string; currentMember?: number; [key: string]: any}>({});
-  const [conversationContext, setConversationContext] = useState<{isTalentInquiry?: boolean; conversationHistory?: Message[]}>({});
+  const [conversationContextLocal, setConversationContextLocal] = useState<{isTalentInquiry?: boolean; conversationHistory?: Message[]}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -110,17 +186,23 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  // Separate useEffect for scrolling - only when loading
   useEffect(() => {
-    scrollToBottom();
-      // Only focus main input if no form is being collected
-      if (isOpen && !isMinimized && !isCollectingContact && !isCollectingPricing) {
-        setTimeout(() => {
-          if (inputRef.current) {
-            inputRef.current.focus();
-          }
-        }, 100);
-      }
-  }, [messages, isOpen, isMinimized, isCollectingContact, isCollectingPricing]);
+    if (isLoading) {
+      scrollToBottom();
+    }
+  }, [isLoading]);
+
+  // Separate useEffect for focus
+  useEffect(() => {
+    if (isOpen && !isMinimized && !isCollectingContact && !isCollectingPricing) {
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+        }
+      }, 100);
+    }
+  }, [isOpen, isMinimized, isCollectingContact, isCollectingPricing]);
 
   useEffect(() => {
     if (inputValue === '') {
@@ -149,34 +231,156 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
+  // Initialize conversation when chat opens
+  useEffect(() => {
+    if (isOpen && !currentConversationId && userId) {
+      const initializeConversation = async () => {
+        try {
+          const conversationId = await createAnonymousConversation(userId);
+          setCurrentConversationId(conversationId);
+          
+          // Initialize context
+          setCurrentContext({
+            deviceId: userId,
+            conversationType: appUser?.user_id ? 'authenticated' : 'anonymous',
+            title: 'New Chat',
+            contextData: {
+              userPreferences: {},
+              conversationHistory: [],
+              systemState: {},
+              metadata: {}
+            },
+            contextSnapshot: null
+          });
+        } catch (error) {
+          console.error('Error initializing conversation:', error);
+        }
+      };
+      
+      initializeConversation();
+    }
+  }, [isOpen, currentConversationId, userId, appUser?.user_id, createAnonymousConversation, setCurrentConversationId, setCurrentContext]);
+
+  // Sync database messages with local messages - only on conversation change
+  useEffect(() => {
+    if (dbMessages.length > 0 && currentConversationId) {
+      const transformedMessages: Message[] = dbMessages.map(msg => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        timestamp: new Date(msg.timestamp),
+        contextSnapshot: msg.contextSnapshot
+      }));
+      
+      // Only update if local messages are empty (initial load) or conversation changed
+      if (messages.length === 0) {
+        setMessages(transformedMessages);
+      }
+    }
+  }, [currentConversationId]); // Only run when conversation changes, not on every dbMessages update
+
+  // Update context when conversation context changes
+  useEffect(() => {
+    if (conversationContext && currentContext) {
+      // Only update if the context data is actually different
+      const contextDataChanged = JSON.stringify(conversationContext.contextData) !== JSON.stringify(currentContext.contextData);
+      const titleChanged = conversationContext.title !== currentContext.title;
+      
+      if (contextDataChanged || titleChanged) {
+        updateContext({
+          contextData: conversationContext.contextData,
+          title: conversationContext.title
+        });
+      }
+    }
+  }, [conversationContext, currentContext]);
+
   // Generate personalized greeting when chat opens and there are no messages
   useEffect(() => {
-    if (isOpen && messages.length === 0 && !isLoading) {
+    // Only generate greeting if:
+    // 1. Chat is open
+    // 2. No messages are loaded yet
+    // 3. Not currently loading
+    // 4. We have a user ID
+    // 5. We have a conversation ID
+    // 6. We haven't already greeted this conversation
+    // 7. This is a truly new conversation (no existing messages)
+    if (isOpen && 
+        messages.length === 0 && 
+        !isLoading && 
+        userId && 
+        currentConversationId && 
+        !greetedConversations.current.has(currentConversationId)) {
+      
+      // Check if this conversation already has messages by looking at the conversation data
+      const hasExistingMessages = conversations.find(c => c.id === currentConversationId)?.messageCount > 0;
+      
+      if (hasExistingMessages) {
+        console.log('⏭️ Bottom nav conversation already has messages, marking as greeted:', currentConversationId);
+        greetedConversations.current.add(currentConversationId);
+        saveGreetedConversations();
+        return;
+      }
+      
+      console.log('🎯 Bottom nav generating greeting for NEW conversation:', currentConversationId);
+      
       const generatePersonalizedGreeting = async () => {
         try {
+          // Mark this conversation as greeted immediately to prevent duplicates
+          greetedConversations.current.add(currentConversationId);
+          saveGreetedConversations();
+          
           setIsLoading(true);
           const { response, relatedContent, userData } = await generateAIResponse('', [], userId);
           
           const greetingMessage: Message = {
-            id: 'personalized-greeting',
+            id: 'personalized-greeting-' + Date.now(),
             role: 'assistant',
             content: response,
             timestamp: new Date(),
             relatedContent: relatedContent.length > 0 ? relatedContent : undefined,
             userData: userData,
+            contextSnapshot: saveContextSnapshot()
           };
 
           addMessage(greetingMessage);
+          
+          // Save greeting message to database
+          if (currentConversationId) {
+            await sendMessageMutation.mutateAsync({
+              conversationId: currentConversationId,
+              userId: userId,
+              role: 'assistant',
+              content: response,
+              contextSnapshot: saveContextSnapshot()
+            });
+          }
         } catch (error) {
           console.error('Error generating personalized greeting:', error);
           // Fallback to generic greeting if personalized greeting fails
           const fallbackMessage: Message = {
-            id: 'fallback-greeting',
+            id: 'fallback-greeting-' + Date.now(),
             role: 'assistant',
             content: "Hello! I'm Maya from ShoreAgents. What would you like to know?",
             timestamp: new Date(),
+            contextSnapshot: saveContextSnapshot()
           };
           addMessage(fallbackMessage);
+          
+          // Save fallback message to database
+          if (currentConversationId) {
+            try {
+              await sendMessageMutation.mutateAsync({
+                conversationId: currentConversationId,
+                userId: userId,
+                role: 'assistant',
+                content: fallbackMessage.content,
+                contextSnapshot: saveContextSnapshot()
+              });
+            } catch (dbError) {
+              console.error('Error saving fallback message:', dbError);
+            }
+          }
         } finally {
           setIsLoading(false);
         }
@@ -184,7 +388,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
 
       generatePersonalizedGreeting();
     }
-  }, [isOpen, messages.length, isLoading, generateAIResponse, userId, addMessage]);
+  }, [isOpen, messages.length, isLoading, generateAIResponse, userId, addMessage, currentConversationId, sendMessageMutation, saveContextSnapshot, conversations]);
 
   useEffect(() => {
     if (isOpen && inputRef.current && !isCollectingContact && !isCollectingPricing) {
@@ -232,16 +436,31 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
+    if (!inputValue.trim() || isLoading || !currentConversationId) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: inputValue,
       timestamp: new Date(),
+      contextSnapshot: saveContextSnapshot()
     };
 
     addMessage(userMessage);
+    
+    // Save user message to database
+    try {
+      await sendMessageMutation.mutateAsync({
+        conversationId: currentConversationId,
+        userId: userId,
+        role: 'user',
+        content: inputValue,
+        contextSnapshot: saveContextSnapshot()
+      });
+    } catch (error) {
+      console.error('Error saving user message:', error);
+    }
+    
     setInputValue('');
     setIsLoading(true);
     // Reset textarea height after sending
@@ -273,14 +492,9 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                                     (messageLower.includes('for') || messageLower.includes('to') || messageLower.includes('help')));
       
       // Update conversation context
-      setConversationContext({
+      setConversationContextLocal({
         isTalentInquiry,
-        conversationHistory: [...messages, {
-          id: Date.now().toString(),
-          role: 'user',
-          content: inputValue,
-          timestamp: new Date(),
-        }]
+        conversationHistory: [...messages, userMessage]
       });
       
       // Direct team creation - immediately trigger pricing calculator
@@ -298,9 +512,56 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
         timestamp: new Date(),
         relatedContent: relatedContent.length > 0 ? relatedContent : undefined,
         userData: userData,
+        contextSnapshot: saveContextSnapshot()
       };
 
       addMessage(assistantMessage);
+      
+      // Save assistant message to database
+      try {
+        await sendMessageMutation.mutateAsync({
+          conversationId: currentConversationId,
+          userId: userId,
+          role: 'assistant',
+          content: response,
+          contextSnapshot: saveContextSnapshot()
+        });
+      } catch (error) {
+        console.error('Error saving assistant message:', error);
+      }
+      
+      // Update conversation context if needed
+      if (isTalentInquiry && currentContext) {
+        updateContext({
+          contextData: {
+            ...currentContext.contextData,
+            userPreferences: {
+              ...currentContext.contextData.userPreferences,
+              isTalentInquiry: true
+            },
+            conversationHistory: [...messages, userMessage, assistantMessage]
+          }
+        });
+        
+        // Update context in database
+        if (currentConversationId) {
+          try {
+            await updateContextMutation.mutateAsync({
+              conversationId: currentConversationId,
+              contextData: {
+                ...currentContext.contextData,
+                userPreferences: {
+                  ...currentContext.contextData.userPreferences,
+                  isTalentInquiry: true
+                },
+                conversationHistory: [...messages, userMessage, assistantMessage]
+              }
+            });
+          } catch (error) {
+            console.error('Error updating conversation context:', error);
+          }
+        }
+      }
       
        // Check if Maya is asking for contact information
        const responseLower = response.toLowerCase();
@@ -455,8 +716,24 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
         role: 'assistant',
         content: "I'm sorry, I encountered an error. Please try again or contact our support team.",
         timestamp: new Date(),
+        contextSnapshot: saveContextSnapshot()
       };
       addMessage(errorMessage);
+      
+      // Save error message to database
+      if (currentConversationId) {
+        try {
+          await sendMessageMutation.mutateAsync({
+            conversationId: currentConversationId,
+            userId: userId,
+            role: 'assistant',
+            content: errorMessage.content,
+            contextSnapshot: saveContextSnapshot()
+          });
+        } catch (dbError) {
+          console.error('Error saving error message:', dbError);
+        }
+      }
     } finally {
       setIsLoading(false);
       // Maintain focus on input field after message submission (only if no form is being collected)
@@ -626,8 +903,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                   </button>
                   <button
                     onClick={() => {
-                      // Clear chat history
-                      clearMessages();
+                      // Clear all chat history
+                      clearAllChatHistory();
                       setShowMenu(false);
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -635,7 +912,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    Clear chat history
+                    Clear all chat history
                   </button>
                 </div>
               )}

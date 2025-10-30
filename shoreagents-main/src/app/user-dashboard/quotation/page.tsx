@@ -25,7 +25,8 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
+import { UserQuoteService } from '@/lib/userQuoteService'
+import { UserQuoteSummary } from '@/hooks/use-api'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
 import { QuoteSummaryModal } from '@/components/ui/quote-summary-modal'
 import { useCurrency } from '@/lib/currencyContext'
@@ -395,6 +396,37 @@ export default function QuotationPage() {
               </Button>
             </div>
 
+            {/* Summary Stats - Moved to Top */}
+            {!isLoading && !error && filteredQuotations.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-lime-600">
+                        {filteredQuotations.length}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Total Quotations</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {formatPrice(filteredQuotations.reduce((sum, q) => sum + q.amount, 0))}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Total Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {filteredQuotations.filter(q => q.status === 'Approved').length}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Approved</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Loading State */}
             {isLoading && (
               <div className="flex items-center justify-center py-12">
@@ -684,36 +716,6 @@ export default function QuotationPage() {
               </div>
             )}
 
-            {/* Summary Stats */}
-            {!isLoading && !error && filteredQuotations.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-lime-600">
-                        {filteredQuotations.length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Total Quotations</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
-                        {formatPrice(filteredQuotations.reduce((sum, q) => sum + q.amount, 0))}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Total Value</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {filteredQuotations.filter(q => q.status === 'Approved').length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Approved</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </SidebarInset>
       </SidebarProvider>

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -8,6 +8,17 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, Menu, X, Star, ArrowRight } from 'lucide-react'
 import { useCurrency, currencies, Currency } from '@/lib/currencyContext'
 import { AuthButtons } from '@/components/ui/auth-buttons'
+
+// Country name mapping for currencies - moved outside component to prevent recreation
+const CURRENCY_COUNTRY_NAMES: Record<string, string> = {
+  USD: 'UNITED STATES',
+  AUD: 'AUSTRALIA',
+  CAD: 'CANADA',
+  GBP: 'UNITED KINGDOM',
+  NZD: 'NEW ZEALAND',
+  EUR: 'EUROPE',
+  PHP: 'PHILIPPINES'
+}
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -17,65 +28,60 @@ export function Navbar() {
   const { selectedCurrency, setSelectedCurrency, isDetectingLocation, detectUserLocation, isAutoDetected, setIsAutoDetected, hasUserSelectedCurrency, setHasUserSelectedCurrency } = useCurrency()
   const pathname = usePathname()
   
-  // Check if we're on an employee profile page, user dashboard, or admin dashboard
-  const isEmployeePage = pathname?.startsWith('/employee/')
-  const isUserDashboard = pathname?.startsWith('/user-dashboard')
-  const isAdminDashboard = pathname?.startsWith('/admin-dashboard')
-
-  // Country name mapping for currencies
-  const currencyCountryNames: Record<string, string> = {
-    USD: 'UNITED STATES',
-    AUD: 'AUSTRALIA',
-    CAD: 'CANADA',
-    GBP: 'UNITED KINGDOM',
-    NZD: 'NEW ZEALAND',
-    EUR: 'EUROPE',
-    PHP: 'PHILIPPINES'
-  }
+  // Memoize route checks to prevent unnecessary recalculations
+  const isEmployeePage = useMemo(() => pathname?.startsWith('/employee/'), [pathname])
+  const isUserDashboard = useMemo(() => pathname?.startsWith('/user-dashboard'), [pathname])
+  const isAdminDashboard = useMemo(() => pathname?.startsWith('/admin-dashboard'), [pathname])
 
   // Handle mounting to prevent hydration mismatches
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Scroll event listener to track scroll state
+  // Optimized scroll event listener with throttling
   useEffect(() => {
+    let ticking = false
     const handleScroll = () => {
-      const scrollTop = window.scrollY
-      setIsScrolled(scrollTop > 0)
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 0)
+          ticking = false
+        })
+        ticking = true
+      }
     }
 
-    window.addEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Helper function to check if a link is active
-  const isActive = (href: string) => {
+  // Memoized helper function to check if a link is active
+  const isActive = useCallback((href: string) => {
     if (href === '/') {
       return pathname === '/'
     }
     return pathname.startsWith(href)
-  }
+  }, [pathname])
 
-  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
+  const toggleMobileMenu = useCallback(() => setIsMobileMenuOpen(!isMobileMenuOpen), [isMobileMenuOpen])
   
-  const handleCurrencySelect = (currency: Currency) => {
+  const handleCurrencySelect = useCallback((currency: Currency) => {
     setSelectedCurrency(currency)
-    setHasUserSelectedCurrency(true) // Mark that user has manually selected a currency
-    setIsAutoDetected(false) // Clear auto-detection flag when manually selecting
-  }
+    setHasUserSelectedCurrency(true)
+    setIsAutoDetected(false)
+  }, [setSelectedCurrency, setHasUserSelectedCurrency, setIsAutoDetected])
 
-  const handleDetectLocation = async () => {
+  const handleDetectLocation = useCallback(async () => {
     await detectUserLocation()
-  }
+  }, [detectUserLocation])
 
-  const toggleSection = (section: string) => {
+  const toggleSection = useCallback((section: string) => {
     setExpandedSections(prev => 
       prev.includes(section) 
         ? prev.filter(s => s !== section)
         : [...prev, section]
     )
-  }
+  }, [])
 
   // Show custom dashboard navbar for admin and user dashboards
   if (isAdminDashboard || isUserDashboard) {
@@ -162,7 +168,7 @@ export function Navbar() {
                       >
                         <div className="flex flex-col">
                           <span className="text-sm font-semibold text-gray-900">{currency.code}</span>
-                          <span className="text-xs text-gray-500">{currencyCountryNames[currency.code]}</span>
+                          <span className="text-xs text-gray-500">{CURRENCY_COUNTRY_NAMES[currency.code]}</span>
                         </div>
                         {selectedCurrency.code === currency.code && isAutoDetected && (
                           <span className="ml-auto text-xs text-lime-600">Auto</span>
@@ -697,7 +703,7 @@ export function Navbar() {
                     >
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-gray-900">{currency.code}</span>
-                        <span className="text-xs text-gray-500">{currencyCountryNames[currency.code]}</span>
+                        <span className="text-xs text-gray-500">{CURRENCY_COUNTRY_NAMES[currency.code]}</span>
                       </div>
                       {selectedCurrency.code === currency.code && isAutoDetected && (
                         <span className="ml-auto text-xs text-lime-600">Auto</span>

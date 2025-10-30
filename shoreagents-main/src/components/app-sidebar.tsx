@@ -208,7 +208,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <div className="flex items-center gap-3 px-3 py-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="" alt={user?.first_name} />
+            <AvatarImage src={user?.avatar || undefined} alt={user?.first_name} />
             <AvatarFallback className="bg-lime-600 text-white text-sm font-semibold">
               {getInitials(`${user?.first_name || ''} ${user?.last_name || ''}`)}
             </AvatarFallback>
