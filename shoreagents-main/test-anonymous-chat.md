@@ -10,7 +10,7 @@ The Chat With Maya interface now includes **real AI analysis** that detects when
 #### **1. Open Anonymous Browser:**
 - Open a new incognito/private browser window
 - Navigate to your ShoreAgents website
-- Open the Chat With Maya console (floating widget)
+- Open the Chat With Maya console (via bottom navigation)
 
 #### **2. Test Scenarios:**
 

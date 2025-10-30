@@ -24,9 +24,24 @@ import ChatConsole from '@/components/ui/ai-chat-console'
 import { InterviewRequestModal, InterviewRequestData } from '@/components/ui/interview-request-modal'
 import { candidateTracker } from '@/lib/candidateTrackingService'
 import { getEmployeeCardData } from '@/lib/api'
-import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
+import { UserQuoteService } from '@/lib/userQuoteService'
+import { UserQuoteSummary } from '@/hooks/use-api'
 import { useAuth } from '@/lib/auth-context'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
+
+// All available case studies with metadata (defined outside component to prevent re-creation)
+const ALL_CASE_STUDIES = [
+  { id: 'team-expansion-success', title: 'Team Expansion Success', slug: 'team-expansion-success', description: 'Successfully expanded team through offshore staffing' },
+  { id: 'business-systems-implementation-success', title: 'Business Systems Implementation', slug: 'business-systems-implementation-success', description: 'Streamlined business systems and processes' },
+  { id: 'offshore-staffing-success', title: 'Offshore Staffing Success', slug: 'offshore-staffing-success', description: 'Achieved growth through strategic offshore hiring' },
+  { id: 'business-referral-partnerships', title: 'Business Referral Partnerships', slug: 'business-referral-partnerships', description: 'Built strong referral network partnerships' },
+  { id: 'immediate-business-transformation', title: 'Immediate Business Transformation', slug: 'immediate-business-transformation', description: 'Rapid business process transformation' },
+  { id: 'hiring-success-after-failures', title: 'Hiring Success After Failures', slug: 'hiring-success-after-failures', description: 'Overcame hiring challenges with Shore Agents' },
+  { id: 'construction-cost-reduction', title: 'Construction Cost Reduction', slug: 'construction-cost-reduction', description: 'Reduced operational costs significantly' },
+  { id: 'customer-service-scaling', title: 'Customer Service Scaling', slug: 'customer-service-scaling', description: 'Scaled customer service operations' },
+  { id: 'mortgage-industry-transformation', title: 'Mortgage Industry Transformation', slug: 'mortgage-industry-transformation', description: 'Transformed mortgage processing workflows' },
+  { id: 'marketing-automation-implementation', title: 'Marketing Automation', slug: 'marketing-automation-implementation', description: 'Automated marketing processes' }
+]
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -55,6 +70,22 @@ export function BottomNav() {
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false)
   const [currentCandidateIndex, setCurrentCandidateIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [topCaseStudies, setTopCaseStudies] = useState<Array<{
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    viewCount: number;
+  }>>([])
+  const [isLoadingCaseStudies, setIsLoadingCaseStudies] = useState(false)
+  const [currentCaseStudyIndex, setCurrentCaseStudyIndex] = useState(0)
+  const [isCaseStudyAnimating, setIsCaseStudyAnimating] = useState(false)
+  
+  // Fetch guards to prevent multiple simultaneous fetches
+  const isFetchingCandidate = React.useRef(false)
+  const isFetchingCaseStudies = React.useRef(false)
+  const isFetchingRecommended = React.useRef(false)
+  const isFetchingQuotes = React.useRef(false)
   
   // Use the engagement tracking hook only on client side
   // const { // recordInteraction } = useEngagementTracking()
@@ -103,6 +134,13 @@ export function BottomNav() {
 
   // Data fetching functions
   const fetchTopCandidate = useCallback(async () => {
+    // Prevent multiple simultaneous fetches
+    if (isFetchingCandidate.current) {
+      console.log('⏭️ Skipping fetchTopCandidate - already fetching')
+      return
+    }
+    
+    isFetchingCandidate.current = true
     try {
       console.log('🔄 Fetching top candidate...')
       setIsLoadingCandidate(true)
@@ -170,10 +208,11 @@ export function BottomNav() {
       console.log('✅ Setting top candidate:', employeeWithScore.user.name)
       setTopCandidate(employeeWithScore)
     } catch (error) {
-      console.error('Error fetching top candidate:', error)
+      console.error('❌ Exception in fetchTopCandidate:', error)
       setTopCandidate(null)
     } finally {
       setIsLoadingCandidate(false)
+      isFetchingCandidate.current = false
     }
   }, [appUser?.user_id])
 
@@ -183,6 +222,13 @@ export function BottomNav() {
       return
     }
 
+    // Prevent multiple simultaneous fetches
+    if (isFetchingRecommended.current) {
+      console.log('⏭️ Skipping fetchRecommendedCandidates - already fetching')
+      return
+    }
+    
+    isFetchingRecommended.current = true
     setIsLoadingRecommended(true)
     try {
       console.log('🔍 Fetching recommended candidates from recent quotes for user:', appUser.user_id)
@@ -290,10 +336,11 @@ export function BottomNav() {
       console.log('✅ Setting recommended candidates with avatars:', candidatesWithAvatars.length)
       setRecommendedCandidates(candidatesWithAvatars)
     } catch (error) {
-      console.error('Error fetching recommended candidates:', error)
+      console.error('❌ Exception in fetchRecommendedCandidates:', error)
       setRecommendedCandidates([])
     } finally {
       setIsLoadingRecommended(false)
+      isFetchingRecommended.current = false
     }
   }, [appUser?.user_id])
 
@@ -303,6 +350,13 @@ export function BottomNav() {
       return
     }
 
+    // Prevent multiple simultaneous fetches
+    if (isFetchingQuotes.current) {
+      console.log('⏭️ Skipping fetchRecentQuotes - already fetching')
+      return
+    }
+    
+    isFetchingQuotes.current = true
     setIsLoadingQuote(true)
     try {
       console.log('🔍 Fetching recent quotes for user:', appUser.user_id)
@@ -319,10 +373,128 @@ export function BottomNav() {
         setRecentQuotes([])
       }
     } catch (error) {
-      console.error('Error fetching recent quotes:', error)
+      console.error('❌ Exception in fetchRecentQuotes:', error)
       setRecentQuotes([])
     } finally {
       setIsLoadingQuote(false)
+      isFetchingQuotes.current = false
+    }
+  }, [appUser?.user_id])
+
+  const fetchTopCaseStudies = useCallback(async () => {
+    // Prevent multiple simultaneous fetches
+    if (isFetchingCaseStudies.current) {
+      console.log('⏭️ Skipping fetchTopCaseStudies - already fetching')
+      return
+    }
+    
+    isFetchingCaseStudies.current = true
+    setIsLoadingCaseStudies(true)
+    try {
+      let userId = null
+      
+      // Get user ID - either from authenticated user or device ID for anonymous users
+      if (appUser?.user_id) {
+        userId = appUser.user_id
+        console.log('✅ Using authenticated user ID for case studies:', userId)
+      } else {
+        // For anonymous users, get device ID from localStorage
+        if (typeof window !== 'undefined') {
+          userId = localStorage.getItem('content_tracking_device_id')
+          console.log('✅ Using device ID for anonymous user case studies:', userId)
+        }
+      }
+
+      if (!userId) {
+        console.log('❌ No user ID or device ID available for case studies')
+        // If no user data, show default top 5 case studies
+        setTopCaseStudies(ALL_CASE_STUDIES.slice(0, 5).map((cs, idx) => ({
+          ...cs,
+          viewCount: 5 - idx // Default ranking
+        })))
+        return
+      }
+
+      // Import supabase client
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      console.log('🔍 Fetching top case studies for user:', userId)
+      
+      // Query content_views for case study views
+      const { data, error } = await supabase
+        .from('content_views')
+        .select('content_id, content_title, content_url')
+        .eq('user_id', userId)
+        .eq('content_type', 'case-study')
+        .order('view_duration', { ascending: false })
+        .limit(10)
+
+      if (error) {
+        console.error('Error fetching case studies:', error)
+        // Fallback to default case studies
+        setTopCaseStudies(ALL_CASE_STUDIES.slice(0, 5).map((cs, idx) => ({
+          ...cs,
+          viewCount: 5 - idx
+        })))
+        return
+      }
+
+      console.log('📊 Found case study views:', data?.length || 0)
+
+      if (!data || data.length === 0) {
+        // No views yet, show default top 5
+        setTopCaseStudies(ALL_CASE_STUDIES.slice(0, 5).map((cs, idx) => ({
+          ...cs,
+          viewCount: 5 - idx
+        })))
+        return
+      }
+
+      // Match the viewed case studies with our metadata
+      const viewedCaseStudies = data
+        .map((view, index) => {
+          const caseStudy = ALL_CASE_STUDIES.find(cs => 
+            view.content_id === cs.id || 
+            view.content_url?.includes(cs.slug)
+          )
+          if (caseStudy) {
+            return {
+              ...caseStudy,
+              viewCount: data.length - index
+            }
+          }
+          return null
+        })
+        .filter((cs): cs is NonNullable<typeof cs> => cs !== null)
+        .slice(0, 5)
+
+      // If we have less than 5, fill with unviewed case studies
+      if (viewedCaseStudies.length < 5) {
+        const viewedIds = new Set(viewedCaseStudies.map(cs => cs.id))
+        const unviewedCaseStudies = ALL_CASE_STUDIES
+          .filter(cs => !viewedIds.has(cs.id))
+          .slice(0, 5 - viewedCaseStudies.length)
+          .map((cs, idx) => ({
+            ...cs,
+            viewCount: 0
+          }))
+        
+        viewedCaseStudies.push(...unviewedCaseStudies)
+      }
+
+      console.log('✅ Setting top case studies:', viewedCaseStudies.length)
+      setTopCaseStudies(viewedCaseStudies)
+    } catch (error) {
+      console.error('❌ Exception in fetchTopCaseStudies:', error)
+      // Fallback to default
+      setTopCaseStudies(ALL_CASE_STUDIES.slice(0, 5).map((cs, idx) => ({
+        ...cs,
+        viewCount: 5 - idx
+      })))
+    } finally {
+      setIsLoadingCaseStudies(false)
+      isFetchingCaseStudies.current = false
     }
   }, [appUser?.user_id])
 
@@ -332,8 +504,9 @@ export function BottomNav() {
       fetchTopCandidate()
       fetchRecommendedCandidates()
       fetchRecentQuotes()
+      fetchTopCaseStudies()
     }
-  }, [isDrawerOpen, fetchTopCandidate, fetchRecommendedCandidates, fetchRecentQuotes])
+  }, [isDrawerOpen, fetchTopCandidate, fetchRecommendedCandidates, fetchRecentQuotes, fetchTopCaseStudies])
 
   // Auto-rotate AI matched candidates with animation
   useEffect(() => {
@@ -351,6 +524,23 @@ export function BottomNav() {
       return () => clearInterval(interval)
     }
   }, [isDrawerOpen, recommendedCandidates.length])
+
+  // Auto-rotate case studies with animation
+  useEffect(() => {
+    if (isDrawerOpen && topCaseStudies.length > 1) {
+      const interval = setInterval(() => {
+        setIsCaseStudyAnimating(true)
+        setTimeout(() => {
+          setCurrentCaseStudyIndex((prevIndex) => 
+            (prevIndex + 1) % topCaseStudies.length
+          )
+          setIsCaseStudyAnimating(false)
+        }, 250) // Half of the animation duration
+      }, 3500) // Change every 3.5 seconds (slightly different from candidates)
+
+      return () => clearInterval(interval)
+    }
+  }, [isDrawerOpen, topCaseStudies.length])
 
   const handleChatWithClaude = () => {
     // recordInteraction('chat')
@@ -728,23 +918,61 @@ export function BottomNav() {
                 <div className="col-span-1 row-span-1">
                   <Card className="hover:shadow-md transition-shadow h-full overflow-hidden p-0">
                     <div className="px-3 py-2 bg-lime-600">
-                      <div className="flex items-center space-x-2">
-                        <BookOpen className="w-4 h-4 text-lime-50" />
-                        <h3 className="text-sm font-semibold text-lime-50">Case Study</h3>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <BookOpen className="w-4 h-4 text-lime-50" />
+                          <h3 className="text-sm font-semibold text-lime-50">Top Case Studies</h3>
+                        </div>
+                        {topCaseStudies.length > 1 && (
+                          <div className="flex items-center space-x-1">
+                            <div className="w-1 h-1 rounded-full bg-lime-300 opacity-50"></div>
+                            <div className="w-1 h-1 rounded-full bg-lime-300 opacity-50"></div>
+                            <div className="w-1 h-1 rounded-full bg-lime-300"></div>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <CardContent className="p-3 h-full flex flex-col justify-between">
-                      <div>
-                        <p className="text-xs text-gray-700 mb-2">Gallery Group Success</p>
-                      </div>
-                      <Button
-                        onClick={() => router.push('/case-studies')}
-                        size="sm"
-                        variant="outline"
-                        className="w-full text-xs h-6 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white"
-                      >
-                        Read More
-                      </Button>
+                      {isLoadingCaseStudies ? (
+                        <div className="flex items-center justify-center py-4">
+                          <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-6 h-6" />
+                        </div>
+                      ) : topCaseStudies.length > 0 ? (
+                        <>
+                          <div className={`transition-all duration-500 ${isCaseStudyAnimating ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+                            <div className="mb-2">
+                              <p className="text-xs font-semibold text-gray-900 line-clamp-2 mb-1">
+                                {topCaseStudies[currentCaseStudyIndex]?.title}
+                              </p>
+                              <p className="text-[10px] text-gray-600 line-clamp-2">
+                                {topCaseStudies[currentCaseStudyIndex]?.description}
+                              </p>
+                            </div>
+                            {topCaseStudies[currentCaseStudyIndex]?.viewCount > 0 && (
+                              <div className="mb-2">
+                                <span className="text-[10px] text-lime-600 bg-lime-50 px-2 py-0.5 rounded">
+                                  Previously viewed
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <Button
+                            onClick={() => router.push(`/case-studies/${topCaseStudies[currentCaseStudyIndex]?.slug}`)}
+                            size="sm"
+                            variant="outline"
+                            className="w-full text-xs h-6 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-all"
+                          >
+                            Read More
+                          </Button>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-2">
+                          <div className="w-8 h-8 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+                            <BookOpen className="w-4 h-4 text-gray-400" />
+                          </div>
+                          <p className="text-xs text-gray-500">No case studies available</p>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>
@@ -829,12 +1057,75 @@ export function BottomNav() {
                           )}
                         </div>
                       ) : (
-                        <div className="text-center py-4">
-                          <div className="w-8 h-8 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-                            <BookOpen className="w-4 h-4 text-gray-400" />
+                        <div className="flex flex-col h-full">
+                          {/* Visual Guide Illustration */}
+                          <div className="flex items-center justify-center space-x-2 mb-3">
+                            <div className="relative">
+                              {/* Step 1: Click Button */}
+                              <div className="flex flex-col items-center">
+                                <div className="w-10 h-10 bg-gradient-to-br from-lime-100 to-lime-200 rounded-lg flex items-center justify-center shadow-sm border border-lime-300 mb-1">
+                                  <BookOpen className="w-5 h-5 text-lime-700" />
+                                </div>
+                                <div className="text-[10px] font-medium text-gray-600">1. Click</div>
+                              </div>
+                              
+                              {/* Arrow */}
+                              <div className="absolute -right-6 top-4 text-lime-400">
+                                <svg width="24" height="8" viewBox="0 0 24 8" fill="none" className="opacity-60">
+                                  <path d="M0 4H22M22 4L18 1M22 4L18 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            </div>
+                            
+                            <div className="ml-6 relative">
+                              {/* Step 2: Fill Form */}
+                              <div className="flex flex-col items-center">
+                                <div className="w-10 h-10 bg-gradient-to-br from-lime-100 to-lime-200 rounded-lg flex items-center justify-center shadow-sm border border-lime-300 mb-1">
+                                  <svg className="w-5 h-5 text-lime-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                </div>
+                                <div className="text-[10px] font-medium text-gray-600">2. Fill Details</div>
+                              </div>
+                              
+                              {/* Arrow */}
+                              <div className="absolute -right-6 top-4 text-lime-400">
+                                <svg width="24" height="8" viewBox="0 0 24 8" fill="none" className="opacity-60">
+                                  <path d="M0 4H22M22 4L18 1M22 4L18 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </div>
+                            </div>
+                            
+                            <div className="ml-6">
+                              {/* Step 3: Get Quote */}
+                              <div className="flex flex-col items-center">
+                                <div className="w-10 h-10 bg-gradient-to-br from-lime-500 to-lime-600 rounded-lg flex items-center justify-center shadow-sm border border-lime-400 mb-1">
+                                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <div className="text-[10px] font-medium text-gray-600">3. Get Quote</div>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-500">No quotes yet</p>
-                          <p className="text-xs text-gray-400 mt-1">Create your first quote</p>
+                          
+                          {/* Description */}
+                          <div className="text-center mb-3">
+                            <p className="text-xs text-gray-700 font-medium mb-1">Get Your Custom Quote</p>
+                            <p className="text-[11px] text-gray-500 leading-relaxed">
+                              Enter team size, roles & preferences to instantly calculate your monthly costs
+                            </p>
+                          </div>
+                          
+                          {/* CTA Button */}
+                          <Button
+                            onClick={handleCreateQuote}
+                            size="sm"
+                            className="w-full bg-gradient-to-r from-lime-600 to-lime-500 hover:from-lime-700 hover:to-lime-600 text-white text-xs h-7 font-semibold shadow-sm"
+                          >
+                            <BookOpen className="w-3 h-3 mr-1.5" />
+                            Create Your First Quote
+                          </Button>
                         </div>
                       )}
                     </CardContent>

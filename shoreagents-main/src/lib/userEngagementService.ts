@@ -22,8 +22,8 @@ export async function getUserIPAddress(): Promise<string | undefined> {
 export function generateUserId(): string {
   // Try to get existing device ID from localStorage, or create a new one
   if (typeof window === 'undefined') {
-    console.log('⚠️ generateUserId called on server side - this should not happen');
-    return `device_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
+    // Return a placeholder for server-side rendering
+    return 'server_placeholder'
   }
   
   let deviceId = localStorage.getItem('shoreagents_device_id')

@@ -1,1042 +1,904 @@
 "use client";
 
 import { SideNav } from "@/components/layout/SideNav";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ArrowRight, Check, AlertTriangle, Clock, DollarSign, Target, Users, Shield, Zap, Phone, Search, UserCheck, Settings, PlayCircle, TrendingUp, MessageCircle, Award, Briefcase } from "lucide-react";
+import Image from "next/image";
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white via-lime-50/30 to-white">
       <SideNav />
       
-      {/* Main Content Section */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          {/* Header Content */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center px-4 py-2 bg-lime-100 border border-lime-300 rounded-full text-sm font-medium text-gray-700 mb-6">
-              <svg className="w-4 h-4 mr-2 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              THE COMPLETE IDIOTS GUIDE
+      {/* Hero Section */}
+      <section className="relative py-16 sm:py-20 md:py-24 px-4 overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-lime-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-lime-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-2000"></div>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
-              SHORE AGENTS - HOW IT WORKS{" "}
-              <span className="bg-gradient-to-r from-lime-600 via-lime-400 to-lime-600 bg-clip-text text-transparent">(COMPLETE GUIDE)</span>
+        <div className="max-w-6xl mx-auto text-center space-y-8">
+          <Badge variant="outline" className="mb-4 border-lime-600 text-lime-700 px-6 py-2.5 text-sm font-semibold hover:bg-lime-50 transition-colors">
+            <Shield className="w-4 h-4 mr-2" />
+            THE COMPLETE IDIOTS GUIDE
+          </Badge>
+          
+          <div className="space-y-4">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+              SHORE AGENTS{" "}
+              <br className="hidden sm:block" />
+              <span className="bg-gradient-to-r from-lime-600 via-lime-500 to-lime-600 bg-clip-text text-transparent">
+                HOW IT WORKS
+              </span>
             </h1>
             
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-700 mb-6">
-              What We <span className="text-lime-600 font-bold">ACTUALLY</span> Do vs. What <span className="text-lime-600 font-bold">YOU</span> Do
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-700 max-w-4xl mx-auto">
+              What We <span className="text-lime-600 font-bold">ACTUALLY</span> Do vs. What{" "}
+              <span className="text-lime-600 font-bold">YOU</span> Do
             </h2>
-            
-            <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto">
-              Claude God's HONEST, No-Bullshit Explanation of our 6-step process - what we handle, what you handle, and why it works.
-            </p>
           </div>
+          
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            No-Bullshit Explanation of our 6-step process - what we handle, what you handle, and why it works.
+          </p>
 
-          {/* Call-to-Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-16">
-            <button 
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+            <Button 
+              size="lg"
               onClick={() => window.location.href = '/gettingstart'}
-              className="bg-lime-600 text-white px-8 py-4 rounded-sm font-semibold hover:bg-lime-500 transition-all duration-300 ease-in-out text-lg shadow-lg hover:shadow-xl cursor-pointer flex items-center"
+              className="w-full sm:w-auto bg-lime-600 hover:bg-lime-700 text-white shadow-lg hover:shadow-xl transition-all transform hover:scale-105 px-8 py-6 text-base"
             >
               Start Your Process Today
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
             
-            <button onClick={() => window.location.href = '/pricing'}  className="bg-white text-lime-600 border-2 border-lime-600 px-8 py-4 rounded-sm font-semibold hover:bg-lime-600 hover:text-white transition-all duration-300 ease-in-out text-lg shadow-lg hover:shadow-xl cursor-pointer">
+            <Button 
+              size="lg"
+              variant="outline"
+              onClick={() => window.location.href = '/pricing'}
+              className="w-full sm:w-auto border-2 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-all transform hover:scale-105 px-8 py-6 text-base"
+            >
               See Pricing Calculator
-            </button>
+            </Button>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 pt-8 opacity-70">
+            <div className="flex items-center gap-2">
+              <Award className="w-5 h-5 text-lime-600" />
+              <span className="text-sm text-gray-600">25,000+ Candidates</span>
+          </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-lime-600" />
+              <span className="text-sm text-gray-600">500+ Happy Clients</span>
+                </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-lime-600" />
+              <span className="text-sm text-gray-600">7 Days to Hire</span>
+                </div>
+              </div>
+
+          {/* Hero Image */}
+          <div className="mt-12 max-w-5xl mx-auto">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-lime-200">
+              <Image 
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop"
+                alt="Team collaboration in modern office"
+                width={1200}
+                height={600}
+                className="w-full h-auto"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-8">
+                <p className="text-white text-lg font-semibold">Building high-performing remote teams, simplified.</p>
+                </div>
+                </div>
+                  </div>
+                  </div>
+      </section>
+
+      <Separator className="max-w-6xl mx-auto" />
+
+      {/* Process Steps Section */}
+      <section className="py-16 sm:py-20 bg-gradient-to-b from-white to-lime-50/50">
+        <div className="max-w-6xl mx-auto px-4 space-y-12">
+          <div className="text-center space-y-4">
+            <Badge className="bg-lime-600 text-white px-6 py-2.5 text-sm font-semibold shadow-md">
+              THE 6-STEP PROCESS
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
+              Simple, Transparent, and Effective
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+              Here's exactly how we help you find the perfect team members.
+            </p>
+            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Step 1 */}
+            <Card className="border-2 border-gray-100 hover:border-lime-300 transition-all hover:shadow-xl group relative overflow-hidden">
+              {/* Mini image for visual appeal */}
+              <div className="relative h-32 overflow-hidden">
+                <Image 
+                  src="https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=600&auto=format&fit=crop"
+                  alt="Phone consultation"
+                  width={600}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <CardHeader className="space-y-3 pb-4 relative z-10 -mt-8">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-gradient-to-br from-lime-600 to-lime-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Phone className="w-7 h-7 text-white" />
+                </div>
+                  <Badge variant="secondary" className="bg-lime-600 text-white px-3 py-1.5 font-semibold">
+                    STEP 1
+                  </Badge>
+                </div>
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl mb-2">Book a Chat With Us</CardTitle>
+                  <div className="flex items-center gap-2 text-lime-600">
+                    <Clock className="w-4 h-4" />
+                    <CardDescription className="text-lime-600 font-semibold">15-30 Minutes</CardDescription>
+                </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm relative z-10">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <MessageCircle className="w-4 h-4 text-lime-600" />
+                    What Happens:
+                  </h4>
+                  <ul className="space-y-1.5 text-gray-600">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>You call us or book online</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>We ask simple questions about your needs</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>Budget and timeline discussion</span>
+                    </li>
+                  </ul>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-lime-50 rounded-lg p-3 border border-lime-100">
+                    <p className="font-semibold text-xs text-lime-700 mb-1">What WE Do:</p>
+                    <p className="text-xs text-gray-700">Listen & understand</p>
+                </div>
+                  <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                    <p className="font-semibold text-xs text-gray-700 mb-1">What YOU Do:</p>
+                    <p className="text-xs text-gray-600">Tell us your needs</p>
+                  </div>
+                  </div>
+                <div className="flex items-center justify-center pt-2">
+                  <Badge variant="outline" className="text-lime-700 border-lime-300 bg-lime-50 px-4 py-2">
+                    <DollarSign className="w-4 h-4 mr-1" />
+                    100% FREE
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Step 2 */}
+            <Card className="border-2 border-gray-100 hover:border-lime-300 transition-all hover:shadow-xl group relative overflow-hidden">
+              {/* Mini image for visual appeal */}
+              <div className="relative h-32 overflow-hidden">
+                <Image 
+                  src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&auto=format&fit=crop"
+                  alt="Recruitment process"
+                  width={600}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <CardHeader className="space-y-3 pb-4 relative z-10 -mt-8">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-gradient-to-br from-lime-600 to-lime-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Search className="w-7 h-7 text-white" />
+                </div>
+                  <Badge variant="secondary" className="bg-lime-600 text-white px-3 py-1.5 font-semibold">
+                    STEP 2
+                  </Badge>
+                </div>
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl mb-2">We Find Qualified People</CardTitle>
+                  <div className="flex items-center gap-2 text-lime-600">
+                    <Clock className="w-4 h-4" />
+                    <CardDescription className="text-lime-600 font-semibold">1-2 Weeks</CardDescription>
+                </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm relative z-10">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <Users className="w-4 h-4 text-lime-600" />
+                    What WE Do:
+                  </h4>
+                  <ul className="space-y-1.5 text-gray-600">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>Search 25,000+ candidates</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>Screen resumes & conduct interviews</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>AI testing & proficiency checks</span>
+                    </li>
+                  </ul>
+                </div>
+                <Separator />
+                <div className="bg-gradient-to-br from-lime-50 to-lime-100/50 rounded-lg p-3 border border-lime-200">
+                  <h4 className="font-semibold text-gray-900 mb-2 text-sm">What YOU Get:</h4>
+                  <ul className="space-y-1 text-xs text-gray-700">
+                    <li>• 3-5 qualified candidates</li>
+                    <li>• Resumes & test scores</li>
+                    <li>• Video interviews</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Step 3 */}
+            <Card className="border-2 border-gray-100 hover:border-lime-300 transition-all hover:shadow-xl group relative overflow-hidden">
+              {/* Mini image for visual appeal */}
+              <div className="relative h-32 overflow-hidden">
+                <Image 
+                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop"
+                  alt="Interview process"
+                  width={600}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <CardHeader className="space-y-3 pb-4 relative z-10 -mt-8">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-gradient-to-br from-lime-600 to-lime-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <UserCheck className="w-7 h-7 text-white" />
+                  </div>
+                  <Badge variant="secondary" className="bg-lime-600 text-white px-3 py-1.5 font-semibold">
+                    STEP 3
+                  </Badge>
+                  </div>
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl mb-2">You Interview and Choose</CardTitle>
+                  <div className="flex items-center gap-2 text-lime-600">
+                    <Target className="w-4 h-4" />
+                    <CardDescription className="text-lime-600 font-semibold">100% YOUR Decision</CardDescription>
+                </div>
+              </div>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm relative z-10">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <PlayCircle className="w-4 h-4 text-lime-600" />
+                    What Happens:
+                  </h4>
+                  <ul className="space-y-1.5 text-gray-600">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>YOU interview them</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>YOU ask your business questions</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>YOU decide who fits</span>
+                    </li>
+                  </ul>
+            </div>
+                <Separator />
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                  <p className="text-xs text-gray-600">
+                    <span className="font-semibold text-gray-900">We help with:</span> Scheduling, setup, and answering background questions
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Step 4 */}
+            <Card className="border-2 border-gray-100 hover:border-lime-300 transition-all hover:shadow-xl group relative overflow-hidden">
+              {/* Mini image for visual appeal */}
+              <div className="relative h-32 overflow-hidden">
+                <Image 
+                  src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=600&auto=format&fit=crop"
+                  alt="Office setup"
+                  width={600}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <CardHeader className="space-y-3 pb-4 relative z-10 -mt-8">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-gradient-to-br from-lime-600 to-lime-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Settings className="w-7 h-7 text-white" />
+                  </div>
+                  <Badge variant="secondary" className="bg-lime-600 text-white px-3 py-1.5 font-semibold">
+                    STEP 4
+                  </Badge>
+                </div>
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl mb-2">We Set Up Everything</CardTitle>
+                  <div className="flex items-center gap-2 text-lime-600">
+                    <Clock className="w-4 h-4" />
+                    <CardDescription className="text-lime-600 font-semibold">1-2 Weeks</CardDescription>
+                </div>
+              </div>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm relative z-10">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-lime-600" />
+                    What WE Handle 100%:
+                  </h4>
+                  <ul className="space-y-1.5 text-gray-600">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>Computer, monitor, equipment</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>High-speed internet + backup</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>Employment contracts & HR</span>
+                    </li>
+                    </ul>
+                  </div>
+                <Separator />
+                <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-3">
+                  <p className="text-xs text-amber-900 font-medium">
+                    <span className="font-bold">YOU Must:</span> Train them on YOUR processes, systems, and business
+                  </p>
+                  </div>
+              </CardContent>
+            </Card>
+
+            {/* Step 5 */}
+            <Card className="border-2 border-gray-100 hover:border-lime-300 transition-all hover:shadow-xl group relative overflow-hidden">
+              {/* Mini image for visual appeal */}
+              <div className="relative h-32 overflow-hidden">
+                <Image 
+                  src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&auto=format&fit=crop"
+                  alt="Team working together"
+                  width={600}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <CardHeader className="space-y-3 pb-4 relative z-10 -mt-8">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-gradient-to-br from-lime-600 to-lime-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Briefcase className="w-7 h-7 text-white" />
+                </div>
+                  <Badge variant="secondary" className="bg-lime-600 text-white px-3 py-1.5 font-semibold">
+                    STEP 5
+                  </Badge>
+                </div>
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl mb-2">They Work For You</CardTitle>
+                  <div className="flex items-center gap-2 text-lime-600">
+                    <TrendingUp className="w-4 h-4" />
+                    <CardDescription className="text-lime-600 font-semibold">Ongoing Partnership</CardDescription>
+                </div>
+                  </div>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm relative z-10">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-3 border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-2 text-xs">THEY Do (For YOU):</h4>
+                    <ul className="space-y-1 text-xs text-gray-700">
+                      <li>• Work YOUR schedule</li>
+                      <li>• Complete YOUR tasks</li>
+                      <li>• Report to YOU</li>
+                    </ul>
+                  </div>
+                  <div className="bg-gradient-to-br from-lime-50 to-lime-100/50 rounded-lg p-3 border border-lime-200">
+                    <h4 className="font-semibold text-gray-900 mb-2 text-xs">WE Handle:</h4>
+                    <ul className="space-y-1 text-xs text-gray-700">
+                      <li>• Payroll & taxes</li>
+                      <li>• IT & equipment</li>
+                      <li>• HR & benefits</li>
+                    </ul>
+                </div>
+              </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-xs text-blue-900 font-medium text-center">
+                    You're their ACTUAL boss - We handle employment logistics
+                  </p>
+            </div>
+              </CardContent>
+            </Card>
+
+            {/* Step 6 */}
+            <Card className="border-2 border-gray-100 hover:border-lime-300 transition-all hover:shadow-xl group relative overflow-hidden">
+              {/* Mini image for visual appeal */}
+              <div className="relative h-32 overflow-hidden">
+                <Image 
+                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&auto=format&fit=crop"
+                  alt="Team growth and scaling"
+                  width={600}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              </div>
+              <CardHeader className="space-y-3 pb-4 relative z-10 -mt-8">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-gradient-to-br from-lime-600 to-lime-500 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Zap className="w-7 h-7 text-white" />
+                  </div>
+                  <Badge variant="secondary" className="bg-lime-600 text-white px-3 py-1.5 font-semibold">
+                    STEP 6
+                  </Badge>
+                </div>
+                <div>
+                  <CardTitle className="text-xl sm:text-2xl mb-2">Expand Your Team</CardTitle>
+                  <div className="flex items-center gap-2 text-lime-600">
+                    <TrendingUp className="w-4 h-4" />
+                    <CardDescription className="text-lime-600 font-semibold">Scale When Ready</CardDescription>
+                </div>
+              </div>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm relative z-10">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">When You Want More:</h4>
+                  <ul className="space-y-1.5 text-gray-600">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>Call us for more people</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>Faster process (1-2 weeks)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <span>We repeat steps 2-5</span>
+                    </li>
+                  </ul>
+                </div>
+                <Separator />
+                <div className="bg-gradient-to-r from-lime-50 to-lime-100 border-2 border-lime-200 rounded-lg p-3">
+                  <p className="text-xs text-lime-900 font-medium text-center">
+                    <Zap className="w-3 h-3 inline mr-1" />
+                    Easy Scaling: Add team members as you grow
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+                </div>
+        </div>
+      </section>
+
+      <Separator className="max-w-6xl mx-auto" />
+
+      {/* Problem Resolution Section with Image */}
+      <section className="py-16 sm:py-20 px-4">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <Badge className="bg-gray-900 text-white px-6 py-2.5 text-sm font-semibold">
+              PROBLEM RESOLUTION
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
+              What If Something Goes Wrong?
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Clear boundaries mean clear solutions. Here's who handles what.
+            </p>
+                </div>
+
+          {/* Support Image */}
+          <div className="max-w-4xl mx-auto mb-12">
+            <div className="relative rounded-xl overflow-hidden shadow-xl">
+              <Image 
+                src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&auto=format&fit=crop"
+                alt="Customer support team"
+                width={1200}
+                height={400}
+                className="w-full h-auto"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-lime-600/80 to-gray-900/80 flex items-center justify-center">
+                <div className="text-center text-white px-6">
+                  <h3 className="text-2xl sm:text-3xl font-bold mb-2">24/7 Support When You Need It</h3>
+                  <p className="text-lg opacity-90">We've got your back on employment matters</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* WE Handle */}
+            <Card className="border-2 border-lime-200 bg-gradient-to-br from-lime-50 via-white to-lime-50/50 hover:shadow-2xl transition-all group">
+              <CardHeader className="pb-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-lime-600 to-lime-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Shield className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                    <CardTitle className="text-2xl sm:text-3xl mb-1">Employment Issues</CardTitle>
+                    <Badge className="bg-lime-600 text-white">WE Handle</Badge>
+                </div>
+              </div>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="space-y-4">
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-lime-100 hover:border-lime-300 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Check className="w-5 h-5 text-lime-600" />
+                </div>
+                <div>
+                        <p className="font-semibold text-gray-900 mb-1">Not showing up to work</p>
+                        <p className="text-sm text-gray-600">We investigate, take action, find replacement</p>
+                </div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-lime-100 hover:border-lime-300 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Check className="w-5 h-5 text-lime-600" />
+                      </div>
+                <div>
+                        <p className="font-semibold text-gray-900 mb-1">Equipment/Internet problems</p>
+                        <p className="text-sm text-gray-600">24/7 IT support, fix or replace equipment</p>
+                </div>
+                  </div>
+                  </div>
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-lime-100 hover:border-lime-300 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Check className="w-5 h-5 text-lime-600" />
+                </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 mb-1">They quit unexpectedly</p>
+                        <p className="text-sm text-gray-600">90-day replacement guarantee, usually within 2 weeks</p>
+              </div>
+            </div>
+          </div>
+        </div>
+              </CardContent>
+            </Card>
+
+            {/* YOU Handle */}
+            <Card className="border-2 border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 hover:shadow-2xl transition-all group">
+              <CardHeader className="pb-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Users className="w-8 h-8 text-white" />
+          </div>
+                  <div>
+                    <CardTitle className="text-2xl sm:text-3xl mb-1">Work Performance</CardTitle>
+                    <Badge className="bg-gray-700 text-white">YOU Handle</Badge>
+                </div>
+              </div>
+              </CardHeader>
+              <CardContent className="space-y-5">
+              <div className="space-y-4">
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                        <p className="font-semibold text-gray-900 mb-1">Don't understand your business</p>
+                        <p className="text-sm text-gray-600">YOU provide business-specific training</p>
+                </div>
+                </div>
+              </div>
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="w-5 h-5 text-amber-600" />
+            </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 mb-1">Work quality not good enough</p>
+                        <p className="text-sm text-gray-600">YOU are their boss, give feedback</p>
+                </div>
+              </div>
+                </div>
+                  <div className="bg-white rounded-xl p-4 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <AlertTriangle className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                        <p className="font-semibold text-gray-900 mb-1">Not following procedures</p>
+                        <p className="text-sm text-gray-600">YOU supervise and enforce your business rules</p>
+                </div>
+              </div>
+            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* New Process Steps Section */}
-      <section className="bg-lime-600 py-16">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              THE <span className="text-lime-200">6-STEP</span> PROCESS (REAL VERSION)
+      <Separator className="max-w-6xl mx-auto" />
+
+      {/* Responsibility Division - Enhanced */}
+      <section className="py-16 sm:py-20 px-4 bg-gradient-to-b from-lime-50/50 to-white relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/2 left-0 w-96 h-96 bg-lime-200 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+        </div>
+
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-4">
+            <Badge className="bg-lime-600 text-white px-6 py-2.5 text-sm font-semibold shadow-md">
+              Clear Boundaries
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
+              The Real Division of Responsibility
             </h2>
-            <p className="text-xl text-lime-100 max-w-3xl mx-auto">
-              Simple, transparent, and effective - here&apos;s exactly how we help you find the perfect team members.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Everyone knows their role - that's why it works.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {/* Step 1 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <span className="text-2xl font-bold text-white">1</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">Book a Chat With Us</h3>
-                  <p className="text-lime-600 font-medium text-base">15-30 Minutes</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What Happens:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• You call us or book online</li>
-                    <li>• We ask you simple questions:</li>
-                    <li>• What kind of work do you need done?</li>
-                    <li>• How many people do you want?</li>
-                    <li>• What&apos;s your budget?</li>
-                    <li>• Do you want them in office or working from home?</li>
-                    <li>• When do you want to start?</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What You Need to Prepare:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Job description (basic is fine)</li>
-                    <li>• Budget range per person</li>
-                    <li>• Timeline (when you want them to start)</li>
-                    <li>• Any special requirements</li>
-                  </ul>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div>
-                    <h5 className="font-semibold text-gray-900 text-sm">What WE Do:</h5>
-                    <p className="text-gray-600 text-sm">Listen and understand your needs</p>
-                  </div>
-                  <div>
-                    <h5 className="font-semibold text-gray-900 text-sm">What YOU Do:</h5>
-                    <p className="text-gray-600 text-sm">Tell us what you want</p>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">⏱️</span>
-                    <span className="text-gray-600">15-30 minutes</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">💰</span>
-                    <span className="text-gray-600 font-semibold">FREE</span>
-                  </div>
+          {/* Partnership Image */}
+          <div className="max-w-4xl mx-auto">
+            <div className="relative rounded-xl overflow-hidden shadow-xl">
+              <Image 
+                src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&auto=format&fit=crop"
+                alt="Business partnership handshake"
+                width={1200}
+                height={400}
+                className="w-full h-auto"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-lime-600/90 to-gray-900/90 flex items-center justify-center">
+                <div className="text-center text-white px-6">
+                  <h3 className="text-2xl sm:text-3xl font-bold mb-2">Partnership That Works</h3>
+                  <p className="text-lg opacity-90">We handle employment, you handle the business</p>
                 </div>
               </div>
             </div>
-
-            {/* Step 2 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <span className="text-2xl font-bold text-white">2</span>
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">We Find Qualified People</h3>
-                  <p className="text-lime-600 font-medium text-base">1-2 Weeks</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What WE Do Behind the Scenes:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Search our database of 25,000+ candidates</li>
-                    <li>• Post on job sites, Facebook, LinkedIn</li>
-                    <li>• Call potential candidates</li>
-                    <li>• Send targeted emails</li>
-                    <li>• Use AI to filter and match candidates</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">Our Screening Process:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Resume Check: Verify education and experience is real</li>
-                    <li>• Phone Call: Test their English and basic communication</li>
-                    <li>• Formal Interview: Professional interview process</li>
-                    <li>• AI Testing: Typing speed, English proficiency, logic, personality</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What YOU Get:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• 3-5 qualified candidates who meet your basic requirements</li>
-                    <li>• Their resumes and test scores</li>
-                    <li>• Video interviews you can review</li>
-                    <li>• Our recommendation on who&apos;s most suitable</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What We DON&apos;T Do:</h4>
-                  <p className="text-gray-600 text-sm">Train them on YOUR business, industry, or processes</p>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">⏱️</span>
-                    <span className="text-gray-600">1-2 weeks</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">💰</span>
-                    <span className="text-gray-600 font-semibold">FREE (included in setup)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <span className="text-2xl font-bold text-white">3</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">You Interview and Choose</h3>
-                  <p className="text-lime-600 font-medium text-base">100% YOUR Decision</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What Happens:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• We schedule interviews between you and the candidates</li>
-                    <li>• YOU interview them via video call, phone, or in-person</li>
-                    <li>• YOU ask questions about YOUR business needs</li>
-                    <li>• YOU decide who fits your requirements</li>
-                    <li>• YOU pick who you want to hire</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What WE Help With:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Scheduling interviews at convenient times</li>
-                    <li>• Setting up video calls if needed</li>
-                    <li>• Being available if technical issues arise</li>
-                    <li>• Answering questions about candidates&apos; backgrounds</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What We DON&apos;T Do:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Make hiring decisions for you</li>
-                    <li>• Know if they&apos;re right for YOUR specific business</li>
-                    <li>• Understand YOUR industry better than you do</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What YOU Do:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Interview candidates yourself</li>
-                    <li>• Ask YOUR business-specific questions</li>
-                    <li>• Test their knowledge of YOUR industry</li>
-                    <li>• Make the final hiring decision</li>
-                  </ul>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">⏱️</span>
-                    <span className="text-gray-600">30-60 minutes per candidate</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">🎯</span>
-                    <span className="text-gray-600 font-semibold">Your Choice</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 4 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <span className="text-2xl font-bold text-white">4</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">We Set Up Employment & Equipment</h3>
-                  <p className="text-lime-600 font-medium text-base">1-2 Weeks</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What WE Handle 100%:</h4>
-                  <div>
-                    <h5 className="font-semibold text-gray-900 text-sm mb-1">Equipment & Infrastructure:</h5>
-                    <ul className="text-gray-600 text-sm space-y-1">
-                      <li>• Computer/Laptop: Brand new, basic business setup</li>
-                      <li>• Monitor: Professional dual screen setup</li>
-                      <li>• Keyboard & Mouse: Professional equipment</li>
-                      <li>• Headset: For calls and meetings</li>
-                      <li>• UPS Backup: Power backup during outages</li>
-                      <li>• Internet: High-speed fiber + backup connection</li>
-                      <li>• Basic Software: Windows, Office, browsers</li>
-                    </ul>
-                  </div>
-                  <div className="mt-3">
-                    <h5 className="font-semibold text-gray-900 text-sm mb-1">Legal & Employment:</h5>
-                    <ul className="text-gray-600 text-sm space-y-1">
-                      <li>• Employment contracts and legal paperwork</li>
-                      <li>• Health insurance enrollment (starts Day 1)</li>
-                      <li>• Government registrations (taxes, social security)</li>
-                      <li>• Payroll system setup</li>
-                      <li>• Shore Agents policy orientation</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What We DON&apos;T Do:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Train them on YOUR software/systems</li>
-                    <li>• Teach them YOUR business processes</li>
-                    <li>• Set up YOUR company-specific tools</li>
-                    <li>• Explain YOUR industry or procedures</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What YOU Must Do:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Give them access to YOUR systems</li>
-                    <li>• Train them on YOUR processes</li>
-                    <li>• Teach them YOUR business procedures</li>
-                    <li>• Show them how YOU want work done</li>
-                    <li>• Provide YOUR company-specific training</li>
-                  </ul>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">⏱️</span>
-                    <span className="text-gray-600">1-2 weeks for our setup</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">🎯</span>
-                    <span className="text-gray-600 font-semibold">Your Training Time</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 5 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <span className="text-2xl font-bold text-white">5</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">They Work For You + We Handle Employment Stuff</h3>
-                  <p className="text-lime-600 font-medium text-base">Ongoing Partnership</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What THEY Do (Working FOR YOU):</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Work the schedule YOU set</li>
-                    <li>• Complete tasks YOU assign</li>
-                    <li>• Attend YOUR meetings</li>
-                    <li>• Report to YOU on progress</li>
-                    <li>• Communicate directly with YOU and YOUR team</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What WE Handle (Employment Logistics):</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Payroll: Pay them every 2 weeks, handle all taxes</li>
-                    <li>• HR Issues: Process sick leave, vacation requests</li>
-                    <li>• IT Support: Fix computers, internet, equipment problems</li>
-                    <li>• Benefits: Manage health insurance and government compliance</li>
-                    <li>• Basic Check-ins: "Are you showing up? Any equipment issues?"</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What We DON&apos;T Do:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Manage their daily work (that&apos;s YOUR job as their boss)</li>
-                    <li>• Train them on YOUR business processes</li>
-                    <li>• Supervise their job performance</li>
-                    <li>• Know if they&apos;re doing good work for YOU</li>
-                    <li>• Handle YOUR business-specific issues</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What YOU Do (You&apos;re Their ACTUAL Boss):</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Assign their daily tasks and projects</li>
-                    <li>• Train them on YOUR business procedures</li>
-                    <li>• Manage their work performance</li>
-                    <li>• Give them feedback on quality</li>
-                    <li>• Handle YOUR business-specific problems</li>
-                    <li>• Decide if they&apos;re meeting YOUR standards</li>
-                  </ul>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">💬</span>
-                    <span className="text-gray-600">With YOU: Daily work communication</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">📞</span>
-                    <span className="text-gray-600 font-semibold">With Us: Only employment/equipment issues</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Step 6 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center mb-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <span className="text-2xl font-bold text-white">6</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900">Expand Your Team (When You&apos;re Ready)</h3>
-                  <p className="text-lime-600 font-medium text-base">Scale When Ready</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">When You Want More People:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Call us: "I need more people for [specific role]"</li>
-                    <li>• We repeat steps 2-5 for new positions</li>
-                    <li>• Faster Process: 1-2 weeks (we know your style now)</li>
-                    <li>• YOU Integrate: New people into YOUR team and processes</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What We Provide:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• More qualified candidates</li>
-                    <li>• Same equipment and setup process</li>
-                    <li>• Same employment management</li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-base mb-2">What YOU Handle:</h4>
-                  <ul className="text-gray-600 text-sm space-y-1">
-                    <li>• Training new people on YOUR business</li>
-                    <li>• Managing larger team workflow</li>
-                    <li>• YOUR company culture and procedures</li>
-                  </ul>
-                </div>
-
-                <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">⚡</span>
-                    <span className="text-gray-600">Faster Process</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="text-lime-600 mr-1">👥</span>
-                    <span className="text-gray-600 font-semibold">Scale Your Team</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* What If Something Goes Wrong Section */}
-      <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What If Something Goes Wrong?
-            </h2>
-          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Employment Issues - WE Handle */}
-            <div className="bg-lime-50 rounded-xl p-8 border border-lime-200 shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">Employment Issues (WE Handle)</h3>
-              </div>
-
-              <div className="space-y-4">
+            {/* Shore Agents */}
+            <Card className="border-2 border-lime-200 hover:shadow-2xl transition-all bg-white">
+              <CardHeader className="bg-gradient-to-br from-lime-50 to-white border-b border-lime-100 pb-6">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <div className="w-12 h-12 bg-lime-600 rounded-xl flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-white" />
+                  </div>
+                  Shore Agents = Employment Provider
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">"They&apos;re not showing up to work"</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">We investigate and take action</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">We handle disciplinary process</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">We find replacement if needed</span>
-                    </li>
-                  </ul>
+                  <h4 className="font-bold text-gray-900 mb-4 text-lg flex items-center gap-2">
+                    <Check className="w-5 h-5 text-lime-600" />
+                    We Provide:
+                  </h4>
+                  <div className="space-y-3">
+                    {["The People: Qualified, English-speaking professionals", "The Infrastructure: Office space, equipment, internet", "The Employment: Contracts, payroll, benefits, HR", "The Support: IT help, equipment fixes, replacements"].map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3 bg-lime-50 rounded-lg p-3 border border-lime-100">
+                        <Check className="w-5 h-5 text-lime-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-700 font-medium">{item}</span>
                 </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">"Equipment/Internet problems"</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">24/7 IT support from us</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">We fix or replace equipment</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">We handle technical issues</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">"They quit unexpectedly"</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">90-day replacement guarantee</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">We start recruitment immediately</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">Usually replaced within 2 weeks</span>
-                    </li>
-                  </ul>
-                </div>
+                    ))}
               </div>
             </div>
-
-            {/* Work Performance Issues - YOU Handle */}
-            <div className="bg-gray-50 rounded-xl p-8 border border-gray-200 shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-gray-600 rounded-lg mr-4 shadow-sm">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
+                <Separator />
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-4 text-lg flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                    We DON'T Provide:
+                  </h4>
+                  <div className="space-y-2">
+                    {["Business management", "Daily supervision", "Industry training", "Quality control of YOUR work"].map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-600">{item}</span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Work Performance Issues (YOU Handle)</h3>
+                    ))}
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">"They don&apos;t understand my business"</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">NOT our problem - YOU need to train them</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-gray-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">YOU provide business-specific training</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-gray-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">YOU explain your processes and procedures</span>
-                    </li>
-                  </ul>
                 </div>
+              </CardContent>
+            </Card>
 
+            {/* You */}
+            <Card className="border-2 border-gray-200 hover:shadow-2xl transition-all bg-white">
+              <CardHeader className="bg-gradient-to-br from-gray-50 to-white border-b border-gray-100 pb-6">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <div className="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  YOU = The Actual Boss
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
                 <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">"Their work quality isn&apos;t good enough"</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">NOT our job to manage - YOU are their boss</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-gray-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">YOU give performance feedback</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-gray-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">Call us only if you want a replacement</span>
-                    </li>
-                  </ul>
+                  <h4 className="font-bold text-gray-900 mb-4 text-lg flex items-center gap-2">
+                    <Check className="w-5 h-5 text-gray-700" />
+                    You Provide:
+                  </h4>
+                  <div className="space-y-3">
+                    {["The Direction: What work needs to be done", "The Training: How YOUR business works", "The Management: Daily supervision and feedback", "The Standards: What quality you expect"].map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3 bg-gray-50 rounded-lg p-3 border border-gray-100">
+                        <Check className="w-5 h-5 text-gray-700 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-700 font-medium">{item}</span>
                 </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">"They&apos;re not following my procedures"</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">WE don&apos;t know your procedures - YOU manage this</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-gray-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">YOU supervise their work</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-gray-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">YOU enforce your business rules</span>
-                    </li>
-                  </ul>
-                </div>
+                    ))}
               </div>
             </div>
+                <Separator />
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-4 text-lg flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5 text-red-600" />
+                    You DON'T Provide:
+                  </h4>
+                  <div className="space-y-2">
+                    {["Office space or equipment", "Employment contracts or payroll", "IT support or technical issues", "Government compliance or benefits"].map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-600">{item}</span>
           </div>
+                    ))}
         </div>
-      </section>
-
-      {/* The Real Division of Responsibility Section */}
-      <section className="bg-lime-600 py-16">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              The Real Division of Responsibility
-            </h2>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Box: Shore Agents = Employment Provider */}
-            <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-lg mr-4 shadow-sm">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">Shore Agents = Employment Provider</h3>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">We Provide:</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The People: Qualified, English-speaking professionals</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The Infrastructure: Office space, equipment, internet</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The Employment: Contracts, payroll, benefits, HR</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The Support: IT help, equipment fixes, replacements</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">We DON&apos;T Provide:</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">Business management</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">Daily supervision</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">Industry training</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">Quality control of YOUR work</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Box: YOU = The Actual Boss */}
-            <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-lg">
-              <div className="flex items-center mb-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-ocean-500 rounded-lg mr-4 shadow-sm">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">YOU = The Actual Boss</h3>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">You Provide:</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The Direction: What work needs to be done</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The Training: How YOUR business works</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The Management: Daily supervision and feedback</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">The Standards: What quality you expect</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-lg mb-3">You DON&apos;T Provide:</h4>
-                  <ul className="space-y-2">
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">Office space or equipment</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">Employment contracts or payroll</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">IT support or technical issues</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                      </svg>
-                      <span className="text-gray-700">Government compliance or benefits</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Simple Summary Section */}
-      <section className="bg-gray-50 py-16">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Simple Summary
-            </h2>
+          {/* Car Analogy Card - Enhanced */}
+          <Card className="border-2 border-lime-300 bg-gradient-to-br from-lime-50 via-white to-lime-50 shadow-xl overflow-hidden">
+            {/* Car Analogy Image */}
+            <div className="relative h-48 sm:h-64">
+              <Image 
+                src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=1200&auto=format&fit=crop"
+                alt="Car keys handover"
+                width={1200}
+                height={400}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-lime-50"></div>
           </div>
 
-          <div className="bg-white rounded-2xl p-12 border border-gray-200 shadow-lg">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+            <CardContent className="p-8 sm:p-12 -mt-12 relative z-10">
+              <div className="text-center space-y-8">
+                <div>
+                  <Badge className="bg-lime-600 text-white px-4 py-2 mb-4">
+                    Simple Analogy
+                  </Badge>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 Think of it like leasing a car:
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
               <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="flex items-center justify-center w-8 h-8 bg-lime-600 rounded-full mr-4 mt-1 flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    {[
+                      { icon: Shield, title: "We provide the car", desc: "(person + equipment + office)" },
+                      { icon: Settings, title: "We handle maintenance", desc: "(IT support, payroll, employment)" }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3 bg-white rounded-xl p-5 shadow-md border-2 border-lime-100 hover:border-lime-300 transition-colors">
+                        <div className="w-10 h-10 bg-lime-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <item.icon className="w-5 h-5 text-white" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">We provide the car</h4>
-                    <p className="text-gray-600 text-sm">(person + equipment + office)</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex items-center justify-center w-8 h-8 bg-lime-600 rounded-full mr-4 mt-1 flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">We handle maintenance</h4>
-                    <p className="text-gray-600 text-sm">(IT support, payroll, employment issues)</p>
+                        <div className="text-left">
+                          <p className="font-bold text-gray-900 mb-1">{item.title}</p>
+                          <p className="text-sm text-gray-600">{item.desc}</p>
                   </div>
                 </div>
-              </div>
-
+                    ))}
+                  </div>
               <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="flex items-center justify-center w-8 h-8 bg-ocean-500 rounded-full mr-4 mt-1 flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    {[
+                      { icon: Users, title: "You drive it", desc: "(manage their daily work)" },
+                      { icon: Target, title: "You decide where to go", desc: "(what work they do)" }
+                    ].map((item, idx) => (
+                      <div key={idx} className="flex items-start gap-3 bg-white rounded-xl p-5 shadow-md border-2 border-gray-100 hover:border-gray-300 transition-colors">
+                        <div className="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <item.icon className="w-5 h-5 text-white" />
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">You drive it</h4>
-                    <p className="text-gray-600 text-sm">(manage their daily work)</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="flex items-center justify-center w-8 h-8 bg-ocean-500 rounded-full mr-4 mt-1 flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">You decide where to go</h4>
-                    <p className="text-gray-600 text-sm">(what work they do for your business)</p>
+                        <div className="text-left">
+                          <p className="font-bold text-gray-900 mb-1">{item.title}</p>
+                          <p className="text-sm text-gray-600">{item.desc}</p>
                   </div>
                 </div>
+                    ))}
               </div>
             </div>
 
-            <div className="mt-8 p-6 bg-lime-50 rounded-xl border border-lime-200">
-              <p className="text-center text-gray-700 font-medium">
-                The person works <span className="font-bold text-gray-900">FOR YOU</span>, but they&apos;re employed <span className="font-bold text-gray-900">BY US</span>.
+                <div className="bg-gradient-to-r from-lime-600 to-lime-500 text-white rounded-2xl p-6 shadow-lg max-w-3xl mx-auto">
+                  <p className="text-lg font-bold">
+                    The person works <span className="underline">FOR YOU</span>, but they're employed <span className="underline">BY US</span>.
               </p>
             </div>
           </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
-      {/* What Makes This Work Section */}
-      <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              What Makes This Work
-            </h2>
+      {/* CTA Section - Enhanced */}
+      <section className="py-16 sm:py-20 px-4 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-lime-50 to-white"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-lime-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-lime-50 rounded-xl p-8 border border-lime-200 shadow-lg">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Why Clients Love This:</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">You get the talent without employment hassles</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">Lower costs than local hiring</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">Fast setup - weeks not months</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">Risk protection - we handle employment issues</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">Easy scaling - add people as you grow</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-8 border border-gray-200 shadow-lg">
-              <h3 className="text-xl font-bold text-gray-900 mb-6">Why It Actually Works:</h3>
-              <ul className="space-y-3">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">Clear boundaries - everyone knows their role</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">You stay in control - it&apos;s still YOUR business</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">Shared responsibility - we handle what we&apos;re good at</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-ocean-500 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">Proven system - tested with hundreds of clients</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Ready to Start Section */}
-      <section className="bg-white py-16">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-          <div className="bg-lime-50 rounded-2xl p-12 border border-lime-200 shadow-lg">
-            <div className="text-center">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+        <div className="max-w-5xl mx-auto">
+          <Card className="border-2 border-lime-300 bg-gradient-to-br from-white via-lime-50/50 to-white shadow-2xl">
+            <CardContent className="p-10 sm:p-14 space-y-10">
+              <div className="text-center space-y-4">
+                <Badge className="bg-lime-600 text-white px-6 py-2.5 text-sm font-semibold shadow-md">
+                  GET STARTED
+                </Badge>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900">
                 Ready to Start?
               </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-full mx-auto mb-3">
-                    <span className="text-white font-bold">1</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Book a consultation</h3>
-                  <p className="text-gray-600 text-sm">15-30 minutes to discuss your needs</p>
+                <p className="text-xl text-gray-700 max-w-2xl mx-auto">
+                  They start working for <span className="font-bold text-lime-600">YOU</span> - With our support structure
+                </p>
                 </div>
                 
-                <div className="text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-full mx-auto mb-3">
-                    <span className="text-white font-bold">2</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                {[
+                  { num: "1", title: "Book consultation", desc: "15-30 minutes", color: "lime" },
+                  { num: "2", title: "We find candidates", desc: "1-2 weeks", color: "lime" },
+                  { num: "3", title: "You choose", desc: "Your decision", color: "lime" },
+                  { num: "4", title: "We set up", desc: "1-2 weeks", color: "lime" },
+                ].map((step) => (
+                  <div key={step.num} className="text-center space-y-3 group">
+                    <div className="w-14 h-14 bg-gradient-to-br from-lime-600 to-lime-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg group-hover:scale-110 transition-transform">
+                      <span className="text-white font-bold text-xl">{step.num}</span>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">We find candidates</h3>
-                  <p className="text-gray-600 text-sm">1-2 weeks of recruitment</p>
+                    <div>
+                      <p className="font-bold text-sm text-gray-900 mb-1">{step.title}</p>
+                      <p className="text-xs text-gray-600">{step.desc}</p>
+                </div>
+                  </div>
+                ))}
                 </div>
                 
-                <div className="text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-full mx-auto mb-3">
-                    <span className="text-white font-bold">3</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">You interview and choose</h3>
-                  <p className="text-gray-600 text-sm">Your decision completely</p>
-                </div>
-                
-                <div className="text-center">
-                  <div className="flex items-center justify-center w-12 h-12 bg-lime-600 rounded-full mx-auto mb-3">
-                    <span className="text-white font-bold">4</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">We set everything up</h3>
-                  <p className="text-gray-600 text-sm">1-2 weeks for equipment and employment</p>
-                </div>
-              </div>
-
-              <p className="text-xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
-                They start working for <span className="font-bold text-gray-900">YOU</span> - With our support structure
-              </p>
-
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
-                <button 
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <Button 
+                  size="lg"
                   onClick={() => window.location.href = '/gettingstart'}
-                  className="bg-lime-600 text-white px-8 py-4 rounded-sm font-semibold hover:bg-lime-500 transition-all duration-300 ease-in-out text-lg shadow-lg hover:shadow-xl cursor-pointer flex items-center"
+                  className="w-full sm:w-auto bg-lime-600 hover:bg-lime-700 text-white shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 px-10 py-7 text-lg font-semibold"
                 >
                   Start Your Process Today
-                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
+                  <ArrowRight className="w-6 h-6 ml-2" />
+                </Button>
                 
-                <button 
-                  onClick={() => {
-                    window.location.href = '/pricing';
-                    // Add a small delay to ensure the page loads before triggering the modal
-                    setTimeout(() => {
-                      const event = new CustomEvent('openPricingCalculator');
-                      window.dispatchEvent(event);
-                    }, 500);
-                  }}
-                  className="bg-white text-lime-600 border-2 border-lime-600 px-8 py-4 rounded-sm font-semibold hover:bg-lime-600 hover:text-white transition-all duration-300 ease-in-out text-lg shadow-lg hover:shadow-xl cursor-pointer"
+                <Button 
+                  size="lg"
+                  variant="outline"
+                  onClick={() => window.location.href = '/pricing'}
+                  className="w-full sm:w-auto border-2 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-all transform hover:scale-105 px-10 py-7 text-lg font-semibold"
                 >
                   See Pricing Calculator
-                </button>
+                </Button>
               </div>
 
-              <p className="text-lg text-gray-600 mt-6">
-                Questions? Let&apos;s talk!
+              <div className="text-center">
+                <p className="text-lg text-gray-600 flex items-center justify-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-lime-600" />
+                  Questions? Let's talk!
               </p>
             </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </div>

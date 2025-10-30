@@ -36,9 +36,9 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { ChartAreaInteractive } from '@/components/chart-area-interactive'
-// Database functions are used in the component
-import { supabase, UserPageVisit } from '@/lib/supabase'
-import { getRealDeviceStats, getRealTimeSeriesData } from '@/lib/userEngagementService'
+import { getRealTimeSeriesData } from '@/lib/userEngagementService'
+import { useDashboardMetrics, useDeviceStats, useUserVisitData, clearAllCaches } from '@/hooks/use-api'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface PerformanceMetrics {
   pageViews: number
@@ -77,41 +77,47 @@ interface UserVisitData {
 export default function AdminDashboard() {
   const router = useRouter()
   const { admin, loading, signOut, isAdmin } = useAdminAuth()
+  const queryClient = useQueryClient()
   
   // Debug logging
   console.log('AdminDashboard - admin:', admin)
   console.log('AdminDashboard - loading:', loading)
   console.log('AdminDashboard - isAdmin:', isAdmin)
-  const [metrics, setMetrics] = useState<PerformanceMetrics>({
-    pageViews: 0,
-    uniqueVisitors: 0,
-    avgLoadTime: 0,
-    bounceRate: 0,
-    conversionRate: 0,
-    serverUptime: 0,
-    apiResponseTime: 0,
-    errorRate: 0
-  })
-
-  const [realMetrics, setRealMetrics] = useState({
-    totalPageViews: 0,
-    uniqueIPs: 0,
-    totalVisitors: 0
-  })
+  
+  // TanStack Query hooks - Automatically fetch and cache data
+  const { 
+    data: dashboardMetrics, 
+    isLoading: isLoadingMetrics, 
+    error: metricsError,
+    refetch: refetchMetrics 
+  } = useDashboardMetrics()
+  
+  const { 
+    data: deviceStatsData, 
+    isLoading: isLoadingDeviceStats, 
+    error: deviceStatsError,
+    refetch: refetchDeviceStats 
+  } = useDeviceStats()
+  
+  const { 
+    data: userVisitsData, 
+    isLoading: isLoadingUserVisits, 
+    error: userVisitsError,
+    refetch: refetchUserVisits 
+  } = useUserVisitData()
 
   const [realTimeSeriesData, setRealTimeSeriesData] = useState<Array<{ date: string; desktop: number; mobile: number; tablet: number }>>([])
-
-  const [deviceStats, setDeviceStats] = useState<DeviceStats>({
-    desktop: 0,
-    mobile: 0,
-    tablet: 0
-  })
-
-  const [pagePerformance, setPagePerformance] = useState<PagePerformance[]>([])
-  const [userVisitData, setUserVisitData] = useState<UserVisitData[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
+  
+  // Use TanStack Query data with proper defaults
+  const realMetrics = dashboardMetrics || { totalPageViews: 0, uniqueIPs: 0, totalVisitors: 0 }
+  const deviceStats = deviceStatsData || { desktop: 0, mobile: 0, tablet: 0 }
+  const userVisitData = userVisitsData || []
+  
+  // Combined loading and error states
+  const isLoading = isLoadingMetrics || isLoadingDeviceStats || isLoadingUserVisits
+  const hasError = metricsError || deviceStatsError || userVisitsError
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -120,186 +126,50 @@ export default function AdminDashboard() {
     }
   }, [loading, isAdmin, router])
 
-  // Fetch real metrics from database
-  const fetchRealMetrics = async () => {
+  // Fetch time-series data on mount
+  useEffect(() => {
+    if (!isAdmin || loading) return
+    
+    const fetchTimeSeriesData = async () => {
+      try {
+        const timeSeriesData = await getRealTimeSeriesData(90)
+        setRealTimeSeriesData(timeSeriesData)
+      } catch (error) {
+        console.error('Error fetching time-series data:', error)
+      }
+    }
+
+    fetchTimeSeriesData()
+  }, [isAdmin, loading])
+
+  const refreshData = async () => {
+    // Trigger TanStack Query refetch
+    setLastUpdated(new Date())
+    await Promise.all([
+      refetchMetrics(),
+      refetchDeviceStats(),
+      refetchUserVisits()
+    ])
+    
+    // Refetch time-series data
     try {
-      if (!supabase) {
-        console.warn('Supabase not available for real metrics')
-        return
-      }
-
-      // Fetch all user page visits
-      const { data: visits, error } = await supabase
-        .from('user_page_visits')
-        .select('*')
-
-      if (error) {
-        console.error('Error fetching real metrics:', error)
-        return
-      }
-
-      if (visits && visits.length > 0) {
-        // Calculate total page views (sum of all visit counts)
-        const totalPageViews = visits.reduce((sum, visit) => sum + visit.visit_count, 0)
-        
-        // Calculate unique IP addresses
-        const uniqueIPs = new Set(visits.map(visit => visit.ip_address).filter(Boolean)).size
-        
-        // Calculate total visitors (sum of all unique user sessions)
-        const totalVisitors = visits.length
-
-        setRealMetrics({
-          totalPageViews,
-          uniqueIPs,
-          totalVisitors
-        })
-      }
-
-      // Fetch real device statistics
-      const realDeviceStats = await getRealDeviceStats()
-      setDeviceStats(realDeviceStats)
-
-      // Fetch real time-series data
       const timeSeriesData = await getRealTimeSeriesData(90)
       setRealTimeSeriesData(timeSeriesData)
     } catch (error) {
-      console.error('Error processing real metrics:', error)
+      console.error('Error fetching time-series data:', error)
     }
-  }
-
-  // Fetch user visit data from database
-  const fetchUserVisitData = async () => {
-    try {
-      if (!supabase) {
-        console.warn('Supabase not available for user visit data')
-        return
-      }
-
-      // Fetch all user page visits
-      const { data: visits, error } = await supabase
-        .from('user_page_visits')
-        .select('*')
-        .order('user_id', { ascending: true })
-        .order('page_path', { ascending: true })
-
-      if (error) {
-        console.error('Error fetching user visit data:', error)
-        return
-      }
-
-      // Group visits by user_id
-      const groupedData = new Map<string, UserVisitData>()
-      
-      visits?.forEach((visit: UserPageVisit) => {
-        const userId = visit.user_id || 'Unknown'
-        
-        if (!groupedData.has(userId)) {
-          groupedData.set(userId, {
-            userId: userId,
-            visits: []
-          })
-        }
-        
-        // Check if this page already exists for this user
-        const existingVisit = groupedData.get(userId)?.visits.find(
-          v => v.pageName === visit.page_path
-        )
-        
-        if (existingVisit) {
-          // Merge the data - add visit count and time spent
-          existingVisit.visitCount += visit.visit_count
-          existingVisit.timeSpent += visit.time_spent_seconds
-          // Keep the most recent last visit
-          if (new Date(visit.last_visit_timestamp) > new Date(existingVisit.lastVisit)) {
-            existingVisit.lastVisit = visit.last_visit_timestamp
-          }
-        } else {
-          // Add new page visit
-          groupedData.get(userId)?.visits.push({
-            pageName: visit.page_path,
-            visitCount: visit.visit_count,
-            timeSpent: visit.time_spent_seconds,
-            lastVisit: visit.last_visit_timestamp
-          })
-        }
-      })
-
-      // Convert to array and sort by user_id
-      const userVisitArray = Array.from(groupedData.values())
-        .sort((a, b) => a.userId.localeCompare(b.userId))
-        .slice(0, 50) // Limit to 50 users for performance
-
-      setUserVisitData(userVisitArray)
-    } catch (error) {
-      console.error('Error processing user visit data:', error)
-    }
-  }
-
-  // Simulate fetching performance data
-  useEffect(() => {
-    // Only fetch data if admin
-    if (!isAdmin || loading) return
-    
-    const fetchMetrics = () => {
-      // Simulate API call delay
-      setTimeout(() => {
-        setMetrics({
-          pageViews: Math.floor(Math.random() * 10000) + 5000,
-          uniqueVisitors: Math.floor(Math.random() * 3000) + 2000,
-          avgLoadTime: Math.random() * 2 + 0.5,
-          bounceRate: Math.random() * 30 + 20,
-          conversionRate: Math.random() * 5 + 2,
-          serverUptime: 99.9,
-          apiResponseTime: Math.random() * 200 + 50,
-          errorRate: Math.random() * 2
-        })
-
-        setDeviceStats({
-          desktop: Math.floor(Math.random() * 60) + 30,
-          mobile: Math.floor(Math.random() * 40) + 20,
-          tablet: Math.floor(Math.random() * 20) + 5
-        })
-
-        setPagePerformance([
-          { path: '/', views: 2500, avgLoadTime: 1.2, bounceRate: 25 },
-          { path: '/about', views: 1200, avgLoadTime: 1.5, bounceRate: 30 },
-          { path: '/services', views: 800, avgLoadTime: 1.8, bounceRate: 35 },
-          { path: '/contact', views: 600, avgLoadTime: 1.1, bounceRate: 20 },
-          { path: '/we-got-talent', views: 400, avgLoadTime: 2.1, bounceRate: 40 }
-        ])
-
-        setLastUpdated(new Date())
-        setIsLoading(false)
-      }, 1000)
-    }
-
-    fetchMetrics()
-    fetchRealMetrics()
-    fetchUserVisitData()
-    
-    // Refresh data every 30 seconds
-    const interval = setInterval(() => {
-      fetchMetrics()
-      fetchRealMetrics()
-      fetchUserVisitData()
-    }, 30000)
-    
-    return () => clearInterval(interval)
-  }, [isAdmin, loading])
-
-  const refreshData = () => {
-    setIsLoading(true)
-    // Trigger refresh
-    setLastUpdated(new Date())
-    fetchRealMetrics()
-    fetchUserVisitData()
-    setTimeout(() => setIsLoading(false), 1000)
   }
 
   const handleLogout = async () => {
     // Use auth context logout
     await signOut()
     router.push('/')
+  }
+
+  const handleClearCache = () => {
+    clearAllCaches(queryClient)
+    // Refetch all data after clearing cache
+    refreshData()
   }
 
   const getStatusColor = (value: number, type: 'uptime' | 'error' | 'performance') => {
@@ -355,48 +225,38 @@ export default function AdminDashboard() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Admin Dashboard</h1>
-              <Badge variant="secondary" className="text-xs">
-                Welcome back, {admin?.first_name}!
-              </Badge>
-            </div>
-          </header>
-          
-          <div className="flex flex-1 flex-col gap-4 p-4">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
             <div className="max-w-7xl mx-auto w-full">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p className="text-gray-600 mt-2">Monitor your website performance and analytics</p>
+
+        {/* Loading State */}
+        {isLoading && !dashboardMetrics && !deviceStatsData && !userVisitsData && (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin text-lime-600 mr-3" />
+            <span className="text-lg text-muted-foreground">Loading dashboard data...</span>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-500">
-              Last updated: {lastUpdated.toLocaleTimeString()}
-            </div>
+        )}
+
+        {/* Error State */}
+        {hasError && !isLoading && (
+          <div className="text-center py-12 bg-red-50 rounded-lg border border-red-200">
+            <div className="text-red-600 font-semibold mb-2">Failed to load dashboard data</div>
+            <p className="text-sm text-red-500 mb-4">
+              {(metricsError || deviceStatsError || userVisitsError)?.message || 'Unknown error occurred'}
+            </p>
             <Button 
-              onClick={refreshData} 
-              disabled={isLoading}
-              className="bg-lime-600 hover:bg-lime-700 text-white"
+              onClick={refreshData}
+              className="bg-lime-600 hover:bg-lime-700"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button 
-              onClick={handleLogout}
-              variant="outline"
-              className="border-lime-200 text-lime-700 hover:bg-lime-50"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Try Again
             </Button>
           </div>
-        </div>
+        )}
 
 
+         {/* Dashboard Content - Only show when data is available */}
+         {(!isLoading || dashboardMetrics || deviceStatsData || userVisitsData) && !hasError && (
+         <>
          {/* Chart and Metrics Layout */}
          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
            {/* Chart - Takes 4/5 of the width */}
@@ -581,7 +441,7 @@ export default function AdminDashboard() {
                                       {topPerformer ? formatTimeSpent(topPerformer.timeSpent) : '0s'}
                                     </span>
                                     {topTimePage && topTimePage.pageName === topPerformer?.pageName && (
-                                      <Badge className="ml-2 bg-orange-100 text-orange-800 border-orange-300 text-xs">
+                                      <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300 text-xs">
                                         Top Time
                                       </Badge>
                                     )}
@@ -621,7 +481,7 @@ export default function AdminDashboard() {
                                           </Badge>
                                         )}
                                         {isTopTime && !isTopPage && (
-                                          <Badge className="ml-2 bg-orange-100 text-orange-800 border-orange-300">
+                                          <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300">
                                             Top Time
                                           </Badge>
                                         )}
@@ -642,7 +502,7 @@ export default function AdminDashboard() {
                                           {formatTimeSpent(visit.timeSpent)}
                                         </span>
                                         {isTopTime && (
-                                          <Badge className="ml-2 bg-orange-100 text-orange-800 border-orange-300 text-xs">
+                                          <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300 text-xs">
                                             Top Time
                                           </Badge>
                                         )}
@@ -673,36 +533,13 @@ export default function AdminDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-lime-600" />
-                    Conversion Metrics
+                    Conversion Metrics (Coming Soon)
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Bounce Rate</span>
-                    <Badge variant="outline" className="text-lime-600 border-lime-200">
-                      {isLoading ? '...' : `${metrics.bounceRate.toFixed(1)}%`}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Conversion Rate</span>
-                    <Badge variant="outline" className="text-lime-600 border-lime-200">
-                      {isLoading ? '...' : `${metrics.conversionRate.toFixed(1)}%`}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">API Response Time</span>
-                    <Badge variant="outline" className="text-lime-600 border-lime-200">
-                      {isLoading ? '...' : `${metrics.apiResponseTime.toFixed(0)}ms`}
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Error Rate</span>
-                    <Badge 
-                      variant="outline" 
-                      className={`${getStatusColor(metrics.errorRate, 'error')} border-current`}
-                    >
-                      {isLoading ? '...' : `${metrics.errorRate.toFixed(2)}%`}
-                    </Badge>
+                <CardContent>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <TrendingUp className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                    <p>Conversion metrics will be available soon</p>
                   </div>
                 </CardContent>
               </Card>
@@ -753,29 +590,13 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle>Performance Metrics</CardTitle>
                 <CardDescription>
-                  Real-time performance monitoring and alerts
+                  Real-time performance monitoring (Coming Soon)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-lime-600">
-                      {isLoading ? '...' : `${metrics.avgLoadTime.toFixed(2)}s`}
-                    </div>
-                    <div className="text-sm text-gray-600">Average Load Time</div>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-lime-600">
-                      {isLoading ? '...' : `${metrics.apiResponseTime.toFixed(0)}ms`}
-                    </div>
-                    <div className="text-sm text-gray-600">API Response Time</div>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg">
-                    <div className="text-2xl font-bold text-lime-600">
-                      {isLoading ? '...' : `${metrics.serverUptime}%`}
-                    </div>
-                    <div className="text-sm text-gray-600">Server Uptime</div>
-                  </div>
+                <div className="text-center py-8 text-muted-foreground">
+                  <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p>Performance monitoring will be available soon</p>
                 </div>
               </CardContent>
             </Card>
@@ -831,35 +652,21 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle>Page Performance</CardTitle>
                 <CardDescription>
-                  Performance metrics for each page
+                  Performance metrics for each page (Coming Soon)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {pagePerformance.map((page, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <div className="font-medium">{page.path}</div>
-                        <div className="text-sm text-gray-600">{page.views} views</div>
-                      </div>
-                      <div className="text-right space-y-1">
-                        <div className="text-sm">
-                          <span className="font-medium">{page.avgLoadTime.toFixed(2)}s</span>
-                          <span className="text-gray-600 ml-2">load time</span>
-                        </div>
-                        <div className="text-sm">
-                          <span className="font-medium">{page.bounceRate}%</span>
-                          <span className="text-gray-600 ml-2">bounce rate</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center py-8 text-muted-foreground">
+                  <Database className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p>Page performance tracking will be available soon</p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
         </Tabs>
+        </>
+         )}
             </div>
           </div>
         </SidebarInset>

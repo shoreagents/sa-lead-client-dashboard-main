@@ -8,7 +8,8 @@ import {
   BookOpen, 
   Users 
 } from 'lucide-react'
-import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
+import { UserQuoteService } from '@/lib/userQuoteService'
+import { UserQuoteSummary } from '@/hooks/use-api'
 
 // Next Step Card Component
 interface NextStepCardProps {
@@ -33,7 +34,7 @@ export const NextStepCard = ({ onSeePricing }: NextStepCardProps) => (
         <Button
           onClick={onSeePricing}
           size="sm"
-          className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors"
+          className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors h-8 text-sm font-semibold"
         >
           View Pricing
         </Button>
@@ -66,7 +67,7 @@ export const CaseStudyCard = ({ onReadMore }: CaseStudyCardProps) => (
           onClick={onReadMore}
           size="sm"
           variant="outline"
-          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors"
+          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors h-8 text-sm font-semibold"
         >
           Read More
         </Button>
@@ -146,7 +147,7 @@ export const TopCandidateCard = ({
           onClick={onViewProfile}
           size="sm"
           variant="outline"
-          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors"
+          className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors h-8 text-sm font-semibold"
         >
           {topCandidate ? 'View Profile' : 'Browse Talent'}
         </Button>
@@ -192,14 +193,14 @@ export const RecentQuoteCard = ({
                 size="sm"
                 variant="outline"
                 onClick={onViewQuote}
-                className="text-xs px-2 py-1 h-7 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors"
+                className="text-xs px-2 py-1 h-8 border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors font-semibold"
               >
                 View All
               </Button>
               <Button
                 size="sm"
                 onClick={onCreateQuote}
-                className="text-xs px-2 py-1 h-7 bg-lime-600 hover:bg-lime-700 text-white"
+                className="text-xs px-2 py-1 h-8 bg-lime-600 hover:bg-lime-700 text-white font-semibold"
               >
                 + New Quote
               </Button>

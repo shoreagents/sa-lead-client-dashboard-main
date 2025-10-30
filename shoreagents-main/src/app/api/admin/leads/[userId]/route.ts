@@ -22,6 +22,7 @@ export async function GET(
           quote_number,
           total_monthly_cost,
           currency_code,
+          member_count,
           created_at
         )
       `)

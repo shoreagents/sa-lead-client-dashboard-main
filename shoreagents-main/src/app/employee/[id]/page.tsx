@@ -298,7 +298,7 @@ export default function EmployeeProfilePage() {
                 <div className="flex justify-center mb-4">
                   <div className="relative">
                     <Avatar className="w-24 h-24 ring-4 ring-lime-100 shadow-lg">
-                      <AvatarImage src={employee.avatar || ''} />
+                      <AvatarImage src={employee.avatar || undefined} />
                       <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-lime-400 to-lime-600 text-white">
                         {employee.name.split(' ').map(n => n[0]).join('')}
                       </AvatarFallback>

@@ -223,6 +223,13 @@ export async function POST(request: NextRequest) {
 
     const { message, conversationHistory, userId }: { message: string; conversationHistory: Array<{ role: string; content: string }>; userId?: string } = requestBody;
 
+    console.log('🚀 API /chat processing:', {
+      message: message ? message.substring(0, 50) + '...' : 'EMPTY_MESSAGE',
+      conversationHistoryLength: conversationHistory.length,
+      userId,
+      timestamp: new Date().toISOString()
+    });
+
     // Validate required fields - allow empty messages for initial greetings
     if (typeof message !== 'string') {
       return NextResponse.json(
@@ -432,9 +439,11 @@ export async function POST(request: NextRequest) {
     topics: conversationAnalysis.topics
   });
   
-  // Create personalized context based on user data and conversation analysis
-  let personalizedContext = '';
-  const suggestedComponents = [];
+    // Create personalized context based on user data and conversation analysis
+    let personalizedContext = '';
+    const suggestedComponents = [];
+    
+    console.log('🔍 Creating personalized context with userData:', userData);
   
   // Enhanced AI analysis for anonymous users
   let shouldRequestContactInfo = false;
@@ -473,8 +482,11 @@ export async function POST(request: NextRequest) {
     // Don't ask for contact info immediately - only when user shows interest
     // This will be handled by the specific interest-based triggers below
     
+    // Check if this is an authenticated user (Regular/Admin)
+    const isAuthenticatedUser = user.user_type === 'Regular' || user.user_type === 'Admin';
+    
     // Don't ask for contact info from authenticated users (Regular/Admin)
-    if (user.user_type === 'Regular' || user.user_type === 'Admin') {
+    if (isAuthenticatedUser) {
       shouldRequestContactInfo = false;
       contactRequestReason = 'authenticated_user_has_contact_info';
     }
@@ -504,15 +516,16 @@ export async function POST(request: NextRequest) {
       )
     );
     
-    if (conversationHistory.length >= 3 && businessTopics && !userProfile.hasContactInfo && !hasProvidedContactInConversation) {
+    // Only ask for contact info if NOT an authenticated user and they don't have contact info
+    if (!isAuthenticatedUser && conversationHistory.length >= 3 && businessTopics && !userProfile.hasContactInfo && !hasProvidedContactInConversation) {
       shouldRequestContactInfo = true;
       contactRequestReason = 'engaged_user_missing_contact';
       console.log('🎯 Triggering contact request: engaged_user_missing_contact');
     }
     
     // Check if user is asking for quotes but hasn't provided contact info
-    // Now we check both database contact info AND conversation history
-    if ((conversationAnalysis.intent === 'pricing_inquiry' || conversationAnalysis.intent === 'talent_inquiry') && 
+    // IMPORTANT: Never ask for contact info from authenticated users
+    if (!isAuthenticatedUser && (conversationAnalysis.intent === 'pricing_inquiry' || conversationAnalysis.intent === 'talent_inquiry') && 
         !userProfile.hasContactInfo && !hasProvidedContactInConversation) {
       shouldRequestContactInfo = true;
       contactRequestReason = 'quote_request_missing_contact';
@@ -703,6 +716,14 @@ CONVERSATION ANALYSIS:
   let systemPrompt = userData && userData.user 
     ? SIMPLIFIED_AI_CONFIG.systemPrompts.withPersonalization(userData)
     : SIMPLIFIED_AI_CONFIG.systemPrompts.base;
+    
+  console.log('🔍 System Prompt Debug:', {
+    hasUserData: !!userData,
+    hasUser: !!userData?.user,
+    userName: userData?.user?.first_name,
+    systemPromptLength: systemPrompt.length,
+    usingPersonalizedPrompt: !!(userData && userData.user)
+  });
 
   // Add candidate analysis data to system prompt if available
   if (candidateAnalysis && candidateAnalysis.success) {
@@ -735,6 +756,7 @@ CRITICAL INSTRUCTIONS:
     console.log('Processing chat request...');
     console.log('Message length:', message.length);
     console.log('Conversation history length:', conversationHistory.length);
+    console.log('🔍 Final System Prompt (first 200 chars):', systemPrompt.substring(0, 200));
 
     // Call Anthropic API
     const anthropicResponse = await anthropic.messages.create({
@@ -760,6 +782,13 @@ CRITICAL INSTRUCTIONS:
         content: item.content,
         url: item.url
       }));
+
+    console.log('✅ API /chat sending response:', {
+      contentLength: aiResponse.text.length,
+      contentPreview: aiResponse.text.substring(0, 100) + '...',
+      suggestedComponents,
+      timestamp: new Date().toISOString()
+    });
 
     const nextResponse = NextResponse.json({
       content: aiResponse.text,
