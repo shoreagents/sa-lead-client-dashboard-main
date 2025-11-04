@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
         }
       },
       include: {
-        leadProgress: {
-          orderBy: { created_at: 'desc' },
-          take: 1 // Get only the latest progress record
-        },
+        leadProgress: true, // One-to-one relationship, so no need for orderBy/take
         pricingQuotes: {
           orderBy: { created_at: 'desc' },
           take: 3 // Get latest 3 quotes
@@ -32,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     // Transform data to match the expected format
     const leads = usersWithProgress.map(user => {
-      const currentProgress = user.leadProgress[0]
+      const currentProgress = user.leadProgress // Since it's one-to-one, access directly
       const hasInterviewRequest = user.interviewRequests.length > 0
       
       // Debug logging
@@ -128,7 +125,14 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in leads API:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const errorStack = error instanceof Error ? error.stack : undefined
+    console.error('Error details:', { errorMessage, errorStack })
+    return NextResponse.json({ 
+      error: 'Failed to load leads', 
+      message: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? errorStack : undefined
+    }, { status: 500 })
   }
 }
 
@@ -159,8 +163,8 @@ export async function PUT(request: NextRequest) {
           previous_status: existingProgress.status, // Store old status as previous
           status: column, // Update to new status
           changed_by: changedBy || null,
-          change_reason: changeReason || null,
-          created_at: new Date() // Update timestamp
+          change_reason: changeReason || null
+          // Note: created_at should not be updated as it represents when the record was first created
         }
       })
       console.log('✅ API: Updated existing lead status:', updatedProgress)

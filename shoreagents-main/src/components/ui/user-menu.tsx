@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -14,10 +14,60 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { User, LogOut, Settings, Building } from "lucide-react"
 import { useUserAuth } from "@/lib/user-auth-context"
 import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
+
+const supabase = createClient()
 
 export function UserMenu() {
-  const { user, signOut, isClient } = useUserAuth()
+  const { user, signOut, isClient, loading: authLoading } = useUserAuth()
   const [loading, setLoading] = useState(false)
+  const [isUserAdmin, setIsUserAdmin] = useState(false)
+
+  // Check if user is an admin by querying the database
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsUserAdmin(false)
+        return
+      }
+
+      // Quick check: if email matches admin email
+      if (user.email === 'admin@shoreagents.com') {
+        setIsUserAdmin(true)
+        return
+      }
+
+      // If we have auth_user_id, query database
+      if (user.auth_user_id) {
+        try {
+          const { data, error } = await supabase
+            .from('users')
+            .select('is_admin, user_type')
+            .eq('auth_user_id', user.auth_user_id)
+            .single()
+
+          if (error) {
+            console.error('Error checking admin status:', error)
+            setIsUserAdmin(false)
+            return
+          }
+
+          // Check if user is admin
+          setIsUserAdmin(!!(data?.is_admin || data?.user_type === 'Admin'))
+        } catch (error) {
+          console.error('Error in checkAdminStatus:', error)
+          setIsUserAdmin(false)
+        }
+      } else {
+        // No auth_user_id available, default to false
+        setIsUserAdmin(false)
+      }
+    }
+
+    if (user) {
+      checkAdminStatus()
+    }
+  }, [user?.auth_user_id, user?.email])
 
 
   // Memoize the sign out handler to prevent unnecessary re-renders
@@ -52,6 +102,7 @@ export function UserMenu() {
     return `${firstName} ${lastName}`.trim() || user.email || 'User'
   }, [user])
 
+  // Don't render if no user (but allow rendering even if loading to avoid stuck state)
   if (!user) {
     return null
   }
@@ -76,10 +127,10 @@ export function UserMenu() {
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
-            {user.user_metadata?.company && (
+            {user.company && (
               <p className="text-xs leading-none text-muted-foreground flex items-center">
                 <Building className="h-3 w-3 mr-1" />
-                {user.user_metadata.company}
+                {user.company}
               </p>
             )}
           </div>
@@ -87,7 +138,11 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <User className="mr-2 h-4 w-4" />
-          <span><a href={isClient ? "/admin-dashboard" : "/user-dashboard"}>Dashboard</a></span>
+          <span>
+            <a href={isUserAdmin ? "/admin-dashboard" : "/user-dashboard"}>
+              Dashboard
+            </a>
+          </span>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />

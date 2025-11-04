@@ -364,6 +364,49 @@ model Message {
   @@schema("public")
 }
 
+model ContentPost {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_type        String    @map("post_type") @db.VarChar(50) // 'blog' | 'article' | 'pillar'
+  title            String    @db.VarChar(500)
+  slug             String    @unique @db.VarChar(500)
+  description      String?   @db.Text
+  content          String    @db.Text
+  category         String?   @db.VarChar(200)
+  tags             Json?     @default("[]") @db.Json
+  custom_url       String?   @unique @map("custom_url") @db.VarChar(500)
+  url_pattern      String?   @map("url_pattern") @db.VarChar(200)
+  status           String    @default("draft") @db.VarChar(50) // 'draft' | 'published'
+  author_id        String?   @map("author_id") @db.VarChar(255)
+  featured_image   String?   @map("featured_image") @db.VarChar(1000)
+  thumbnail        String?   @db.VarChar(1000)
+  
+  // SEO Fields
+  seo_title        String?   @map("seo_title") @db.VarChar(500)
+  seo_description  String?   @map("seo_description") @db.VarChar(1000)
+  seo_keywords     Json?     @default("[]") @map("seo_keywords") @db.Json
+  canonical_url    String?   @map("canonical_url") @db.VarChar(500)
+  og_image         String?   @map("og_image") @db.VarChar(1000)
+  structured_data  Json?     @map("structured_data") @db.Json
+  no_index         Boolean   @default(false) @map("no_index")
+  
+  // Metadata
+  published_at     DateTime? @map("published_at") @db.Timestamptz(6)
+  created_at       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at       DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  last_modified    DateTime? @map("last_modified") @db.Timestamptz(6)
+
+  @@index([slug], map: "idx_content_posts_slug")
+  @@index([custom_url], map: "idx_content_posts_custom_url")
+  @@index([post_type], map: "idx_content_posts_post_type")
+  @@index([status], map: "idx_content_posts_status")
+  @@index([category], map: "idx_content_posts_category")
+  @@index([published_at], map: "idx_content_posts_published_at")
+  @@index([created_at], map: "idx_content_posts_created_at")
+  @@index([author_id], map: "idx_content_posts_author_id")
+  @@map("content_posts")
+  @@schema("public")
+}
+
 enum UserType {
   Anonymous
   Regular

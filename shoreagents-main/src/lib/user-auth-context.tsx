@@ -355,10 +355,12 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
         const userData = await fetchUserData(session.user)
         if (mounted) {
           setUser(userData)
+          setLoading(false)
         }
       } else {
         if (mounted) {
           setUser(null)
+          setLoading(false)
         }
       }
     })

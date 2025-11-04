@@ -19,6 +19,7 @@ import {
   ChevronDown,
   ChevronRight,
   Info,
+  PenSquare,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -45,6 +46,12 @@ const adminNavItems = [
     title: "Lead Management",
     url: "/admin-dashboard/leads",
     icon: Users,
+    disabled: false,
+  },
+  {
+    title: "Create a Post",
+    url: "/admin-dashboard/create-post",
+    icon: PenSquare,
     disabled: false,
   },
   {

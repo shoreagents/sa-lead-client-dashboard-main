@@ -616,10 +616,25 @@ const fetchLeads = async (): Promise<LeadsResponse> => {
   const response = await fetch('/api/admin/leads');
   
   if (!response.ok) {
-    throw new Error('Failed to fetch leads');
+    // Try to get error message from response
+    let errorMessage = 'Failed to fetch leads';
+    try {
+      const errorData = await response.json();
+      errorMessage = errorData.message || errorData.error || errorMessage;
+    } catch {
+      // If response is not JSON, use default message
+    }
+    throw new Error(errorMessage);
   }
   
-  return response.json();
+  const result = await response.json();
+  
+  // Check if the response indicates an error
+  if (!result.success && result.error) {
+    throw new Error(result.message || result.error);
+  }
+  
+  return result;
 };
 
 const updateLeadStatus = async ({ 
@@ -1352,5 +1367,62 @@ export const useUpdateConversationContext = () => {
         queryKey: ['conversations'] 
       });
     },
+  });
+};
+
+// ============================================================================
+// TSX Content Management
+// ============================================================================
+
+interface CompileTsxResponse {
+  success: boolean;
+  content: string;
+  method?: string;
+}
+
+interface ImproveTsxResponse {
+  success: boolean;
+  improvedCode: string;
+}
+
+const compileTsx = async (tsxCode: string): Promise<CompileTsxResponse> => {
+  const response = await fetch('/api/admin/content/compile-tsx', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tsxCode }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to compile TSX code');
+  }
+
+  return response.json();
+};
+
+const improveTsx = async (tsxCode: string): Promise<ImproveTsxResponse> => {
+  const response = await fetch('/api/admin/content/improve-tsx', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tsxCode }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to improve TSX code');
+  }
+
+  return response.json();
+};
+
+export const useCompileTsx = () => {
+  return useMutation({
+    mutationFn: compileTsx,
+  });
+};
+
+export const useImproveTsx = () => {
+  return useMutation({
+    mutationFn: improveTsx,
   });
 };

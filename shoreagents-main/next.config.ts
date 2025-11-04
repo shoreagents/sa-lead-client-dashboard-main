@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ['@babel/parser', '@babel/traverse', '@babel/types'],
 };
 
 export default nextConfig;
