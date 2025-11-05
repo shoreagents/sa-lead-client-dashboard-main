@@ -569,7 +569,7 @@ export default function AnalysisPage() {
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto analysis-modal-scrollbar">
                 <div className="grid grid-cols-2 gap-6 text-sm text-gray-300">
               
               {selectedAnalysis && (

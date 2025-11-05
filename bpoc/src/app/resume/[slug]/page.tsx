@@ -388,8 +388,22 @@ export default function ResumeSlugPage() {
       if (resume?.data?.content) {
         // Set a flag to indicate we're editing an existing resume
         localStorage.setItem('editingExistingResume', 'true');
-        localStorage.setItem('resumeData', JSON.stringify(resume.data.content));
-        console.log('Existing resume data loaded for editing');
+        
+        // Load the complete resume data structure (including profilePhoto, template, etc.)
+        const completeResumeData = {
+          content: resume.data.content,
+          template: resume.data.template,
+          sections: resume.data.sections,
+          headerInfo: resume.data.headerInfo,
+          profilePhoto: resume.data.profilePhoto
+        };
+        
+        console.log('🔍 Resume data from database:', resume.data);
+        console.log('📸 Profile photo in resume data:', resume.data.profilePhoto);
+        console.log('📦 Complete resume data being saved to localStorage:', completeResumeData);
+        
+        localStorage.setItem('resumeData', JSON.stringify(completeResumeData));
+        console.log('✅ Complete resume data loaded for editing');
       } else {
         console.error('No resume data found to edit');
         return;

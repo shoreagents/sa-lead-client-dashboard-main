@@ -18,7 +18,9 @@ import {
   AlertCircle,
   X,
   RefreshCw,
-  ChevronDown
+  ChevronDown,
+  TrendingUp,
+  BarChart3
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -266,14 +268,19 @@ export default function ResumesPage() {
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                  <Eye className="w-6 h-6 text-white" />
+                  <TrendingUp className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Total Views</p>
+                  <p className="text-sm text-gray-400">Resumes This Month</p>
                   <p className="text-2xl font-bold text-white">
-                    {resumes.reduce((sum, r) => sum + r.view_count, 0)}
+                    {resumes.filter(r => {
+                      const createdDate = new Date(r.created_at)
+                      const now = new Date()
+                      return createdDate.getMonth() === now.getMonth() && 
+                             createdDate.getFullYear() === now.getFullYear()
+                    }).length}
                   </p>
-                  <p className="text-xs text-green-400">All resumes</p>
+                  <p className="text-xs text-green-400">New this month</p>
                 </div>
               </div>
             </CardContent>
@@ -283,14 +290,16 @@ export default function ResumesPage() {
             <CardContent className="p-6">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
+                  <BarChart3 className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-400">Templates</p>
+                  <p className="text-sm text-gray-400">Avg Views/Resume</p>
                   <p className="text-2xl font-bold text-white">
-                    {new Set(resumes.map(r => r.template_used)).size}
+                    {resumes.length > 0 
+                      ? Math.round(resumes.reduce((sum, r) => sum + r.view_count, 0) / resumes.length)
+                      : 0}
                   </p>
-                  <p className="text-xs text-yellow-400">Unique templates</p>
+                  <p className="text-xs text-yellow-400">Average engagement</p>
                 </div>
               </div>
             </CardContent>

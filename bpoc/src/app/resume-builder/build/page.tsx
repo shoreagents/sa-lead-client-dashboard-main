@@ -42,6 +42,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getSessionToken } from '@/lib/auth-helpers';
 import { cleanupLocalStorageAfterSave } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
+import { toast } from '@/components/ui/toast';
 
 interface ResumeTemplate {
   id: string;
@@ -194,6 +195,7 @@ export default function ResumeBuilderPage() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
+  
 
   // Photo upload functions
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,9 +247,17 @@ export default function ResumeBuilderPage() {
           .from('resume_headshot')
           .getPublicUrl(filePath);
 
+        console.log('🔗 Generated photo URL:', urlData?.publicUrl);
+        console.log('📁 File path used:', filePath);
+        console.log('🪣 Bucket name:', 'resume_headshot');
+
         if (urlData?.publicUrl) {
           setProfilePhoto(urlData.publicUrl);
-          console.log('✅ Photo uploaded successfully:', urlData.publicUrl);
+          console.log('✅ Photo uploaded successfully and set to state:', urlData.publicUrl);
+          // Close the photo upload dialog
+          setShowPhotoUpload(false);
+          // Show success message
+          alert('Photo uploaded successfully!');
         } else {
           throw new Error('Failed to get public URL');
         }
@@ -289,6 +299,8 @@ export default function ResumeBuilderPage() {
     }
     
     setProfilePhoto(null);
+    // Show success message
+    alert('Photo removed successfully!');
   };
 
   useEffect(() => {
@@ -337,30 +349,110 @@ export default function ResumeBuilderPage() {
         const isEditingExisting = localStorage.getItem('editingExistingResume') === 'true';
         
         if (resumeData) {
-          const parsedData = JSON.parse(resumeData);
-          setOriginalResumeData(parsedData);
-          
-          if (isEditingExisting) {
-            // When editing existing resume, use the data directly without API call
-            console.log('Editing existing resume - using data directly');
-            setImprovedResume(parsedData);
+          try {
+            const parsedData = JSON.parse(resumeData);
+            setOriginalResumeData(parsedData);
             
-            // Load profile photo if it exists
-            if (parsedData.profilePhoto) {
-              setProfilePhoto(parsedData.profilePhoto);
-              console.log('✅ Loaded existing profile photo from localStorage');
+            if (isEditingExisting) {
+              // When editing existing resume, use the data directly without API call
+              console.log('✅ Editing existing resume - using data directly');
+              console.log('📄 Parsed data:', parsedData);
+              console.log('📸 Profile photo in data:', parsedData.profilePhoto);
+              setImprovedResume(parsedData.content || parsedData);
+            
+              // Load profile photo if it exists (check both top level and content level)
+              if (parsedData.profilePhoto) {
+                setProfilePhoto(parsedData.profilePhoto);
+                console.log('✅ Loaded existing profile photo from localStorage:', parsedData.profilePhoto);
+              } else if (parsedData.content?.profilePhoto) {
+                setProfilePhoto(parsedData.content.profilePhoto);
+                console.log('✅ Loaded existing profile photo from content:', parsedData.content.profilePhoto);
+              } else {
+                console.log('❌ No profile photo found in resume data');
+              }
+              
+              // Load template and colors if they exist
+              if (parsedData.template) {
+                setSelectedTemplate(parsedData.template);
+                if (parsedData.template.primaryColor) {
+                  setCustomColors(prev => ({
+                    ...prev,
+                    primary: parsedData.template.primaryColor
+                  }));
+                }
+                if (parsedData.template.secondaryColor) {
+                  setCustomColors(prev => ({
+                    ...prev,
+                    secondary: parsedData.template.secondaryColor
+                  }));
+                }
+              }
+              
+              setIsLoading(false);
+              // Clear the editing flag
+              localStorage.removeItem('editingExistingResume');
+            } else {
+              // Only call API for new resume generation
+              generateImprovedResume(parsedData);
             }
-            
+          } catch (error) {
+            console.error('Error parsing resume data:', error);
+            setError('Error loading resume data. Please try again.');
             setIsLoading(false);
-            // Clear the editing flag
-            localStorage.removeItem('editingExistingResume');
-          } else {
-            // Only call API for new resume generation
-            generateImprovedResume(parsedData);
           }
         } else {
-          // No resume data available locally, still attempt to fetch extracted fallback from server
-          setError('No resume data found. Please upload a resume first.');
+          // No resume data available locally, try to load from database as fallback
+          (async () => {
+            try {
+              const sessionToken = await getSessionToken();
+              if (sessionToken && user?.id) {
+                const response = await fetch('/api/user/saved-resume-data', {
+                  headers: {
+                    'x-user-id': user.id,
+                    'Authorization': `Bearer ${sessionToken}`
+                  }
+                });
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  if (data.success && data.hasData) {
+                    const resumeData = data.resumeData;
+                    setOriginalResumeData(resumeData);
+                    setImprovedResume(resumeData.content || resumeData);
+                    
+                    // Load profile photo if it exists
+                    if (resumeData.profilePhoto) {
+                      setProfilePhoto(resumeData.profilePhoto);
+                    }
+                    
+                    // Load template and colors if they exist
+                    if (resumeData.template) {
+                      setSelectedTemplate(resumeData.template);
+                      if (resumeData.template.primaryColor) {
+                        setCustomColors(prev => ({
+                          ...prev,
+                          primary: resumeData.template.primaryColor
+                        }));
+                      }
+                      if (resumeData.template.secondaryColor) {
+                        setCustomColors(prev => ({
+                          ...prev,
+                          secondary: resumeData.template.secondaryColor
+                        }));
+                      }
+                    }
+                    
+                    setIsLoading(false);
+                    return;
+                  }
+                }
+              }
+            } catch (dbError) {
+              console.error('Database fallback failed:', dbError);
+            }
+            
+            setError('No resume data found. Please upload a resume first.');
+          })();
         }
       }
     });
@@ -1157,6 +1249,9 @@ export default function ResumeBuilderPage() {
         headerInfo: getHeaderInfo(),
         profilePhoto: profilePhoto // Include the profile photo in saved data
       };
+      
+      console.log('💾 Saving resume with profile photo:', profilePhoto);
+      console.log('📦 Complete resume data structure:', completeResumeData);
       
       console.log('📦 Complete resume data being saved:', {
         templateId: selectedTemplate.id,
@@ -2362,7 +2457,11 @@ export default function ResumeBuilderPage() {
                                   )}
                                 </div>
                               </TooltipTrigger>
-                              <TooltipContent>
+                              <TooltipContent 
+                                side={profilePhoto ? "left" : "top"}
+                                align={profilePhoto ? "start" : "center"}
+                                className={profilePhoto ? "ml-2" : ""}
+                              >
                                 <p>Name, job title, and location can be changed via profile link</p>
                               </TooltipContent>
                             </Tooltip>
@@ -2385,12 +2484,23 @@ export default function ResumeBuilderPage() {
                                   className="w-24 h-24 rounded-lg object-cover border-4 shadow-lg"
                                   style={{ borderColor: customColors.primary }}
                                 />
-                                <button
-                                  onClick={removePhoto}
-                                  className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
+                                {/* Action buttons - show on hover */}
+                                <div className="absolute -top-2 -right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={() => setShowPhotoUpload(true)}
+                                    className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors shadow-lg"
+                                    title="Change Photo"
+                                  >
+                                    <Camera className="w-3 h-3" />
+                                  </button>
+                                  <button
+                                    onClick={removePhoto}
+                                    className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-lg"
+                                    title="Remove Photo"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           ) : (
@@ -2727,14 +2837,29 @@ export default function ResumeBuilderPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Camera className="w-5 h-5" />
-              Add Professional Headshot
+              {profilePhoto ? 'Change Professional Headshot' : 'Add Professional Headshot'}
             </DialogTitle>
             <DialogDescription>
-              Upload a professional headshot for your resume. Recommended: 400x400px, JPG or PNG format, max 5MB.
+              {profilePhoto 
+                ? 'Upload a new professional headshot for your resume. Recommended: 400x400px, JPG or PNG format, max 5MB.'
+                : 'Upload a professional headshot for your resume. Recommended: 400x400px, JPG or PNG format, max 5MB.'
+              }
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
+            {/* Current photo preview */}
+            {profilePhoto && (
+              <div className="text-center">
+                <p className="text-sm text-gray-600 mb-2">Current photo:</p>
+                <img 
+                  src={profilePhoto} 
+                  alt="Current profile" 
+                  className="w-20 h-20 rounded-lg object-cover border-2 border-gray-300 mx-auto"
+                />
+              </div>
+            )}
+            
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
               <input
                 type="file"
@@ -2749,7 +2874,7 @@ export default function ResumeBuilderPage() {
               >
                 <Upload className="w-8 h-8 text-gray-400" />
                 <span className="text-sm text-gray-600">
-                  Click to upload or drag and drop
+                  {profilePhoto ? 'Click to upload new photo' : 'Click to upload or drag and drop'}
                 </span>
                 <span className="text-xs text-gray-500">
                   PNG, JPG up to 5MB
@@ -2765,7 +2890,19 @@ export default function ResumeBuilderPage() {
             )}
           </div>
           
-          <DialogFooter>
+          <DialogFooter className="flex gap-2">
+            {profilePhoto && (
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  removePhoto();
+                  setShowPhotoUpload(false);
+                }}
+                className="mr-auto"
+              >
+                Remove Photo
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setShowPhotoUpload(false)}>
               Cancel
             </Button>

@@ -24,7 +24,6 @@ import {
 import { 
   Settings,
   User,
-  Bell,
   Shield,
   Eye,
   Key,
@@ -117,13 +116,6 @@ export default function SettingsPage() {
     location_region: ''
   })
 
-  const [notifications, setNotifications] = useState({
-    emailUpdates: true,
-    jobAlerts: true,
-    marketingEmails: false,
-    smsNotifications: true,
-    pushNotifications: true
-  })
   const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   // Privacy settings state
@@ -153,14 +145,6 @@ export default function SettingsPage() {
       description: 'Manage your personal information'
     },
     {
-      id: 'notifications',
-      title: 'Notifications',
-      icon: Bell,
-      color: 'text-yellow-400',
-      bgColor: 'bg-yellow-500/10',
-      description: 'Coming soon'
-    },
-    {
       id: 'privacy',
       title: 'Privacy & Security',
       icon: Shield,
@@ -170,7 +154,7 @@ export default function SettingsPage() {
     },
   ]
 
-  const COMING_SOON_SECTIONS = new Set(['notifications'])
+  const COMING_SOON_SECTIONS = new Set([])
 
   const privacyTabs = [
     {
@@ -492,12 +476,6 @@ export default function SettingsPage() {
     }
   }
 
-  const handleToggleNotification = (key: string) => {
-    setNotifications(prev => ({
-      ...prev,
-      [key]: !prev[key as keyof typeof prev]
-    }))
-  }
 
   const handlePrivacySettingChange = (key: string, value: string) => {
     setPrivacySettings(prev => ({
@@ -959,9 +937,6 @@ export default function SettingsPage() {
     </motion.div>
   )
 
-  const renderNotificationSettings = () => (
-    <ComingSoon title="Notification Preferences" icon={Bell} bg="bg-gradient-to-br from-yellow-500 to-orange-600" />
-  )
 
 
 
@@ -1204,8 +1179,6 @@ export default function SettingsPage() {
     switch (activeSection) {
       case 'profile':
         return renderProfileSettings()
-      case 'notifications':
-        return renderNotificationSettings()
       case 'privacy':
         return renderPrivacySettings()
       default:
