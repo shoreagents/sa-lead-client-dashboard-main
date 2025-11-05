@@ -51,6 +51,31 @@
   scrollbar-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.05);
 }
 
+/* Custom scrollbar styles for Analysis Modal */
+.analysis-modal-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.analysis-modal-scrollbar::-webkit-scrollbar-track {
+  background: rgb(17, 24, 39); /* gray-900 to match card background */
+  border-radius: 4px;
+}
+
+.analysis-modal-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2); /* white/20 to match card border */
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.analysis-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.analysis-modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgb(17, 24, 39);
+}
+
 /* Enhanced Animal Animations for DISC Personality Results */
 
 /* Eagle Animations - Dynamic Flying and Soaring */

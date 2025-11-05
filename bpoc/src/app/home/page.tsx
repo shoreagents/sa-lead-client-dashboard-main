@@ -1082,7 +1082,7 @@ function HomePageContent() {
             >
               {/* Recommended Badge */}
               <motion.div 
-                className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20"
+                className="absolute top-0 left-0 right-0 flex justify-center z-20"
                 animate={{ 
                   y: [0, -3, 0],
                   scale: [1, 1.05, 1]
@@ -1093,7 +1093,7 @@ function HomePageContent() {
                   ease: "easeInOut"
                 }}
               >
-                <Badge className="bg-gradient-to-r from-red-500 to-pink-600 text-white border-0 px-6 py-2 text-sm font-bold shadow-lg shadow-red-500/25 relative overflow-hidden">
+                <Badge className="bg-gradient-to-r from-red-500 to-pink-600 text-white border-0 px-6 py-2 text-sm font-bold shadow-lg shadow-red-500/25 relative overflow-hidden -translate-y-1/2">
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent animate-pulse"></div>
                   <span className="relative z-10">✨ RECOMMENDED</span>
                 </Badge>
@@ -1109,8 +1109,8 @@ function HomePageContent() {
                 <div className="absolute bottom-4 left-4 w-1 h-1 bg-pink-400/60 rounded-full animate-ping delay-1000"></div>
                 <div className="absolute top-1/2 right-6 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-ping delay-2000"></div>
                 
-                <CardHeader className="text-center pb-6 relative z-10">
-                  <CardTitle className="text-2xl text-white mb-2 flex items-center justify-center gap-3">
+                <CardHeader className="text-center pt-2 pb-4 relative z-10">
+                  <CardTitle className="text-2xl text-white mb-1 flex items-center justify-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/25">
                       <Sparkles className="w-5 h-5 text-white" />
                     </div>

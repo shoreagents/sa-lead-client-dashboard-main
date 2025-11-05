@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
       resumeTitle,
       resumeSlug
     })
+    console.log('📸 Profile photo in received data:', resumeData?.profilePhoto)
+    console.log('📦 Full resume data structure:', resumeData)
 
     if (!resumeData || !templateUsed || !resumeTitle) {
       console.log('❌ Missing required fields')

@@ -50,6 +50,23 @@ export default function DashboardPage() {
   const [applicationsRange, setApplicationsRange] = useState<'7d'|'30d'|'90d'>('7d')
   const [registrationsRange, setRegistrationsRange] = useState<'7d'|'30d'|'90d'>('7d')
 
+  // Function to fetch activity data separately for real-time updates
+  const fetchActivityData = async () => {
+    try {
+      const activityResponse = await fetch('/api/admin/all-recent-activity')
+      if (activityResponse.ok) {
+        const activityData = await activityResponse.json()
+        setRecentActivity(activityData.recent_activity || [])
+      } else {
+        console.error('Failed to fetch recent activity:', activityResponse.status)
+        setRecentActivity([])
+      }
+    } catch (error) {
+      console.error('Error fetching recent activity:', error)
+      setRecentActivity([])
+    }
+  }
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -116,30 +133,7 @@ export default function DashboardPage() {
         }
 
         // Fetch recent activity (ALL activities for admin)
-        try {
-          const activityResponse = await fetch('/api/admin/all-recent-activity')
-          console.log('🔍 Activity API response status:', activityResponse.status)
-          
-          if (activityResponse.ok) {
-            const activityData = await activityResponse.json()
-            console.log('✅ Activity data received:', activityData)
-            console.log('📊 Activity data structure:', {
-              hasRecentActivity: !!activityData.recent_activity,
-              recentActivityLength: activityData.recent_activity?.length,
-              recentActivityType: typeof activityData.recent_activity,
-              fullResponse: activityData
-            })
-            setRecentActivity(activityData.recent_activity || [])
-          } else {
-            console.error('❌ Failed to fetch recent activity:', activityResponse.status)
-            const errorText = await activityResponse.text()
-            console.error('❌ Error details:', errorText)
-            setRecentActivity([])
-          }
-        } catch (error) {
-          console.error('❌ Error fetching recent activity:', error)
-          setRecentActivity([])
-        }
+        await fetchActivityData()
 
         // Fetch game performance data
         try {
@@ -208,6 +202,53 @@ export default function DashboardPage() {
 
     fetchDashboardData()
   }, [gameRange, applicationsRange, registrationsRange])
+
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  // Update current time every 30 seconds for real-time display
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 30000) // Update every 30 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Auto-refresh activity data every 30 seconds for real-time updates
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const activityResponse = await fetch('/api/admin/all-recent-activity')
+        if (activityResponse.ok) {
+          const activityData = await activityResponse.json()
+          setRecentActivity(activityData.recent_activity || [])
+        }
+      } catch (error) {
+        console.error('Error refreshing activity data:', error)
+      }
+    }, 30000) // Refresh every 30 seconds
+
+    return () => clearInterval(interval)
+  }, [])
+
+  // Helper function to format date and time
+  const formatRelativeTime = (timestamp: string | Date) => {
+    if (!timestamp) return 'Unknown'
+    
+    const date = new Date(timestamp)
+    const now = currentTime
+    
+    // Format date and time
+    const dateStr = date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+    })
+    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    
+    // Show date and time
+    return `${dateStr} ${timeStr}`
+  }
 
   const getTypeBadge = (type: string) => {
     const variants = {
@@ -390,9 +431,9 @@ export default function DashboardPage() {
                         >
                           <Filter className="w-3 h-3 mr-2" />
                           {activityFilter === 'all' ? 'All Types' : 
-                           activityFilter === 'game' ? 'Games & Assessments' : 
-                           activityFilter === 'resume' ? 'Resume Uploads' : 
-                           activityFilter === 'profile' ? 'Profile Updates' : 
+                           activityFilter === 'game' ? 'Games' : 
+                           activityFilter === 'resume' ? 'Resumes' : 
+                           activityFilter === 'profile' ? 'Profiles' : 
                            activityFilter === 'applicants' ? 'Job Applications' : 'All Types'}
                           <ChevronDown className="w-3 h-3 ml-2" />
                         </Button>
@@ -411,21 +452,21 @@ export default function DashboardPage() {
                           onClick={() => setActivityFilter('game')}
                         >
                           <Gamepad2 className="w-3 h-3 mr-2" />
-                          Games & Assessments
+                          Games
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className={activityFilter === 'resume' ? 'bg-white/20' : ''}
                           onClick={() => setActivityFilter('resume')}
                         >
                           <FileText className="w-3 h-3 mr-2" />
-                          Resume Uploads
+                          Resumes
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className={activityFilter === 'profile' ? 'bg-white/20' : ''}
                           onClick={() => setActivityFilter('profile')}
                         >
                           <Users className="w-3 h-3 mr-2" />
-                          Profile Updates
+                          Profiles
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           className={activityFilter === 'applicants' ? 'bg-white/20' : ''}
@@ -494,9 +535,9 @@ export default function DashboardPage() {
                       <span>Showing:</span>
                       {activityFilter !== 'all' && (
                         <Badge variant="outline" className="text-xs">
-                          {activityFilter === 'game' ? 'Games & Assessments' : 
-                           activityFilter === 'resume' ? 'Resume Uploads' : 
-                           activityFilter === 'profile' ? 'Profile Updates' : 
+                          {activityFilter === 'game' ? 'Games' : 
+                           activityFilter === 'resume' ? 'Resumes' : 
+                           activityFilter === 'profile' ? 'Profiles' : 
                            activityFilter === 'applicants' ? 'Job Applications' : 'All Types'}
                         </Badge>
                       )}
@@ -531,9 +572,9 @@ export default function DashboardPage() {
                             key={index}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center space-x-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                            className="flex items-start space-x-3 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
                           >
-                            <Avatar className="w-8 h-8">
+                            <Avatar className="w-8 h-8 flex-shrink-0">
                               <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-purple-600 text-white text-xs">
                                 {activity.user_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2) || 'U'}
                               </AvatarFallback>
@@ -541,22 +582,24 @@ export default function DashboardPage() {
                                 <AvatarImage src={activity.user_avatar} alt={activity.user_name} />
                               )}
                             </Avatar>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <p className="text-white font-medium">{activity.user_name || 'Unknown User'}</p>
                               <p className="text-sm text-gray-400">
                                 {activity.action}
                                 {activity.score && ` - ${activity.score}`}
                               </p>
                             </div>
-                            <Badge className={getTypeBadge(activity.type)}>
-                              {activity.type === 'game' ? 'Games' : 
-                               activity.type === 'resume' ? 'Resume' : 
-                               activity.type === 'profile' ? 'Profile' : 
-                               activity.type === 'applicants' ? 'Application' : 'Activity'}
-                            </Badge>
-                            <span className="text-gray-500 text-sm">
-                              {activity.activity_time ? new Date(activity.activity_time).toLocaleTimeString() : 'Unknown'}
-                            </span>
+                            <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                              <Badge className={getTypeBadge(activity.type)}>
+                                {activity.type === 'game' ? 'Games' : 
+                                 activity.type === 'resume' ? 'Resume' : 
+                                 activity.type === 'profile' ? 'Profile' : 
+                                 activity.type === 'applicants' ? 'Application' : 'Activity'}
+                              </Badge>
+                              <span className="text-gray-400 text-xs whitespace-nowrap" title={activity.activity_time ? new Date(activity.activity_time).toLocaleString() : 'Unknown'}>
+                                {formatRelativeTime(activity.activity_time)}
+                              </span>
+                            </div>
                           </motion.div>
                       ))
                     ) : (

@@ -88,6 +88,8 @@ export async function GET(
 
       const resume = resumeResult.rows[0]
       console.log('✅ Resume found:', resume.resume_title)
+      console.log('📄 Resume data from database:', resume.resume_data)
+      console.log('📸 Profile photo in resume data:', resume.resume_data?.profilePhoto)
       console.log('👤 User info from database:', {
         full_name: resume.full_name,
         avatar_url: resume.avatar_url,
