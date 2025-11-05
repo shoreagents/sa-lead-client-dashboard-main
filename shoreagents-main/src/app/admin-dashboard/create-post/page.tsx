@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code } from 'lucide-react'
+import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code, ExternalLink, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCompileTsx, useImproveTsx } from '@/hooks/use-api'
 
@@ -54,6 +54,30 @@ export default function CreatePostPage() {
   const [tsxCode, setTsxCode] = useState('')
   const [compiledContent, setCompiledContent] = useState('')
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [isImprovedByAI, setIsImprovedByAI] = useState(false)
+  
+  // Preprocess TSX code for iframe (remove imports and exports)
+  const processedTsxCode = React.useMemo(() => {
+    if (!tsxCode) return ''
+    
+    let processed = tsxCode
+    
+    // Remove all import statements
+    processed = processed.replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')
+    
+    // Replace "export default function" with just "function"
+    processed = processed.replace(/export\s+default\s+function/g, 'function')
+    
+    // Replace "export function" with just "function"  
+    processed = processed.replace(/export\s+function/g, 'function')
+    
+    // Replace "export default ComponentName" at the end
+    processed = processed.replace(/export\s+default\s+(\w+);?\s*$/gm, '// $1 is the component')
+    
+    console.log('🔧 Processed TSX Code Sample (first 200 chars):', processed.substring(0, 200))
+    
+    return processed
+  }, [tsxCode])
   
   // TanStack Query mutations
   const compileTsxMutation = useCompileTsx()
@@ -227,8 +251,38 @@ export default function CreatePostPage() {
       improveTsxMutation.mutate(tsxCode, {
         onSuccess: (data) => {
           if (data.improvedCode && data.improvedCode.trim()) {
+            // Validate the improved code has balanced quotes
+            const singleQuotes = (data.improvedCode.match(/'/g) || []).length
+            const doubleQuotes = (data.improvedCode.match(/"/g) || []).length
+            const backticks = (data.improvedCode.match(/`/g) || []).length
+            
+            // Check for unterminated strings (basic validation)
+            if (doubleQuotes % 2 !== 0) {
+              console.warn('⚠️ Detected unbalanced double quotes in AI response')
+              toast.error('AI response may be incomplete. Please try again or edit manually.')
+              return
+            }
+            
+            // Check for common truncation patterns
+            if (data.improvedCode.endsWith('...') || data.improvedCode.length < tsxCode.length * 0.8) {
+              console.warn('⚠️ AI response appears truncated')
+              toast.error('AI response was truncated. Please try again or use the original code.')
+              return
+            }
+            
             setTsxCode(data.improvedCode)
-            toast.success('✨ TSX code improved! Review the changes and compile when ready.')
+            setIsImprovedByAI(true)
+            
+            // Show success message with banner image info
+            if (data.bannerImage && data.keywords) {
+              toast.success(
+                `✨ Code improved with AI! Added banner image for: "${data.keywords}"`,
+                { duration: 5000 }
+              )
+              console.log('🖼️ Banner image added:', data.bannerImage)
+            } else {
+              toast.success('✨ TSX code improved by AI! Review the changes and compile when ready.')
+            }
           } else {
             toast.error('Could not improve TSX code. Please try again.')
           }
@@ -266,6 +320,201 @@ export default function CreatePostPage() {
       console.log('✅ State updated - compiledContent set to PREVIEW_READY')
     }
 
+    const handleOpenInNewTab = () => {
+      if (!tsxCode.trim() || !compiledContent) {
+        toast.error('Please preview the TSX code first!')
+        return
+      }
+
+      // Create the full HTML document
+      const fullHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TSX Preview - Full Size</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            lime: {
+              50: '#f7fee7',
+              100: '#ecfccb',
+              200: '#d9f99d',
+              300: '#bef264',
+              400: '#a3e635',
+              500: '#84cc16',
+              600: '#65a30d',
+              700: '#4d7c0f',
+              800: '#3f6212',
+              900: '#365314',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div style="padding: 2rem; text-align: center; color: #84cc16;">
+      <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+      <p>Loading preview...</p>
+    </div>
+  </div>
+  
+  <script>
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+    
+    async function loadAllLibraries() {
+      try {
+        await loadScript('https://unpkg.com/react@18/umd/react.production.min.js');
+        await loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js');
+        
+        if (typeof React !== 'undefined') {
+          window.React = React;
+          window.ReactDOM = ReactDOM;
+        }
+        
+        await loadScript('https://unpkg.com/@babel/standalone/babel.min.js');
+        
+        await loadScript('https://unpkg.com/lucide@latest/dist/umd/lucide.min.js');
+        
+        return true;
+      } catch (error) {
+        console.error('Error loading libraries:', error);
+        document.getElementById('root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h2>Failed to load libraries</h2><p>' + error.message + '</p></div>';
+        return false;
+      }
+    }
+    
+    loadAllLibraries().then((success) => {
+      if (!success) return;
+      
+      // Create Lucide icon components
+      const createLucideIcon = (iconName) => {
+        return (props) => {
+          const { className = '', style = {}, ...rest } = props || {};
+          const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+          
+          const iconElement = React.createElement('i', {
+            'data-lucide': kebabName,
+            className: className,
+            style: { display: 'inline-block', ...style },
+            ...rest
+          });
+          
+          React.useEffect(() => {
+            if (window.lucide && window.lucide.createIcons) {
+              window.lucide.createIcons();
+            }
+          }, []);
+          
+          return iconElement;
+        };
+      };
+      
+      // Common icon names
+      const commonIcons = [
+        'Bot', 'Clock', 'Globe', 'Globe2', 'Zap', 'Users', 'Users2', 'TrendingUp', 
+        'Star', 'ArrowRight', 'CheckCircle', 'CheckCircle2', 'Award', 'Target',
+        'Lightbulb', 'Code', 'Code2', 'Database', 'Shield', 'Smartphone',
+        'Mail', 'Phone', 'MapPin', 'Calendar', 'FileText', 'Image', 'Video', 
+        'Music', 'Download', 'Upload', 'Search', 'Filter', 'Settings', 'Bell', 
+        'Heart', 'Share', 'Share2', 'MessageCircle', 'ThumbsUp', 'Eye', 'EyeOff',
+        'Lock', 'Unlock', 'User', 'User2', 'UserPlus', 'UserMinus', 'Home', 
+        'Menu', 'X', 'ChevronDown', 'ChevronUp', 'ChevronLeft', 'ChevronRight',
+        'Plus', 'Minus', 'Check', 'AlertCircle', 'Info', 'HelpCircle', 
+        'ExternalLink', 'Link', 'Link2', 'Unlink', 'Copy', 'Clipboard', 'Trash', 
+        'Trash2', 'Edit', 'Edit2', 'Edit3', 'Save', 'RefreshCw', 'RotateCw',
+        'Play', 'Pause', 'Stop', 'SkipBack', 'SkipForward', 'Volume', 'Volume2',
+        'VolumeX', 'Wifi', 'WifiOff', 'Battery', 'BatteryCharging', 'Sun', 
+        'Moon', 'Cloud', 'CloudRain', 'Twitter', 'Linkedin', 'Facebook',
+        'Instagram', 'Github', 'Youtube'
+      ];
+      
+      commonIcons.forEach(iconName => {
+        window[iconName] = createLucideIcon(iconName);
+      });
+      
+      try {
+        const processedCode = \`${processedTsxCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
+        const transpiledCode = Babel.transform(processedCode, {
+          presets: ['react']
+        }).code;
+        
+        eval(transpiledCode);
+        
+        // Auto-detect any React component function
+        let componentToRender = null;
+        const commonNames = ['VirtualAssistanceBlog', 'BlogPost', 'Post', 'Page', 'Component', 'Article', 'Blog', 'Content'];
+        
+        for (const name of commonNames) {
+          if (typeof window[name] === 'function') {
+            componentToRender = window[name];
+            break;
+          }
+        }
+        
+        if (!componentToRender) {
+          for (const key in window) {
+            if (key[0] === key[0].toUpperCase() && typeof window[key] === 'function') {
+              if (!['Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'RegExp', 'Error', 'Function', 'Symbol', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array', 'DataView', 'ArrayBuffer', 'SharedArrayBuffer', 'Atomics', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl', 'WebAssembly', 'React', 'ReactDOM', 'Babel'].includes(key)) {
+                componentToRender = window[key];
+                break;
+              }
+            }
+          }
+        }
+        
+        if (componentToRender) {
+          const root = ReactDOM.createRoot(document.getElementById('root'));
+          root.render(React.createElement(componentToRender));
+          
+          // Initialize Lucide icons after render
+          setTimeout(() => {
+            if (window.lucide && window.lucide.createIcons) {
+              window.lucide.createIcons();
+            }
+          }, 100);
+        } else {
+          document.getElementById('root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h2>Could not find component</h2></div>';
+        }
+      } catch (error) {
+        console.error('Preview error:', error);
+        document.getElementById('root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h2>Error rendering component</h2><p>' + error.message + '</p></div>';
+      }
+    });
+  </script>
+</body>
+</html>
+      `
+
+      // Open in new tab
+      const newWindow = window.open('', '_blank')
+      if (newWindow) {
+        newWindow.document.write(fullHtml)
+        newWindow.document.close()
+        toast.success('Opened preview in new tab!')
+      } else {
+        toast.error('Please allow pop-ups to open the preview in a new tab!')
+      }
+    }
+
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
         <div className="flex items-center gap-2">
@@ -293,7 +542,13 @@ export default function CreatePostPage() {
                 <Textarea
                   placeholder="Paste your TSX code here..."
                   value={tsxCode}
-                  onChange={(e) => setTsxCode(e.target.value)}
+                  onChange={(e) => {
+                    setTsxCode(e.target.value)
+                    // Reset improvement flag when code is manually edited
+                    if (isImprovedByAI) {
+                      setIsImprovedByAI(false)
+                    }
+                  }}
                   rows={20}
                   className="font-mono text-sm"
                 />
@@ -302,11 +557,11 @@ export default function CreatePostPage() {
                     type="button"
                     onClick={handleImproveWithAI}
                     variant="outline"
-                    className="w-full border-lime-600 text-lime-600 hover:bg-lime-50"
-                    disabled={!tsxCode.trim() || improveTsxMutation.isPending}
+                    className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={!tsxCode.trim() || improveTsxMutation.isPending || isImprovedByAI}
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
-                    {improveTsxMutation.isPending ? 'Improving...' : 'Improve with AI'}
+                    {improveTsxMutation.isPending ? 'Improving...' : isImprovedByAI ? '✨ Improved by AI' : 'Improve with AI'}
                   </Button>
                   <Button
                     type="button"
@@ -326,6 +581,7 @@ export default function CreatePostPage() {
                   <div className="font-semibold text-gray-700 mb-2">Debug Info:</div>
                   <div className="space-y-1 text-gray-600">
                     <div>TSX Code: {tsxCode ? `${tsxCode.length} characters` : 'Empty'}</div>
+                    <div>Processed Code: {processedTsxCode ? `${processedTsxCode.length} characters (imports removed)` : 'Not processed'}</div>
                     <div>Compiled Content: {compiledContent || 'Not set'}</div>
                     <div>Preview Loading: {previewLoading ? '⏳ Yes' : '✓ No'}</div>
                   </div>
@@ -336,13 +592,28 @@ export default function CreatePostPage() {
             {/* Styled TSX Preview */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Eye className="w-5 h-5 text-lime-600" />
-                  Live Styled Preview
-                </CardTitle>
-                <CardDescription>
-                  Preview your TSX component with full styling
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Eye className="w-5 h-5 text-lime-600" />
+                      Live Styled Preview
+                    </CardTitle>
+                    <CardDescription>
+                      Preview your TSX component with full styling
+                    </CardDescription>
+                  </div>
+                  {compiledContent && tsxCode && (
+                    <Button
+                      type="button"
+                      onClick={handleOpenInNewTab}
+                      variant="outline"
+                      className="border-lime-600 text-lime-600 hover:bg-lime-50"
+                    >
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Open in New Tab
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="min-h-[400px] max-h-[600px] overflow-hidden rounded-lg border border-gray-200 bg-white">
@@ -364,6 +635,7 @@ export default function CreatePostPage() {
                         <span className="text-xs bg-lime-600 text-white px-2 py-1 rounded">✓ Ready</span>
                       </div>
                       <iframe
+                      key={compiledContent + tsxCode.length}
                       srcDoc={`
 <!DOCTYPE html>
 <html lang="en">
@@ -394,46 +666,215 @@ export default function CreatePostPage() {
       }
     }
   </script>
+  <style>
+    body { margin: 0; padding: 0; }
+    #preview-root { min-height: 100vh; }
+  </style>
 </head>
-<body class="m-0 p-0">
-  <div id="preview-root"></div>
+<body>
+  <div id="preview-root">
+    <div style="padding: 2rem; text-align: center; color: #84cc16;">
+      <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+      <p>Loading preview...</p>
+    </div>
+  </div>
   
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
-  
-  <script type="text/babel">
-    const { Bot, Clock, Globe, Zap, Users, TrendingUp, Star, ArrowRight, CheckCircle, Award, Target, Lightbulb, Code, Database, Shield, Smartphone, Mail, Phone, MapPin, Calendar, FileText, Image: ImageIcon, Video, Music, Download, Upload, Search, Filter, Settings, Bell, Heart, Share, MessageCircle, ThumbsUp, Eye, EyeOff, Lock, Unlock, User, UserPlus, UserMinus, Home, Menu, X, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Plus, Minus, Check, AlertCircle, Info, HelpCircle, ExternalLink, Link, Unlink, Copy, Clipboard, Trash, Edit, Save, RefreshCw, RotateCw, Play, Pause, Stop, SkipBack, SkipForward, Volume, VolumeX, Wifi, WifiOff, Battery, BatteryCharging, Sun, Moon, Cloud, CloudRain } = lucideReact;
-
-    try {
-      ${tsxCode.replace(/`/g, '\\`')}
-      
-      // Try to find and render the component
-      const componentToRender = typeof VirtualAssistanceBlog !== 'undefined' ? VirtualAssistanceBlog : 
-                                 typeof BlogPost !== 'undefined' ? BlogPost :
-                                 typeof Post !== 'undefined' ? Post :
-                                 typeof Page !== 'undefined' ? Page :
-                                 typeof Component !== 'undefined' ? Component :
-                                 null;
-      
-      if (componentToRender) {
-        const root = ReactDOM.createRoot(document.getElementById('preview-root'));
-        root.render(React.createElement(componentToRender));
-      } else {
-        document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h2>❌ Could not find component</h2><p>Make sure your TSX exports a component with "export default function ComponentName() {...}"</p></div>';
-      }
-    } catch (error) {
-      document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h2>❌ Error rendering component</h2><p>' + error.message + '</p></div>';
-      console.error('Preview error:', error);
+  <script>
+    // Load scripts sequentially
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
     }
+    
+    async function loadAllLibraries() {
+      try {
+        console.log('📦 Loading React...');
+        await loadScript('https://unpkg.com/react@18/umd/react.production.min.js');
+        console.log('✅ React loaded');
+        
+        console.log('📦 Loading ReactDOM...');
+        await loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js');
+        console.log('✅ ReactDOM loaded');
+        
+        // Expose React globally
+        if (typeof React !== 'undefined') {
+          window.React = React;
+          window.ReactDOM = ReactDOM;
+          console.log('✅ React exposed globally');
+        } else {
+          throw new Error('React not loaded properly');
+        }
+        
+        console.log('📦 Loading Babel...');
+        await loadScript('https://unpkg.com/@babel/standalone/babel.min.js');
+        console.log('✅ Babel loaded');
+        
+        console.log('📦 Loading Lucide icons...');
+        await loadScript('https://unpkg.com/lucide@latest/dist/umd/lucide.min.js');
+        console.log('✅ Lucide loaded');
+        
+        console.log('✅ All libraries loaded successfully!');
+        return true;
+      } catch (error) {
+        console.error('❌ Error loading libraries:', error);
+        document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h2>Failed to load preview libraries</h2><p>' + error.message + '</p></div>';
+        return false;
+      }
+    }
+    
+    loadAllLibraries().then((success) => {
+      if (!success) return;
+      console.log('🚀 Starting preview render...');
+      
+      // Create Lucide icon components
+      console.log('🎨 Creating Lucide icon components');
+      
+      // Helper to convert kebab-case to PascalCase (e.g., 'arrow-right' to 'ArrowRight')
+      const toPascalCase = (str) => {
+        return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+      };
+      
+      // Create React component wrapper for Lucide icons
+      const createLucideIcon = (iconName) => {
+        return (props) => {
+          const { className = '', style = {}, ...rest } = props || {};
+          
+          // Convert PascalCase to kebab-case for Lucide (e.g., 'ArrowRight' to 'arrow-right')
+          const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
+          
+          // Create the icon element
+          const iconElement = React.createElement('i', {
+            'data-lucide': kebabName,
+            className: className,
+            style: { display: 'inline-block', ...style },
+            ...rest
+          });
+          
+          // Use effect to initialize the icon after render
+          React.useEffect(() => {
+            if (window.lucide && window.lucide.createIcons) {
+              window.lucide.createIcons();
+            }
+          }, []);
+          
+          return iconElement;
+        };
+      };
+      
+      // Common icon names used in blogs/articles
+      const commonIcons = [
+        'Bot', 'Clock', 'Globe', 'Globe2', 'Zap', 'Users', 'Users2', 'TrendingUp', 
+        'Star', 'ArrowRight', 'CheckCircle', 'CheckCircle2', 'Award', 'Target',
+        'Lightbulb', 'Code', 'Code2', 'Database', 'Shield', 'Smartphone',
+        'Mail', 'Phone', 'MapPin', 'Calendar', 'FileText', 'Image', 'Video', 
+        'Music', 'Download', 'Upload', 'Search', 'Filter', 'Settings', 'Bell', 
+        'Heart', 'Share', 'Share2', 'MessageCircle', 'ThumbsUp', 'Eye', 'EyeOff',
+        'Lock', 'Unlock', 'User', 'User2', 'UserPlus', 'UserMinus', 'Home', 
+        'Menu', 'X', 'ChevronDown', 'ChevronUp', 'ChevronLeft', 'ChevronRight',
+        'Plus', 'Minus', 'Check', 'AlertCircle', 'Info', 'HelpCircle', 
+        'ExternalLink', 'Link', 'Link2', 'Unlink', 'Copy', 'Clipboard', 'Trash', 
+        'Trash2', 'Edit', 'Edit2', 'Edit3', 'Save', 'RefreshCw', 'RotateCw',
+        'Play', 'Pause', 'Stop', 'SkipBack', 'SkipForward', 'Volume', 'Volume2',
+        'VolumeX', 'Wifi', 'WifiOff', 'Battery', 'BatteryCharging', 'Sun', 
+        'Moon', 'Cloud', 'CloudRain', 'Twitter', 'Linkedin', 'Facebook',
+        'Instagram', 'Github', 'Youtube'
+      ];
+      
+      // Auto-generate all icon components
+      commonIcons.forEach(iconName => {
+        window[iconName] = createLucideIcon(iconName);
+      });
+      
+      console.log('✅ Created', commonIcons.length, 'Lucide icon components');
+      
+      try {
+        console.log('📝 Transpiling TSX code...');
+        
+        // Transpile and execute the code
+        const transpiledCode = Babel.transform(\`${processedTsxCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, {
+          presets: ['react']
+        }).code;
+        
+        console.log('✅ Code transpiled successfully');
+        eval(transpiledCode);
+        
+        console.log('🔍 Looking for component to render...');
+        
+        // Auto-detect any React component function in global scope
+        let componentToRender = null;
+        const commonNames = ['VirtualAssistanceBlog', 'BlogPost', 'Post', 'Page', 'Component', 'Article', 'Blog', 'Content'];
+        
+        // First, try common component names
+        for (const name of commonNames) {
+          if (typeof window[name] === 'function') {
+            componentToRender = window[name];
+            console.log('✅ Found component by common name:', name);
+            break;
+          }
+        }
+        
+        // If not found, scan all global functions starting with capital letter (React convention)
+        if (!componentToRender) {
+          console.log('🔍 Scanning global scope for React components...');
+          for (const key in window) {
+            if (key[0] === key[0].toUpperCase() && typeof window[key] === 'function') {
+              // Skip built-in constructors
+              if (!['Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'RegExp', 'Error', 'Function', 'Symbol', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array', 'DataView', 'ArrayBuffer', 'SharedArrayBuffer', 'Atomics', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl', 'WebAssembly', 'React', 'ReactDOM', 'Babel'].includes(key)) {
+                componentToRender = window[key];
+                console.log('✅ Auto-detected component:', key);
+                break;
+              }
+            }
+          }
+        }
+        
+        console.log('🎯 Component found:', componentToRender ? 'YES' : 'NO');
+        console.log('Component name:', componentToRender?.name || 'Unknown');
+        
+        if (componentToRender) {
+          console.log('✨ Rendering component...');
+          const root = ReactDOM.createRoot(document.getElementById('preview-root'));
+          root.render(React.createElement(componentToRender));
+          console.log('✅ Component rendered successfully!');
+          
+          // Initialize Lucide icons after render
+          setTimeout(() => {
+            if (window.lucide && window.lucide.createIcons) {
+              window.lucide.createIcons();
+              console.log('✅ Lucide icons initialized!');
+            }
+          }, 100);
+        } else {
+          console.error('❌ No component found to render');
+          document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444; font-family: system-ui;"><h2 style="font-size: 1.5rem; margin-bottom: 1rem;">❌ Could not find component</h2><p>Make sure your TSX exports a component with:<br><code style="background: #fee; padding: 0.5rem; border-radius: 0.25rem; display: inline-block; margin-top: 1rem;">export default function ComponentName() {...}</code></p></div>';
+        }
+      } catch (error) {
+        console.error('❌ Preview error:', error);
+        console.error('Error stack:', error.stack);
+        document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444; font-family: system-ui;"><h2 style="font-size: 1.5rem; margin-bottom: 1rem;">❌ Error rendering component</h2><p style="background: #fee; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; text-align: left; overflow-x: auto;"><strong>Error:</strong> ' + error.message + '<br><br><strong>Stack:</strong><br><code style="font-size: 0.75rem; white-space: pre-wrap;">' + (error.stack || 'No stack trace') + '</code></p></div>';
+      }
+    });
   </script>
 </body>
 </html>
                       `}
                       className="w-full h-[550px] border-0"
                       title="TSX Preview"
-                      sandbox="allow-scripts"
+                      sandbox="allow-scripts allow-same-origin"
+                      onLoad={() => {
+                        console.log('📊 Preview iframe loaded')
+                        console.log('📊 TSX Code length:', tsxCode.length)
+                        console.log('📊 Processed Code length:', processedTsxCode.length)
+                      }}
+                      onError={(e) => {
+                        console.error('❌ Iframe error:', e)
+                        toast.error('Failed to load preview iframe')
+                      }}
                     />
                     </>
                   ) : (
@@ -510,6 +951,31 @@ export default function CreatePostPage() {
                       required
                       className="font-mono"
                     />
+                    
+                    {/* Live URL Preview */}
+                    {(customUrl || slug) && (
+                      <div className="flex items-center gap-2 p-3 bg-lime-50 border border-lime-200 rounded-lg mt-3">
+                        <Globe className="w-4 h-4 text-lime-600 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-lime-700 font-medium mb-1">Live Preview:</p>
+                          <p className="text-sm text-lime-900 font-mono truncate">
+                            https://yourdomain.com{customUrl || (slug ? `${urlPattern.replace('[slug]', slug)}` : '')}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const fullUrl = `https://yourdomain.com${customUrl || (slug ? `${urlPattern.replace('[slug]', slug)}` : '')}`
+                            navigator.clipboard.writeText(fullUrl)
+                            toast.success('URL copied to clipboard!')
+                          }}
+                          className="p-2 hover:bg-lime-100 rounded transition-colors"
+                          title="Copy URL"
+                        >
+                          <Copy className="w-4 h-4 text-lime-600" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="slug-tsx">Slug</Label>
@@ -696,6 +1162,31 @@ export default function CreatePostPage() {
                         <p className="text-xs text-muted-foreground mt-1">
                           Type the full URL where your post will be published (e.g., /blog/my-post or /real-estate-outsourcing). This will be saved to the database.
                         </p>
+                        
+                        {/* Live URL Preview */}
+                        {(customUrl || slug) && (
+                          <div className="flex items-center gap-2 p-3 bg-lime-50 border border-lime-200 rounded-lg mt-3">
+                            <Globe className="w-4 h-4 text-lime-600 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-lime-700 font-medium mb-1">Live Preview:</p>
+                              <p className="text-sm text-lime-900 font-mono truncate">
+                                https://yourdomain.com{customUrl || (slug && urlPattern ? urlPattern.replace('[slug]', slug) : '')}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const fullUrl = `https://yourdomain.com${customUrl || (slug && urlPattern ? urlPattern.replace('[slug]', slug) : '')}`
+                                navigator.clipboard.writeText(fullUrl)
+                                toast.success('URL copied to clipboard!')
+                              }}
+                              className="p-2 hover:bg-lime-100 rounded transition-colors"
+                              title="Copy URL"
+                            >
+                              <Copy className="w-4 h-4 text-lime-600" />
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                       <div>
