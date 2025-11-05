@@ -1383,6 +1383,8 @@ interface CompileTsxResponse {
 interface ImproveTsxResponse {
   success: boolean;
   improvedCode: string;
+  bannerImage?: string;
+  keywords?: string;
 }
 
 const compileTsx = async (tsxCode: string): Promise<CompileTsxResponse> => {

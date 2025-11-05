@@ -334,7 +334,7 @@ export function Navbar() {
                           {/* Bottom Links Section */}
                           <div className="grid grid-cols-3 gap-8">
                             {/* Column 1 */}
-                          <div className="space-y-2">
+                          <div className="space-y-0">
                               <Link href="/services/our-services/real-estate-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
                               Real Estate Virtual Assistant
                             </Link>
@@ -350,7 +350,7 @@ export function Navbar() {
                           </div>
 
                             {/* Column 2 */}
-                          <div className="space-y-2">
+                          <div className="space-y-0">
                               <Link href="/services/our-services/construction-team" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
                               Construction Team
                             </Link>
@@ -366,7 +366,7 @@ export function Navbar() {
                           </div>
 
                             {/* Column 3 */}
-                          <div className="space-y-2">
+                          <div className="space-y-0">
                               <Link href="/services/our-services/architecture-teams" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
                                 Architecture Teams
                             </Link>
@@ -447,56 +447,128 @@ export function Navbar() {
                           </Link>
                         </div>
 
-                          {/* Bottom Links Section */}
-                          <div className="grid grid-cols-3 gap-8">
-                            {/* Column 1 - Outsourcing Services */}
-                          <div className="space-y-2">
-                              <Link href="/services/pillars/real-estate-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Real Estate Outsourcing
-                            </Link>
-                              <Link href="/services/pillars/property-management-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Property Management Outsourcing
-                            </Link>
-                              <Link href="/services/pillars/construction-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Construction Outsourcing
-                            </Link>
-                              <Link href="/services/pillars/accounting-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Accounting Outsourcing
-                            </Link>
-                          </div>
+                        {/* Bottom Links Section - All 37 Pillars */}
+                        <div className="grid grid-cols-3 gap-6">
+                          {/* Column 1 - Outsourcing Services (Part 1) */}
+                        <div className="space-y-0">
+                            <div className="text-xs font-bold text-lime-700 mb-1 uppercase">Outsourcing</div>
+                            <Link href="/real-estate-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Real Estate Outsourcing
+                          </Link>
+                            <Link href="/property-management-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Property Management
+                          </Link>
+                            <Link href="/construction-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Construction Outsourcing
+                          </Link>
+                            <Link href="/insurance-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Insurance Outsourcing
+                          </Link>
+                            <Link href="/mortgage-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Mortgage Outsourcing
+                          </Link>
+                            <Link href="/legal-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Legal Outsourcing
+                          </Link>
+                            <Link href="/architectural-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Architectural Outsourcing
+                          </Link>
+                            <Link href="/drafting-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Drafting Outsourcing
+                          </Link>
+                            <Link href="/engineering-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Engineering Outsourcing
+                          </Link>
+                            <Link href="/estimating-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Estimating Outsourcing
+                          </Link>
+                            <Link href="/seo-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            SEO Outsourcing
+                          </Link>
+                            <Link href="/graphic-design-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Graphic Design
+                          </Link>
+                            <Link href="/accounting-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Accounting Outsourcing
+                          </Link>
+                            <Link href="/bookkeeping-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Bookkeeping Outsourcing
+                          </Link>
+                            <Link href="/website-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Website Outsourcing
+                          </Link>
+                            <Link href="/content-writing-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Content Writing
+                          </Link>
+                        </div>
 
-                            {/* Column 2 - Virtual Assistants */}
-                          <div className="space-y-2">
-                              <Link href="/services/pillars/real-estate-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Real Estate Virtual Assistant
-                            </Link>
-                              <Link href="/services/pillars/seo-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              SEO Virtual Assistant
-                            </Link>
-                              <Link href="/services/pillars/ai-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              AI Virtual Assistant
-                            </Link>
-                              <Link href="/services/pillars/social-media-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Social Media Virtual Assistant
-                            </Link>
-                          </div>
+                          {/* Column 2 - Virtual Assistants (Part 1) */}
+                        <div className="space-y-0">
+                            <div className="text-xs font-bold text-lime-700 mb-1 uppercase">Virtual Assistants</div>
+                            <Link href="/real-estate-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Real Estate VA
+                          </Link>
+                            <Link href="/property-management-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Property Management VA
+                          </Link>
+                            <Link href="/architect-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Architect VA
+                          </Link>
+                            <Link href="/construction-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Construction VA
+                          </Link>
+                            <Link href="/engineering-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Engineering VA
+                          </Link>
+                            <Link href="/mortgage-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Mortgage VA
+                          </Link>
+                            <Link href="/insurance-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Insurance VA
+                          </Link>
+                            <Link href="/legal-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Legal VA
+                          </Link>
+                            <Link href="/drafting-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Drafting VA
+                          </Link>
+                            <Link href="/estimating-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Estimating VA
+                          </Link>
+                            <Link href="/ai-virtual-assistants" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            AI Virtual Assistants
+                          </Link>
+                            <Link href="/seo-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            SEO VA
+                          </Link>
+                        </div>
 
-                            {/* Column 3 - Technical & Digital */}
-                          <div className="space-y-2">
-                              <Link href="/services/pillars/architectural-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Architectural Outsourcing
-                            </Link>
-                              <Link href="/services/pillars/engineering-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Engineering Outsourcing
-                            </Link>
-                              <Link href="/services/pillars/seo-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              SEO Outsourcing
-                            </Link>
-                              <Link href="/services/pillars/graphic-design-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Graphic Design Outsourcing
-                            </Link>
-                            </div>
-                          </div>
+                          {/* Column 3 - Virtual Assistants (Part 2) */}
+                        <div className="space-y-0">
+                            <div className="text-xs font-bold text-lime-700 mb-1 uppercase">More VA Services</div>
+                            <Link href="/marketing-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Marketing VA
+                          </Link>
+                            <Link href="/bookkeeping-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Bookkeeping VA
+                          </Link>
+                            <Link href="/graphic-design-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Graphic Design VA
+                          </Link>
+                            <Link href="/social-media-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Social Media VA
+                          </Link>
+                            <Link href="/content-writing-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Content Writing VA
+                          </Link>
+                            <Link href="/administrative-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Administrative VA
+                          </Link>
+                            <Link href="/accounting-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                            Accounting VA
+                          </Link>
+                        </div>
+                        </div>
                         </div>
                       </div>
                     </div>
@@ -594,7 +666,7 @@ export function Navbar() {
                   {/* Bottom Links Section */}
                   <div className="grid grid-cols-3 gap-8">
                     {/* First Column */}
-                          <div className="space-y-2">
+                          <div className="space-y-0">
                       <Link href="/how-it-works" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
                         How It Works
                             </Link>
@@ -610,7 +682,7 @@ export function Navbar() {
                         </div>
 
                     {/* Second Column */}
-                          <div className="space-y-2">
+                          <div className="space-y-0">
                       <Link href="/case-studies/ballast-4-46-team" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
                         Ballast: 4-46 Team
                             </Link>
@@ -626,7 +698,7 @@ export function Navbar() {
                         </div>
 
                     {/* Third Column */}
-                          <div className="space-y-2">
+                          <div className="space-y-0">
                       <Link href="/about/complete-service-guide" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
                         Complete Service Guide
                       </Link>
@@ -921,48 +993,122 @@ export function Navbar() {
                      </div>
                    </div>
                       
-                      {/* Pillars */}
-                   <div>
-                        <div className="text-sm font-semibold text-gray-800 mb-2 px-3 py-1">Pillars</div>
-                        <div className="pl-3 space-y-1">
-                          <Link href="/services/pillars/real-estate-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Real Estate Outsourcing
-                       </Link>
-                          <Link href="/services/pillars/property-management-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Property Management Outsourcing
-                       </Link>
-                          <Link href="/services/pillars/construction-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Construction Outsourcing
-                       </Link>
-                          <Link href="/services/pillars/accounting-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Accounting Outsourcing
-                       </Link>
-                          <Link href="/services/pillars/real-estate-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Real Estate Virtual Assistant
-                       </Link>
-                          <Link href="/services/pillars/seo-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         SEO Virtual Assistant
-                       </Link>
-                          <Link href="/services/pillars/ai-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         AI Virtual Assistant
-                       </Link>
-                          <Link href="/services/pillars/social-media-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Social Media Virtual Assistant
-                       </Link>
-                          <Link href="/services/pillars/architectural-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Architectural Outsourcing
-                       </Link>
-                          <Link href="/services/pillars/engineering-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Engineering Outsourcing
-                       </Link>
-                          <Link href="/services/pillars/seo-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         SEO Outsourcing
-                   </Link>
-                          <Link href="/services/pillars/graphic-design-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
-                         Graphic Design Outsourcing
-                   </Link>
-                     </div>
-                   </div>
+                     {/* Pillars - All 37 */}
+                  <div>
+                       <div className="text-sm font-semibold text-gray-800 mb-2 px-3 py-1">Pillars (37 Services)</div>
+                       <div className="pl-3 space-y-1">
+                         {/* Outsourcing Services */}
+                         <div className="text-xs font-bold text-lime-700 mt-3 mb-1 px-3 uppercase">Outsourcing Services</div>
+                         <Link href="/real-estate-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Real Estate Outsourcing
+                      </Link>
+                         <Link href="/property-management-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Property Management Outsourcing
+                      </Link>
+                         <Link href="/construction-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Construction Outsourcing
+                      </Link>
+                         <Link href="/insurance-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Insurance Outsourcing
+                      </Link>
+                         <Link href="/mortgage-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Mortgage Outsourcing
+                      </Link>
+                         <Link href="/legal-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Legal Outsourcing
+                      </Link>
+                         <Link href="/architectural-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Architectural Outsourcing
+                      </Link>
+                         <Link href="/drafting-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Drafting Outsourcing
+                      </Link>
+                         <Link href="/engineering-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Engineering Outsourcing
+                      </Link>
+                         <Link href="/estimating-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Estimating Outsourcing
+                      </Link>
+                         <Link href="/seo-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        SEO Outsourcing
+                      </Link>
+                         <Link href="/graphic-design-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Graphic Design Outsourcing
+                      </Link>
+                         <Link href="/accounting-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Accounting Outsourcing
+                      </Link>
+                         <Link href="/bookkeeping-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Bookkeeping Outsourcing
+                      </Link>
+                         <Link href="/website-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Website Outsourcing
+                      </Link>
+                         <Link href="/content-writing-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Content Writing Outsourcing
+                      </Link>
+                         
+                         {/* Virtual Assistants */}
+                         <div className="text-xs font-bold text-lime-700 mt-3 mb-1 px-3 uppercase">Virtual Assistants</div>
+                         <Link href="/real-estate-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Real Estate Virtual Assistant
+                      </Link>
+                         <Link href="/property-management-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Property Management VA
+                      </Link>
+                         <Link href="/architect-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Architect Virtual Assistant
+                      </Link>
+                         <Link href="/construction-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Construction Virtual Assistant
+                      </Link>
+                         <Link href="/engineering-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Engineering Virtual Assistant
+                      </Link>
+                         <Link href="/mortgage-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Mortgage Virtual Assistant
+                      </Link>
+                         <Link href="/insurance-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Insurance Virtual Assistant
+                      </Link>
+                         <Link href="/legal-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Legal Virtual Assistant
+                      </Link>
+                         <Link href="/drafting-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Drafting Virtual Assistant
+                      </Link>
+                         <Link href="/estimating-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Estimating Virtual Assistant
+                      </Link>
+                         <Link href="/ai-virtual-assistants" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        AI Virtual Assistants
+                      </Link>
+                         <Link href="/seo-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        SEO Virtual Assistant
+                      </Link>
+                         <Link href="/marketing-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Marketing Virtual Assistant
+                      </Link>
+                         <Link href="/bookkeeping-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Bookkeeping Virtual Assistant
+                      </Link>
+                         <Link href="/graphic-design-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Graphic Design Virtual Assistant
+                      </Link>
+                         <Link href="/social-media-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Social Media Virtual Assistant
+                      </Link>
+                         <Link href="/content-writing-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Content Writing VA
+                      </Link>
+                         <Link href="/administrative-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Administrative Virtual Assistant
+                      </Link>
+                         <Link href="/accounting-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
+                        Accounting Virtual Assistant
+                      </Link>
+                    </div>
+                  </div>
                  </div>
                   )}
                </div>
