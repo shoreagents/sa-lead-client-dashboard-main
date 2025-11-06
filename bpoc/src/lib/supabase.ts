@@ -27,10 +27,11 @@ export const signIn = async (email: string, password: string) => {
 }
 
 export const signInWithGoogle = async () => {
-	const isProduction = process.env.NODE_ENV === 'production'
-	const baseUrl = isProduction 
-		? (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bpoc.io')
-		: 'http://localhost:3000'
+	// Use the actual current URL instead of relying on environment variables
+	// This ensures the redirect URL always matches where the user is accessing the app
+	const baseUrl = typeof window !== 'undefined' 
+		? window.location.origin
+		: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bpoc.io')
 	
 	console.log('🔗 Google OAuth redirect URL (supabase.ts):', `${baseUrl}/auth/callback`)
 	
@@ -86,10 +87,10 @@ export const getSession = () => supabase.auth.getSession()
 
 // Password reset helpers
 export const requestPasswordReset = async (email: string) => {
-	const isProduction = process.env.NODE_ENV === 'production'
-	const baseUrl = isProduction 
-		? (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bpoc.io')
-		: 'http://localhost:3000'
+	// Use the actual current URL instead of relying on environment variables
+	const baseUrl = typeof window !== 'undefined' 
+		? window.location.origin
+		: (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bpoc.io')
 	const redirectTo = `${baseUrl}/reset-password`
 	return await supabase.auth.resetPasswordForEmail(email, { redirectTo })
 }
