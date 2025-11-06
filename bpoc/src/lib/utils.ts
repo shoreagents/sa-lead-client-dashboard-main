@@ -1247,12 +1247,12 @@ async function buildResumeWithCloudConvertPipeline(
     contentSource: 'CloudConvert + GPT Pipeline'
   };
   
-  // Save JSON file to public folder
+  // Save resume data to database
   try {
-    const savedFilePath = await saveJSONToFile(jsonData, originalFile.name, sessionToken);
-    console.log(`💾 JSON file saved: ${savedFilePath}`);
+    const saveResult = await saveJSONToFile(jsonData, originalFile.name, sessionToken);
+    console.log(`💾 Resume data saved: ${saveResult}`);
   } catch (error) {
-    console.warn('⚠️ Could not save JSON file:', error);
+    console.warn('⚠️ Could not save resume data:', error);
   }
   
   return pureResumeData;
@@ -2320,12 +2320,12 @@ async function buildResumeWithDOCXPreview(
     }
   };
   
-  // Save JSON file to public folder
+  // Save resume data to database
   try {
-    const savedFilePath = await saveJSONToFile(jsonData, file.name, sessionToken);
-    console.log(`💾 JSON file saved: ${savedFilePath}`);
+    const saveResult = await saveJSONToFile(jsonData, file.name, sessionToken);
+    console.log(`💾 Resume data saved: ${saveResult}`);
   } catch (error) {
-    console.warn('⚠️ Could not save JSON file:', error);
+    console.warn('⚠️ Could not save resume data:', error);
   }
   
   console.log('📊 Clean DOCX Content Statistics:');
@@ -2409,12 +2409,12 @@ async function buildFinalResumeJSON(file: File, extractedText: string, aiParsedD
     }
   };
   
-  // Save JSON file to public folder
+  // Save resume data to database
   try {
-    const savedFilePath = await saveJSONToFile(aiParsedData, file.name, sessionToken);
-    console.log(`💾 JSON file saved: ${savedFilePath}`);
+    const saveResult = await saveJSONToFile(aiParsedData, file.name, sessionToken);
+    console.log(`💾 Resume data saved: ${saveResult}`);
   } catch (error) {
-    console.warn('⚠️ Could not save JSON file:', error);
+    console.warn('⚠️ Could not save resume data:', error);
   }
   
   console.log('📊 Pipeline Statistics:');
@@ -2781,12 +2781,12 @@ async function buildComprehensiveResumeJSON(
     }
   };
   
-  // Save JSON file to public folder
+  // Save resume data to database
   try {
-    const savedFilePath = await saveJSONToFile(resumeJSON, file.name, sessionToken);
-    console.log(`💾 JSON file saved: ${savedFilePath}`);
+    const saveResult = await saveJSONToFile(resumeJSON, file.name, sessionToken);
+    console.log(`💾 Resume data saved: ${saveResult}`);
   } catch (error) {
-    console.warn('⚠️ Could not save JSON file:', error);
+    console.warn('⚠️ Could not save resume data:', error);
   }
   
   console.log('✅ Resume JSON built successfully');
@@ -4000,60 +4000,40 @@ export function extractResumeInsights(resume: ProcessedResume): {
   return insights;
 }
 
-// Save JSON file to public folder and database
+// Save resume data to database (file system saving removed for security)
 export async function saveJSONToFile(jsonData: any, fileName: string, sessionToken?: string): Promise<string> {
   try {
-    // First, save to file system
-    const fileResponse = await fetch('/api/save-json', {
+    // Save to database (only if session token is provided)
+    if (!sessionToken) {
+      console.log('⚠️ No session token provided, skipping database save');
+      return 'no-session';
+    }
+
+    const dbResponse = await fetch('/api/save-resume', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionToken}`
       },
       body: JSON.stringify({
-        jsonData,
-        fileName
+        resumeData: jsonData,
+        originalFilename: fileName
       })
     });
 
-    if (!fileResponse.ok) {
-      const errorData = await fileResponse.json();
-      throw new Error(errorData.error || 'Failed to save JSON file');
+    if (!dbResponse.ok) {
+      const errorData = await dbResponse.json();
+      console.error('❌ Failed to save to database:', errorData.error);
+      throw new Error(errorData.error || 'Failed to save resume to database');
     }
 
-    const fileResult = await fileResponse.json();
-    console.log(`💾 JSON file saved: ${fileResult.fileName}`);
-    console.log(`📁 File path: ${fileResult.filePath}`);
-
-    // Then, save to database (only if session token is provided)
-    if (sessionToken) {
-      const dbResponse = await fetch('/api/save-resume', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`
-        },
-        body: JSON.stringify({
-          resumeData: jsonData,
-          originalFilename: fileName
-        })
-      });
-
-      if (!dbResponse.ok) {
-        const errorData = await dbResponse.json();
-        console.warn('⚠️ Failed to save to database:', errorData.error);
-        // Don't throw error here, just log warning
-      } else {
-        const dbResult = await dbResponse.json();
-        console.log(`💾 Resume saved to database: ${dbResult.resumeId}`);
-      }
-    } else {
-      console.log('⚠️ No session token provided, skipping database save');
-    }
+    const dbResult = await dbResponse.json();
+    console.log(`💾 Resume saved to database: ${dbResult.resumeId}`);
     
-    return fileResult.filePath;
+    return dbResult.resumeId || 'saved';
   } catch (error) {
-    console.error('❌ Error saving JSON file:', error);
-    throw new Error(`Failed to save JSON file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('❌ Error saving resume to database:', error);
+    throw new Error(`Failed to save resume: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
 

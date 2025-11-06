@@ -27,11 +27,9 @@ export async function GET(request: NextRequest) {
   }
 
 
-  // Determine the correct redirect URL based on environment
-  const isProduction = process.env.NODE_ENV === 'production'
-  const redirectUrl = isProduction 
-    ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bpoc.io')
-    : 'http://localhost:3000'
+  // Use the actual request URL to determine the redirect URL
+  // This ensures we always redirect to the same domain the user came from
+  const redirectUrl = requestUrl.origin
 
   console.log('🔄 Auth callback redirecting to:', redirectUrl)
 

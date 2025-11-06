@@ -387,11 +387,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const signInWithGoogle = async () => {
-    // Force the correct redirect URL based on current environment
-    const isProduction = process.env.NODE_ENV === 'production'
-    const baseUrl = isProduction 
-      ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bpoc.io')
-      : 'http://localhost:3000'
+    // Use the actual current URL instead of relying on environment variables
+    // This ensures the redirect URL always matches where the user is accessing the app
+    const baseUrl = typeof window !== 'undefined' 
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.bpoc.io')
     
     console.log('🔗 Google OAuth redirect URL:', `${baseUrl}/auth/callback`)
     
