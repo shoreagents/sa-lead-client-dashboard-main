@@ -34,8 +34,8 @@ export function AnonymousUserButton() {
 
     // Check if user form status is loaded and handle accordingly
     if (!isLoading && userFormStatus) {
-      if (userFormStatus.hasFilledForm) {
-        // User already filled form, don't show modal
+      if (userFormStatus.hasFilledForm || userFormStatus.userExists) {
+        // User already filled form or user exists, don't show modal
         return;
       }
 

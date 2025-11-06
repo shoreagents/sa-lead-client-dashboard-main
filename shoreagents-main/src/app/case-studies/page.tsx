@@ -53,13 +53,13 @@ const caseStudies: CaseStudy[] = [
   },
   {
     id: '4',
-    title: 'Customer Service Scaling',
-    description: 'Transforming customer support operations from overwhelmed local team to 24/7 offshore excellence. 94% customer satisfaction achieved.',
+    title: 'BoxBrownie Client Success: 8x Customer Service Growth',
+    description: 'Global PropTech leader serving 170,000+ customers across 117 countries scales from 2 to 16 customer service representatives. Systematic infrastructure supporting real estate photo editing empire.',
     url: '/case-studies/customer-service-scaling',
     category: 'Customer Support',
     thumbnail: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=400&h=250&fit=crop',
-    industry: 'E-commerce',
-    results: '24/7 Coverage'
+    industry: 'PropTech',
+    results: '8x Team Growth'
   },
   {
     id: '5',
@@ -370,7 +370,7 @@ export default function CaseStudiesPage() {
         {/* Case Studies Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {filteredCaseStudies.map((caseStudy) => (
-            <Link key={caseStudy.id} href={caseStudy.url}>
+            <Link key={caseStudy.id} href={caseStudy.url} target="_blank" rel="noopener noreferrer">
               <Card className="border-lime-200 hover:shadow-xl transition-all duration-300 cursor-pointer h-full group">
                 <CardContent className="p-0">
                   <div className="relative h-48 overflow-hidden rounded-t-lg">
