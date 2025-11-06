@@ -14,9 +14,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code, ExternalLink, Copy } from 'lucide-react'
+import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code, ExternalLink, Copy, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { useCompileTsx, useImproveTsx } from '@/hooks/use-api'
+import { useCompileTsx, useImproveTsx, useAIResearch, useAIGenerateBlog } from '@/hooks/use-api'
 
 type PostType = 'blog' | 'article' | 'pillar'
 type CreationMethod = 'ai' | 'custom' | 'paste' | null
@@ -79,9 +79,20 @@ export default function CreatePostPage() {
     return processed
   }, [tsxCode])
   
+  // AI Content Generation state
+  const [aiTopic, setAiTopic] = useState('')
+  const [aiPostType, setAiPostType] = useState<PostType>('blog')
+  const [aiTone, setAiTone] = useState('professional')
+  const [aiTargetAudience, setAiTargetAudience] = useState('general')
+  const [aiResearchData, setAiResearchData] = useState<any>(null)
+  const [aiGeneratedContent, setAiGeneratedContent] = useState<any>(null)
+  const [aiStep, setAiStep] = useState<'input' | 'researching' | 'generating' | 'preview'>('input')
+  
   // TanStack Query mutations
   const compileTsxMutation = useCompileTsx()
   const improveTsxMutation = useImproveTsx()
+  const aiResearchMutation = useAIResearch()
+  const aiGenerateBlogMutation = useAIGenerateBlog()
 
   // Handle method selection
   const handleMethodSelect = (method: 'ai' | 'custom' | 'paste') => {
@@ -201,7 +212,67 @@ export default function CreatePostPage() {
     }
   }
 
-  // Render AI Generation Interface (placeholder for now)
+  // Handle AI Content Generation
+  const handleStartAIGeneration = () => {
+    if (!aiTopic.trim()) {
+      toast.error('Please enter a topic')
+      return
+    }
+
+    setAiStep('researching')
+    
+    // Step 1: Research with Serper
+    aiResearchMutation.mutate(
+      { topic: aiTopic, numResults: 10 },
+      {
+        onSuccess: (researchResponse) => {
+          console.log('✅ Research completed:', researchResponse)
+          setAiResearchData(researchResponse.data)
+          setAiStep('generating')
+          
+          // Step 2: Generate blog with Claude AI
+          aiGenerateBlogMutation.mutate(
+            {
+              topic: aiTopic,
+              research: researchResponse.data,
+              postType: aiPostType,
+              tone: aiTone,
+              targetAudience: aiTargetAudience,
+            },
+            {
+              onSuccess: (blogResponse) => {
+                console.log('✅ Blog generated:', blogResponse)
+                setAiGeneratedContent(blogResponse.data)
+                
+                // Pre-populate form fields
+                setTitle(blogResponse.data.title)
+                setDescription(blogResponse.data.description)
+                setContent(blogResponse.data.content)
+                setTags(blogResponse.data.suggestedTags || [])
+                setSeoKeywords(blogResponse.data.suggestedKeywords || [])
+                setPostType(aiPostType)
+                
+                setAiStep('preview')
+                toast.success('✨ Blog post generated successfully!')
+              },
+              onError: (error) => {
+                console.error('❌ Blog generation error:', error)
+                toast.error(`Failed to generate blog: ${error.message}`)
+                setAiStep('input')
+              },
+            }
+          )
+        },
+        onError: (error) => {
+          console.error('❌ Research error:', error)
+          toast.error(`Failed to research topic: ${error.message}`)
+          setAiStep('input')
+        },
+      }
+    )
+  }
+
+  // Render AI Generation Interface
   const renderAIGeneration = () => {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
@@ -209,33 +280,268 @@ export default function CreatePostPage() {
           <SidebarTrigger />
           <h1 className="text-3xl font-bold text-gray-900">AI Content Generation</h1>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-lime-600" />
-              Generate Content with AI
-            </CardTitle>
-            <CardDescription>
-              Use AI to generate your blog post, article, or pillar page content automatically
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="p-6 bg-lime-50 rounded-lg border border-lime-200">
-              <p className="text-gray-600 text-center">
-                AI content generation feature coming soon. This will allow you to generate posts using AI assistance.
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setCreationMethod(null)
-                setShowMethodModal(true)
-              }}
-            >
-              Choose Different Method
-            </Button>
-          </CardContent>
-        </Card>
+
+        {/* Input Stage */}
+        {aiStep === 'input' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-lime-600" />
+                Generate Content with AI
+              </CardTitle>
+              <CardDescription>
+                Use AI to research on Google (via Serper) and generate your blog post automatically
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Topic Input */}
+              <div>
+                <Label htmlFor="ai-topic">Topic *</Label>
+                <Input
+                  id="ai-topic"
+                  placeholder="e.g., Virtual Assistants for Real Estate"
+                  value={aiTopic}
+                  onChange={(e) => setAiTopic(e.target.value)}
+                  className="text-lg"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  What do you want to write about? Be specific for better results.
+                </p>
+              </div>
+
+              {/* Post Type */}
+              <div>
+                <Label htmlFor="ai-post-type">Content Type</Label>
+                <Select value={aiPostType} onValueChange={(value) => setAiPostType(value as PostType)}>
+                  <SelectTrigger id="ai-post-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blog">Blog Post (1500-2000 words)</SelectItem>
+                    <SelectItem value="article">Article (2000-3000 words)</SelectItem>
+                    <SelectItem value="pillar">Pillar Page (3000+ words)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Tone */}
+              <div>
+                <Label htmlFor="ai-tone">Tone</Label>
+                <Select value={aiTone} onValueChange={setAiTone}>
+                  <SelectTrigger id="ai-tone">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="casual">Casual</SelectItem>
+                    <SelectItem value="friendly">Friendly</SelectItem>
+                    <SelectItem value="authoritative">Authoritative</SelectItem>
+                    <SelectItem value="conversational">Conversational</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Target Audience */}
+              <div>
+                <Label htmlFor="ai-audience">Target Audience</Label>
+                <Input
+                  id="ai-audience"
+                  placeholder="e.g., real estate agents, property managers"
+                  value={aiTargetAudience}
+                  onChange={(e) => setAiTargetAudience(e.target.value)}
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <Button
+                  onClick={handleStartAIGeneration}
+                  className="flex-1 bg-lime-600 hover:bg-lime-700 text-white"
+                  disabled={!aiTopic.trim()}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Content
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setCreationMethod(null)
+                    setShowMethodModal(true)
+                  }}
+                >
+                  Choose Different Method
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Researching Stage */}
+        {aiStep === 'researching' && (
+          <Card>
+            <CardContent className="py-12">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-12 h-12 text-lime-600 animate-spin" />
+                <h3 className="text-xl font-semibold">Researching on Google...</h3>
+                <p className="text-gray-600 text-center max-w-md">
+                  Using Serper AI to gather comprehensive research from Google about "{aiTopic}"
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Generating Stage */}
+        {aiStep === 'generating' && (
+          <Card>
+            <CardContent className="py-12">
+              <div className="flex flex-col items-center gap-4">
+                <Loader2 className="w-12 h-12 text-lime-600 animate-spin" />
+                <h3 className="text-xl font-semibold">Generating Blog Post...</h3>
+                <p className="text-gray-600 text-center max-w-md">
+                  Our AI is processing the research and creating a {aiPostType} for you
+                </p>
+                {aiResearchData && (
+                  <div className="mt-4 p-4 bg-lime-50 rounded-lg text-sm">
+                    <p className="text-lime-900">
+                      ✓ Found {aiResearchData.mainResults?.length || 0} sources
+                    </p>
+                    <p className="text-lime-900">
+                      ✓ Identified {aiResearchData.peopleAlsoAsk?.length || 0} common questions
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Preview Stage */}
+        {aiStep === 'preview' && aiGeneratedContent && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-lime-600" />
+                  Generated Content Preview
+                </CardTitle>
+                <CardDescription>
+                  Review and edit your AI-generated content before publishing
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Title */}
+                <div>
+                  <Label htmlFor="ai-preview-title">Title</Label>
+                  <Input
+                    id="ai-preview-title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="text-lg font-semibold"
+                  />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <Label htmlFor="ai-preview-description">Description</Label>
+                  <Textarea
+                    id="ai-preview-description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {aiGeneratedContent.estimatedReadTime}
+                  </p>
+                </div>
+
+                {/* Content Preview */}
+                <div>
+                  <Label htmlFor="ai-preview-content">Content (Markdown)</Label>
+                  <Textarea
+                    id="ai-preview-content"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={20}
+                    className="font-mono text-sm"
+                  />
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <Label>Suggested Tags</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleTagRemove(tag)}
+                          className="ml-1 hover:text-red-600"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    onClick={() => {
+                      // Populate form and switch to custom CMS for editing
+                      setCreationMethod('custom')
+                    }}
+                    className="flex-1 bg-lime-600 hover:bg-lime-700 text-white"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Continue to Edit & Publish
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      // Reset and start over
+                      setAiStep('input')
+                      setAiTopic('')
+                      setAiResearchData(null)
+                      setAiGeneratedContent(null)
+                    }}
+                  >
+                    Generate Another
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Research Sources Card */}
+            {aiResearchData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Research Sources</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {aiResearchData.mainResults?.slice(0, 5).map((result: any, index: number) => (
+                      <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                        <a 
+                          href={result.link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="font-medium text-lime-600 hover:text-lime-700 flex items-center gap-1"
+                        >
+                          {result.title}
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                        <p className="text-sm text-gray-600 mt-1">{result.snippet}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
     )
   }

@@ -4,7 +4,7 @@ import { SideNav } from "@/components/layout/SideNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, TrendingUp, Users, Target, Building, Award, DollarSign, Shield, Zap, Home, Phone, Cog, Star, Clock } from 'lucide-react';
+import { CheckCircle, TrendingUp, Users, Target, Building, Award, DollarSign, Shield, Zap, Home, Phone, Cog, Star, Clock, Globe } from 'lucide-react';
 import Image from 'next/image';
 
 export default function TeamExpansionSuccessPage() {
@@ -15,7 +15,7 @@ export default function TeamExpansionSuccessPage() {
         {/* Hero Section */}
         <div className="text-center mb-16">
           <Badge className="bg-red-600 text-white px-4 py-2 text-lg mb-6">
-            🚨 ENTERPRISE BREAKTHROUGH: From 4 to 46 Specialists
+            ENTERPRISE BREAKTHROUGH: From 4 to 46 Specialists
           </Badge>
           <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
             Ballast&apos;s Success Secret: The 4-to-46 Formula That Works
@@ -55,7 +55,10 @@ export default function TeamExpansionSuccessPage() {
                 <div className="text-gray-900 font-bold">Kuahiwi Kahapea</div>
                 <div className="text-gray-600">Ballast, USA</div>
                 <div className="text-gray-600">Hired a Workforce</div>
-                <div className="mt-2">🇺🇸 United States of America</div>
+                <div className="mt-2 flex items-center justify-center gap-2">
+                  <Globe className="w-4 h-4 text-gray-600" />
+                  <span>United States of America</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -92,7 +95,7 @@ export default function TeamExpansionSuccessPage() {
         {/* Intro Section */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            🏢 Ballast Client Success: Property Management Excellence
+            Ballast Client Success: Property Management Excellence
           </h2>
           <p className="text-xl text-gray-700 mb-4">
             How a major property management company scaled from 4 test specialists to complete enterprise operation
@@ -108,7 +111,7 @@ export default function TeamExpansionSuccessPage() {
             <CardContent className="p-8">
               <div className="flex items-center mb-6">
                 <Target className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">🎯 Ballast Client Success: From Testing to Total Confidence</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Ballast Client Success: From Testing to Total Confidence</h2>
               </div>
               <div className="prose prose-lg max-w-none text-gray-700">
                 <p className="mb-4">

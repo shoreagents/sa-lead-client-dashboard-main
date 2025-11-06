@@ -1428,3 +1428,100 @@ export const useImproveTsx = () => {
     mutationFn: improveTsx,
   });
 };
+
+// ============================================================================
+// AI Content Generation
+// ============================================================================
+
+interface AIResearchResponse {
+  success: boolean;
+  data: {
+    topic: string;
+    mainResults: Array<{
+      title: string;
+      snippet: string;
+      link: string;
+    }>;
+    knowledgeGraph: any;
+    relatedSearches: Array<{
+      query: string;
+    }>;
+    peopleAlsoAsk: Array<{
+      question: string;
+      snippet: string;
+    }>;
+    additionalSources: {
+      guides: any[];
+      bestPractices: any[];
+      examples: any[];
+      statistics: any[];
+    };
+  };
+}
+
+interface AIGenerateBlogRequest {
+  topic: string;
+  research?: any;
+  postType?: 'blog' | 'article' | 'pillar';
+  tone?: string;
+  targetAudience?: string;
+}
+
+interface AIGenerateBlogResponse {
+  success: boolean;
+  data: {
+    title: string;
+    description: string;
+    content: string;
+    suggestedTags: string[];
+    suggestedKeywords: string[];
+    estimatedReadTime: string;
+  };
+  usage: {
+    input_tokens: number;
+    output_tokens: number;
+  };
+}
+
+const performAIResearch = async (topic: string, numResults?: number): Promise<AIResearchResponse> => {
+  const response = await fetch('/api/admin/ai-research', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, numResults }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to perform AI research');
+  }
+
+  return response.json();
+};
+
+const generateAIBlog = async (data: AIGenerateBlogRequest): Promise<AIGenerateBlogResponse> => {
+  const response = await fetch('/api/admin/ai-generate-blog', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to generate blog post');
+  }
+
+  return response.json();
+};
+
+export const useAIResearch = () => {
+  return useMutation({
+    mutationFn: ({ topic, numResults }: { topic: string; numResults?: number }) => 
+      performAIResearch(topic, numResults),
+  });
+};
+
+export const useAIGenerateBlog = () => {
+  return useMutation({
+    mutationFn: generateAIBlog,
+  });
+};
