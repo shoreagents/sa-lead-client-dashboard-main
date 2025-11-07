@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
+          model: 'claude-sonnet-4-20250514',
           max_tokens: 4000,
           messages: [
             { role: 'user', content: analysisPrompt }
@@ -338,7 +338,7 @@ export async function POST(request: NextRequest) {
         JSON.stringify(analysisResult.salaryAnalysis || {}),
         JSON.stringify(analysisResult.careerPath || {}),
         JSON.stringify(analysisResult.sectionAnalysis || {}),
-        JSON.stringify({ source: 'claude-3-5-sonnet-20241022' }),
+        JSON.stringify({ source: 'claude-sonnet-4-20250514' }),
         JSON.stringify(portfolioLinks || []),
         filesAnalyzed ? JSON.stringify(filesAnalyzed) : null,
         JSON.stringify(profile || {}),

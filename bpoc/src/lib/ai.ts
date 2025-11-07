@@ -292,7 +292,7 @@ export const aiHelpers = {
 // Configuration for Claude API (for production use)
 export const claudeConfig = {
   apiKey: process.env.ANTHROPIC_API_KEY || process.env.CLAUDE_API_KEY || '',
-  model: 'claude-3-sonnet-20240229',
+  model: 'claude-sonnet-4-20250514',
   maxTokens: 1000,
   temperature: 0.7
 }

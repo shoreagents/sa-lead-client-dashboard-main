@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
             'anthropic-version': '2023-06-01'
           },
           body: JSON.stringify({
-            model: 'claude-3-5-sonnet-20241022',
+            model: 'claude-sonnet-4-20250514',
             max_tokens: 2000,
             messages: [{
               role: 'user',
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         if (response.ok) {
           const data = await response.json()
           const aiAssessment = data.content[0].text
-          return NextResponse.json({ aiAssessment, generatedBy: 'claude-3.5-sonnet' })
+          return NextResponse.json({ aiAssessment, generatedBy: 'claude-sonnet-4' })
         } else {
           console.error('Claude API error for assessment:', response.status)
           return getFallbackResponse(true, discScores, prompt)
@@ -171,7 +171,7 @@ Make it PERSONAL. Use ${user?.first_name || 'User'}'s name throughout. Make it i
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20241022',
+          model: 'claude-sonnet-4-20250514',
           max_tokens: 3000,
           messages: [{
             role: 'user',
