@@ -43,6 +43,12 @@ const adminNavItems = [
     disabled: false,
   },
   {
+    title: "User Management",
+    url: "/admin-dashboard/users",
+    icon: UserCheck,
+    disabled: false,
+  },
+  {
     title: "Lead Management",
     url: "/admin-dashboard/leads",
     icon: Users,
@@ -64,7 +70,7 @@ const adminNavItems = [
     title: "Reports",
     url: "/admin-dashboard/reports",
     icon: FileText,
-    disabled: true, // Disabled
+    disabled: false,
   },
   {
     title: "Database",
@@ -85,8 +91,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { toggleSidebar, state } = useSidebar()
   
-  // Keep dropdown open when on any lead management page
-  const isLeadManagementOpen = pathname.startsWith('/admin-dashboard/leads')
+  // State to control dropdown open/close
+  const [isLeadManagementOpen, setIsLeadManagementOpen] = React.useState(
+    pathname.startsWith('/admin-dashboard/leads')
+  )
+  
+  // Update dropdown state when pathname changes
+  React.useEffect(() => {
+    setIsLeadManagementOpen(pathname.startsWith('/admin-dashboard/leads'))
+  }, [pathname])
+  
+  const toggleLeadManagement = () => {
+    setIsLeadManagementOpen(!isLeadManagementOpen)
+  }
 
   const handleSignOut = async () => {
     try {
@@ -132,20 +149,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <SidebarMenuItem key={item.title}>
                       <div>
                         <SidebarMenuButton
-                          asChild
+                          onClick={toggleLeadManagement}
                           isActive={pathname.startsWith('/admin-dashboard/leads')}
                           tooltip={item.title}
-                          className={`${pathname.startsWith('/admin-dashboard/leads') ? '!bg-lime-600 !text-white hover:!bg-lime-700 h-10 data-[active=true]:!bg-lime-600 data-[active=true]:!text-white' : 'hover:!bg-lime-100 hover:!text-lime-800'} text-base h-10 w-full data-[collapsible=icon]:!w-10 data-[collapsible=icon]:!h-10 data-[collapsible=icon]:!p-2`}
+                          className={`${pathname.startsWith('/admin-dashboard/leads') ? '!bg-lime-600 !text-white hover:!bg-lime-700 h-10 data-[active=true]:!bg-lime-600 data-[active=true]:!text-white' : 'hover:!bg-lime-100 hover:!text-lime-800'} text-base h-10 w-full data-[collapsible=icon]:!w-10 data-[collapsible=icon]:!h-10 data-[collapsible=icon]:!p-2 cursor-pointer`}
                         >
-                          <Link href="/admin-dashboard/leads">
-                            <item.icon className="w-5 h-5 data-[collapsible=icon]:!w-6 data-[collapsible=icon]:!h-6" />
-                            <span className="text-base font-medium data-[collapsible=icon]:!hidden">{item.title}</span>
-                            {isLeadManagementOpen ? (
-                              <ChevronDown className="w-4 h-4 ml-auto data-[collapsible=icon]:!hidden" />
-                            ) : (
-                              <ChevronRight className="w-4 h-4 ml-auto data-[collapsible=icon]:!hidden" />
-                            )}
-                          </Link>
+                          <item.icon className="w-5 h-5 data-[collapsible=icon]:!w-6 data-[collapsible=icon]:!h-6" />
+                          <span className="text-base font-medium data-[collapsible=icon]:!hidden">{item.title}</span>
+                          {isLeadManagementOpen ? (
+                            <ChevronDown className="w-4 h-4 ml-auto data-[collapsible=icon]:!hidden" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 ml-auto data-[collapsible=icon]:!hidden" />
+                          )}
                         </SidebarMenuButton>
                         
                         {isLeadManagementOpen && (

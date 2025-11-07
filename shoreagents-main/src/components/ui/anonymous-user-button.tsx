@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { AnonymousUserModal } from './anonymous-user-modal';
 import { useAuth } from '@/lib/auth-context';
 import { generateUserId } from '@/lib/userEngagementService';
@@ -9,55 +9,77 @@ import { useUserFormStatus } from '@/hooks/use-api';
 export function AnonymousUserButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isAuthenticated } = useAuth();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Only generate userId once, not on every render
   const userId = useMemo(() => generateUserId(), []);
   const { data: userFormStatus, isLoading, error } = useUserFormStatus(userId);
 
-  // Auto-open modal after 45 seconds
+  // Start timer immediately for anonymous users
   useEffect(() => {
     // Only start timer for anonymous users
     if (isAuthenticated) {
+      console.log('🚫 User is authenticated, clearing timer');
+      // Clear timer if user becomes authenticated
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
       return;
     }
 
-    // Database check is the primary source of truth - no localStorage needed
-
-    let timer: NodeJS.Timeout;
-    let countdownInterval: NodeJS.Timeout;
-
-    const startCountdown = () => {
-      timer = setTimeout(() => {
+    // Start the timer immediately for anonymous users
+    // Only start if timer isn't already running
+    if (!timerRef.current) {
+      console.log('⏱️ Starting 45-second timer for anonymous user modal');
+      timerRef.current = setTimeout(() => {
+        console.log('⏱️ 45 seconds elapsed, opening anonymous user modal');
         setIsModalOpen(true);
+        timerRef.current = null;
       }, 45000); // 45 seconds
-    };
-
-    // Check if user form status is loaded and handle accordingly
-    if (!isLoading && userFormStatus) {
-      if (userFormStatus.hasFilledForm || userFormStatus.userExists) {
-        // User already filled form or user exists, don't show modal
-        return;
-      }
-
-      // Add a small delay to make sure the database check is complete
-      setTimeout(() => {
-        startCountdown();
-      }, 2000);
-    } else if (error) {
-      // Database check failed, start countdown anyway
-      startCountdown();
     }
 
-    // Cleanup function
+    // Cleanup function - clear timer on unmount
     return () => {
-      if (timer) clearTimeout(timer);
-      if (countdownInterval) clearInterval(countdownInterval);
+      if (timerRef.current) {
+        console.log('🧹 Cleaning up timer (component unmounting)');
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
     };
-  }, [isAuthenticated, isLoading, userFormStatus, error]);
+  }, [isAuthenticated]); // Only depend on isAuthenticated for starting timer
+
+  // Cancel timer if user has filled form
+  useEffect(() => {
+    // Check if user form status is loaded and user already filled form
+    if (!isLoading && userFormStatus) {
+      console.log('📊 User form status loaded:', userFormStatus);
+      // Only prevent modal if user has actually filled the form (has meaningful data)
+      if (userFormStatus.hasFilledForm) {
+        // User already filled form, cancel the timer
+        console.log('✅ User already filled form, canceling timer', userFormStatus);
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+      }
+    }
+  }, [isLoading, userFormStatus]); // Only depend on form status for canceling
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
+  // Debug logging
+  useEffect(() => {
+    console.log('🎭 AnonymousUserButton render state:', {
+      isAuthenticated,
+      isModalOpen,
+      isLoading,
+      userFormStatus,
+      hasTimer: !!timerRef.current
+    });
+  }, [isAuthenticated, isModalOpen, isLoading, userFormStatus]);
 
   // Only show for anonymous users
   if (isAuthenticated) {

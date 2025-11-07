@@ -9,6 +9,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Users, 
   Mail, 
@@ -212,9 +213,17 @@ export default function LeadQuotations() {
                 </CardHeader>
                 <CardContent>
                   {isLoading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="w-6 h-6 animate-spin text-lime-600" />
-                      <span className="ml-2 text-gray-600">Loading quotations...</span>
+                    <div className="space-y-4 py-4">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
+                          <Skeleton className="h-12 w-12 rounded" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-[250px]" />
+                            <Skeleton className="h-4 w-[200px]" />
+                          </div>
+                          <Skeleton className="h-8 w-24" />
+                        </div>
+                      ))}
                     </div>
                   ) : error ? (
                     <div className="flex items-center justify-center py-8">

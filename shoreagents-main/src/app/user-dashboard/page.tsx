@@ -5,6 +5,7 @@ import { UserDashboardSidebar } from '@/components/layout/UserDashboardSidebar'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { useUserAuth } from '@/lib/user-auth-context'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
 import ChatConsole from '@/components/ui/ai-chat-console'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
@@ -136,10 +137,28 @@ export default function UserDashboardPage() {
         <SidebarInset>
           <div className="flex flex-1 flex-col gap-2 p-3 pt-20">
             {isLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-500"></div>
-                  <span className="text-lg">Loading your dashboard...</span>
+              <div className="space-y-4">
+                {/* Header Skeleton */}
+                <div className="space-y-2">
+                  <Skeleton className="h-7 w-48" />
+                  <Skeleton className="h-4 w-96" />
+                </div>
+                
+                {/* Grid Skeleton */}
+                <div className="grid" style={{
+                  display: 'grid',
+                  height: '60%',
+                  width: '100%',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gridTemplateRows: 'repeat(4, 1fr)',
+                  gap: '12px',
+                  backgroundColor: '#ffffff',
+                  padding: '6px',
+                  borderRadius: '8px',
+                }}>
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="w-full h-full rounded-lg" />
+                  ))}
                 </div>
               </div>
             ) : (

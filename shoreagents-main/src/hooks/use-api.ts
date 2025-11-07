@@ -885,6 +885,30 @@ const fetchUserVisitData = async (): Promise<UserVisitData[]> => {
   return result.data;
 };
 
+export interface TimeSeriesData {
+  date: string;
+  desktop: number;
+  mobile: number;
+  tablet: number;
+  total?: number;
+}
+
+const fetchTimeSeriesData = async (days: number = 90): Promise<TimeSeriesData[]> => {
+  const response = await fetch(`/api/admin/dashboard/time-series?days=${days}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch time series data');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch time series data');
+  }
+  
+  return result.data || [];
+};
+
 export const useDashboardMetrics = () => {
   return useQuery<DashboardMetrics>({
     queryKey: ['dashboardMetrics'],
@@ -912,6 +936,16 @@ export const useUserVisitData = () => {
     queryFn: fetchUserVisitData,
     staleTime: 30 * 1000, // 30 seconds
     gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useTimeSeriesData = (days: number = 90) => {
+  return useQuery<TimeSeriesData[]>({
+    queryKey: ['timeSeriesData', days],
+    queryFn: () => fetchTimeSeriesData(days),
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
   });
 };

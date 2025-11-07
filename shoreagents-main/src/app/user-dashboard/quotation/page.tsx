@@ -8,6 +8,7 @@ import { useDeleteQuotationMutation } from '@/hooks/use-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Quote, 
   Plus,
@@ -429,9 +430,27 @@ export default function QuotationPage() {
 
             {/* Loading State */}
             {isLoading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-8 h-8" />
-                <span className="ml-2 text-gray-600">Loading quotations...</span>
+              <div className="space-y-4 py-4">
+                {[...Array(3)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <Skeleton className="h-6 w-48" />
+                        <Skeleton className="h-6 w-20" />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-3/4" />
+                        <div className="flex gap-2">
+                          <Skeleton className="h-8 w-24" />
+                          <Skeleton className="h-8 w-24" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
 

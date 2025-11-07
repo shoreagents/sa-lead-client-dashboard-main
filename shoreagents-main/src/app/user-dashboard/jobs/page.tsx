@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Briefcase, 
   Search, 
@@ -118,9 +119,22 @@ export default function JobsPage() {
 
             {/* Loading State */}
             {isLoading && (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-lime-600" />
-                <span className="ml-3 text-muted-foreground">Loading jobs...</span>
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <Skeleton className="h-6 w-3/4" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-6 w-16" />
+                        <Skeleton className="h-6 w-16" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
 
