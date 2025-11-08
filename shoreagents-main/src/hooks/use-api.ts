@@ -1559,3 +1559,47 @@ export const useAIGenerateBlog = () => {
     mutationFn: generateAIBlog,
   });
 };
+
+// ============================================================================
+// AI TSX Blog Generation (with Serper + Claude)
+// ============================================================================
+
+interface GenerateTSXBlogRequest {
+  topic: string;
+  researchData?: any;
+  tone?: string;
+  targetAudience?: string;
+}
+
+interface GenerateTSXBlogResponse {
+  success: boolean;
+  tsxCode: string;
+  topic: string;
+  metadata: {
+    tone: string;
+    targetAudience: string;
+    generatedAt: string;
+    length: number;
+  };
+}
+
+const generateTSXBlog = async (data: GenerateTSXBlogRequest): Promise<GenerateTSXBlogResponse> => {
+  const response = await fetch('/api/admin/content/generate-blog', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to generate TSX blog post');
+  }
+
+  return response.json();
+};
+
+export const useGenerateTSXBlog = () => {
+  return useMutation({
+    mutationFn: generateTSXBlog,
+  });
+};
