@@ -121,7 +121,7 @@ Return ONLY the complete TSX code starting with "export default function BlogPos
     // Call Claude API
     console.log('📝 Calling Claude API to generate blog post...');
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-3-5-sonnet-20240620',
       max_tokens: 8000,
       temperature: 0.7,
       system: systemPrompt,

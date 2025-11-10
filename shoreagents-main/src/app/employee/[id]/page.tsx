@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +27,7 @@ import { useAuth } from '@/lib/auth-context';
 import { generateUserId } from '@/lib/userEngagementService';
 import { InterviewRequestModal, InterviewRequestData } from '@/components/ui/interview-request-modal';
 import { useBPOCEmployeeById } from '@/hooks/use-api';
+import { SideNav } from '@/components/layout/SideNav';
 
 interface EmployeeProfile {
   id: string;
@@ -62,66 +63,215 @@ export default function EmployeeProfilePage() {
   // Use TanStack Query to fetch employee data
   const { data: bpocEmployee, isLoading, error } = useBPOCEmployeeById(params.id as string);
 
-  // Convert BPOC data to EmployeeProfile format
-  const employee: EmployeeProfile | null = bpocEmployee ? {
-    id: bpocEmployee.user_id,
-    name: bpocEmployee.full_name,
-    email: `${bpocEmployee.first_name.toLowerCase()}.${bpocEmployee.last_name.toLowerCase()}@example.com`,
-    position: bpocEmployee.current_position || bpocEmployee.position || 'Position not specified',
-    location: bpocEmployee.location || 'Location not specified',
-    avatar: bpocEmployee.avatar_url || null,
-    bio: bpocEmployee.bio || `Professional ${bpocEmployee.current_position || bpocEmployee.position || 'candidate'} with expertise in various technologies.`,
-    score: bpocEmployee.overall_score || 0,
-    skills: bpocEmployee.skills_snapshot || [],
-    experience: bpocEmployee.experience_snapshot ? 
-      (Array.isArray(bpocEmployee.experience_snapshot) ? 
-        bpocEmployee.experience_snapshot.length + ' years' : 
-        'Experience available') : 
-      'Experience not specified',
-    expectedSalary: bpocEmployee.expected_salary ? 
-      parseFloat(bpocEmployee.expected_salary.replace(/[^\d.]/g, '')) : 0,
-    workStatus: bpocEmployee.work_status || 'Status not specified',
-    joinedDate: bpocEmployee.user_created_at ? new Date(bpocEmployee.user_created_at).toISOString().split('T')[0] : '2023-01-01',
-    tier: (bpocEmployee.overall_score || 0) >= 80 ? 'GOLD' : 
-          (bpocEmployee.overall_score || 0) >= 60 ? 'SILVER' : 'BRONZE',
-    // AI Analysis data
-    keyStrengths: bpocEmployee.key_strengths || [],
-    improvements: bpocEmployee.improvements || [],
-    recommendations: bpocEmployee.recommendations || [],
-    improvedSummary: bpocEmployee.improved_summary || null,
-    strengthsAnalysis: bpocEmployee.strengths_analysis || null
-  } : null;
+  // Convert BPOC data to EmployeeProfile format - memoized to prevent recreation on every render
+  const employee: EmployeeProfile | null = useMemo(() => {
+    if (!bpocEmployee) return null;
+    
+    return {
+      id: bpocEmployee.user_id,
+      name: bpocEmployee.full_name,
+      email: `${bpocEmployee.first_name.toLowerCase()}.${bpocEmployee.last_name.toLowerCase()}@example.com`,
+      position: bpocEmployee.current_position || bpocEmployee.position || 'Position not specified',
+      location: bpocEmployee.location || 'Location not specified',
+      avatar: bpocEmployee.avatar_url || null,
+      bio: bpocEmployee.bio || `Professional ${bpocEmployee.current_position || bpocEmployee.position || 'candidate'} with expertise in various technologies.`,
+      score: bpocEmployee.overall_score || 0,
+      skills: bpocEmployee.skills_snapshot || [],
+      experience: bpocEmployee.experience_snapshot ? 
+        (Array.isArray(bpocEmployee.experience_snapshot) ? 
+          bpocEmployee.experience_snapshot.length + ' years' : 
+          'Experience available') : 
+        'Experience not specified',
+      expectedSalary: bpocEmployee.expected_salary ? 
+        parseFloat(bpocEmployee.expected_salary.replace(/[^\d.]/g, '')) : 0,
+      workStatus: bpocEmployee.work_status || 'Status not specified',
+      joinedDate: bpocEmployee.user_created_at ? new Date(bpocEmployee.user_created_at).toISOString().split('T')[0] : '2023-01-01',
+      tier: (bpocEmployee.overall_score || 0) >= 80 ? 'GOLD' : 
+            (bpocEmployee.overall_score || 0) >= 60 ? 'SILVER' : 'BRONZE',
+      // AI Analysis data
+      keyStrengths: bpocEmployee.key_strengths || [],
+      improvements: bpocEmployee.improvements || [],
+      recommendations: bpocEmployee.recommendations || [],
+      improvedSummary: bpocEmployee.improved_summary || null,
+      strengthsAnalysis: bpocEmployee.strengths_analysis || null
+    };
+  }, [bpocEmployee]);
+
+  // Track if we've already started tracking for this candidate to prevent loops
+  const trackingStartedRef = useRef<string | null>(null);
+  const currentCandidateIdRef = useRef<string | null>(null);
 
   // Start tracking when employee data is loaded
   useEffect(() => {
-    if (employee) {
-      const trackingUserId = appUser?.user_id || 
-        (typeof window !== 'undefined' ? generateUserId() : '') || 
-        '';
-      
-      console.log('🔍 Starting candidate tracking with user ID:', trackingUserId);
-      candidateTracker.startTracking(
-        trackingUserId,
-        employee.id, 
-        employee.name
-      );
+    if (!employee) return;
+    
+    // Create a unique key for this tracking session
+    const trackingKey = `${employee.id}-${appUser?.user_id || 'anonymous'}`;
+    
+    // If this is a different candidate, reset the tracking ref
+    if (currentCandidateIdRef.current !== employee.id) {
+      trackingStartedRef.current = null;
+      currentCandidateIdRef.current = employee.id;
     }
-  }, [employee, appUser?.user_id]);
+    
+    // Skip if we've already started tracking for this candidate/user combination in this session
+    if (trackingStartedRef.current === trackingKey) {
+      return;
+    }
+    
+    const trackingUserId = appUser?.user_id || 
+      (typeof window !== 'undefined' ? generateUserId() : '') || 
+      '';
+    
+    if (!trackingUserId) {
+      console.warn('⚠️ No tracking user ID available, skipping tracking');
+      return;
+    }
+    
+    console.log('🔍 Starting candidate tracking with user ID:', trackingUserId);
+    candidateTracker.startTracking(
+      trackingUserId,
+      employee.id, 
+      employee.name
+    );
+    
+    // Mark tracking as started for this candidate/user combination
+    trackingStartedRef.current = trackingKey;
+  }, [employee?.id, employee?.name, appUser?.user_id]);
+
+  // Track scroll percentage
+  useEffect(() => {
+    if (!employee) return;
+
+    let ticking = false;
+    let lastScrollPercentage = 0;
+    let lastUpdateTime = 0;
+
+    const updateScrollPercentage = () => {
+      if (typeof window === 'undefined') return;
+
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollableHeight = documentHeight - windowHeight;
+
+      if (scrollableHeight > 0) {
+        const currentScrollPercentage = Math.min(100, Math.round((scrollTop / scrollableHeight) * 100));
+        
+        // Only update if scroll percentage increased significantly (at least 5%) or if it's been 2 seconds since last update
+        const now = Date.now();
+        const timeSinceLastUpdate = now - lastUpdateTime;
+        const scrollIncrease = currentScrollPercentage - lastScrollPercentage;
+
+        if (currentScrollPercentage > lastScrollPercentage && (scrollIncrease >= 5 || timeSinceLastUpdate >= 2000)) {
+          console.log(`📜 Scroll percentage updated: ${currentScrollPercentage}% (was ${lastScrollPercentage}%)`);
+          candidateTracker.recordScrollPercentage(currentScrollPercentage);
+          lastScrollPercentage = currentScrollPercentage;
+          lastUpdateTime = now;
+        }
+      }
+
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateScrollPercentage);
+        ticking = true;
+      }
+    };
+
+    // Also update on resize (in case window size changes)
+    const handleResize = () => {
+      updateScrollPercentage();
+    };
+
+    // Initial scroll percentage calculation
+    updateScrollPercentage();
+
+    // Add scroll and resize listeners
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [employee?.id]);
 
   // Cleanup tracking when component unmounts or user navigates away
   useEffect(() => {
     const handleBeforeUnload = () => {
+      // Update final scroll percentage before ending
+      if (typeof window !== 'undefined') {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const scrollableHeight = documentHeight - windowHeight;
+        
+        if (scrollableHeight > 0) {
+          const finalScrollPercentage = Math.min(100, Math.round((scrollTop / scrollableHeight) * 100));
+          candidateTracker.recordScrollPercentage(finalScrollPercentage);
+        }
+      }
+      
       candidateTracker.endTracking();
+      // Reset tracking ref so tracking can start again if user comes back
+      trackingStartedRef.current = null;
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Page is hidden (user switched tabs, minimized window, etc.)
+        // Save current scroll percentage and duration
+        if (typeof window !== 'undefined') {
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const windowHeight = window.innerHeight;
+          const documentHeight = document.documentElement.scrollHeight;
+          const scrollableHeight = documentHeight - windowHeight;
+          
+          if (scrollableHeight > 0) {
+            const currentScrollPercentage = Math.min(100, Math.round((scrollTop / scrollableHeight) * 100));
+            candidateTracker.recordScrollPercentage(currentScrollPercentage);
+          }
+        }
+        
+        console.log('👁️ Page hidden, saving current tracking duration...');
+        candidateTracker.endTracking();
+        // Don't reset trackingStartedRef - allow tracking to resume if user comes back
+      } else if (!document.hidden && trackingStartedRef.current) {
+        // Page became visible again - restart tracking if we were tracking before
+        console.log('👁️ Page visible again, checking if tracking should resume...');
+        // Tracking will resume automatically if the component is still mounted
+      }
     };
 
     // Listen for page unload events
     window.addEventListener('beforeunload', handleBeforeUnload);
     window.addEventListener('pagehide', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
+      // Update final scroll percentage before ending tracking
+      if (typeof window !== 'undefined') {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const scrollableHeight = documentHeight - windowHeight;
+        
+        if (scrollableHeight > 0) {
+          const finalScrollPercentage = Math.min(100, Math.round((scrollTop / scrollableHeight) * 100));
+          candidateTracker.recordScrollPercentage(finalScrollPercentage);
+        }
+      }
+      
+      // End tracking when component unmounts (user navigates away)
       candidateTracker.endTracking();
+      // Reset tracking ref so tracking can start again if user comes back
+      trackingStartedRef.current = null;
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('pagehide', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -196,11 +346,14 @@ export default function EmployeeProfilePage() {
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full border-4 border-lime-600 border-t-transparent w-8 h-8 mx-auto mb-4"></div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Loading Employee Profile...</h1>
-          <p className="text-gray-600">Fetching candidate information</p>
+      <div className="min-h-screen bg-gray-50">
+        <SideNav />
+        <div className="flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full border-4 border-lime-600 border-t-transparent w-8 h-8 mx-auto mb-4"></div>
+            <h1 className="text-xl font-bold text-gray-900 mb-2">Loading Employee Profile...</h1>
+            <p className="text-gray-600">Fetching candidate information</p>
+          </div>
         </div>
       </div>
     );
@@ -209,19 +362,22 @@ export default function EmployeeProfilePage() {
   // Handle error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Profile</h1>
-          <p className="text-gray-600 mb-2">Unable to fetch employee data.</p>
-          <p className="text-sm text-gray-500 mb-6">Please try again later.</p>
-          <div className="space-x-4">
-            <Button onClick={() => router.back()}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go Back
-            </Button>
-            <Button variant="outline" onClick={() => router.push('/')}>
-              Go to Home
-            </Button>
+      <div className="min-h-screen bg-gray-50">
+        <SideNav />
+        <div className="flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Profile</h1>
+            <p className="text-gray-600 mb-2">Unable to fetch employee data.</p>
+            <p className="text-sm text-gray-500 mb-6">Please try again later.</p>
+            <div className="space-x-4">
+              <Button onClick={() => router.back()}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Go Back
+              </Button>
+              <Button variant="outline" onClick={() => router.push('/')}>
+                Go to Home
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -231,19 +387,22 @@ export default function EmployeeProfilePage() {
   // Handle employee not found
   if (!employee) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Employee Not Found</h1>
-          <p className="text-gray-600 mb-2">The employee profile with ID "{params.id}" doesn't exist.</p>
-          <p className="text-sm text-gray-500 mb-6">This could be because the employee ID is invalid or the data hasn't been loaded yet.</p>
-          <div className="space-x-4">
-            <Button onClick={() => router.back()}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Go Back
-            </Button>
-            <Button variant="outline" onClick={() => router.push('/')}>
-              Go to Home
-            </Button>
+      <div className="min-h-screen bg-gray-50">
+        <SideNav />
+        <div className="flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Employee Not Found</h1>
+            <p className="text-gray-600 mb-2">The employee profile with ID "{params.id}" doesn't exist.</p>
+            <p className="text-sm text-gray-500 mb-6">This could be because the employee ID is invalid or the data hasn't been loaded yet.</p>
+            <div className="space-x-4">
+              <Button onClick={() => router.back()}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Go Back
+              </Button>
+              <Button variant="outline" onClick={() => router.push('/')}>
+                Go to Home
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -252,6 +411,7 @@ export default function EmployeeProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SideNav />
       {/* Header */}
       <div className="bg-white border-b border-lime-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -260,7 +420,25 @@ export default function EmployeeProfilePage() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => router.back()}
+                onClick={async () => {
+                  try {
+                    // End tracking before navigating - wait for it to complete
+                    console.log('🔙 Back button clicked, ending tracking...');
+                    await candidateTracker.endTracking();
+                    console.log('✅ Tracking ended successfully, navigating to talent pool...');
+                    
+                    // Add a small delay to ensure database write completes
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    
+                    // Navigate to talent pool page with cache-busting parameter to force refresh
+                    const timestamp = Date.now();
+                    window.location.href = `/we-got-talent?refresh=${timestamp}`;
+                  } catch (error) {
+                    console.error('❌ Error ending tracking before navigation:', error);
+                    // Still navigate even if tracking fails
+                    window.location.href = '/we-got-talent';
+                  }
+                }}
                 className="flex-shrink-0 border-lime-200 hover:bg-lime-50 hover:border-lime-300 hover:text-lime-700 transition-all duration-200"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />

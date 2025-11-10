@@ -158,6 +158,7 @@ const submitAnonymousUserData = async (data: AnonymousUserData): Promise<unknown
 };
 
 const fetchAutocompleteSuggestions = async (data: AutocompleteData): Promise<AISuggestion[] | string> => {
+  try {
   const response = await fetch('/api/autocomplete', {
     method: 'POST',
     headers: {
@@ -175,10 +176,44 @@ const fetchAutocompleteSuggestions = async (data: AutocompleteData): Promise<AIS
   });
   
   if (!response.ok) {
-    throw new Error('Failed to fetch autocomplete suggestions');
+      // Try to get error details from response
+      let errorMessage = 'Failed to fetch autocomplete suggestions';
+      try {
+        const errorData = await response.json();
+        if (errorData.error) {
+          errorMessage = errorData.error;
+          if (errorData.details) {
+            errorMessage += `: ${errorData.details}`;
+          }
+        }
+      } catch (parseError) {
+        // If we can't parse the error, use the status text
+        errorMessage = `Failed to fetch autocomplete suggestions: ${response.status} ${response.statusText}`;
+      }
+      const errorDetails = {
+        status: response.status,
+        statusText: response.statusText,
+        message: errorMessage,
+        query: data.query,
+        type: data.type
+      };
+      console.error('❌ Autocomplete API error:', JSON.stringify(errorDetails, null, 2));
+      throw new Error(errorMessage);
   }
   
   const result = await response.json();
+    
+    // Check if the result is an error object
+    if (result && typeof result === 'object' && result.error) {
+      const errorInfo = {
+        error: result.error,
+        details: result.details,
+        query: data.query,
+        type: data.type
+      };
+      console.error('❌ Autocomplete API returned error:', JSON.stringify(errorInfo, null, 2));
+      throw new Error(result.error + (result.details ? `: ${result.details}` : ''));
+    }
   
   // For description type, return the string directly
   if (data.type === 'description') {
@@ -187,6 +222,24 @@ const fetchAutocompleteSuggestions = async (data: AutocompleteData): Promise<AIS
   
   // For other types, return the suggestions array
   return result;
+  } catch (error) {
+    // Log the full error details
+    const errorInfo = {
+      message: error instanceof Error ? error.message : String(error),
+      name: error instanceof Error ? error.name : 'Unknown',
+      stack: error instanceof Error ? error.stack : undefined,
+      query: data.query,
+      type: data.type
+    };
+    console.error('❌ Autocomplete fetch error:', JSON.stringify(errorInfo, null, 2));
+    
+    // Re-throw if it's already an Error with a message
+    if (error instanceof Error) {
+      throw error;
+    }
+    // Otherwise wrap it
+    throw new Error(`Failed to fetch autocomplete suggestions: ${String(error)}`);
+  }
 };
 
 const checkEmailExists = async (data: CheckEmailData): Promise<{ exists: boolean }> => {
@@ -489,6 +542,16 @@ const fetchEmployeeCardData = async (): Promise<EmployeeCardData[]> => {
     const candidateProfile = bpocUser.candidate_profile as Record<string, unknown>;
     const email = candidateProfile?.email as string || '';
 
+    // Debug: Log data transformation for Lovell Siron
+    if (bpocUser.full_name?.toLowerCase().includes('lovell') && bpocUser.last_name?.toLowerCase().includes('siron')) {
+      console.log('🔍 Transforming Lovell Siron data:', {
+        skills_snapshot: bpocUser.skills_snapshot,
+        experience_snapshot: bpocUser.experience_snapshot,
+        expected_salary: bpocUser.expected_salary,
+        work_status: bpocUser.work_status
+      });
+    }
+
     return {
       user: {
         id: bpocUser.user_id,
@@ -503,14 +566,131 @@ const fetchEmployeeCardData = async (): Promise<EmployeeCardData[]> => {
         updated_at: new Date().toISOString(),
         score: bpocUser.overall_score || 0,
         skills: bpocUser.skills_snapshot || [],
-        experience: bpocUser.experience_snapshot ? 
-          (Array.isArray(bpocUser.experience_snapshot) ? 
-            bpocUser.experience_snapshot.length + ' years' : 
-            'Experience available') : 
-          'Experience not specified',
-        expectedSalary: bpocUser.expected_salary ? 
-          parseFloat(bpocUser.expected_salary.replace(/[^\d.]/g, '')) : 0,
-        workStatus: bpocUser.work_status || 'Status not specified',
+        experience: (() => {
+          if (!bpocUser.experience_snapshot || !Array.isArray(bpocUser.experience_snapshot)) {
+            return 'Experience not specified';
+          }
+          
+          // Helper function to parse date strings like "July 2022", "Jan 2020", etc.
+          const parseDateString = (dateStr: string): Date | null => {
+            try {
+              // Try parsing as-is first
+              const parsed = new Date(dateStr);
+              if (!isNaN(parsed.getTime())) {
+                return parsed;
+              }
+              
+              // Try common formats
+              const monthNameMatch = dateStr.match(/^(\w+)\s+(\d{4})$/i); // "July 2022"
+              if (monthNameMatch) {
+                const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
+                                  'july', 'august', 'september', 'october', 'november', 'december'];
+                const monthIndex = monthNames.findIndex(m => dateStr.toLowerCase().startsWith(m));
+                if (monthIndex !== -1) {
+                  return new Date(parseInt(monthNameMatch[2]), monthIndex, 1);
+                }
+              }
+              
+              return null;
+            } catch {
+              return null;
+            }
+          };
+          
+          // Calculate total years from experience records
+          let totalYears = 0;
+          const now = new Date();
+          
+          bpocUser.experience_snapshot.forEach((exp: any) => {
+            if (exp.duration) {
+              const durationStr = String(exp.duration);
+              
+              // Check if it's a date range format (e.g., "July 2022 - Present", "Jan 2020 - Dec 2022")
+              if (durationStr.includes(' - ') || durationStr.includes(' to ')) {
+                const parts = durationStr.split(/ - | to /i);
+                if (parts.length === 2) {
+                  const startStr = parts[0].trim();
+                  const endStr = parts[1].trim();
+                  
+                  // Try to parse start date
+                  const startDate = parseDateString(startStr);
+                  if (startDate) {
+                    // Check if end is "Present" or "Current"
+                    const endDate = (endStr.toLowerCase() === 'present' || endStr.toLowerCase() === 'current') 
+                      ? now 
+                      : parseDateString(endStr) || now;
+                    
+                    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+                    const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
+                    totalYears += diffYears;
+                  }
+                }
+              } else {
+                // Try to parse duration string (e.g., "2 years", "1 year 6 months", "18 months")
+                const durationLower = durationStr.toLowerCase();
+                const yearsMatch = durationLower.match(/(\d+)\s*years?/);
+                const monthsMatch = durationLower.match(/(\d+)\s*months?/);
+                
+                if (yearsMatch) {
+                  totalYears += parseFloat(yearsMatch[1]);
+                }
+                if (monthsMatch) {
+                  totalYears += parseFloat(monthsMatch[1]) / 12;
+                }
+              }
+            } else if (exp.start_date && exp.end_date) {
+              // Calculate from date range
+              const start = new Date(exp.start_date);
+              const end = exp.end_date === 'Present' || exp.end_date === 'Current' ? now : new Date(exp.end_date);
+              const diffTime = Math.abs(end.getTime() - start.getTime());
+              const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
+              totalYears += diffYears;
+            } else if (exp.start_date) {
+              // Only start date, calculate to present
+              const start = new Date(exp.start_date);
+              const diffTime = Math.abs(now.getTime() - start.getTime());
+              const diffYears = diffTime / (1000 * 60 * 60 * 24 * 365);
+              totalYears += diffYears;
+            }
+          });
+          
+          // If we couldn't calculate from durations/dates, use array length as fallback
+          if (totalYears === 0 && bpocUser.experience_snapshot.length > 0) {
+            // Assume average 2 years per position as fallback
+            totalYears = bpocUser.experience_snapshot.length * 2;
+          }
+          
+          return totalYears > 0 ? `${Math.round(totalYears * 10) / 10} years` : 'Experience not specified';
+        })(),
+        expectedSalary: (() => {
+          if (!bpocUser.expected_salary) return 0;
+          
+          // Handle salary ranges like "P20000-P30000", "₱25,000 - ₱35,000", etc.
+          const salaryStr = String(bpocUser.expected_salary);
+          const numbers = salaryStr.match(/[\d,]+/g);
+          
+          if (!numbers || numbers.length === 0) return 0;
+          
+          let salary = 0;
+          
+          // If range, take the average
+          if (numbers.length > 1) {
+            const min = parseInt(numbers[0].replace(/,/g, ''), 10);
+            const max = parseInt(numbers[1].replace(/,/g, ''), 10);
+            salary = Math.round((min + max) / 2);
+          } else {
+            salary = parseInt(numbers[0].replace(/,/g, ''), 10);
+          }
+          
+          // Validate salary range (reasonable PHP salary range: 15,000 - 200,000)
+          if (salary < 15000 || salary > 200000) {
+            console.log(`⚠️ Unrealistic salary detected: ${salaryStr} -> ${salary}. Using 0.`);
+            return 0;
+          }
+          
+          return salary;
+        })(),
+        workStatus: bpocUser.work_status || 'Not specified',
         joinedDate: bpocUser.user_created_at ? new Date(bpocUser.user_created_at).toISOString().split('T')[0] : '2023-01-01',
         tier: (bpocUser.overall_score || 0) >= 80 ? 'GOLD' : 
               (bpocUser.overall_score || 0) >= 60 ? 'SILVER' : 'BRONZE'
@@ -535,6 +715,18 @@ const fetchEmployeeCardData = async (): Promise<EmployeeCardData[]> => {
       resume: undefined, // Will be fetched separately if needed
       aiAnalysis: undefined // Will be fetched separately if needed
     };
+  }).map((employeeData) => {
+    // Debug: Log final transformed data for Lovell Siron
+    if (employeeData.user.name?.toLowerCase().includes('lovell')) {
+      console.log('✅ Final transformed data for Lovell Siron:', {
+        name: employeeData.user.name,
+        skills: employeeData.user.skills,
+        experience: employeeData.user.experience,
+        expectedSalary: employeeData.user.expectedSalary,
+        workStatus: employeeData.user.workStatus
+      });
+    }
+    return employeeData;
   });
 };
 
@@ -1059,6 +1251,47 @@ export const useTopCandidate = (userId: string | null) => {
   return useQuery<TopCandidateData | null>({
     queryKey: ['topCandidate', userId],
     queryFn: () => fetchTopCandidate(userId),
+    enabled: !!userId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};
+
+// Fetch top candidates based on engagement metrics
+const fetchTopCandidates = async (userId: string | null): Promise<Array<{
+  id: string;
+  name: string;
+  position: string;
+  avatar?: string;
+  bio?: string;
+  expectedSalary?: number;
+  view_duration: number;
+  scroll_percentage: number;
+  page_views: number;
+  engagement_score: number;
+}>> => {
+  if (!userId) return [];
+  
+  const response = await fetch(`/api/user-dashboard/top-candidates?userId=${userId}&limit=5`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch top candidates');
+  }
+  
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(result.error || 'Failed to fetch top candidates');
+  }
+  
+  return result.data || [];
+};
+
+export const useTopCandidates = (userId: string | null) => {
+  return useQuery({
+    queryKey: ['topCandidates', userId],
+    queryFn: () => fetchTopCandidates(userId),
     enabled: !!userId,
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes

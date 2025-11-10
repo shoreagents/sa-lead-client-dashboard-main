@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   TrendingUp, 
   Users, 
@@ -13,7 +14,6 @@ import {
   Rocket, 
   Info, 
   ArrowRight,
-  Loader2,
   Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
@@ -97,8 +97,35 @@ export function NextStepCard({ userId }: { userId: string }) {
             Next Step
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-40">
-          <Loader2 className="w-8 h-8 animate-spin text-lime-600" />
+        <CardContent className="py-6 space-y-4">
+          {/* Badge Skeleton */}
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-5 w-32" />
+          </div>
+          
+          {/* Main Recommendation Skeleton */}
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            </div>
+            
+            {/* Activity Summary Skeleton */}
+            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <div className="flex flex-wrap gap-3">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-3 w-28" />
+              </div>
+            </div>
+            
+            {/* Button Skeleton */}
+            <Skeleton className="h-10 w-full" />
+          </div>
         </CardContent>
       </Card>
     );

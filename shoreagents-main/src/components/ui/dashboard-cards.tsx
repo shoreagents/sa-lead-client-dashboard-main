@@ -3,6 +3,7 @@
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   TrendingUp, 
   BookOpen, 
@@ -14,27 +15,33 @@ import { UserQuoteSummary } from '@/hooks/use-api'
 // Next Step Card Component
 interface NextStepCardProps {
   onSeePricing: () => void;
+  isLoading?: boolean;
 }
 
-export const NextStepCard = ({ onSeePricing }: NextStepCardProps) => (
+export const NextStepCard = ({ onSeePricing, isLoading = false }: NextStepCardProps) => (
   <Card 
-    className="hover:shadow-md transition-shadow"
-    style={{
-      gridColumn: 'span 1',
-      gridRow: 'span 1'
-    }}
+    className="hover:shadow-md transition-shadow h-full"
   >
-    <CardContent className="p-4">
+    <CardContent className="p-4 h-full">
       <div className="flex flex-col h-full space-y-3">
         <div className="flex items-center space-x-3">
           <TrendingUp className="w-5 h-5 text-lime-600" />
           <h3 className="text-base font-semibold text-gray-900">Next Step</h3>
         </div>
-        <p className="text-sm text-gray-700 flex-grow">Based on your browsing:</p>
+        {isLoading ? (
+          <div className="flex-grow space-y-3">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        ) : (
+          <p className="text-base text-gray-700 flex-grow leading-relaxed">Based on your browsing:</p>
+        )}
         <Button
           onClick={onSeePricing}
           size="sm"
           className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors h-8 text-sm font-semibold"
+          disabled={isLoading}
         >
           View Pricing
         </Button>
@@ -46,28 +53,34 @@ export const NextStepCard = ({ onSeePricing }: NextStepCardProps) => (
 // Case Study Card Component
 interface CaseStudyCardProps {
   onReadMore: () => void;
+  isLoading?: boolean;
 }
 
-export const CaseStudyCard = ({ onReadMore }: CaseStudyCardProps) => (
+export const CaseStudyCard = ({ onReadMore, isLoading = false }: CaseStudyCardProps) => (
   <Card 
-    className="hover:shadow-md transition-shadow"
-    style={{
-      gridColumn: 'span 1',
-      gridRow: 'span 2'
-    }}
+    className="hover:shadow-md transition-shadow h-full"
   >
-    <CardContent className="p-4">
+    <CardContent className="p-4 h-full">
       <div className="flex flex-col h-full space-y-3">
         <div className="flex items-center space-x-3">
           <BookOpen className="w-5 h-5 text-lime-600" />
           <h3 className="text-base font-semibold text-gray-900">Case Study</h3>
         </div>
-        <p className="text-sm text-gray-700 flex-grow">Gallery Group Success</p>
+        {isLoading ? (
+          <div className="flex-grow space-y-2">
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+        ) : (
+          <p className="text-base text-gray-700 flex-grow leading-relaxed">Gallery Group Success</p>
+        )}
         <Button
           onClick={onReadMore}
           size="sm"
           variant="outline"
           className="w-full border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white transition-colors h-8 text-sm font-semibold"
+          disabled={isLoading}
         >
           Read More
         </Button>
@@ -175,13 +188,9 @@ export const RecentQuoteCard = ({
 
   return (
     <Card 
-      className="hover:shadow-md transition-shadow"
-      style={{
-        gridColumn: 'span 1',
-        gridRow: 'span 3'
-      }}
+      className="hover:shadow-md transition-shadow h-full"
     >
-      <CardContent className="p-4">
+      <CardContent className="p-4 h-full">
         <div className="flex flex-col h-full space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -208,8 +217,34 @@ export const RecentQuoteCard = ({
           </div>
           
           {isLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-6 h-6" />
+            <div className="space-y-3 flex-grow">
+              {/* Latest Quote Skeleton */}
+              <div className="bg-lime-50 rounded-lg p-3 border border-lime-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+                <div className="text-center space-y-2">
+                  <Skeleton className="h-8 w-32 mx-auto" />
+                  <Skeleton className="h-4 w-20 mx-auto" />
+                </div>
+                <div className="space-y-2 mt-3">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-3/4" />
+                </div>
+              </div>
+              {/* Recent Quotes Skeleton */}
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-16" />
+                <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-3 w-16" />
+                  </div>
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              </div>
             </div>
           ) : latestQuote ? (
             <div className="space-y-3">
@@ -224,15 +259,15 @@ export const RecentQuoteCard = ({
                   </span>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-lime-600">
+                  <div className="text-2xl font-bold text-lime-600">
                     {UserQuoteService.formatCurrency(latestQuote.total_monthly_cost, latestQuote.currency_code)}
                   </div>
-                  <div className="text-xs text-gray-500">per month</div>
+                  <div className="text-sm text-gray-500 mt-1">per month</div>
                 </div>
-                <div className="text-sm text-gray-700 mt-2">
-                  <div className="font-medium">{latestQuote.member_count} members</div>
-                  <div className="text-xs text-gray-500">{latestQuote.industry}</div>
-                  <div className="text-xs text-gray-500">{latestQuote.roles_count} roles</div>
+                <div className="text-base text-gray-700 mt-3 space-y-1">
+                  <div className="font-semibold">{latestQuote.member_count} members</div>
+                  <div className="text-sm text-gray-600">{latestQuote.industry}</div>
+                  <div className="text-sm text-gray-600">{latestQuote.roles_count} roles</div>
                 </div>
               </div>
 
@@ -241,16 +276,16 @@ export const RecentQuoteCard = ({
                 <div className="space-y-2">
                   <div className="text-xs font-semibold text-gray-600 mb-2">Recent</div>
                   {otherQuotes.map((quote, index) => (
-                    <div key={quote.id} className="bg-gray-50 rounded-lg p-2 border border-gray-200">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-gray-700">
+                    <div key={quote.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-semibold text-gray-700">
                           {UserQuoteService.formatCurrency(quote.total_monthly_cost, quote.currency_code)}
                         </span>
                         <span className="text-xs text-gray-500">
                           {UserQuoteService.getQuoteAge(quote.created_at)}
                         </span>
                       </div>
-                      <div className="text-xs text-gray-600">
+                      <div className="text-sm text-gray-600">
                         {quote.member_count} members • {quote.industry}
                       </div>
                     </div>
@@ -284,16 +319,12 @@ export const ReservedCard = ({
   description = "?" 
 }: ReservedCardProps) => (
   <Card 
-    className="hover:shadow-md transition-shadow"
-    style={{
-      gridColumn: 'span 1',
-      gridRow: 'span 2'
-    }}
+    className="hover:shadow-md transition-shadow h-full"
   >
-    <CardContent className="p-4">
+    <CardContent className="p-4 h-full">
       <div className="flex flex-col h-full items-center justify-center text-center space-y-2">
-        <span className="text-gray-500 text-lg">{description}</span>
-        <p className="text-sm text-gray-600">{title}</p>
+        <span className="text-gray-500 text-2xl">{description}</span>
+        <p className="text-base text-gray-600">{title}</p>
       </div>
     </CardContent>
   </Card>

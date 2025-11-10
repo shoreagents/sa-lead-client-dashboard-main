@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, Suspense, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { TalentCard } from '@/components/ui/talent-card';
 import { ResumeModal } from '@/components/ui/resume-modal';
 import { InterviewRequestModal, InterviewRequestData } from '@/components/ui/interview-request-modal';
 import { SideNav } from '@/components/layout/SideNav';
+import { FullPageLoader } from '@/components/ui/full-page-loader';
 import { EmployeeCardData, ResumeGenerated } from '@/types/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,7 +22,10 @@ import {
   Heart
 } from 'lucide-react';
 
-export default function EmployeesPage() {
+function EmployeesPageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const hasRefreshedRef = useRef<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
@@ -33,6 +38,174 @@ export default function EmployeesPage() {
   
   // Use TanStack Query to fetch employee data
   const { data: employees = [], isLoading, error, refetch } = useEmployeeCardData();
+  
+  // Loading progress state for full-page loader
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showLoader, setShowLoader] = useState(false);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingStartTimeRef = useRef<number | null>(null);
+  const minimumDelayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const dataLoadedRef = useRef(false);
+
+  // Simulate loading progress when isLoading is true
+  useEffect(() => {
+    if (isLoading) {
+      // Start showing loader and track start time
+      setShowLoader(true);
+      loadingStartTimeRef.current = Date.now();
+      dataLoadedRef.current = false;
+      setLoadingProgress(0);
+      
+      // Simulate progress from 0 to 95% gradually while loading
+      progressIntervalRef.current = setInterval(() => {
+        setLoadingProgress((prev) => {
+          // If data has loaded, allow progress to 100%
+          if (dataLoadedRef.current) {
+            if (prev >= 100) {
+              return 100;
+            }
+            // Smoothly continue from current progress to 100%
+            return Math.min(prev + 1.5, 100);
+          }
+          // While loading, progress from 0 to 95%
+          if (prev >= 95) {
+            return 95; // Hold at 95% until data loads
+          }
+          // Faster progress at the beginning, slower as we approach 95%
+          const increment = prev < 30 ? 6 : prev < 60 ? 3 : prev < 85 ? 1.5 : 0.8;
+          return Math.min(prev + increment, 95);
+        });
+      }, 100); // Update every 100ms
+    } else {
+      // Data has finished loading
+      dataLoadedRef.current = true;
+      
+      // Calculate elapsed time
+      const elapsedTime = loadingStartTimeRef.current 
+        ? Date.now() - loadingStartTimeRef.current 
+        : 0;
+      const remainingTime = Math.max(0, 2000 - elapsedTime); // 2 seconds minimum
+      
+      // Continue progress animation to 100% smoothly
+      const finalProgressInterval = setInterval(() => {
+        setLoadingProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(finalProgressInterval);
+            return 100;
+          }
+          // Smoothly animate to 100%
+          return Math.min(prev + 2, 100);
+        });
+      }, 50);
+      
+      // Clear the original interval
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+      
+      // Wait for remaining time to ensure minimum 2 seconds, then hide loader
+      minimumDelayTimeoutRef.current = setTimeout(() => {
+        clearInterval(finalProgressInterval);
+        setLoadingProgress(0);
+        setShowLoader(false);
+        loadingStartTimeRef.current = null;
+        dataLoadedRef.current = false;
+      }, remainingTime + 300); // Add 300ms for smooth transition
+    }
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      if (minimumDelayTimeoutRef.current) {
+        clearTimeout(minimumDelayTimeoutRef.current);
+      }
+    };
+  }, [isLoading]);
+
+  // Refresh data when navigating back from employee profile page
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh');
+    if (refreshParam && hasRefreshedRef.current !== refreshParam) {
+      console.log('🔄 Refresh parameter detected, refetching data...', refreshParam);
+      hasRefreshedRef.current = refreshParam;
+      
+      // Immediately refetch data when refresh parameter is present
+      // Use a small delay to ensure page is fully loaded
+      const timeoutId = setTimeout(() => {
+        refetch().then(() => {
+          console.log('✅ Data refreshed successfully');
+          // Remove the refresh parameter from URL without page reload
+          const url = new URL(window.location.href);
+          url.searchParams.delete('refresh');
+          window.history.replaceState({}, '', url.toString());
+        }).catch((err) => {
+          console.error('❌ Error refreshing employee data:', err);
+          // Retry once after a delay if it fails
+          setTimeout(() => {
+            console.log('🔄 Retrying data refresh...');
+            refetch();
+          }, 500);
+        });
+      }, 150);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [searchParams, refetch]);
+
+  // Track if this is the first mount to avoid unnecessary refreshes
+  const isFirstMount = useRef(true);
+  
+  // Refresh when page becomes visible after being hidden (user navigated back)
+  // This is a backup mechanism in case the refresh parameter doesn't work
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      // On first mount, check if we have a refresh parameter
+      // If not, we might have navigated here directly, so don't refresh
+      const refreshParam = searchParams.get('refresh');
+      if (!refreshParam) {
+        return;
+      }
+    }
+
+    let wasHidden = false;
+    let hideTime = 0;
+    let lastRefreshTime = 0;
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        wasHidden = true;
+        hideTime = Date.now();
+      } else if (wasHidden && !document.hidden) {
+        // Page became visible after being hidden
+        const timeHidden = Date.now() - hideTime;
+        const timeSinceLastRefresh = Date.now() - lastRefreshTime;
+        
+        // Only refresh if:
+        // 1. Page was hidden for more than 300ms (indicates navigation)
+        // 2. At least 1 second has passed since last refresh (prevent rapid refreshes)
+        if (timeHidden > 300 && timeSinceLastRefresh > 1000) {
+          console.log('🔄 Page became visible after navigation, refreshing data...', {
+            timeHidden,
+            timeSinceLastRefresh
+          });
+          lastRefreshTime = Date.now();
+          refetch().catch((err) => {
+            console.error('❌ Error refreshing on visibility change:', err);
+          });
+        }
+        wasHidden = false;
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refetch, searchParams]);
 
   const handleInterviewSubmit = async (data: InterviewRequestData) => {
     try {
@@ -131,7 +304,20 @@ export default function EmployeesPage() {
 
 
 
-  // Removed loading state - show content immediately
+  // Show full-page loader while loading (with minimum 2 second delay)
+  if (isLoading || showLoader || loadingProgress > 0) {
+    return (
+      <>
+        <FullPageLoader 
+          isLoading={true} 
+          progress={loadingProgress}
+          message="Loading talent pool..."
+        />
+        {/* Render empty div to prevent layout shift */}
+        <div className="min-h-screen bg-gray-50" />
+      </>
+    );
+  }
 
   if (error) {
     return (
@@ -264,5 +450,19 @@ export default function EmployeesPage() {
       )}
 
     </div>
+  );
+}
+
+export default function EmployeesPage() {
+  return (
+    <Suspense fallback={
+      <FullPageLoader 
+        isLoading={true} 
+        progress={0}
+        message="Loading talent pool..."
+      />
+    }>
+      <EmployeesPageContent />
+    </Suspense>
   );
 }

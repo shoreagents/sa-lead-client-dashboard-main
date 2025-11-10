@@ -32,9 +32,9 @@ export function generateUserId(): string {
     // Use fingerprint-based device ID only
     deviceId = generateDeviceFingerprint()
     localStorage.setItem('shoreagents_device_id', deviceId)
-    console.log('🔍 Generated and stored new device ID:', deviceId);
+    console.log('✅ Generated and stored new device ID:', deviceId);
   } else {
-    console.log('🔍 Using existing device ID:', deviceId);
+    console.log('🔍 Using existing device ID from localStorage:', deviceId);
   }
   return deviceId
 }
@@ -150,12 +150,12 @@ async function ensureAnonymousUser(userId: string): Promise<void> {
   try {
     console.log('🔍 ensureAnonymousUser called with userId:', userId)
     
-    // Check if user already exists
+    // Check if user already exists and get their user_type
     const { data: existingUser, error: checkError } = await supabase
       .from('users')
-      .select('user_id')
+      .select('user_id, user_type, auth_user_id, email')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
 
     console.log('🔍 User check result:', { existingUser, checkError })
 
@@ -194,7 +194,23 @@ async function ensureAnonymousUser(userId: string): Promise<void> {
         console.log('✅ Anonymous user created successfully:', insertData)
       }
     } else {
-      console.log('✅ Anonymous user already exists:', existingUser)
+      // User exists - check their actual type
+      const userType = existingUser.user_type || 'Unknown'
+      const isAnonymous = userType === UserType.ANONYMOUS || !existingUser.auth_user_id
+      
+      if (isAnonymous) {
+        console.log('✅ User already exists (Anonymous):', {
+          user_id: existingUser.user_id,
+          user_type: existingUser.user_type
+        })
+      } else {
+        console.log('✅ User already exists (Authenticated):', {
+          user_id: existingUser.user_id,
+          user_type: existingUser.user_type,
+          email: existingUser.email,
+          auth_user_id: existingUser.auth_user_id
+        })
+      }
     }
   } catch (error) {
     console.error('❌ Failed to ensure anonymous user exists:', error)
@@ -217,6 +233,14 @@ export async function savePageVisit(
     console.log('🔍 savePageVisit called with:', { pagePath, ipAddress, currentSessionTimeSeconds })
 
     const userId = generateUserId()
+    console.log('🔍 Generated/Retrieved device ID for page visit:', userId)
+    
+    // Also check what's in localStorage for debugging
+    if (typeof window !== 'undefined') {
+      const storedDeviceId = localStorage.getItem('shoreagents_device_id')
+      console.log('🔍 Device ID in localStorage:', storedDeviceId, 'matches generated:', storedDeviceId === userId)
+    }
+    
     const now = new Date().toISOString()
     
     // Ensure anonymous user exists in users table

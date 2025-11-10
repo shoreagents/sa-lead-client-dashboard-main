@@ -36,24 +36,45 @@ export async function GET(request: NextRequest) {
 
     quotesResult.data.forEach((quote, index) => {
       if (quote.candidate_recommendations && quote.candidate_recommendations.length > 0) {
-        // Handle nested structure: extract recommendedCandidates from each role
-        quote.candidate_recommendations.forEach((roleData) => {
-          if (roleData.recommendedCandidates && roleData.recommendedCandidates.length > 0) {
-            // Map the nested structure to the expected format
-            const mappedCandidates = roleData.recommendedCandidates.map(candidate => ({
-              id: candidate.id,
-              name: candidate.name,
-              position: candidate.position,
-              avatar: candidate.avatar,
-              score: candidate.matchScore || candidate.overallScore || 0,
-              isFavorite: candidate.isFavorite || false,
-              bio: candidate.bio,
-              expectedSalary: candidate.expectedSalary || 0
-            }))
-            
-            allRecommendedCandidates.push(...mappedCandidates)
+        console.log(`📋 Quote ${index + 1} has ${quote.candidate_recommendations.length} candidate recommendations`);
+        
+        // Handle both nested and flat structures
+        quote.candidate_recommendations.forEach((item: any) => {
+          // Check if it's a nested structure (has recommendedCandidates array)
+          if (item.recommendedCandidates && Array.isArray(item.recommendedCandidates)) {
+            // Nested structure: extract from roleData.recommendedCandidates
+            console.log(`  📦 Nested structure found for role: ${item.roleTitle || 'Unknown'}`);
+            item.recommendedCandidates.forEach((candidate: any) => {
+              allRecommendedCandidates.push({
+                id: candidate.id,
+                name: candidate.name,
+                position: candidate.position,
+                avatar: candidate.avatar,
+                score: candidate.matchScore || candidate.overallScore || candidate.score || 0,
+                isFavorite: candidate.isFavorite || false,
+                bio: candidate.bio,
+                expectedSalary: candidate.expectedSalary || 0
+              });
+            });
+          } else if (item.id && item.name) {
+            // Flat structure: direct candidate objects
+            console.log(`  📄 Flat structure found - candidate: ${item.name}`);
+            allRecommendedCandidates.push({
+              id: item.id,
+              name: item.name,
+              position: item.position || 'Position not specified',
+              avatar: item.avatar,
+              score: item.score || item.matchScore || item.overallScore || 0,
+              isFavorite: item.isFavorite || false,
+              bio: item.bio,
+              expectedSalary: item.expectedSalary || 0
+            });
+          } else {
+            console.log(`  ⚠️ Unknown structure in candidate_recommendations:`, item);
           }
-        })
+        });
+      } else {
+        console.log(`📭 Quote ${index + 1} has no candidate recommendations`);
       }
     })
 
