@@ -65,7 +65,7 @@ export default function RootLayout({
                       <ScrollToTop />
                       <Navbar />
                       
-                      <main>
+                      <main className="pt-16">
                         {children}
                       </main>
                       <ConditionalFooter />

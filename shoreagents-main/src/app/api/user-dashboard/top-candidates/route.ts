@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
-    const limit = parseInt(searchParams.get('limit') || '5')
+    const limit = parseInt(searchParams.get('limit') || '3') // Target 3 candidates, but show whatever is available
 
     if (!userId) {
       return NextResponse.json({ success: false, error: 'User ID is required' }, { status: 400 })
@@ -38,40 +38,88 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, data: [] })
     }
 
-    // Calculate engagement score for each candidate
-    // Combine view_duration, scroll_percentage, and page_views into a composite score
-    const candidatesWithScore = candidateViews.map(view => {
-      const viewDuration = view.view_duration || 0
-      const scrollPercentage = view.scroll_percentage || 0
-      const pageViews = view.page_views || 0
-      
-      // Normalize and weight each metric:
-      // - view_duration: 0-1000 seconds -> 0-100 points (40% weight)
-      // - scroll_percentage: 0-100 -> 0-100 points (30% weight)  
-      // - page_views: 1-10+ views -> 0-100 points (30% weight)
-      const normalizedDuration = Math.min((viewDuration / 10), 100) // 10 seconds = 1 point, max 100
-      const normalizedScroll = scrollPercentage // Already 0-100
-      const normalizedViews = Math.min((pageViews - 1) * 11.11, 100) // 1 view = 0, 10 views = 100
-      
-      // Weighted composite score
-      const engagementScore = (normalizedDuration * 0.4) + (normalizedScroll * 0.3) + (normalizedViews * 0.3)
-      
-      return {
-        candidate_id: view.candidate_id,
-        candidate_name: view.candidate_name,
-        view_duration: viewDuration,
-        scroll_percentage: scrollPercentage,
-        page_views: pageViews,
-        engagement_score: engagementScore,
-        updated_at: view.updated_at
+    // Get up to 3 candidates: prioritize one for each metric
+    // 1. Top candidate by scroll_percentage
+    // 2. Top candidate by view_duration (if different from #1)
+    // 3. Top candidate by visit_count/page_views (if different from #1 and #2)
+    // Note: Shows all available candidates even if less than 3
+    
+    const candidatesWithMetrics = candidateViews.map(view => ({
+      candidate_id: view.candidate_id,
+      candidate_name: view.candidate_name,
+      view_duration: view.view_duration || 0,
+      scroll_percentage: view.scroll_percentage || 0,
+      page_views: view.page_views || 0,
+      updated_at: view.updated_at
+    }))
+
+    // Sort candidates by each metric to get top performers
+    const byScroll = [...candidatesWithMetrics].sort((a, b) => b.scroll_percentage - a.scroll_percentage)
+    const byDuration = [...candidatesWithMetrics].sort((a, b) => b.view_duration - a.view_duration)
+    const byVisits = [...candidatesWithMetrics].sort((a, b) => b.page_views - a.page_views)
+
+    // Collect up to 3 unique candidates, prioritizing different metrics
+    const topCandidatesMap = new Map<string, typeof byScroll[0] & { metric_type: string }>()
+    
+    // First, try to get top from each metric
+    if (byScroll[0]) {
+      topCandidatesMap.set(byScroll[0].candidate_id, { ...byScroll[0], metric_type: 'scroll_percentage' })
+    }
+    
+    // Add second candidate from duration (skip if already added)
+    for (const candidate of byDuration) {
+      if (!topCandidatesMap.has(candidate.candidate_id)) {
+        topCandidatesMap.set(candidate.candidate_id, { ...candidate, metric_type: 'view_duration' })
+        break
       }
+    }
+    
+    // Add third candidate from visits (skip if already added)
+    for (const candidate of byVisits) {
+      if (!topCandidatesMap.has(candidate.candidate_id)) {
+        topCandidatesMap.set(candidate.candidate_id, { ...candidate, metric_type: 'visit_count' })
+        break
+      }
+    }
+
+    // If we still have less than limit (or less than available candidates), add more from combined score
+    const targetCount = Math.min(limit, candidatesWithMetrics.length)
+    if (topCandidatesMap.size < targetCount) {
+      const remainingCandidates = candidatesWithMetrics
+        .filter(c => !topCandidatesMap.has(c.candidate_id))
+        .sort((a, b) => {
+          // Sort by combined score
+          const scoreA = (a.scroll_percentage * 0.4) + (a.view_duration * 0.4) + (a.page_views * 0.2)
+          const scoreB = (b.scroll_percentage * 0.4) + (b.view_duration * 0.4) + (b.page_views * 0.2)
+          return scoreB - scoreA
+        })
+      
+      for (const candidate of remainingCandidates) {
+        if (topCandidatesMap.size >= targetCount) break
+        topCandidatesMap.set(candidate.candidate_id, { ...candidate, metric_type: 'combined' })
+      }
+    }
+
+    const topCandidates = Array.from(topCandidatesMap.values())
+    
+    console.log('🔍 Top candidates selection DETAILS:', {
+      totalViewedCandidates: candidatesWithMetrics.length,
+      allCandidates: candidatesWithMetrics.map(c => ({
+        name: c.candidate_name,
+        scroll: c.scroll_percentage,
+        duration: c.view_duration,
+        visits: c.page_views
+      })),
+      topByScroll: byScroll[0]?.candidate_name,
+      topByDuration: byDuration[0]?.candidate_name,
+      topByVisits: byVisits[0]?.candidate_name,
+      uniqueCandidatesSelected: topCandidates.length,
+      selectedCandidates: topCandidates.map(c => ({ 
+        name: c.candidate_name, 
+        metric: c.metric_type,
+        id: c.candidate_id
+      }))
     })
-
-    // Sort by engagement score (highest first)
-    candidatesWithScore.sort((a, b) => b.engagement_score - a.engagement_score)
-
-    // Get top candidates (limit)
-    const topCandidates = candidatesWithScore.slice(0, limit)
 
     // Get all employees to match with candidate data
     const employees = await getEmployeeCardData()
@@ -79,6 +127,11 @@ export async function GET(request: NextRequest) {
     // Match candidates with employee profiles
     const matchedCandidates = topCandidates.map(candidate => {
       const employee = employees.find(emp => emp.user.id === candidate.candidate_id)
+      
+      // Calculate engagement score for display
+      const engagementScore = (candidate.scroll_percentage * 0.4) + 
+                              ((candidate.view_duration / 10) * 0.4) + 
+                              (candidate.page_views * 0.2)
       
       if (employee) {
         return {
@@ -91,7 +144,8 @@ export async function GET(request: NextRequest) {
           view_duration: candidate.view_duration,
           scroll_percentage: candidate.scroll_percentage,
           page_views: candidate.page_views,
-          engagement_score: candidate.engagement_score,
+          engagement_score: engagementScore,
+          metric_type: candidate.metric_type,
           updated_at: candidate.updated_at
         }
       }
@@ -107,12 +161,24 @@ export async function GET(request: NextRequest) {
         view_duration: candidate.view_duration,
         scroll_percentage: candidate.scroll_percentage,
         page_views: candidate.page_views,
-        engagement_score: candidate.engagement_score,
+        engagement_score: engagementScore,
+        metric_type: candidate.metric_type,
         updated_at: candidate.updated_at
       }
     })
 
-    console.log('✅ Returning top candidates:', matchedCandidates.length)
+    console.log('✅ Returning top candidates (up to 3, one per metric):', {
+      count: matchedCandidates.length,
+      candidates: matchedCandidates.map(c => ({
+        name: c.name,
+        metric_type: c.metric_type,
+        view_duration: c.view_duration,
+        scroll_percentage: c.scroll_percentage,
+        page_views: c.page_views,
+        engagement_score: c.engagement_score.toFixed(2)
+      }))
+    })
+    
     return NextResponse.json({ success: true, data: matchedCandidates })
 
   } catch (error) {

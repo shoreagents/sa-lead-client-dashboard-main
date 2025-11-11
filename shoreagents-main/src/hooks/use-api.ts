@@ -46,6 +46,8 @@ export interface ConversationContext {
 interface UserFormStatus {
   hasFilledForm: boolean;
   userExists: boolean;
+  hasAccount: boolean;
+  userType: string | null;
   company: string | null;
   industry: string | null;
   firstName: string | null;
@@ -1258,7 +1260,11 @@ export const useTopCandidate = (userId: string | null) => {
   });
 };
 
-// Fetch top candidates based on engagement metrics
+// Fetch up to 3 candidates - one for each metric:
+// 1. Candidate with highest scroll_percentage
+// 2. Candidate with highest view_duration (if different)
+// 3. Candidate with highest visit_count/page_views (if different)
+// Note: Returns all available candidates even if less than 3
 const fetchTopCandidates = async (userId: string | null): Promise<Array<{
   id: string;
   name: string;
@@ -1270,16 +1276,23 @@ const fetchTopCandidates = async (userId: string | null): Promise<Array<{
   scroll_percentage: number;
   page_views: number;
   engagement_score: number;
+  metric_type?: string;
 }>> => {
   if (!userId) return [];
   
-  const response = await fetch(`/api/user-dashboard/top-candidates?userId=${userId}&limit=5`);
+  const response = await fetch(`/api/user-dashboard/top-candidates?userId=${userId}&limit=3`); // Get 3 candidates (one per metric)
   
   if (!response.ok) {
     throw new Error('Failed to fetch top candidates');
   }
   
   const result = await response.json();
+  
+  console.log('📊 fetchTopCandidates API response:', {
+    success: result.success,
+    dataCount: result.data?.length || 0,
+    data: result.data
+  });
   
   if (!result.success) {
     throw new Error(result.error || 'Failed to fetch top candidates');
@@ -1293,9 +1306,10 @@ export const useTopCandidates = (userId: string | null) => {
     queryKey: ['topCandidates', userId],
     queryFn: () => fetchTopCandidates(userId),
     enabled: !!userId,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 1 * 60 * 1000, // 1 minute
+    refetchOnWindowFocus: true, // Refetch when window gains focus
+    refetchOnMount: true, // Refetch when component mounts
   });
 };
 

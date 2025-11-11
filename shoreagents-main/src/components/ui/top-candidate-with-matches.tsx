@@ -33,7 +33,10 @@ export const TopCandidateSection = ({
   userId
 }: TopCandidateSectionProps) => {
   const { convertPrice, formatPrice } = useCurrency()
-  // Fetch top candidates based on engagement metrics
+  // Fetch up to 3 top candidates - one for each metric:
+  // 1. Highest scroll_percentage
+  // 2. Highest view_duration (if different from #1)
+  // 3. Highest visit_count/page_views (if different from #1 and #2)
   const { data: topCandidates = [], isLoading: isLoadingTopCandidates } = useTopCandidates(userId);
   const { data: allProfiles = [], isLoading: isLoadingProfiles } = useEmployeeCardData();
   
@@ -45,6 +48,12 @@ export const TopCandidateSection = ({
   
   // Use top candidates if available, otherwise fall back to single topCandidate
   const candidatesToDisplay = useMemo(() => {
+    console.log('🎯 TopCandidateSection - Data received:', {
+      topCandidatesCount: topCandidates.length,
+      topCandidates: topCandidates.map(c => ({ name: c.name, id: c.id })),
+      hasTopCandidate: !!topCandidate
+    });
+    
     return topCandidates.length > 0 
       ? topCandidates 
       : topCandidate 
@@ -141,7 +150,6 @@ export const TopCandidateSection = ({
   return (
     <div 
       className="h-full flex flex-col"
-      style={{ minHeight: '350px', maxHeight: '350px' }}
       onMouseEnter={() => {
         console.log('🖱️ Top Candidate - Mouse Enter');
         setIsHovered(true);
@@ -153,231 +161,91 @@ export const TopCandidateSection = ({
         isHoveredRef.current = false;
       }}
     >
-      <div className="flex items-center space-x-2 mb-2">
-        <Users className="w-4 h-4 text-lime-600" />
-        <h4 className="text-sm font-semibold text-gray-900">Top Candidate</h4>
-      </div>
       
       {isLoading || isLoadingProfile ? (
-        <div className="flex-1 min-h-0 overflow-y-auto" style={{ maxHeight: 'calc(350px - 120px)' }}>
-          <div className="space-y-3">
-            {/* Avatar and Name Skeleton */}
-            <div className="flex items-center gap-3 mb-3">
-              <Skeleton className="w-16 h-16 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-32" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            </div>
-            
-            {/* Top Skills and Salary Skeleton */}
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-start gap-2 flex-1">
-                <Skeleton className="w-1.5 h-1.5 rounded-full mt-1.5" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-3 w-16" />
-                  <Skeleton className="h-3 w-full" />
-                  <Skeleton className="h-3 w-3/4" />
-                </div>
-              </div>
-              <div className="flex-shrink-0 space-y-2">
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-            </div>
-            
-            {/* Experience Skeleton */}
-            <div className="flex items-start gap-2">
-              <Skeleton className="w-1.5 h-1.5 rounded-full mt-1.5" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-3 w-20" />
-                <Skeleton className="h-3 w-full" />
-              </div>
-            </div>
-          </div>
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-6 h-6" />
         </div>
       ) : currentCandidate ? (
         <>
-          {/* Current Candidate Card - Scrollable content */}
+          {/* Current Candidate Card */}
           <div 
-            className={`rounded-lg p-2 transition-all duration-300 overflow-hidden relative flex-1 min-h-0 overflow-y-auto ${
+            className={`transition-all duration-300 ${
               isAnimating ? 'opacity-0 transform translate-x-2' : 'opacity-100 transform translate-x-0'
             }`}
-            style={{ maxHeight: 'calc(350px - 120px)' }}
           >
             {/* Candidate Info */}
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar className="w-20 h-20 flex-shrink-0">
+            <div className="flex items-center space-x-3">
+              <Avatar className="w-12 h-12 flex-shrink-0">
                 <AvatarImage src={currentEmployeeProfile?.user?.avatar || currentCandidate.avatar || undefined} />
-                <AvatarFallback className="text-xl bg-lime-100 text-lime-800">
+                <AvatarFallback className="text-lg bg-gradient-to-br from-lime-200 to-lime-300 text-lime-800 font-bold border-2 border-lime-400 shadow-sm">
                   {currentCandidate.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <div className="text-base font-bold text-gray-800 truncate" title={currentCandidate.name}>
-                    {currentCandidate.name.split(' ')[0]}
-                  </div>
-                </div>
-                <div className="text-sm font-semibold text-gray-600 truncate mt-0.5" title={currentCandidate.position}>
+                <p className="text-xs font-medium text-gray-900 truncate" title={currentCandidate.name}>
+                  {currentCandidate.name.split(' ')[0]}
+                </p>
+                <p className="text-xs text-gray-500 truncate" title={currentCandidate.position}>
                   {currentCandidate.position}
-                </div>
-                {/* Bio below job title */}
-                {(currentEmployeeProfile?.user?.bio || currentCandidate.bio) && (
-                  <div className="text-sm text-gray-600 line-clamp-2 mt-1.5 leading-relaxed" title={currentEmployeeProfile?.user?.bio || currentCandidate.bio}>
-                    {currentEmployeeProfile?.user?.bio || currentCandidate.bio}
-                  </div>
-                )}
+                </p>
               </div>
             </div>
 
-            {/* Candidate Details from BPOC Database */}
-            <div className="space-y-2.5">
-              {/* Top Skills with Salary Expectation on the right */}
-              {(() => {
-                const userWithExtras = currentEmployeeProfile?.user as any;
-                const skills = userWithExtras?.skills || [];
-                const phpSalary = userWithExtras?.expectedSalary || currentCandidate.expectedSalary || 0;
-                const convertedSalary = phpSalary > 0 ? convertPrice(phpSalary) : 0;
-                return (
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2 flex-1 min-w-0">
-                      <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-700 mb-1">Top Skills</div>
-                        <div className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                          {skills.length > 0
-                            ? skills.slice(0, 3).join(' • ')
-                            : 'Not specified'}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex-shrink-0 text-right">
-                      <div className="text-sm font-semibold text-gray-700 mb-1">Salary Expectation</div>
-                      <div className="text-base font-bold text-lime-600">
-                        {convertedSalary > 0 
-                          ? `${formatPrice(convertedSalary)}/month`
-                          : 'Not specified'}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Experience Level */}
-              {(() => {
-                const userWithExtras = currentEmployeeProfile?.user as any;
-                const experience = userWithExtras?.experience;
-                return experience && experience !== 'Experience not specified' ? (
-                  <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-lime-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold text-gray-700 mb-1">Experience</div>
-                      <div className="text-sm text-gray-600 leading-relaxed break-words">
-                        {experience} in {currentCandidate.position || 'Software Development'}
-                      </div>
-                    </div>
-                  </div>
-                ) : null;
-              })()}
-            </div>
           </div>
 
-          {/* Action Buttons - Fixed at bottom */}
-          <div className="flex gap-1.5 mt-auto px-2 flex-shrink-0">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 h-8 text-white hover:brightness-110 transition-all duration-200 text-xs font-medium px-2"
-                    style={{ 
-                      borderColor: 'rgb(101, 163, 13)', 
-                      backgroundColor: 'rgb(101, 163, 13)' 
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onAskForInterview?.(currentCandidate.id, currentCandidate.name, currentCandidate.position)
-                    }}
-                  >
-                    <MessageCircle className="w-3 h-3 mr-1" />
-                    Interview
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Request an interview<br />with this candidate</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 h-8 text-white hover:brightness-110 transition-all duration-200 text-xs font-medium px-2"
-                    style={{ 
-                      borderColor: 'rgb(101, 163, 13)', 
-                      backgroundColor: 'rgb(101, 163, 13)' 
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (currentCandidate) {
-                        // Navigate to the current candidate's profile
-                        if (typeof window !== 'undefined') {
-                          window.location.href = `/employee/${currentCandidate.id}`
-                        }
-                      } else if (onViewProfile) {
-                        onViewProfile()
-                      }
-                    }}
-                  >
-                    <Eye className="w-3 h-3 mr-1" />
-                    View
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>View detailed<br />candidate profile</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          {/* Action Buttons */}
+          <div className="flex space-x-1 mt-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="flex-1 text-xs h-6"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAskForInterview?.(currentCandidate.id, currentCandidate.name, currentCandidate.position)
+              }}
+            >
+              Interview
+            </Button>
+            <Button
+              size="sm"
+              className="flex-1 text-xs bg-lime-600 hover:bg-lime-700 h-6"
+              onClick={(e) => {
+                e.stopPropagation()
+                if (currentCandidate) {
+                  // Navigate to the current candidate's profile
+                  if (typeof window !== 'undefined') {
+                    window.location.href = `/employee/${currentCandidate.id}`
+                  }
+                } else if (onViewProfile) {
+                  onViewProfile()
+                }
+              }}
+            >
+              View Profile
+            </Button>
           </div>
 
-          {/* Carousel Indicators - Fixed at bottom */}
+          {/* Carousel Indicators */}
           {candidatesToDisplay.length > 1 && (
-            <div className="flex justify-center gap-1 mt-2 pt-2 border-t border-gray-200 flex-shrink-0">
+            <div className="flex justify-center gap-1 mt-1.5 pt-1.5 border-t border-gray-200">
               {candidatesToDisplay.map((_, index) => (
-                <TooltipProvider key={index}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => handleNavigateTo(index)}
-                        className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                          index === currentIndex 
-                            ? 'bg-lime-600 scale-110' 
-                            : 'bg-gray-300 hover:bg-gray-400'
-                        }`}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View candidate {index + 1}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <button
+                  key={index}
+                  onClick={() => handleNavigateTo(index)}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    index === currentIndex 
+                      ? 'bg-lime-600 scale-110' 
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
               ))}
             </div>
           )}
         </>
       ) : (
         <div className="text-center py-4">
-          <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-            <Users className="w-6 h-6 text-gray-400" />
-          </div>
-          <p className="text-sm text-gray-500">No viewing history yet</p>
-          <p className="text-xs text-gray-400 mt-1">Start browsing to see recommendations</p>
+          <p className="text-xs text-gray-500">No candidate data</p>
         </div>
       )}
     </div>

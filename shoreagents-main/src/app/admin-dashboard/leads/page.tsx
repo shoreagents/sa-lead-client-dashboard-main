@@ -253,7 +253,7 @@ export default function LeadManagement() {
                 {isLoading ? (
                   <>
                     {[...Array(4)].map((_, i) => (
-                      <Card key={i} className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-1">
+                      <Card key={i} className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 pt-1.5 px-2.5">
                           <Skeleton className="h-3 w-20" />
                           <Skeleton className="h-3 w-3 rounded" />
@@ -267,7 +267,7 @@ export default function LeadManagement() {
                   </>
                 ) : (
                   <>
-                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-1 !gap-0">
+                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">Total Leads</CardTitle>
                         <Users className="h-3.5 w-3.5 text-lime-600" />
@@ -282,7 +282,7 @@ export default function LeadManagement() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-1 !gap-0">
+                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">New Leads</CardTitle>
                         <UserPlus className="h-3.5 w-3.5 text-lime-600" />
@@ -297,7 +297,7 @@ export default function LeadManagement() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-1 !gap-0">
+                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">In Progress</CardTitle>
                         <Clock className="h-3.5 w-3.5 text-lime-600" />
@@ -312,7 +312,7 @@ export default function LeadManagement() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm py-1 !gap-0">
+                    <Card className="border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm py-3 !gap-0">
                       <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">Closed Won</CardTitle>
                         <CheckCircle className="h-3.5 w-3.5 text-green-600" />

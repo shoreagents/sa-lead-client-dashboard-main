@@ -223,7 +223,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} sticky top-0 z-[60] transition-all duration-300 ${isMounted && isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
+    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isMounted && isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
       <div className="w-full relative">
         <div className="flex items-center h-16">
           {/* Logo - Absolute left edge */}

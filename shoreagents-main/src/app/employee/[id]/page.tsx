@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +29,7 @@ import { generateUserId } from '@/lib/userEngagementService';
 import { InterviewRequestModal, InterviewRequestData } from '@/components/ui/interview-request-modal';
 import { useBPOCEmployeeById } from '@/hooks/use-api';
 import { SideNav } from '@/components/layout/SideNav';
+import { FullPageLoader } from '@/components/ui/full-page-loader';
 
 interface EmployeeProfile {
   id: string;
@@ -100,6 +102,92 @@ export default function EmployeeProfilePage() {
   // Track if we've already started tracking for this candidate to prevent loops
   const trackingStartedRef = useRef<string | null>(null);
   const currentCandidateIdRef = useRef<string | null>(null);
+  
+  // Track scroll progress for animations - use window scroll to avoid hydration issues
+  // Using window scroll instead of a specific target ref prevents hydration errors
+  const { scrollYProgress } = useScroll({
+    offset: ["start start", "end start"]
+  });
+  
+  // State to track which section is active (inspired by sticky scroll reveal)
+  const [activeSection, setActiveSection] = useState(0);
+  
+  // Define sections: 0 = Overview start, 1 = Work Experience, 2 = Education, 3 = AI Analysis
+  const sections = [0, 0.25, 0.5, 0.75];
+  
+  // Detect active section based on scroll progress (similar to sticky scroll reveal)
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    const closestSectionIndex = sections.reduce(
+      (acc, breakpoint, index) => {
+        const distance = Math.abs(latest - breakpoint);
+        if (distance < Math.abs(latest - sections[acc])) {
+          return index;
+        }
+        return acc;
+      },
+      0,
+    );
+    setActiveSection(closestSectionIndex);
+  });
+  
+  // Transform scroll progress to create smooth animations for profile card
+  // As user scrolls, the card gets subtle visual feedback inspired by sticky scroll reveal
+  const profileOpacity = useTransform(scrollYProgress, [0, 0.1, 0.3], [1, 1, 0.98]);
+  const profileScale = useTransform(scrollYProgress, [0, 0.1, 0.3], [1, 1, 0.99]);
+  const cardShadow = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.5],
+    ['0 4px 6px rgba(0,0,0,0.1)', '0 8px 12px rgba(0,0,0,0.15)', '0 12px 20px rgba(0,0,0,0.2)']
+  );
+  
+  // Border glow effect that changes based on active section
+  const borderGlowIntensity = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [0.1, 0.3, 0.4, 0.5, 0.6]
+  );
+  
+  // Combined box shadow with glow effect - calculate directly from scroll progress
+  const combinedShadow = useTransform(scrollYProgress, (progress) => {
+    const intensity = 0.1 + (progress * 0.5); // 0.1 to 0.6
+    const glowSize = 20 + intensity * 30;
+    const glowColor = `rgba(132, 204, 22, ${intensity})`;
+    const baseShadow = progress < 0.2 
+      ? '0 4px 6px rgba(0,0,0,0.1)' 
+      : progress < 0.5 
+      ? '0 8px 12px rgba(0,0,0,0.15)' 
+      : '0 12px 20px rgba(0,0,0,0.2)';
+    return `0 0 ${glowSize}px ${glowColor}, ${baseShadow}`;
+  });
+  
+  // Background gradient that changes based on scroll (lime green variations)
+  const cardBackground = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75, 1],
+    [
+      'linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,1))',
+      'linear-gradient(to bottom, rgba(247,254,231,1), rgba(255,255,255,1))',
+      'linear-gradient(to bottom, rgba(236,252,203,1), rgba(255,255,255,1))',
+      'linear-gradient(to bottom, rgba(217,249,157,1), rgba(255,255,255,1))',
+      'linear-gradient(to bottom, rgba(190,242,100,1), rgba(255,255,255,1))'
+    ]
+  );
+  
+  // Avatar scale animation on scroll
+  const avatarScale = useTransform(scrollYProgress, [0, 0.2, 0.4], [1, 1.02, 1.05]);
+  
+  // Summary section opacity based on scroll
+  const summaryOpacity = useTransform(scrollYProgress, [0, 0.2, 0.4], [1, 0.7, 0.5]);
+  
+  // Score badge animation based on active section
+  const scoreBadgeScale = useTransform(
+    scrollYProgress,
+    [0, 0.25, 0.5, 0.75],
+    [1, 1.05, 1, 1.05]
+  );
+  
+  // Name/title opacity based on scroll (fade slightly as you scroll)
+  const nameOpacity = useTransform(scrollYProgress, [0, 0.3, 0.6], [1, 0.9, 0.8]);
 
   // Start tracking when employee data is loaded
   useEffect(() => {
@@ -346,16 +434,17 @@ export default function EmployeeProfilePage() {
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <SideNav />
-        <div className="flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full border-4 border-lime-600 border-t-transparent w-8 h-8 mx-auto mb-4"></div>
-            <h1 className="text-xl font-bold text-gray-900 mb-2">Loading Employee Profile...</h1>
-            <p className="text-gray-600">Fetching candidate information</p>
-          </div>
+      <>
+        <FullPageLoader 
+          isLoading={true} 
+          progress={50}
+          message="Loading employee profile..."
+        />
+        {/* Render empty div to prevent layout shift */}
+        <div className="min-h-screen bg-gray-50">
+          <SideNav />
         </div>
-      </div>
+      </>
     );
   }
 
@@ -412,52 +501,67 @@ export default function EmployeeProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      {/* Header */}
-      <div className="bg-white border-b border-lime-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={async () => {
-                  try {
-                    // End tracking before navigating - wait for it to complete
-                    console.log('🔙 Back button clicked, ending tracking...');
-                    await candidateTracker.endTracking();
-                    console.log('✅ Tracking ended successfully, navigating to talent pool...');
-                    
-                    // Add a small delay to ensure database write completes
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    
-                    // Navigate to talent pool page with cache-busting parameter to force refresh
-                    const timestamp = Date.now();
-                    window.location.href = `/we-got-talent?refresh=${timestamp}`;
-                  } catch (error) {
-                    console.error('❌ Error ending tracking before navigation:', error);
-                    // Still navigate even if tracking fails
-                    window.location.href = '/we-got-talent';
-                  }
-                }}
-                className="flex-shrink-0 border-lime-200 hover:bg-lime-50 hover:border-lime-300 hover:text-lime-700 transition-all duration-200"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Employee Profile</h1>
-                <p className="text-sm text-lime-600 font-medium">Detailed candidate information</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           {/* Left Sidebar - Profile Overview */}
           <div className="lg:col-span-1">
-            <Card className="relative mt-15">
+            {/* Header - Positioned just above the profile card */}
+            <div className="mb-4">
+              <div className="flex items-center gap-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      // End tracking before navigating - wait for it to complete
+                      console.log('🔙 Back button clicked, ending tracking...');
+                      await candidateTracker.endTracking();
+                      console.log('✅ Tracking ended successfully, navigating to talent pool...');
+                      
+                      // Add a small delay to ensure database write completes
+                      await new Promise(resolve => setTimeout(resolve, 200));
+                      
+                      // Navigate to talent pool page with cache-busting parameter to force refresh
+                      const timestamp = Date.now();
+                      window.location.href = `/we-got-talent?refresh=${timestamp}`;
+                    } catch (error) {
+                      console.error('❌ Error ending tracking before navigation:', error);
+                      // Still navigate even if tracking fails
+                      window.location.href = '/we-got-talent';
+                    }
+                  }}
+                  className="flex-shrink-0 border-lime-200 hover:bg-lime-50 hover:border-lime-300 hover:text-lime-700 transition-all duration-200"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Button>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">Employee Profile</h1>
+                  <p className="text-sm text-lime-600 font-medium">Detailed candidate information</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Sticky wrapper for profile card - sticks to bottom of navbar when scrolling */}
+            <motion.div 
+              className="sticky top-16 z-30 space-y-4 overflow-y-auto" 
+              style={{ 
+                alignSelf: 'flex-start', 
+                maxHeight: 'calc(100vh - 4rem)',
+                opacity: profileOpacity,
+                scale: profileScale,
+                boxShadow: cardShadow
+              }}
+            >
+              <motion.div
+                style={{
+                  background: cardBackground,
+                  boxShadow: combinedShadow
+                }}
+                className="rounded-lg"
+              >
+                <Card className="relative py-5 transition-all duration-300 hover:shadow-xl border-lime-200 bg-transparent">
               <CardHeader className="text-center">
                 {/* Favorite Button - Upper Right */}
                 <Button
@@ -474,7 +578,10 @@ export default function EmployeeProfilePage() {
                 </Button>
                 
                 <div className="flex justify-center mb-4">
-                  <div className="relative">
+                  <motion.div 
+                    className="relative"
+                    style={{ scale: avatarScale }}
+                  >
                     <Avatar className="w-24 h-24 ring-4 ring-lime-100 shadow-lg">
                       <AvatarImage src={employee.avatar || undefined} />
                       <AvatarFallback className="text-2xl font-semibold bg-gradient-to-br from-lime-400 to-lime-600 text-white">
@@ -485,22 +592,28 @@ export default function EmployeeProfilePage() {
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-lime-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center">
                       <div className="w-2 h-2 bg-white rounded-full"></div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
-                <CardTitle className="text-lg">{employee.name.split(' ')[0]}</CardTitle>
-                <CardDescription className="text-sm">{employee.position.split(',')[0].trim()}</CardDescription>
+                <motion.div style={{ opacity: nameOpacity }}>
+                  <CardTitle className="text-lg">{employee.name.split(' ')[0]}</CardTitle>
+                  <CardDescription className="text-sm">{employee.position.split(',')[0].trim()}</CardDescription>
+                </motion.div>
                 <div className="flex justify-center mt-2">
-                  <Badge className={`${getScoreColor(employee.score)} flex items-center space-x-1`}>
-                    <Trophy className="w-3 h-3" />
-                    <span>Score {employee.score}</span>
-                  </Badge>
+                  <motion.div style={{ scale: scoreBadgeScale }}>
+                    <Badge className={`${getScoreColor(employee.score)} flex items-center space-x-1`}>
+                      <Trophy className="w-3 h-3" />
+                      <span>Score {employee.score}</span>
+                    </Badge>
+                  </motion.div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Separator />
                 
                 {/* Summary Section */}
-                <div>
+                <motion.div
+                  style={{ opacity: summaryOpacity }}
+                >
                   <h3 className="flex items-center gap-2 text-sm font-semibold text-gray-900 mb-2">
                     <Award className="w-4 h-4 text-lime-600" />
                     Summary
@@ -508,20 +621,22 @@ export default function EmployeeProfilePage() {
                   <p className="text-sm text-gray-700 leading-relaxed">
                     {employee.bio || 'No Bio to show.'}
                   </p>
-                </div>
+                </motion.div>
               </CardContent>
             </Card>
+              </motion.div>
 
-            {/* Ask for Interview Button */}
-            <div className="mt-4">
-              <Button 
-                onClick={handleAskForInterview}
-                className="w-full bg-lime-600 hover:bg-lime-700 text-white font-medium transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Ask for Interview
-              </Button>
-            </div>
+              {/* Ask for Interview Button */}
+              <div>
+                <Button 
+                  onClick={handleAskForInterview}
+                  className="w-full bg-lime-600 hover:bg-lime-700 text-white font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Ask for Interview
+                </Button>
+              </div>
+            </motion.div>
           </div>
 
           {/* Main Content */}
@@ -534,7 +649,7 @@ export default function EmployeeProfilePage() {
 
               <TabsContent value="overview" className="space-y-4">
 
-                <Card>
+                <Card className="py-3 gap-0">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Briefcase className="w-4 h-4 text-lime-600" />
@@ -555,7 +670,7 @@ export default function EmployeeProfilePage() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="py-3 gap-0">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <GraduationCap className="w-4 h-4 text-lime-600" />
@@ -603,7 +718,7 @@ export default function EmployeeProfilePage() {
                   <div className="space-y-6 pt-4 border-t border-gray-200 animate-in slide-in-from-top-2 fade-in-0 duration-300">
                     {/* AI-Enhanced Summary */}
                     {employee.improvedSummary && (
-                      <Card>
+                      <Card className="py-3 gap-0">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2">
                             <Award className="w-5 h-5 text-lime-600" />
@@ -622,7 +737,7 @@ export default function EmployeeProfilePage() {
                     {employee.keyStrengths.length > 0 && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Top Strengths */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -642,7 +757,7 @@ export default function EmployeeProfilePage() {
                         </Card>
 
                         {/* Key Strengths */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -662,7 +777,7 @@ export default function EmployeeProfilePage() {
                         </Card>
 
                         {/* Core Strengths */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -682,7 +797,7 @@ export default function EmployeeProfilePage() {
                         </Card>
 
                         {/* Technical Strengths */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -702,7 +817,7 @@ export default function EmployeeProfilePage() {
                         </Card>
 
                         {/* Notable Achievements */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -722,7 +837,7 @@ export default function EmployeeProfilePage() {
                         </Card>
 
                         {/* Market Advantages */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -742,7 +857,7 @@ export default function EmployeeProfilePage() {
                         </Card>
 
                         {/* Unique Value Proposition */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -762,7 +877,7 @@ export default function EmployeeProfilePage() {
                         </Card>
 
                         {/* Areas to Highlight */}
-                        <Card>
+                        <Card className="py-3 gap-0">
                           <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                               <Award className="w-5 h-5 text-lime-600" />
@@ -787,7 +902,7 @@ export default function EmployeeProfilePage() {
               </TabsContent>
 
               <TabsContent value="skills" className="space-y-4">
-                <Card>
+                <Card className="py-2">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base">
                       <Award className="w-4 h-4 text-lime-600" />

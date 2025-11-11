@@ -49,11 +49,25 @@ export function AnonymousUserButton() {
     };
   }, [isAuthenticated]); // Only depend on isAuthenticated for starting timer
 
-  // Cancel timer if user has filled form
+  // Cancel timer if user has filled form OR has an account
   useEffect(() => {
-    // Check if user form status is loaded and user already filled form
+    // Check if user form status is loaded and user already filled form or has an account
     if (!isLoading && userFormStatus) {
       console.log('📊 User form status loaded:', userFormStatus);
+      
+      // Prevent modal if user has an account (Regular/Admin user type)
+      if (userFormStatus.hasAccount) {
+        console.log('✅ User has an account, canceling timer', {
+          hasAccount: userFormStatus.hasAccount,
+          userType: userFormStatus.userType
+        });
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
+        return;
+      }
+      
       // Only prevent modal if user has actually filled the form (has meaningful data)
       if (userFormStatus.hasFilledForm) {
         // User already filled form, cancel the timer
@@ -76,6 +90,9 @@ export function AnonymousUserButton() {
       isAuthenticated,
       isModalOpen,
       isLoading,
+      hasAccount: userFormStatus?.hasAccount,
+      userType: userFormStatus?.userType,
+      hasFilledForm: userFormStatus?.hasFilledForm,
       userFormStatus,
       hasTimer: !!timerRef.current
     });
