@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code, ExternalLink, Copy, Loader2 } from 'lucide-react'
+import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code, ExternalLink, Copy, Loader2, FileText, RefreshCw, Bot, Target, Mic, PenSquare, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCompileTsx, useImproveTsx, useAIResearch, useAIGenerateBlog } from '@/hooks/use-api'
 
@@ -106,7 +106,7 @@ export default function CreatePostPage() {
       '  </div>',
       '  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></' + 'script>',
       '  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></' + 'script>',
-      '  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></' + 'script>',
+      '  <script src="https://unpkg.com/sucrase@3.35.0/dist/browser/sucrase.iife.js"></' + 'script>',
       '  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></' + 'script>',
       '  <script>',
       '    (function() {',
@@ -114,13 +114,14 @@ export default function CreatePostPage() {
       '      ',
       '      // Wait for all libraries to load',
       '      const checkLibraries = setInterval(() => {',
-      '        if (typeof React !== "undefined" && typeof ReactDOM !== "undefined" && typeof Babel !== "undefined" && typeof lucide !== "undefined") {',
+      '        if (typeof React !== "undefined" && typeof ReactDOM !== "undefined" && typeof Sucrase !== "undefined" && typeof lucide !== "undefined") {',
       '          clearInterval(checkLibraries);',
       '          window.React = React;',
       '          window.ReactDOM = ReactDOM;',
-      '          window.Babel = Babel;',
+      '          window.Sucrase = Sucrase;',
       '          window.lucide = lucide;',
-      '          console.log("All libraries loaded");',
+      '          console.log("All libraries loaded (React, ReactDOM, Sucrase, Lucide)");',
+      '          console.log("Sucrase version:", Sucrase.version);',
       '          ',
       '          // Notify parent that iframe is ready',
       '          if (window.parent !== window) {',
@@ -149,27 +150,83 @@ export default function CreatePostPage() {
       '        try {',
       '          console.log("Processing TSX code...");',
       '          ',
-      '          // Create Lucide icon components',
-      '          const commonIcons = ["Bot", "Clock", "Globe", "Zap", "Users", "TrendingUp", "Star", "ArrowRight", "CheckCircle", "Award", "Target", "Lightbulb", "Code", "Database", "Shield", "Smartphone", "Mail", "Phone", "MapPin", "Calendar", "FileText", "Image", "Video", "Heart", "Share", "MessageCircle", "ThumbsUp", "Eye", "Lock", "User", "Home", "Menu", "X", "ChevronDown", "ChevronUp", "ChevronLeft", "ChevronRight", "Plus", "Minus", "Check", "AlertCircle", "Info", "ExternalLink", "Link", "Copy", "Trash", "Edit", "Save"];',
+      '          // Create Lucide icon components - comprehensive list',
+      '          const commonIcons = [',
+      '            "Bot", "Clock", "Globe", "Globe2", "Zap", "Users", "Users2", "TrendingUp", "TrendingDown",',
+      '            "Star", "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "ArrowUpRight", "ArrowDownRight",',
+      '            "CheckCircle", "CheckCircle2", "Award", "Target", "Lightbulb", "Code", "Code2", "Database",',
+      '            "Shield", "ShieldCheck", "Smartphone", "Mail", "Phone", "MapPin", "Calendar", "FileText",',
+      '            "Image", "Video", "Music", "Heart", "Share", "Share2", "MessageCircle", "MessageSquare",',
+      '            "ThumbsUp", "ThumbsDown", "Eye", "EyeOff", "Lock", "Unlock", "User", "User2", "UserPlus",',
+      '            "UserMinus", "UserCheck", "Home", "Menu", "X", "ChevronDown", "ChevronUp", "ChevronLeft",',
+      '            "ChevronRight", "ChevronsDown", "ChevronsUp", "Plus", "Minus", "Check", "AlertCircle",',
+      '            "AlertTriangle", "Info", "HelpCircle", "ExternalLink", "Link", "Link2", "Unlink", "Copy",',
+      '            "Clipboard", "Trash", "Trash2", "Edit", "Edit2", "Edit3", "Save", "Download", "Upload",',
+      '            "Search", "Filter", "Settings", "Bell", "BellOff", "Volume", "Volume2", "VolumeX",',
+      '            "Play", "Pause", "Stop", "SkipBack", "SkipForward", "RefreshCw", "RotateCw", "RotateCcw",',
+      '            "Loader", "Loader2", "Circle", "Square", "Triangle", "Sun", "Moon", "Cloud", "CloudRain",',
+      '            "Wifi", "WifiOff", "Battery", "BatteryCharging", "Bookmark", "BookmarkPlus", "Tag",',
+      '            "Folder", "FolderOpen", "File", "FileEdit", "Package", "Gift", "ShoppingCart", "ShoppingBag",',
+      '            "CreditCard", "DollarSign", "TrendingUp", "BarChart", "BarChart2", "PieChart", "Activity",',
+      '            "Cpu", "HardDrive", "Server", "Layers", "Layout", "Grid", "List", "AlignLeft", "AlignCenter",',
+      '            "AlignRight", "Bold", "Italic", "Underline", "Type", "Maximize", "Minimize", "Move",',
+      '            "Navigation", "Navigation2", "Compass", "Flag", "Map", "MapPin", "Send", "Inbox", "Archive",',
+      '            "Twitter", "Facebook", "Instagram", "Linkedin", "Github", "Youtube", "Slack", "Chrome"',
+      '          ];',
       '          ',
+      '          // Create simple placeholder icon components',
       '          commonIcons.forEach(function(iconName) {',
       '            window[iconName] = function(props) {',
       '              var className = (props && props.className) || "";',
       '              var kebabName = iconName.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/^-/, "");',
-      '              var el = React.createElement("i", { "data-lucide": kebabName, className: className });',
-      '              React.useEffect(function() {',
-      '                if (window.lucide) window.lucide.createIcons();',
-      '              }, []);',
-      '              return el;',
+      '              ',
+      '              // Return a simple element that Lucide will replace',
+      '              return React.createElement("i", {',
+      '                "data-lucide": kebabName,',
+      '                className: className',
+      '              });',
       '            };',
       '          });',
       '          ',
-      '          // Transpile and evaluate',
-      '          var transpiledCode = Babel.transform(tsxCode, { presets: ["react"] }).code;',
-      '          console.log("Code transpiled");',
+      '          console.log("Created " + commonIcons.length + " icon components");',
       '          ',
-      '          eval(transpiledCode);',
-      '          console.log("Code evaluated");',
+      '          // Log the TSX code we received',
+      '          console.log("TSX code to transform (length: " + tsxCode.length + ")");',
+      '          ',
+      '          // Transform TSX using Sucrase (fast, no Babel!)',
+      '          var transpiledCode;',
+      '          ',
+      '          if (!window.Sucrase || typeof window.Sucrase.transform !== "function") {',
+      '            throw new Error("Sucrase is not loaded");',
+      '          }',
+      '          ',
+      '          try {',
+      '            var result = window.Sucrase.transform(tsxCode, {',
+      '              transforms: ["jsx"],',
+      '              jsxPragma: "React.createElement",',
+      '              jsxFragmentPragma: "React.Fragment"',
+      '            });',
+      '            ',
+      '            if (!result || !result.code) {',
+      '              throw new Error("Sucrase returned no code");',
+      '            }',
+      '            ',
+      '            transpiledCode = result.code;',
+      '            console.log("✅ Sucrase transformed JSX successfully");',
+      '            console.log("Transpiled code preview:", transpiledCode.substring(0, 300));',
+      '          } catch (sucraseError) {',
+      '            console.error("Sucrase error:", sucraseError);',
+      '            throw new Error("Failed to transform JSX: " + sucraseError.message);',
+      '          }',
+      '          ',
+      '          try {',
+      '            eval(transpiledCode);',
+      '            console.log("Code evaluated successfully");',
+      '          } catch (evalError) {',
+      '            console.error("Eval error:", evalError);',
+      '            console.error("Problematic code:", transpiledCode);',
+      '            throw new Error("Failed to execute: " + evalError.message);',
+      '          }',
       '          ',
       '          // Find component to render',
       '          var componentToRender = null;',
@@ -189,13 +246,24 @@ export default function CreatePostPage() {
       '            root.render(React.createElement(componentToRender));',
       '            console.log("Component rendered");',
       '            ',
-      '            // Notify success',
+      '            // Initialize Lucide icons and notify success',
       '            setTimeout(function() {',
-      '              if (window.lucide) window.lucide.createIcons();',
+      '              if (window.lucide && window.lucide.createIcons) {',
+      '                console.log("Initializing Lucide icons...");',
+      '                window.lucide.createIcons();',
+      '                console.log("Lucide icons initialized");',
+      '              }',
       '              if (window.parent !== window) {',
       '                window.parent.postMessage({ type: "preview-success" }, "*");',
       '              }',
-      '            }, 500);',
+      '            }, 300);',
+      '            ',
+      '            // Re-initialize icons periodically for dynamic content',
+      '            setInterval(function() {',
+      '              if (window.lucide && window.lucide.createIcons) {',
+      '                window.lucide.createIcons();',
+      '              }',
+      '            }, 1000);',
       '          } else {',
       '            throw new Error("No component found to render");',
       '          }',
@@ -214,7 +282,7 @@ export default function CreatePostPage() {
     ].join('\n');
     
     return html;
-  }, []);
+  }, []); // Version: 3.1 - Fixed Sucrase CDN and global variable
   
   // Preprocess TSX code for iframe (remove imports, exports, and TypeScript syntax)
   const processedTsxCode = React.useMemo(() => {
@@ -1372,7 +1440,7 @@ export default function CreatePostPage() {
                         <span className="text-xs bg-lime-600 text-white px-2 py-1 rounded">✓ Ready</span>
                       </div>
                       <iframe
-                      key={compiledContent + tsxCode.length}
+                      key={`preview-v3.1-${compiledContent}-${tsxCode.length}`}
                       srcDoc={iframeHtml}
                       className="w-full h-[550px] border-0"
                       title="TSX Preview"
@@ -1475,7 +1543,7 @@ export default function CreatePostPage() {
   return (
     <AdminGuard>
       <SidebarProvider>
-        <AdminSidebar />
+        <AppSidebar />
         <SidebarInset>
           {renderPasteTSX()}
         </SidebarInset>
