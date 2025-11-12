@@ -120,12 +120,13 @@ export async function GET(request: NextRequest) {
           WHERE user_id = $1 AND job_id = $2
           AND analyzed_at > NOW() - INTERVAL '24 hours'
           AND score IS NOT NULL
+          AND score > 0
         `, [userId, jobId]);
 
         if (existingResult.rows.length > 0) {
           const cached = existingResult.rows[0];
-          // Double-check that score is valid
-          if (cached.score !== null && cached.score !== undefined) {
+          // Double-check that score is valid (not null, not undefined, and > 0)
+          if (cached.score !== null && cached.score !== undefined && cached.score > 0) {
             console.log(`Using cached match result for user ${userId}, job ${jobId}`);
             return NextResponse.json({
               matchScore: cached.score,
@@ -258,14 +259,30 @@ export async function GET(request: NextRequest) {
       console.log(`Performing new AI analysis for user ${userId}, job ${jobId}`);
       const matchScore = await analyzeJobMatchWithAI(analysisData);
 
-      // Persist the latest analysis as the basis for future counts
+      // If there's an error or score is null, don't cache it and return error
+      if (matchScore.error || matchScore.failed || matchScore.score === null || matchScore.score === undefined) {
+        // Clear any old cached error results for this job
+        await client.query(`
+          DELETE FROM job_match_results
+          WHERE user_id = $1 AND job_id = $2 AND score IS NULL
+        `, [userId, jobId]).catch(err => {
+          console.warn('Failed to clear old error results:', err);
+        });
+        
+        return NextResponse.json({
+          error: matchScore.reasoning || 'Failed to analyze job match',
+          message: 'AI analysis failed'
+        }, { status: 500 });
+      }
+
+      // Persist the latest analysis as the basis for future counts (only successful analyses)
       try {
         await client.query(
           `INSERT INTO job_match_results (user_id, job_id, score, reasoning, breakdown, analyzed_at)
            VALUES ($1, $2, $3, $4, $5, NOW())
            ON CONFLICT (user_id, job_id)
            DO UPDATE SET score = EXCLUDED.score, reasoning = EXCLUDED.reasoning, breakdown = EXCLUDED.breakdown, analyzed_at = NOW()`,
-          [userId, jobId, Math.round(matchScore.score ?? 0), matchScore.reasoning ?? '', JSON.stringify(matchScore.breakdown ?? {})]
+          [userId, jobId, Math.round(matchScore.score), matchScore.reasoning ?? '', JSON.stringify(matchScore.breakdown ?? {})]
         )
       } catch (persistErr) {
         console.warn('job_match_results upsert failed (table may not exist yet):', persistErr)
@@ -451,6 +468,7 @@ SCORING GUIDELINES:
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
+        temperature: 0, // Set to 0 for deterministic, consistent results
         messages: [
           {
             role: 'user',
@@ -481,63 +499,114 @@ SCORING GUIDELINES:
     
     const content = result.content[0].text;
     console.log('AI response content length:', content.length);
+    console.log('AI response preview (first 500 chars):', content.substring(0, 500));
     
-         // Extract JSON from the response with better error handling
-     const jsonMatch = content.match(/\{[\s\S]*\}/);
-     if (jsonMatch) {
-       try {
-         // Clean the JSON string by removing control characters and fixing common issues
-         let jsonString = jsonMatch[0];
-         
-         // Remove control characters that might break JSON parsing
-         jsonString = jsonString.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-         
-         // Fix common JSON issues
-         jsonString = jsonString.replace(/\n/g, '\\n'); // Escape newlines in strings
-         jsonString = jsonString.replace(/\r/g, '\\r'); // Escape carriage returns
-         jsonString = jsonString.replace(/\t/g, '\\t'); // Escape tabs
-         
-         const parsed = JSON.parse(jsonString);
-         console.log('Parsed AI response:', parsed);
-         
-         // Validate the response
-         if (typeof parsed.score === 'number' && parsed.score >= 0 && parsed.score <= 100) {
-           // Use weighted score if available, otherwise use regular score
-           const finalScore = parsed.weightedScore || parsed.score;
-           
-           return {
-             score: finalScore,
-             reasoning: parsed.reasoning || 'Analysis completed',
-             breakdown: parsed.breakdown || {},
-             weightedScore: parsed.weightedScore,
-             originalScore: parsed.score
-           };
-         } else {
-           throw new Error('Invalid score in AI response');
-         }
-       } catch (parseError) {
-         console.error('JSON parsing error:', parseError);
-         console.error('Raw JSON string:', jsonMatch[0]);
-         
-         // Try to extract just the essential parts manually
-         const scoreMatch = content.match(/"score":\s*(\d+)/);
-         const reasoningMatch = content.match(/"reasoning":\s*"([^"]+)"/);
-         
-         if (scoreMatch && reasoningMatch) {
-           const score = parseInt(scoreMatch[1]);
-           const reasoning = reasoningMatch[1].replace(/\\n/g, '\n');
-           
-           return {
-             score: score,
-             reasoning: reasoning,
-             breakdown: {}
-           };
-         }
-         
-         throw new Error('Failed to parse AI response JSON');
-       }
-     }
+    // Try to extract JSON from the response - check for code blocks first
+    let jsonStr = '';
+    let jsonMatch = null;
+    
+    // First, try to find JSON in markdown code blocks (```json ... ``` or ``` ... ```)
+    const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1];
+      console.log('Found JSON in code block');
+    } else {
+      // Try to find JSON object in the content
+      jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
+    }
+    
+    if (jsonStr) {
+      try {
+        // First, try parsing as-is (most responses should be valid JSON)
+        let parsed = JSON.parse(jsonStr);
+        console.log('✅ Successfully parsed JSON on first attempt');
+        
+        // Validate the response
+        const finalScore = parsed.weightedScore || parsed.score;
+        if (typeof finalScore !== 'number' || isNaN(finalScore) || finalScore < 0 || finalScore > 100) {
+          throw new Error(`Invalid score value: ${finalScore}`);
+        }
+        
+        return {
+          score: finalScore,
+          reasoning: parsed.reasoning || 'Analysis completed',
+          breakdown: parsed.breakdown || {},
+          weightedScore: parsed.weightedScore,
+          originalScore: parsed.score
+        };
+      } catch (parseError) {
+        console.error('❌ JSON parsing error on first attempt:', parseError);
+        console.error('Raw JSON string (first 1000 chars):', jsonStr.substring(0, 1000));
+        
+        // Try cleaning and parsing again
+        try {
+          // More conservative cleaning - only fix obvious issues
+          let cleanedJson = jsonStr
+            .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '') // Remove only problematic control chars
+            .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+          
+          const parsed = JSON.parse(cleanedJson);
+          console.log('✅ Successfully parsed JSON after cleaning');
+          
+          const finalScore = parsed.weightedScore || parsed.score;
+          if (typeof finalScore !== 'number' || isNaN(finalScore) || finalScore < 0 || finalScore > 100) {
+            throw new Error(`Invalid score value: ${finalScore}`);
+          }
+          
+          return {
+            score: finalScore,
+            reasoning: parsed.reasoning || 'Analysis completed',
+            breakdown: parsed.breakdown || {},
+            weightedScore: parsed.weightedScore,
+            originalScore: parsed.score
+          };
+        } catch (secondParseError) {
+          console.error('❌ JSON parsing error after cleaning:', secondParseError);
+          console.error('Full content (first 2000 chars):', content.substring(0, 2000));
+          
+          // Try to extract just the essential parts manually
+          const scoreMatch = content.match(/(?:score|match|rating|weightedScore)[:\s]*(\d+)/i);
+          const reasoningMatch = content.match(/"reasoning":\s*"([^"]+)"/);
+          
+          if (scoreMatch) {
+            const score = parseInt(scoreMatch[1]);
+            if (score >= 0 && score <= 100) {
+              const reasoning = reasoningMatch ? reasoningMatch[1].replace(/\\n/g, '\n') : 'Analysis completed with extracted scoring';
+              console.log('⚠️ Extracted score from content:', score);
+              
+              return {
+                score: score,
+                reasoning: reasoning,
+                breakdown: {}
+              };
+            }
+          }
+          
+          throw new Error(`Failed to parse AI response JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`);
+        }
+      }
+    }
 
+    console.error('❌ No JSON found in response');
+    console.error('Full content (first 2000 chars):', content.substring(0, 2000));
+    
+    // Try to extract score from plain text
+    const scoreMatch = content.match(/(?:score|match|rating|weightedScore)[:\s]*(\d+)/i);
+    if (scoreMatch) {
+      const score = parseInt(scoreMatch[1]);
+      if (score >= 0 && score <= 100) {
+        console.log('⚠️ Extracted score from plain text:', score);
+        return {
+          score: score,
+          reasoning: 'Analysis completed with extracted scoring (no JSON found)',
+          breakdown: {}
+        };
+      }
+    }
+    
     throw new Error('No valid JSON found in AI response');
 
   } catch (error: any) {

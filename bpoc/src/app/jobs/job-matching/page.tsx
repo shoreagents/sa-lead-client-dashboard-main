@@ -1353,7 +1353,20 @@ function JobMatchingContent() {
                             if (!user) { triggerHeaderSignUp(); return }
                             const token = await getSessionToken()
                             if (!token) { triggerHeaderSignUp(); return }
-                            const chk = await fetch('/api/user/saved-resumes', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
+                            if (!user?.id) {
+                              setApplicationMessage('You must be logged in to apply');
+                              setApplicationType('error');
+                              setShowApplicationDialog(true);
+                              return;
+                            }
+                            
+                            const chk = await fetch('/api/user/saved-resumes', { 
+                              headers: { 
+                                Authorization: `Bearer ${token}`,
+                                'x-user-id': user.id
+                              }, 
+                              cache: 'no-store' 
+                            })
                             const j = await chk.json()
                             if (!chk.ok || !j?.hasSavedResume) { 
                               setApplicationMessage('You must have a resume first before applying');
@@ -1362,12 +1375,119 @@ function JobMatchingContent() {
                               router.push('/resume-builder')
                               return 
                             }
+                            
+                            // Get resume ID and slug from the response
+                            const resumeId = j.resumeId || j.id
+                            const resumeSlug = j.resumeSlug
+                            
+                            if (!resumeId || !resumeSlug) {
+                              setApplicationMessage('Resume data is incomplete. Please update your resume.');
+                              setApplicationType('error');
+                              setShowApplicationDialog(true);
+                              return;
+                            }
+                            
+                            // Extract the actual database ID from originalId (remove prefixes if present)
+                            let dbJobId = selectedJobData.originalId;
+                            if (typeof dbJobId === 'string') {
+                              if (dbJobId.startsWith('recruiter_')) {
+                                dbJobId = dbJobId.replace('recruiter_', '');
+                              } else if (dbJobId.startsWith('processed_')) {
+                                dbJobId = dbJobId.replace('processed_', '');
+                              } else if (dbJobId.startsWith('job_request_')) {
+                                dbJobId = dbJobId.replace('job_request_', '');
+                              }
+                            }
+                            
+                            if (!user?.id) {
+                              setApplicationMessage('You must be logged in to apply');
+                              setApplicationType('error');
+                              setShowApplicationDialog(true);
+                              return;
+                            }
+                            
+                            console.log('Submitting application:', {
+                              jobId: dbJobId,
+                              resumeId,
+                              resumeSlug,
+                              userId: user.id
+                            })
+                            
                             const resp = await fetch('/api/user/applications', {
                               method: 'POST',
-                              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                              body: JSON.stringify({ jobId: selectedJobData.originalId, resumeId: j.id || j.resumeId, resumeSlug: j.resumeSlug })
+                              headers: { 
+                                'Content-Type': 'application/json', 
+                                Authorization: `Bearer ${token}`,
+                                'x-user-id': user.id
+                              },
+                              body: JSON.stringify({ jobId: dbJobId, resumeId, resumeSlug })
                             })
-                            if (!resp.ok) throw new Error('Failed to submit application')
+                            
+                            if (!resp.ok) {
+                              let errorData: any = {}
+                              let errorText = ''
+                              
+                              try {
+                                // Try to get the response as text first
+                                errorText = await resp.clone().text()
+                                console.log('Raw error response text:', errorText)
+                                
+                                // Try to parse as JSON
+                                if (errorText && errorText.trim().startsWith('{')) {
+                                  errorData = JSON.parse(errorText)
+                                } else if (errorText) {
+                                  // If it's not JSON, use the text as the error message
+                                  errorData = { error: errorText, details: errorText }
+                                } else {
+                                  // Empty response
+                                  errorData = { 
+                                    error: `Server error (${resp.status})`,
+                                    details: `The server returned an error but no error message. Status: ${resp.status} ${resp.statusText}`
+                                  }
+                                }
+                              } catch (parseError) {
+                                console.error('Error parsing error response:', parseError)
+                                errorData = { 
+                                  error: `HTTP ${resp.status}: ${resp.statusText}`,
+                                  details: errorText || `Failed to parse error response. Status: ${resp.status}`
+                                }
+                              }
+                              
+                              // Log error details for debugging
+                              const errorLog: any = {
+                                status: resp.status,
+                                statusText: resp.statusText,
+                                jobId: dbJobId,
+                                resumeId,
+                                resumeSlug,
+                                userId: user.id
+                              }
+                              
+                              // Only add errorText and errorData if they have meaningful content
+                              if (errorText && errorText.trim()) {
+                                errorLog.errorText = errorText
+                              }
+                              if (errorData && Object.keys(errorData).length > 0) {
+                                errorLog.errorData = errorData
+                              } else if (errorText && errorText.trim()) {
+                                // If errorData is empty but we have errorText, use that
+                                errorLog.errorMessage = errorText
+                              }
+                              
+                              console.error('Application submission failed:', errorLog)
+                              
+                              // Build a comprehensive error message
+                              const errorMessage = errorData.error || 
+                                                  errorData.details || 
+                                                  errorData.message || 
+                                                  errorText ||
+                                                  `Failed to submit application (${resp.status} ${resp.statusText})`
+                              
+                              setApplicationMessage(errorMessage)
+                              setApplicationType('error')
+                              setShowApplicationDialog(true)
+                              return
+                            }
                             // Update local state to reflect application before redirect
                             setAppliedMap(prev => ({ ...prev, [selectedJobData.id]: true }));
                             setSelectedJob(null);
@@ -1396,82 +1516,206 @@ function JobMatchingContent() {
                   <div className="p-4 job-modal-scroll overflow-y-auto h-full">
                     <div className="space-y-4 pb-4">
                       {/* Job Description */}
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
-                          <FileText className="h-5 w-5 text-cyan-400" />
-                          Job Description
-                        </h3>
-                        <p className="text-gray-300 leading-relaxed text-sm">{selectedJobDetails?.description || selectedJobData.description}</p>
-                      </div>
+                      {(() => {
+                        const description = selectedJobDetails?.description || selectedJobData?.description || '';
+                        if (!description || description.trim() === '') {
+                          return (
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                                <FileText className="h-5 w-5 text-cyan-400" />
+                                Job Description
+                              </h3>
+                              <p className="text-gray-400 text-sm italic">No job description listed</p>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                              <FileText className="h-5 w-5 text-cyan-400" />
+                              Job Description
+                            </h3>
+                            <p className="text-gray-300 leading-relaxed text-sm">{description}</p>
+                          </div>
+                        );
+                      })()}
 
                       {/* Responsibilities */}
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
-                          <CheckCircle className="h-5 w-5 text-green-400" />
-                          Responsibilities
-                        </h3>
-                          <ul className="space-y-2">
-                            {Array.isArray(selectedJobDetails?.responsibilities) && selectedJobDetails.responsibilities.length > 0
-                              ? selectedJobDetails.responsibilities.map((responsibility: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-3 text-gray-300">
-                                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                                    <span className="text-sm">{responsibility}</span>
-                                  </li>
-                                ))
-                              : (selectedJobData.responsibilities || []).map((responsibility: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-3 text-gray-300">
-                                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                                    <span className="text-sm">{responsibility}</span>
-                                  </li>
-                                ))}
-                          </ul>
-                      </div>
+                      {(() => {
+                        // Parse responsibilities from either selectedJobDetails or selectedJobData
+                        let responsibilities: string[] = [];
+                        
+                        if (selectedJobDetails?.responsibilities) {
+                          if (Array.isArray(selectedJobDetails.responsibilities)) {
+                            responsibilities = selectedJobDetails.responsibilities.filter((r: any) => r && String(r).trim());
+                          } else if (typeof selectedJobDetails.responsibilities === 'string') {
+                            try {
+                              const parsed = JSON.parse(selectedJobDetails.responsibilities);
+                              responsibilities = Array.isArray(parsed) ? parsed.filter((r: any) => r && String(r).trim()) : [selectedJobDetails.responsibilities].filter((r: any) => r && String(r).trim());
+                            } catch {
+                              responsibilities = selectedJobDetails.responsibilities.split('\n\n').filter((s: string) => s.trim());
+                            }
+                          }
+                        } else if (selectedJobData?.responsibilities) {
+                          if (Array.isArray(selectedJobData.responsibilities)) {
+                            responsibilities = selectedJobData.responsibilities.filter((r: any) => r && String(r).trim());
+                          } else if (typeof selectedJobData.responsibilities === 'string') {
+                            try {
+                              const parsed = JSON.parse(selectedJobData.responsibilities);
+                              responsibilities = Array.isArray(parsed) ? parsed.filter((r: any) => r && String(r).trim()) : [selectedJobData.responsibilities].filter((r: any) => r && String(r).trim());
+                            } catch {
+                              responsibilities = selectedJobData.responsibilities.split('\n\n').filter((s: string) => s.trim());
+                            }
+                          }
+                        }
+                        
+                        if (responsibilities.length === 0) {
+                          return (
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                                <CheckCircle className="h-5 w-5 text-green-400" />
+                                Responsibilities
+                              </h3>
+                              <p className="text-gray-400 text-sm italic">No responsibilities listed</p>
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                              <CheckCircle className="h-5 w-5 text-green-400" />
+                              Responsibilities
+                            </h3>
+                            <ul className="space-y-2">
+                              {responsibilities.map((responsibility: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-3 text-gray-300">
+                                  <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                                  <span className="text-sm">{responsibility}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })()}
 
                       {/* Qualifications */}
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
-                          <Star className="h-5 w-5 text-yellow-400" />
-                          Qualifications & Requirements
-                        </h3>
-                          <ul className="space-y-2">
-                            {Array.isArray(selectedJobDetails?.requirements) && selectedJobDetails.requirements.length > 0
-                              ? selectedJobDetails.requirements.map((qualification: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-3 text-gray-300">
-                                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0"></div>
-                                    <span className="text-sm">{qualification}</span>
-                                  </li>
-                                ))
-                              : (selectedJobData.qualifications || []).map((qualification: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-3 text-gray-300">
-                                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0"></div>
-                                    <span className="text-sm">{qualification}</span>
-                                  </li>
-                                ))}
-                          </ul>
-                      </div>
+                      {(() => {
+                        // Parse requirements/qualifications from either selectedJobDetails or selectedJobData
+                        let qualifications: string[] = [];
+                        
+                        if (selectedJobDetails?.requirements) {
+                          if (Array.isArray(selectedJobDetails.requirements)) {
+                            qualifications = selectedJobDetails.requirements.filter((q: any) => q && String(q).trim());
+                          } else if (typeof selectedJobDetails.requirements === 'string') {
+                            try {
+                              const parsed = JSON.parse(selectedJobDetails.requirements);
+                              qualifications = Array.isArray(parsed) ? parsed.filter((q: any) => q && String(q).trim()) : [selectedJobDetails.requirements].filter((q: any) => q && String(q).trim());
+                            } catch {
+                              qualifications = selectedJobDetails.requirements.split('\n\n').filter((s: string) => s.trim());
+                            }
+                          }
+                        } else if (selectedJobData?.qualifications) {
+                          if (Array.isArray(selectedJobData.qualifications)) {
+                            qualifications = selectedJobData.qualifications.filter((q: any) => q && String(q).trim());
+                          } else if (typeof selectedJobData.qualifications === 'string') {
+                            try {
+                              const parsed = JSON.parse(selectedJobData.qualifications);
+                              qualifications = Array.isArray(parsed) ? parsed.filter((q: any) => q && String(q).trim()) : [selectedJobData.qualifications].filter((q: any) => q && String(q).trim());
+                            } catch {
+                              qualifications = selectedJobData.qualifications.split('\n\n').filter((s: string) => s.trim());
+                            }
+                          }
+                        }
+                        
+                        if (qualifications.length === 0) {
+                          return (
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                                <Star className="h-5 w-5 text-yellow-400" />
+                                Qualifications & Requirements
+                              </h3>
+                              <p className="text-gray-400 text-sm italic">No qualifications & requirements listed</p>
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                              <Star className="h-5 w-5 text-yellow-400" />
+                              Qualifications & Requirements
+                            </h3>
+                            <ul className="space-y-2">
+                              {qualifications.map((qualification: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-3 text-gray-300">
+                                  <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full mt-2 flex-shrink-0"></div>
+                                  <span className="text-sm">{qualification}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })()}
 
                       {/* Perks & Benefits */}
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                        <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
-                          <Gift className="h-5 w-5 text-pink-400" />
-                          Perks & Benefits
-                        </h3>
-                          <ul className="space-y-2">
-                            {Array.isArray(selectedJobDetails?.benefits) && selectedJobDetails.benefits.length > 0
-                              ? selectedJobDetails.benefits.map((perk: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-3 text-gray-300">
-                                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                                    <span className="text-sm">{perk}</span>
-                                  </li>
-                                ))
-                              : (selectedJobData.perks || []).map((perk: string, idx: number) => (
-                                  <li key={idx} className="flex items-start gap-3 text-gray-300">
-                                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                                    <span className="text-sm">{perk}</span>
-                                  </li>
-                                ))}
-                          </ul>
-                      </div>
+                      {(() => {
+                        // Parse benefits from either selectedJobDetails or selectedJobData
+                        let benefits: string[] = [];
+                        
+                        if (selectedJobDetails?.benefits) {
+                          if (Array.isArray(selectedJobDetails.benefits)) {
+                            benefits = selectedJobDetails.benefits.filter((b: any) => b && String(b).trim());
+                          } else if (typeof selectedJobDetails.benefits === 'string') {
+                            try {
+                              const parsed = JSON.parse(selectedJobDetails.benefits);
+                              benefits = Array.isArray(parsed) ? parsed.filter((b: any) => b && String(b).trim()) : [selectedJobDetails.benefits].filter((b: any) => b && String(b).trim());
+                            } catch {
+                              benefits = selectedJobDetails.benefits.split('\n\n').filter((s: string) => s.trim());
+                            }
+                          }
+                        } else if (selectedJobData?.perks) {
+                          if (Array.isArray(selectedJobData.perks)) {
+                            benefits = selectedJobData.perks.filter((b: any) => b && String(b).trim());
+                          } else if (typeof selectedJobData.perks === 'string') {
+                            try {
+                              const parsed = JSON.parse(selectedJobData.perks);
+                              benefits = Array.isArray(parsed) ? parsed.filter((b: any) => b && String(b).trim()) : [selectedJobData.perks].filter((b: any) => b && String(b).trim());
+                            } catch {
+                              benefits = selectedJobData.perks.split('\n\n').filter((s: string) => s.trim());
+                            }
+                          }
+                        }
+                        
+                        if (benefits.length === 0) {
+                          return (
+                            <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                                <Gift className="h-5 w-5 text-pink-400" />
+                                Perks & Benefits
+                              </h3>
+                              <p className="text-gray-400 text-sm italic">No perks & benefits listed</p>
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <h3 className="flex items-center gap-2 text-white text-lg font-semibold mb-3">
+                              <Gift className="h-5 w-5 text-pink-400" />
+                              Perks & Benefits
+                            </h3>
+                            <ul className="space-y-2">
+                              {benefits.map((perk: string, idx: number) => (
+                                <li key={idx} className="flex items-start gap-3 text-gray-300">
+                                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+                                  <span className="text-sm">{perk}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
