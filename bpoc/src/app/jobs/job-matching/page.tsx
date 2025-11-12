@@ -284,7 +284,8 @@ function JobMatchingContent() {
                       score: result.score,
                       reasoning: result.reasoning,
                       breakdown: result.breakdown,
-                      cached: result.cached
+                      cached: result.cached,
+                      error: result.error || result.failed || false
                     }
                   }
                 })
@@ -358,14 +359,26 @@ function JobMatchingContent() {
                 scores[job.id] = {
                   score: Math.round(matchData.matchScore),
                   reasoning: matchData.reasoning,
-                  breakdown: matchData.breakdown
+                  breakdown: matchData.breakdown,
+                  error: false
                 }
               } else {
-                scores[job.id] = { score: 0, reasoning: 'Analysis failed', breakdown: {} }
+                const errorData = await matchRes.json().catch(() => ({}))
+                scores[job.id] = { 
+                  score: null, 
+                  reasoning: errorData.error || 'Analysis failed', 
+                  breakdown: {},
+                  error: true
+                }
               }
             } catch (error) {
               console.error('Error fetching match score for job:', job.id, error)
-              scores[job.id] = { score: 0, reasoning: 'Network error', breakdown: {} }
+              scores[job.id] = { 
+                score: null, 
+                reasoning: error instanceof Error ? error.message : 'Network error', 
+                breakdown: {},
+                error: true
+              }
             }
             
             // Small delay to show progress
@@ -453,7 +466,7 @@ function JobMatchingContent() {
     if (percentage >= 65) return `${percentage}% Good Match`;
     if (percentage >= 55) return `${percentage}% Fair Match`;
     if (percentage >= 45) return `${percentage}% Poor Match`;
-    return "Not Suitable";
+    return `${percentage}% Not Suitable`;
   };
 
   const getWorkType = (job: any) => {
@@ -1212,8 +1225,8 @@ function JobMatchingContent() {
                                       <li>• Network connectivity issues</li>
                                     </ul>
                                     <div className="bg-red-500/5 border border-red-500/20 rounded p-2">
-                                      <p className="text-xs text-red-400 font-mono">
-                                        Error: {matchScores[selectedJobData.id].reasoning}
+                                      <p className="text-xs text-red-400 font-mono break-words">
+                                        {matchScores[selectedJobData.id].reasoning || 'Unknown error occurred during analysis'}
                                       </p>
                                     </div>
                                   </div>

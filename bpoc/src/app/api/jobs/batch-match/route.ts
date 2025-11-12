@@ -36,26 +36,56 @@ export async function POST(request: NextRequest) {
       const user = userResult.rows[0];
 
       // Separate job IDs by type (processed jobs are integers, recruiter jobs are UUIDs)
-      const processedJobIds = jobIds.filter((id: string) => !id.includes('-') && !isNaN(Number(id)));
+      const numericJobIds = jobIds.filter((id: string) => !id.includes('-') && !isNaN(Number(id)));
       const recruiterJobIds = jobIds.filter((id: string) => id.includes('-') || isNaN(Number(id)));
       
-      console.log('🔍 Separated job IDs:', { processedJobIds, recruiterJobIds });
+      console.log('🔍 Separated job IDs:', { numericJobIds, recruiterJobIds });
 
-      // Get all jobs from both sources
-      let processedJobsResult, recruiterJobsResult;
+      // Get all jobs from all three sources
+      let jobRequestsResult, processedJobsResult, recruiterJobsResult;
       
-      if (processedJobIds.length > 0) {
+      // Check job_requests table (admin jobs)
+      if (numericJobIds.length > 0) {
+        try {
+          jobRequestsResult = await client.query(`
+            SELECT 
+              jr.id, jr.job_title, jr.job_description, 
+              COALESCE(jr.requirements, ARRAY[]::text[]) as requirements, 
+              COALESCE(jr.responsibilities, ARRAY[]::text[]) as responsibilities, 
+              COALESCE(jr.benefits, ARRAY[]::text[]) as benefits, 
+              COALESCE(jr.skills, ARRAY[]::text[]) as skills, 
+              jr.experience_level,
+              jr.industry, jr.department, jr.work_arrangement, jr.salary_min, jr.salary_max,
+              m.company as company_name, 'job_requests' as source
+            FROM job_requests jr
+            LEFT JOIN members m ON jr.company_id = m.company_id
+            WHERE jr.id = ANY($1) AND jr.status = 'active'
+          `, [numericJobIds]);
+        } catch (error) {
+          console.error('Error fetching job_requests:', error);
+          jobRequestsResult = { rows: [] };
+        }
+      } else {
+        jobRequestsResult = { rows: [] };
+      }
+
+      // Check processed_job_requests table
+      if (numericJobIds.length > 0) {
         try {
           processedJobsResult = await client.query(`
             SELECT 
-              pjr.id, pjr.job_title, pjr.job_description, pjr.requirements, 
-              pjr.responsibilities, pjr.benefits, pjr.skills, pjr.experience_level,
+              pjr.id, pjr.job_title, pjr.job_description, 
+              COALESCE(pjr.requirements, ARRAY[]::text[]) as requirements, 
+              COALESCE(pjr.responsibilities, ARRAY[]::text[]) as responsibilities, 
+              COALESCE(pjr.benefits, ARRAY[]::text[]) as benefits, 
+              COALESCE(pjr.skills, ARRAY[]::text[]) as skills, 
+              pjr.experience_level,
               pjr.industry, pjr.department, pjr.work_arrangement, pjr.salary_min, pjr.salary_max,
               m.company as company_name, 'processed_job_requests' as source
             FROM processed_job_requests pjr
             LEFT JOIN members m ON pjr.company_id = m.company_id
-            WHERE pjr.id = ANY($1)
-          `, [processedJobIds]);
+            WHERE pjr.id = ANY($1) AND pjr.status = 'active'
+          `, [numericJobIds]);
         } catch (error) {
           console.error('Error fetching processed jobs:', error);
           processedJobsResult = { rows: [] };
@@ -64,17 +94,22 @@ export async function POST(request: NextRequest) {
         processedJobsResult = { rows: [] };
       }
 
+      // Check recruiter_jobs table
       if (recruiterJobIds.length > 0) {
         try {
           recruiterJobsResult = await client.query(`
             SELECT 
-              rj.id, rj.job_title, rj.job_description, rj.requirements, 
-              rj.responsibilities, rj.benefits, rj.skills, rj.experience_level,
+              rj.id, rj.job_title, rj.job_description, 
+              COALESCE(rj.requirements, ARRAY[]::text[]) as requirements, 
+              COALESCE(rj.responsibilities, ARRAY[]::text[]) as responsibilities, 
+              COALESCE(rj.benefits, ARRAY[]::text[]) as benefits, 
+              COALESCE(rj.skills, ARRAY[]::text[]) as skills, 
+              rj.experience_level,
               rj.industry, rj.department, rj.work_arrangement, rj.salary_min, rj.salary_max,
               COALESCE(rj.company_id::text, u.company) as company_name, 'recruiter_jobs' as source
             FROM recruiter_jobs rj
             LEFT JOIN users u ON u.id = rj.recruiter_id
-            WHERE rj.id = ANY($1)
+            WHERE rj.id = ANY($1) AND rj.status = 'active'
           `, [recruiterJobIds]);
         } catch (error) {
           console.error('Error fetching recruiter jobs:', error);
@@ -84,30 +119,45 @@ export async function POST(request: NextRequest) {
         recruiterJobsResult = { rows: [] };
       }
 
-      // Combine results from both sources
+      // Combine results from all three sources
       const jobResult = {
-        rows: [...processedJobsResult.rows, ...recruiterJobsResult.rows]
+        rows: [...jobRequestsResult.rows, ...processedJobsResult.rows, ...recruiterJobsResult.rows]
       };
 
       const jobs = jobResult.rows;
       console.log('🔍 Batch match - Found jobs:', jobs.length);
       console.log('🔍 Batch match - Job sources:', jobs.map(j => ({ id: j.id, source: j.source, title: j.job_title })));
+      
+      if (jobs.length === 0) {
+        console.warn('⚠️ No jobs found for batch match. Requested job IDs:', jobIds);
+        return NextResponse.json({ 
+          results: {},
+          cached: 0,
+          analyzed: 0,
+          error: 'No jobs found'
+        });
+      }
 
       // Check cache for all jobs at once (24 hours cache)
+      // Only cache successful results (score is not null)
       const cachedResults = await client.query(`
         SELECT job_id, score, reasoning, breakdown, analyzed_at
         FROM job_match_results 
         WHERE user_id = $1 AND job_id = ANY($2)
         AND analyzed_at > NOW() - INTERVAL '24 hours'
+        AND score IS NOT NULL
       `, [userId, jobIds]);
 
       const cachedMap = new Map();
       cachedResults.rows.forEach(row => {
-        cachedMap.set(row.job_id, {
-          score: row.score,
-          reasoning: row.reasoning,
-          breakdown: typeof row.breakdown === 'string' ? JSON.parse(row.breakdown) : row.breakdown
-        });
+        // Only cache results with valid scores
+        if (row.score !== null && row.score !== undefined) {
+          cachedMap.set(row.job_id, {
+            score: row.score,
+            reasoning: row.reasoning,
+            breakdown: typeof row.breakdown === 'string' ? JSON.parse(row.breakdown) : row.breakdown
+          });
+        }
       });
 
       // Process only non-cached jobs
@@ -177,10 +227,34 @@ export async function POST(request: NextRequest) {
             job: {
               title: job.job_title,
               description: job.job_description,
-              requirements: job.requirements || [],
-              responsibilities: job.responsibilities || [],
-              benefits: job.benefits || [],
-              skills: job.skills || [],
+              requirements: (() => {
+                if (Array.isArray(job.requirements)) return job.requirements;
+                if (typeof job.requirements === 'string') {
+                  try { return JSON.parse(job.requirements); } catch { return []; }
+                }
+                return job.requirements || [];
+              })(),
+              responsibilities: (() => {
+                if (Array.isArray(job.responsibilities)) return job.responsibilities;
+                if (typeof job.responsibilities === 'string') {
+                  try { return JSON.parse(job.responsibilities); } catch { return []; }
+                }
+                return job.responsibilities || [];
+              })(),
+              benefits: (() => {
+                if (Array.isArray(job.benefits)) return job.benefits;
+                if (typeof job.benefits === 'string') {
+                  try { return JSON.parse(job.benefits); } catch { return []; }
+                }
+                return job.benefits || [];
+              })(),
+              skills: (() => {
+                if (Array.isArray(job.skills)) return job.skills;
+                if (typeof job.skills === 'string') {
+                  try { return JSON.parse(job.skills); } catch { return []; }
+                }
+                return job.skills || [];
+              })(),
               experienceLevel: job.experience_level,
               industry: job.industry,
               department: job.department,
@@ -190,30 +264,51 @@ export async function POST(request: NextRequest) {
             }
           };
 
-          return analyzeJobMatchWithAI(analysisData).then(matchScore => ({
-            jobId: job.id,
-            score: Math.round(matchScore.score ?? 0),
-            reasoning: matchScore.reasoning ?? '',
-            breakdown: matchScore.breakdown ?? {},
-            cached: false
-          })).catch(error => {
-            console.error(`Error analyzing job ${job.id}:`, error);
-            // Return failure indicator for this specific job
+          try {
+            return await analyzeJobMatchWithAI(analysisData).then(matchScore => ({
+              jobId: job.id,
+              score: Math.round(matchScore.score ?? 0),
+              reasoning: matchScore.reasoning ?? '',
+              breakdown: matchScore.breakdown ?? {},
+              cached: false,
+              error: matchScore.error || false
+            })).catch(error => {
+              console.error(`❌ Error analyzing job ${job.id} (${job.job_title}):`, error);
+              console.error(`❌ Error details:`, {
+                message: error instanceof Error ? error.message : 'Unknown error',
+                stack: error instanceof Error ? error.stack : undefined,
+                jobId: job.id,
+                jobTitle: job.job_title
+              });
+              // Return error indicator for this specific job
+              return {
+                jobId: job.id,
+                score: null,
+                reasoning: `Failed to analyze: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                breakdown: {},
+                cached: false,
+                failed: true,
+                error: true
+              };
+            });
+          } catch (error) {
+            console.error(`❌ Unexpected error processing job ${job.id}:`, error);
             return {
               jobId: job.id,
               score: null,
-              reasoning: 'Failed to analyze - AI analysis unavailable',
+              reasoning: `Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`,
               breakdown: {},
               cached: false,
               failed: true,
               error: true
             };
-          });
+          }
         });
 
         const analysisResults = await Promise.all(analysisPromises);
 
         // Cache the new results (only cache successful analyses)
+        // Also clear any old error results (null scores) for these jobs
         for (const result of analysisResults) {
           if (result.score !== null && !(result as any).failed) {
             await client.query(`
@@ -222,6 +317,15 @@ export async function POST(request: NextRequest) {
               ON CONFLICT (user_id, job_id)
               DO UPDATE SET score = EXCLUDED.score, reasoning = EXCLUDED.reasoning, breakdown = EXCLUDED.breakdown, analyzed_at = NOW()
             `, [userId, result.jobId, result.score, result.reasoning, JSON.stringify(result.breakdown)]);
+          } else {
+            // Clear any old cached error results for this job
+            await client.query(`
+              DELETE FROM job_match_results 
+              WHERE user_id = $1 AND job_id = $2 AND score IS NULL
+            `, [userId, result.jobId]).catch(err => {
+              // Ignore errors when clearing old results
+              console.warn('Failed to clear old error results:', err);
+            });
           }
 
           results[result.jobId] = result;
@@ -429,9 +533,19 @@ SCORING GUIDELINES:
 
     const result = await response.json();
     console.log('Anthropic API response received');
+    console.log('Response structure:', { 
+      hasContent: !!result.content, 
+      contentLength: result.content?.length,
+      firstContentType: result.content?.[0]?.type 
+    });
+    
+    if (!result.content || !result.content[0] || !result.content[0].text) {
+      console.error('Invalid API response structure:', JSON.stringify(result, null, 2));
+      throw new Error('Invalid API response: missing content or text');
+    }
     
     const content = result.content[0].text;
-    console.log('AI response content:', content);
+    console.log('AI response content length:', content.length);
     
     // Extract JSON from the response with better error handling
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -569,21 +683,11 @@ SCORING GUIDELINES:
     }
   } catch (error) {
     console.error('Error in analyzeJobMatchWithAI:', error);
+    console.error('⚠️ AI analysis failed for job:', data.job.title);
+    console.error('🔧 This is likely due to missing CLAUDE_API_KEY or API error - see AI_SETUP_GUIDE.md for setup instructions');
     
-    // Provide a reasonable fallback score instead of throwing
-    console.log('⚠️ AI analysis failed, using improved fallback scoring for job:', data.job.title);
-    console.log('🔧 This is likely due to missing CLAUDE_API_KEY - see AI_SETUP_GUIDE.md for setup instructions');
-    
-    // Calculate a comprehensive fallback score based on multiple criteria
-    const fallbackScore = calculateComprehensiveFallbackScore(data);
-    
-    console.log(`🔍 Fallback score calculated: ${fallbackScore.score} for job: ${data.job.title}`);
-    
-    return {
-      score: fallbackScore.score,
-      reasoning: fallbackScore.reasoning,
-      breakdown: fallbackScore.breakdown
-    };
+    // Throw the error so it can be caught and handled properly
+    throw error;
   }
 }
 

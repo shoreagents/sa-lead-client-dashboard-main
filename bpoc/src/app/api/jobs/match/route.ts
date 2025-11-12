@@ -35,41 +35,71 @@ export async function GET(request: NextRequest) {
 
       const user = userResult.rows[0];
 
-      // Determine job type and query appropriate table
+      // Check all three job sources to find the job
       const isRecruiterJob = jobId.includes('-') || isNaN(Number(jobId));
-      let jobResult;
+      let jobResult = { rows: [] };
       
       if (isRecruiterJob) {
+        // Check recruiter_jobs table
         try {
           jobResult = await client.query(`
             SELECT 
-              rj.id, rj.job_title, rj.job_description, rj.requirements, 
-              rj.responsibilities, rj.benefits, rj.skills, rj.experience_level,
+              rj.id, rj.job_title, rj.job_description, 
+              COALESCE(rj.requirements, ARRAY[]::text[]) as requirements, 
+              COALESCE(rj.responsibilities, ARRAY[]::text[]) as responsibilities, 
+              COALESCE(rj.benefits, ARRAY[]::text[]) as benefits, 
+              COALESCE(rj.skills, ARRAY[]::text[]) as skills, 
+              rj.experience_level,
               rj.industry, rj.department, rj.work_arrangement, rj.salary_min, rj.salary_max,
               COALESCE(rj.company_id, u.company) as company_name, 'recruiter_jobs' as source
             FROM recruiter_jobs rj
             LEFT JOIN users u ON u.id = rj.recruiter_id
-            WHERE rj.id = $1
+            WHERE rj.id = $1 AND rj.status = 'active'
           `, [jobId]);
         } catch (error) {
           console.error('Error fetching recruiter job:', error);
-          jobResult = { rows: [] };
         }
       } else {
+        // Check job_requests table first (admin jobs)
         try {
           jobResult = await client.query(`
             SELECT 
-              pjr.id, pjr.job_title, pjr.job_description, pjr.requirements, 
-              pjr.responsibilities, pjr.benefits, pjr.skills, pjr.experience_level,
-              pjr.industry, pjr.department, pjr.work_arrangement, pjr.salary_min, pjr.salary_max,
-              m.company as company_name, 'processed_job_requests' as source
-            FROM processed_job_requests pjr
-            LEFT JOIN members m ON pjr.company_id = m.company_id
-            WHERE pjr.id = $1
+              jr.id, jr.job_title, jr.job_description, 
+              COALESCE(jr.requirements, ARRAY[]::text[]) as requirements, 
+              COALESCE(jr.responsibilities, ARRAY[]::text[]) as responsibilities, 
+              COALESCE(jr.benefits, ARRAY[]::text[]) as benefits, 
+              COALESCE(jr.skills, ARRAY[]::text[]) as skills, 
+              jr.experience_level,
+              jr.industry, jr.department, jr.work_arrangement, jr.salary_min, jr.salary_max,
+              m.company as company_name, 'job_requests' as source
+            FROM job_requests jr
+            LEFT JOIN members m ON jr.company_id = m.company_id
+            WHERE jr.id = $1 AND jr.status = 'active'
           `, [jobId]);
         } catch (error) {
-          console.error('Error fetching processed job:', error);
-          jobResult = { rows: [] };
+          console.error('Error fetching job_requests:', error);
+        }
+        
+        // If not found in job_requests, check processed_job_requests
+        if (jobResult.rows.length === 0) {
+          try {
+            jobResult = await client.query(`
+              SELECT 
+                pjr.id, pjr.job_title, pjr.job_description, 
+                COALESCE(pjr.requirements, ARRAY[]::text[]) as requirements, 
+                COALESCE(pjr.responsibilities, ARRAY[]::text[]) as responsibilities, 
+                COALESCE(pjr.benefits, ARRAY[]::text[]) as benefits, 
+                COALESCE(pjr.skills, ARRAY[]::text[]) as skills, 
+                pjr.experience_level,
+                pjr.industry, pjr.department, pjr.work_arrangement, pjr.salary_min, pjr.salary_max,
+                m.company as company_name, 'processed_job_requests' as source
+              FROM processed_job_requests pjr
+              LEFT JOIN members m ON pjr.company_id = m.company_id
+              WHERE pjr.id = $1 AND pjr.status = 'active'
+            `, [jobId]);
+          } catch (error) {
+            console.error('Error fetching processed job:', error);
+          }
         }
       }
 
@@ -82,24 +112,29 @@ export async function GET(request: NextRequest) {
       const job = jobResult.rows[0];
 
       // Check if we already have a recent analysis for this user-job combination (24 hours)
+      // Only use cached results if they have a valid score (not null)
       try {
         const existingResult = await client.query(`
           SELECT score, reasoning, breakdown, analyzed_at
           FROM job_match_results 
           WHERE user_id = $1 AND job_id = $2
           AND analyzed_at > NOW() - INTERVAL '24 hours'
+          AND score IS NOT NULL
         `, [userId, jobId]);
 
         if (existingResult.rows.length > 0) {
           const cached = existingResult.rows[0];
-          console.log(`Using cached match result for user ${userId}, job ${jobId}`);
-          return NextResponse.json({
-            matchScore: cached.score,
-            reasoning: cached.reasoning,
-            breakdown: typeof cached.breakdown === 'string' ? JSON.parse(cached.breakdown) : cached.breakdown,
-            message: 'Using cached analysis result',
-            cached: true
-          });
+          // Double-check that score is valid
+          if (cached.score !== null && cached.score !== undefined) {
+            console.log(`Using cached match result for user ${userId}, job ${jobId}`);
+            return NextResponse.json({
+              matchScore: cached.score,
+              reasoning: cached.reasoning,
+              breakdown: typeof cached.breakdown === 'string' ? JSON.parse(cached.breakdown) : cached.breakdown,
+              message: 'Using cached analysis result',
+              cached: true
+            });
+          }
         }
       } catch (cacheErr) {
         console.warn('Failed to check cached results (table may not exist):', cacheErr);
@@ -159,10 +194,34 @@ export async function GET(request: NextRequest) {
           title: job.job_title,
           company: job.company_name,
           description: job.job_description,
-          requirements: job.requirements || [],
-          responsibilities: job.responsibilities || [],
-          benefits: job.benefits || [],
-          skills: job.skills || [],
+          requirements: (() => {
+            if (Array.isArray(job.requirements)) return job.requirements;
+            if (typeof job.requirements === 'string') {
+              try { return JSON.parse(job.requirements); } catch { return []; }
+            }
+            return job.requirements || [];
+          })(),
+          responsibilities: (() => {
+            if (Array.isArray(job.responsibilities)) return job.responsibilities;
+            if (typeof job.responsibilities === 'string') {
+              try { return JSON.parse(job.responsibilities); } catch { return []; }
+            }
+            return job.responsibilities || [];
+          })(),
+          benefits: (() => {
+            if (Array.isArray(job.benefits)) return job.benefits;
+            if (typeof job.benefits === 'string') {
+              try { return JSON.parse(job.benefits); } catch { return []; }
+            }
+            return job.benefits || [];
+          })(),
+          skills: (() => {
+            if (Array.isArray(job.skills)) return job.skills;
+            if (typeof job.skills === 'string') {
+              try { return JSON.parse(job.skills); } catch { return []; }
+            }
+            return job.skills || [];
+          })(),
           experienceLevel: job.experience_level,
           industry: job.industry,
           department: job.department,
@@ -408,10 +467,20 @@ SCORING GUIDELINES:
     }
 
     const result = await response.json();
-    console.log('Anthropic API response:', result);
+    console.log('Anthropic API response received');
+    console.log('Response structure:', { 
+      hasContent: !!result.content, 
+      contentLength: result.content?.length,
+      firstContentType: result.content?.[0]?.type 
+    });
+    
+    if (!result.content || !result.content[0] || !result.content[0].text) {
+      console.error('Invalid API response structure:', JSON.stringify(result, null, 2));
+      throw new Error('Invalid API response: missing content or text');
+    }
     
     const content = result.content[0].text;
-    console.log('AI response content:', content);
+    console.log('AI response content length:', content.length);
     
          // Extract JSON from the response with better error handling
      const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -473,18 +542,11 @@ SCORING GUIDELINES:
 
   } catch (error: any) {
     console.error('Error calling Anthropic API:', error);
+    console.error('⚠️ AI analysis failed for job:', data.job.title);
+    console.error('🔧 This is likely due to missing CLAUDE_API_KEY or API error - see AI_SETUP_GUIDE.md for setup instructions');
     
-    // Use comprehensive fallback scoring instead of returning 0
-    console.log('⚠️ AI analysis failed, using improved fallback scoring for job:', data.job.title);
-    console.log('🔧 This is likely due to missing CLAUDE_API_KEY - see AI_SETUP_GUIDE.md for setup instructions');
-    const fallbackScore = calculateComprehensiveFallbackScore(data);
-    
-    return {
-      score: fallbackScore.score,
-      reasoning: fallbackScore.reasoning,
-      breakdown: fallbackScore.breakdown,
-      error: false // Don't mark as error since we have a fallback
-    };
+    // Throw the error so it can be caught and handled properly
+    throw error;
   }
 }
 
