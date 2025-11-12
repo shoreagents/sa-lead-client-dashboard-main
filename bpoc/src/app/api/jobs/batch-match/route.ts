@@ -36,10 +36,32 @@ export async function POST(request: NextRequest) {
       const user = userResult.rows[0];
 
       // Separate job IDs by type (processed jobs are integers, recruiter jobs are UUIDs)
-      const numericJobIds = jobIds.filter((id: string) => !id.includes('-') && !isNaN(Number(id)));
-      const recruiterJobIds = jobIds.filter((id: string) => id.includes('-') || isNaN(Number(id)));
+      // Frontend sends IDs like "recruiter_<uuid>", "processed_<id>", or "job_request_<id>"
+      // We need to extract the actual IDs for database queries
+      const processedJobIds: string[] = [];
+      const recruiterJobIds: string[] = [];
+      const jobRequestIds: string[] = [];
       
-      console.log('🔍 Separated job IDs:', { numericJobIds, recruiterJobIds });
+      jobIds.forEach((id: string) => {
+        if (id.startsWith('recruiter_')) {
+          recruiterJobIds.push(id.replace('recruiter_', ''));
+        } else if (id.startsWith('processed_')) {
+          processedJobIds.push(id.replace('processed_', ''));
+        } else if (id.startsWith('job_request_')) {
+          jobRequestIds.push(id.replace('job_request_', ''));
+        } else if (id.includes('-') || isNaN(Number(id))) {
+          // UUID format (recruiter job without prefix)
+          recruiterJobIds.push(id);
+        } else {
+          // Numeric ID (processed or job_request without prefix)
+          processedJobIds.push(id);
+          jobRequestIds.push(id);
+        }
+      });
+      
+      const numericJobIds = [...new Set([...processedJobIds, ...jobRequestIds])];
+      
+      console.log('🔍 Separated job IDs:', { numericJobIds, recruiterJobIds, jobRequestIds });
 
       // Get all jobs from all three sources
       let jobRequestsResult, processedJobsResult, recruiterJobsResult;
@@ -60,7 +82,7 @@ export async function POST(request: NextRequest) {
             FROM job_requests jr
             LEFT JOIN members m ON jr.company_id = m.company_id
             WHERE jr.id = ANY($1) AND jr.status = 'active'
-          `, [numericJobIds]);
+          `, [jobRequestIds]);
         } catch (error) {
           console.error('Error fetching job_requests:', error);
           jobRequestsResult = { rows: [] };
@@ -70,7 +92,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Check processed_job_requests table
-      if (numericJobIds.length > 0) {
+      if (processedJobIds.length > 0) {
         try {
           processedJobsResult = await client.query(`
             SELECT 
@@ -85,7 +107,7 @@ export async function POST(request: NextRequest) {
             FROM processed_job_requests pjr
             LEFT JOIN members m ON pjr.company_id = m.company_id
             WHERE pjr.id = ANY($1) AND pjr.status = 'active'
-          `, [numericJobIds]);
+          `, [processedJobIds]);
         } catch (error) {
           console.error('Error fetching processed jobs:', error);
           processedJobsResult = { rows: [] };
@@ -120,60 +142,116 @@ export async function POST(request: NextRequest) {
       }
 
       // Combine results from all three sources
-      const jobResult = {
-        rows: [...jobRequestsResult.rows, ...processedJobsResult.rows, ...recruiterJobsResult.rows]
-      };
-
-      const jobs = jobResult.rows;
+      // Map the database IDs back to the frontend format for proper matching
+      const jobs = [
+        ...jobRequestsResult.rows.map((row: any) => ({ ...row, frontendId: `job_request_${row.id}` })),
+        ...processedJobsResult.rows.map((row: any) => ({ ...row, frontendId: `processed_${row.id}` })),
+        ...recruiterJobsResult.rows.map((row: any) => ({ ...row, frontendId: `recruiter_${row.id}` }))
+      ];
+      
       console.log('🔍 Batch match - Found jobs:', jobs.length);
-      console.log('🔍 Batch match - Job sources:', jobs.map(j => ({ id: j.id, source: j.source, title: j.job_title })));
+      console.log('🔍 Batch match - Job sources:', jobs.map(j => ({ id: j.id, frontendId: j.frontendId, source: j.source, title: j.job_title })));
       
       if (jobs.length === 0) {
         console.warn('⚠️ No jobs found for batch match. Requested job IDs:', jobIds);
+        console.warn('⚠️ Searched in: job_requests, processed_job_requests, recruiter_jobs');
         return NextResponse.json({ 
           results: {},
           cached: 0,
           analyzed: 0,
-          error: 'No jobs found'
+          error: 'No jobs found',
+          message: `None of the requested ${jobIds.length} job IDs were found in any job table`
         });
+      }
+      
+      // Log any missing jobs (check against frontend IDs)
+      const foundFrontendIds = new Set(jobs.map(j => j.frontendId));
+      const missingJobIds = jobIds.filter(id => !foundFrontendIds.has(id));
+      if (missingJobIds.length > 0) {
+        console.warn(`⚠️ ${missingJobIds.length} job(s) not found:`, missingJobIds);
       }
 
       // Check cache for all jobs at once (24 hours cache)
-      // Only cache successful results (score is not null)
-      const cachedResults = await client.query(`
+      // Use the actual database IDs (not frontend IDs) for cache lookup
+      const allDbIds = [
+        ...jobRequestIds,
+        ...processedJobIds,
+        ...recruiterJobIds
+      ];
+      
+      // Only cache successful results (score is not null and not 0 - 0 might indicate a failed analysis)
+      const cachedResults = allDbIds.length > 0 ? await client.query(`
         SELECT job_id, score, reasoning, breakdown, analyzed_at
-        FROM job_match_results 
+        FROM job_match_results
         WHERE user_id = $1 AND job_id = ANY($2)
         AND analyzed_at > NOW() - INTERVAL '24 hours'
         AND score IS NOT NULL
-      `, [userId, jobIds]);
+        AND score > 0
+      `, [userId, allDbIds]) : { rows: [] };
 
       const cachedMap = new Map();
       cachedResults.rows.forEach(row => {
-        // Only cache results with valid scores
-        if (row.score !== null && row.score !== undefined) {
-          cachedMap.set(row.job_id, {
-            score: row.score,
-            reasoning: row.reasoning,
-            breakdown: typeof row.breakdown === 'string' ? JSON.parse(row.breakdown) : row.breakdown
-          });
+        // Only cache results with valid scores (not null, not undefined, and > 0)
+        // Score 0 might indicate a failed analysis, so we'll re-analyze
+        if (row.score !== null && row.score !== undefined && row.score > 0) {
+          // Map database job_id to frontend ID format for matching
+          const dbJobId = String(row.job_id);
+          // Find which job this corresponds to (match by database ID)
+          const job = jobs.find(j => String(j.id) === dbJobId);
+          if (job) {
+            // Use frontendId as the key for internal cache map
+            cachedMap.set(job.frontendId, {
+              score: row.score,
+              reasoning: row.reasoning,
+              breakdown: typeof row.breakdown === 'string' ? JSON.parse(row.breakdown) : row.breakdown
+            });
+            console.log(`📦 Cached: dbId=${dbJobId}, frontendId=${job.frontendId}, score=${row.score}%`);
+          } else {
+            console.warn(`⚠️ Cached result found for job_id ${dbJobId} but job not found in current job list`);
+          }
         }
       });
 
-      // Process only non-cached jobs
-      const uncachedJobs = jobs.filter(job => !cachedMap.has(job.id));
+      console.log(`📦 Cache check: Found ${cachedMap.size} cached results out of ${jobs.length} jobs`);
+      if (cachedMap.size > 0) {
+        console.log('📦 Cached job IDs:', Array.from(cachedMap.keys()));
+      }
+
+      // Process only non-cached jobs (use frontendId for matching)
+      const uncachedJobs = jobs.filter(job => !cachedMap.has(job.frontendId));
+      console.log(`🔄 Will analyze ${uncachedJobs.length} uncached jobs`);
       const results: Record<string, any> = {};
 
-      // Add cached results
-      cachedMap.forEach((value, jobId) => {
-        results[jobId] = { ...value, cached: true };
+      // Add cached results (use originalId for matching with frontend)
+      cachedMap.forEach((value, frontendId) => {
+        // Find the job to get its originalId (database ID)
+        const job = jobs.find(j => j.frontendId === frontendId);
+        if (job) {
+          // Use originalId (database ID) as the key to match frontend expectations
+          results[String(job.id)] = { ...value, cached: true, error: false };
+          console.log(`✅ Using cached result for job ${frontendId} (db: ${job.id}): ${value.score}%`);
+        }
       });
 
-      // Process uncached jobs in parallel
+      // Process uncached jobs in parallel with rate limiting
+      // Process in batches to avoid hitting API rate limits
       if (uncachedJobs.length > 0) {
-        console.log(`Processing ${uncachedJobs.length} uncached jobs in parallel`);
+        console.log(`Processing ${uncachedJobs.length} uncached jobs in batches of 5`);
         
-        const analysisPromises = uncachedJobs.map(async (job) => {
+        // Process jobs in batches of 5 to avoid rate limits
+        const batchSize = 5;
+        const batches = [];
+        for (let i = 0; i < uncachedJobs.length; i += batchSize) {
+          batches.push(uncachedJobs.slice(i, i + batchSize));
+        }
+        
+        const allAnalysisResults = [];
+        
+        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+          const batch = batches[batchIndex];
+          console.log(`📦 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} jobs)`);
+          
+          const analysisPromises = batch.map(async (job) => {
           // Calculate distance from user to office (Clark, Pampanga)
           const officeLat = 15.175949880147643;
           const officeLng = 120.53233701473826;
@@ -265,14 +343,21 @@ export async function POST(request: NextRequest) {
           };
 
           try {
-            return await analyzeJobMatchWithAI(analysisData).then(matchScore => ({
-              jobId: job.id,
-              score: Math.round(matchScore.score ?? 0),
-              reasoning: matchScore.reasoning ?? '',
-              breakdown: matchScore.breakdown ?? {},
-              cached: false,
-              error: matchScore.error || false
-            })).catch(error => {
+            return await analyzeJobMatchWithAI(analysisData).then(matchScore => {
+              // If there's an error or score is null, preserve null (don't convert to 0)
+              const finalScore = (matchScore.error || matchScore.score === null || matchScore.score === undefined) 
+                ? null 
+                : Math.round(matchScore.score);
+              
+              return {
+                jobId: job.id,
+                score: finalScore,
+                reasoning: matchScore.reasoning ?? '',
+                breakdown: matchScore.breakdown ?? {},
+                cached: false,
+                error: matchScore.error || matchScore.failed || matchScore.score === null || false
+              };
+            }).catch(error => {
               console.error(`❌ Error analyzing job ${job.id} (${job.job_title}):`, error);
               console.error(`❌ Error details:`, {
                 message: error instanceof Error ? error.message : 'Unknown error',
@@ -303,14 +388,23 @@ export async function POST(request: NextRequest) {
               error: true
             };
           }
-        });
+          });
+          
+          const batchResults = await Promise.all(analysisPromises);
+          allAnalysisResults.push(...batchResults);
+          
+          // Add a small delay between batches to avoid rate limits (except for the last batch)
+          if (batchIndex < batches.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay between batches
+          }
+        }
+        
+        const analysisResults = allAnalysisResults;
 
-        const analysisResults = await Promise.all(analysisPromises);
-
-        // Cache the new results (only cache successful analyses)
-        // Also clear any old error results (null scores) for these jobs
+        // Cache the new results (only cache successful analyses with score > 0)
+        // Also clear any old error results (null scores or score 0) for these jobs
         for (const result of analysisResults) {
-          if (result.score !== null && !(result as any).failed) {
+          if (result.score !== null && result.score > 0 && !(result as any).failed) {
             await client.query(`
               INSERT INTO job_match_results (user_id, job_id, score, reasoning, breakdown, analyzed_at)
               VALUES ($1, $2, $3, $4, $5, NOW())
@@ -318,17 +412,26 @@ export async function POST(request: NextRequest) {
               DO UPDATE SET score = EXCLUDED.score, reasoning = EXCLUDED.reasoning, breakdown = EXCLUDED.breakdown, analyzed_at = NOW()
             `, [userId, result.jobId, result.score, result.reasoning, JSON.stringify(result.breakdown)]);
           } else {
-            // Clear any old cached error results for this job
+            // Clear any old cached error results for this job (null scores or score 0)
             await client.query(`
               DELETE FROM job_match_results 
-              WHERE user_id = $1 AND job_id = $2 AND score IS NULL
+              WHERE user_id = $1 AND job_id = $2 AND (score IS NULL OR score = 0)
             `, [userId, result.jobId]).catch(err => {
               // Ignore errors when clearing old results
               console.warn('Failed to clear old error results:', err);
             });
           }
 
-          results[result.jobId] = result;
+          // The frontend sends originalId (database ID) and expects results keyed by originalId
+          // So we need to return results using the database ID (job.id), not frontendId
+          const job = jobs.find(j => String(j.id) === String(result.jobId));
+          if (job) {
+            // Return result keyed by database ID (originalId) to match frontend expectations
+            results[String(job.id)] = result;
+          } else {
+            // Fallback: use the jobId directly
+            results[String(result.jobId)] = result;
+          }
         }
       }
 
@@ -371,6 +474,44 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
     Math.sin(dLon/2) * Math.sin(dLon/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c;
+}
+
+// Helper function to retry API calls with exponential backoff
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<T> {
+  let lastError: any;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      
+      // Check if error is retryable (network errors, rate limits, timeouts)
+      const isRetryable = 
+        error.message?.includes('timeout') ||
+        error.message?.includes('network') ||
+        error.message?.includes('rate limit') ||
+        error.message?.includes('429') ||
+        error.message?.includes('503') ||
+        error.message?.includes('502') ||
+        error.message?.includes('504');
+      
+      if (!isRetryable || attempt === maxRetries - 1) {
+        throw error;
+      }
+      
+      // Exponential backoff: 1s, 2s, 4s
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.log(`⚠️ Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms delay`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  
+  throw lastError;
 }
 
 // Reuse the existing analyzeJobMatchWithAI function
@@ -506,23 +647,53 @@ SCORING GUIDELINES:
       skills: data.job.skills?.length || 0
     });
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ]
-      })
+    // Wrap the API call in retry logic for transient failures
+    const response = await retryWithBackoff(async () => {
+      // Create abort controller for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
+      try {
+        const fetchResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            temperature: 0, // Set to 0 for deterministic, consistent results
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ]
+          }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Check for rate limit errors
+        if (fetchResponse.status === 429) {
+          const retryAfter = fetchResponse.headers.get('retry-after');
+          const delay = retryAfter ? parseInt(retryAfter) * 1000 : 5000;
+          console.warn(`⚠️ Rate limit hit, waiting ${delay}ms before retry`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          throw new Error(`Rate limit: ${fetchResponse.status}`);
+        }
+        
+        return fetchResponse;
+      } catch (error: any) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+          throw new Error('Request timeout after 30 seconds');
+        }
+        throw error;
+      }
     });
 
     if (!response.ok) {
@@ -546,26 +717,30 @@ SCORING GUIDELINES:
     
     const content = result.content[0].text;
     console.log('AI response content length:', content.length);
+    console.log('AI response preview (first 500 chars):', content.substring(0, 500));
     
-    // Extract JSON from the response with better error handling
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      let jsonStr = '';
+    // Try to extract JSON from the response - check for code blocks first
+    let jsonStr = '';
+    let jsonMatch = null;
+    
+    // First, try to find JSON in markdown code blocks (```json ... ``` or ``` ... ```)
+    const codeBlockMatch = content.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+    if (codeBlockMatch) {
+      jsonStr = codeBlockMatch[1];
+      console.log('Found JSON in code block');
+    } else {
+      // Try to find JSON object in the content
+      jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
+    }
+    
+    if (jsonStr) {
       try {
-        // Clean the JSON string by removing control characters and fixing common issues
-        jsonStr = jsonMatch[0]
-          .replace(/[\x00-\x1F\x7F]/g, '') // Remove control characters
-          .replace(/\n/g, ' ') // Replace newlines with spaces
-          .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-          .trim();
-
-        // Try to fix common JSON issues
-        jsonStr = jsonStr
-          .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
-          .replace(/([{,]\s*)(\w+):/g, '$1"$2":') // Add quotes around unquoted keys
-          .replace(/:\s*([^",{\[\s][^,}]*?)(\s*[,}])/g, ': "$1"$2'); // Add quotes around unquoted string values
-
-        const parsed = JSON.parse(jsonStr);
+        // First, try parsing as-is (most responses should be valid JSON)
+        let parsed = JSON.parse(jsonStr);
+        console.log('✅ Successfully parsed JSON on first attempt');
         
         // Validate the response structure
         if (typeof parsed.score !== 'undefined') {
@@ -599,48 +774,69 @@ SCORING GUIDELINES:
           parsed.weightedScore = totalWeight > 0 ? weightedSum / totalWeight : 75;
         }
 
+        // Validate that we have a valid score
+        const finalScore = parsed.weightedScore || parsed.score;
+        if (typeof finalScore !== 'number' || isNaN(finalScore) || finalScore < 0 || finalScore > 100) {
+          throw new Error(`Invalid score value: ${finalScore}`);
+        }
+
         return {
-          score: parsed.weightedScore || parsed.score || 75,
+          score: finalScore,
           reasoning: parsed.reasoning || 'Analysis completed',
           breakdown: parsed.breakdown || {}
         };
       } catch (parseError) {
-        console.error('JSON parsing error:', parseError);
-        console.error('Raw content:', content);
-        console.error('Cleaned JSON string:', jsonStr);
+        console.error('❌ JSON parsing error on first attempt:', parseError);
+        console.error('Raw JSON string (first 1000 chars):', jsonStr.substring(0, 1000));
         
-        // Try to extract a score from the content even if JSON parsing fails
-        const scoreMatch = content.match(/(?:score|match|rating)[:\s]*(\d+)/i);
-        const extractedScore = scoreMatch ? parseInt(scoreMatch[1]) : null;
-        
-        if (extractedScore !== null) {
-          console.log('Extracted fallback score:', extractedScore);
+        // Try cleaning and parsing again
+        try {
+          // More conservative cleaning - only fix obvious issues
+          let cleanedJson = jsonStr
+            .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F]/g, '') // Remove only problematic control chars
+            .replace(/,(\s*[}\]])/g, '$1'); // Remove trailing commas
+          
+          const parsed = JSON.parse(cleanedJson);
+          console.log('✅ Successfully parsed JSON after cleaning');
+          
+          const finalScore = parsed.weightedScore || parsed.score;
+          if (typeof finalScore !== 'number' || isNaN(finalScore) || finalScore < 0 || finalScore > 100) {
+            throw new Error(`Invalid score value: ${finalScore}`);
+          }
           
           return {
-            score: Math.min(100, Math.max(0, extractedScore)),
-            reasoning: 'Analysis completed with extracted scoring',
-            breakdown: {
-              skillsMatch: extractedScore,
-              experienceMatch: extractedScore,
-              careerMatch: extractedScore,
-              salaryMatch: extractedScore,
-              workSetupMatch: extractedScore,
-              locationMatch: extractedScore,
-              industryMatch: extractedScore,
-              shiftMatch: extractedScore,
-              culturalMatch: extractedScore
-            }
+            score: finalScore,
+            reasoning: parsed.reasoning || 'Analysis completed',
+            breakdown: parsed.breakdown || {}
           };
-        } else {
-          console.log('No score found in content, marking as failed');
+        } catch (secondParseError) {
+          console.error('❌ JSON parsing error after cleaning:', secondParseError);
+          console.error('Full content (first 2000 chars):', content.substring(0, 2000));
           
-          return {
-            score: null,
-            reasoning: 'Failed to analyze - Unable to parse AI response',
-            breakdown: {},
-            failed: true,
-            error: true
-          };
+          // Try to extract a score from the content even if JSON parsing fails
+          const scoreMatch = content.match(/(?:score|match|rating|weightedScore)[:\s]*(\d+)/i);
+          const extractedScore = scoreMatch ? parseInt(scoreMatch[1]) : null;
+          
+          if (extractedScore !== null && extractedScore >= 0 && extractedScore <= 100) {
+            console.log('⚠️ Extracted fallback score from content:', extractedScore);
+            
+            return {
+              score: extractedScore,
+              reasoning: 'Analysis completed with extracted scoring (JSON parsing failed)',
+              breakdown: {}
+            };
+          } else {
+            console.error('❌ No valid score found in content, marking as failed');
+            console.error('Full AI response:', content);
+            
+            return {
+              score: null,
+              reasoning: `Failed to analyze - Unable to parse AI response. Error: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`,
+              breakdown: {},
+              failed: true,
+              error: true
+            };
+          }
         }
       }
     } else {

@@ -105,7 +105,58 @@ export async function GET(_request: NextRequest) {
         salary_min: row.salary_min,
         salary_max: row.salary_max,
         created_at: row.created_at,
-        updated_at: row.updated_at
+        updated_at: row.updated_at,
+        // Include full details for initial load with proper parsing
+        job_description: row.job_description || '',
+        requirements: (() => {
+          if (Array.isArray(row.requirements)) {
+            return row.requirements.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
+            );
+          }
+          if (typeof row.requirements === 'string') {
+            try {
+              const parsed = JSON.parse(row.requirements);
+              return Array.isArray(parsed) ? parsed : [row.requirements];
+            } catch {
+              return row.requirements.split('\n\n').filter((s: string) => s.trim());
+            }
+          }
+          return [];
+        })(),
+        responsibilities: (() => {
+          if (Array.isArray(row.responsibilities)) {
+            return row.responsibilities.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
+            );
+          }
+          if (typeof row.responsibilities === 'string') {
+            try {
+              const parsed = JSON.parse(row.responsibilities);
+              return Array.isArray(parsed) ? parsed : [row.responsibilities];
+            } catch {
+              return row.responsibilities.split('\n\n').filter((s: string) => s.trim());
+            }
+          }
+          return [];
+        })(),
+        benefits: (() => {
+          if (Array.isArray(row.benefits)) {
+            return row.benefits.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
+            );
+          }
+          if (typeof row.benefits === 'string') {
+            try {
+              const parsed = JSON.parse(row.benefits);
+              return Array.isArray(parsed) ? parsed : [row.benefits];
+            } catch {
+              return row.benefits.split('\n\n').filter((s: string) => s.trim());
+            }
+          }
+          return [];
+        })(),
+        skills: row.skills || []
       }
     }))
 
@@ -171,7 +222,58 @@ export async function GET(_request: NextRequest) {
         salary_min: row.salary_min,
         salary_max: row.salary_max,
         created_at: row.created_at,
-        updated_at: row.updated_at
+        updated_at: row.updated_at,
+        // Include full details for initial load with proper parsing
+        job_description: row.job_description || '',
+        requirements: (() => {
+          if (Array.isArray(row.requirements)) {
+            return row.requirements.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
+            );
+          }
+          if (typeof row.requirements === 'string') {
+            try {
+              const parsed = JSON.parse(row.requirements);
+              return Array.isArray(parsed) ? parsed : [row.requirements];
+            } catch {
+              return row.requirements.split('\n\n').filter((s: string) => s.trim());
+            }
+          }
+          return [];
+        })(),
+        responsibilities: (() => {
+          if (Array.isArray(row.responsibilities)) {
+            return row.responsibilities.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
+            );
+          }
+          if (typeof row.responsibilities === 'string') {
+            try {
+              const parsed = JSON.parse(row.responsibilities);
+              return Array.isArray(parsed) ? parsed : [row.responsibilities];
+            } catch {
+              return row.responsibilities.split('\n\n').filter((s: string) => s.trim());
+            }
+          }
+          return [];
+        })(),
+        benefits: (() => {
+          if (Array.isArray(row.benefits)) {
+            return row.benefits.flatMap((item: any) => 
+              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
+            );
+          }
+          if (typeof row.benefits === 'string') {
+            try {
+              const parsed = JSON.parse(row.benefits);
+              return Array.isArray(parsed) ? parsed : [row.benefits];
+            } catch {
+              return row.benefits.split('\n\n').filter((s: string) => s.trim());
+            }
+          }
+          return [];
+        })(),
+        skills: row.skills || []
       }
     }))
 
