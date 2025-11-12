@@ -9,6 +9,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   KanbanBoard, 
   KanbanCard, 
@@ -244,75 +245,94 @@ export default function LeadManagement() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
-            <div className="w-full">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-20 h-screen overflow-hidden">
+            <div className="w-full flex flex-col flex-1 min-h-0">
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
-                    <Users className="h-4 w-4 text-lime-600" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-lime-600">
-                      {isLoading ? '...' : leadsData?.total || 0}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      All pipeline stages
-                    </p>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
+                {isLoading ? (
+                  <>
+                    {[...Array(4)].map((_, i) => (
+                      <Card key={i} className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 pt-1.5 px-2.5">
+                          <Skeleton className="h-3 w-20" />
+                          <Skeleton className="h-3 w-3 rounded" />
+                        </CardHeader>
+                        <CardContent className="px-2.5 pb-1.5 pt-0">
+                          <Skeleton className="h-5 w-12 mb-1" />
+                          <Skeleton className="h-2.5 w-28" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                        <CardTitle className="text-sm font-medium !mb-0">Total Leads</CardTitle>
+                        <Users className="h-3.5 w-3.5 text-lime-600" />
+                      </CardHeader>
+                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                        <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
+                          {leadsData?.total || 0}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                          All pipeline stages
+                        </p>
+                      </CardContent>
+                    </Card>
 
-                <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">New Leads</CardTitle>
-                    <UserPlus className="h-4 w-4 text-lime-600" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-lime-600">
-                      {isLoading ? '...' : stats.new}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Fresh opportunities
-                    </p>
-                  </CardContent>
-                </Card>
+                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                        <CardTitle className="text-sm font-medium !mb-0">New Leads</CardTitle>
+                        <UserPlus className="h-3.5 w-3.5 text-lime-600" />
+                      </CardHeader>
+                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                        <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
+                          {stats.new}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                          Fresh opportunities
+                        </p>
+                      </CardContent>
+                    </Card>
 
-                <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">In Progress</CardTitle>
-                    <Clock className="h-4 w-4 text-lime-600" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-lime-600">
-                      {isLoading ? '...' : stats.stage1 + stats.stage2 + stats.pending + stats.meeting_booked + stats.signed_up}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Active deals
-                    </p>
-                  </CardContent>
-                </Card>
+                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                        <CardTitle className="text-sm font-medium !mb-0">In Progress</CardTitle>
+                        <Clock className="h-3.5 w-3.5 text-lime-600" />
+                      </CardHeader>
+                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                        <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
+                          {stats.stage1 + stats.stage2 + stats.pending + stats.meeting_booked + stats.signed_up}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                          Active deals
+                        </p>
+                      </CardContent>
+                    </Card>
 
-                <Card className="border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Closed Won</CardTitle>
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-green-600">
-                      {isLoading ? '...' : stats.closed_won}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Successful deals
-                    </p>
-                  </CardContent>
-                </Card>
+                    <Card className="border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm py-3 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                        <CardTitle className="text-sm font-medium !mb-0">Closed Won</CardTitle>
+                        <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                      </CardHeader>
+                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                        <div className="text-2xl font-bold text-green-600 leading-none -mt-0.5">
+                          {stats.closed_won}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
+                          Successful deals
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
 
               {/* Kanban Board */}
-              <Card>
-                <CardHeader>
+              <Card className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                <CardHeader className="flex-shrink-0">
                   <CardTitle className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-lime-600" />
                     Lead Tracking
@@ -321,16 +341,22 @@ export default function LeadManagement() {
                     Drag and drop leads between stages to update their status
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="flex-1 min-h-0 overflow-hidden p-0">
                   {isLoading ? (
-                    <div className="flex items-center justify-center h-[600px]">
-                      <div className="flex items-center gap-2">
-                        <RefreshCw className="w-6 h-6 animate-spin text-lime-600" />
-                        <span className="text-lime-600">Loading leads...</span>
-                      </div>
+                    <div className="space-y-4 p-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
+                          <Skeleton className="h-12 w-12 rounded" />
+                          <div className="space-y-2 flex-1">
+                            <Skeleton className="h-4 w-[200px]" />
+                            <Skeleton className="h-4 w-[150px]" />
+                          </div>
+                          <Skeleton className="h-8 w-24" />
+                        </div>
+                      ))}
                     </div>
                   ) : error ? (
-                    <div className="flex items-center justify-center h-[600px]">
+                    <div className="flex items-center justify-center h-full">
                       <div className="text-center">
                         <AlertCircle className="w-12 h-12 text-lime-500 mx-auto mb-4" />
                         <p className="text-lime-600 font-medium">Failed to load leads</p>
@@ -345,7 +371,7 @@ export default function LeadManagement() {
                       </div>
                     </div>
                   ) : leads.length === 0 ? (
-                    <div className="flex items-center justify-center h-[600px]">
+                    <div className="flex items-center justify-center h-full">
                       <div className="text-center">
                         <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-600 font-medium">No leads found</p>
@@ -353,17 +379,19 @@ export default function LeadManagement() {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-[600px]">
+                    <div className="h-full overflow-hidden flex flex-col">
                       {updateLeadStatusMutation.isPending && (
                         <div className="absolute top-4 right-4 bg-lime-100 text-lime-800 px-3 py-2 rounded-md text-sm font-medium z-10">
                           Updating lead status...
                         </div>
                       )}
-                      <KanbanProvider
-                        columns={columns}
-                        data={leads}
-                        onDataChange={handleDataChange}
-                      >
+                      <div className="flex-1 min-h-0 overflow-hidden">
+                        <KanbanProvider
+                          columns={columns}
+                          data={leads}
+                          onDataChange={handleDataChange}
+                          className="h-full"
+                        >
                         {(column) => (
                           <KanbanBoard key={column.id} id={column.id}>
                             <KanbanHeader className="bg-lime-50 border-b border-lime-200">
@@ -442,7 +470,8 @@ export default function LeadManagement() {
                             </KanbanCards>
                           </KanbanBoard>
                         )}
-                      </KanbanProvider>
+                        </KanbanProvider>
+                      </div>
                     </div>
                   )}
                 </CardContent>

@@ -28,6 +28,7 @@ import { UserQuoteService } from '@/lib/userQuoteService'
 import { UserQuoteSummary } from '@/hooks/use-api'
 import { useAuth } from '@/lib/auth-context'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
+import { TopCandidateSection } from '@/components/ui/top-candidate-with-matches'
 
 // All available case studies with metadata (defined outside component to prevent re-creation)
 const ALL_CASE_STUDIES = [
@@ -90,6 +91,17 @@ export function BottomNav() {
   // Use the engagement tracking hook only on client side
   // const { // recordInteraction } = useEngagementTracking()
   const { appUser } = useAuth()
+  
+  // Get user ID - either from authenticated user or device ID for anonymous users
+  const userId = React.useMemo(() => {
+    if (appUser?.user_id) {
+      return appUser.user_id
+    }
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('content_tracking_device_id')
+    }
+    return null
+  }, [appUser?.user_id])
   
   // Show/hide bottom nav based on scroll position
   useEffect(() => {
@@ -706,79 +718,23 @@ export function BottomNav() {
             <div className="relative z-10 max-w-6xl mx-auto">
               {/* 4x2 Grid Layout - All components visible without scrolling */}
               <div className="grid grid-cols-4 gap-3 h-full">
-                {/* Top Left: Top Candidate */}
+                {/* Top Left: Top Candidates Carousel */}
                 <div className="col-span-1 row-span-1">
                   <Card className="hover:shadow-md transition-shadow h-full overflow-hidden p-0">
                     <div className="px-3 py-2 bg-lime-600">
                       <div className="flex items-center space-x-2">
                         <Users className="w-4 h-4 text-lime-50" />
-                        <h3 className="text-sm font-semibold text-lime-50">Top Candidate</h3>
+                        <h3 className="text-sm font-semibold text-lime-50">Top Candidates</h3>
                       </div>
                     </div>
                     <CardContent className="p-3 h-full flex flex-col">
-                      {isLoadingCandidate ? (
-                        <div className="flex items-center justify-center py-4">
-                          <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-6 h-6" />
-                        </div>
-                      ) : topCandidate ? (
-                        <div className="space-y-2 flex-1 flex flex-col justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="w-12 h-12">
-                              {(() => {
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                const avatarUrl = String((topCandidate as any)?.user?.avatar_url || '');
-                                return avatarUrl && avatarUrl !== 'undefined' && avatarUrl !== 'null' && avatarUrl.trim() !== '' ? (
-                                  <AvatarImage 
-                                    src={avatarUrl} 
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    alt={String((topCandidate as any)?.user?.name || 'Candidate')}
-                                    onError={() => console.log('❌ Top candidate avatar failed to load')}
-                                    onLoad={() => console.log('✅ Top candidate avatar loaded successfully')}
-                                  />
-                                ) : null;
-                              })()}
-                              <AvatarFallback className="bg-gradient-to-br from-lime-200 to-lime-300 text-lime-800 text-lg font-bold border-2 border-lime-400 shadow-sm">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {String((topCandidate as any)?.user?.name || 'U').charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium text-gray-900 truncate">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {String((topCandidate as any)?.user?.name || 'Unknown')}
-                              </p>
-                              <p className="text-xs text-gray-500 truncate">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {String((topCandidate as any)?.user?.position || 'Position')}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex space-x-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 text-xs h-6"
-                              onClick={() => {
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                handleAskForInterview(String((topCandidate as any)?.user?.id), String((topCandidate as any)?.user?.name));
-                              }}
-                            >
-                              Interview
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="flex-1 text-xs bg-lime-600 hover:bg-lime-700 h-6"
-                              onClick={handleViewProfile}
-                            >
-                              View Profile
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center py-4">
-                          <p className="text-xs text-gray-500">No candidate data</p>
-                        </div>
-                      )}
+                      <TopCandidateSection 
+                        topCandidate={topCandidate}
+                        isLoading={isLoadingCandidate}
+                        onViewProfile={handleViewProfile}
+                        onAskForInterview={handleAskForInterview}
+                        userId={userId}
+                      />
                     </CardContent>
                   </Card>
                 </div>

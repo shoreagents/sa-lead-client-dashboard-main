@@ -193,6 +193,16 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     }
   }, [isLoading]);
 
+  // Auto-show pricing form after contact info is collected (if team creation was requested)
+  useEffect(() => {
+    if (isDirectTeamCreation && !isCollectingContact && contactStep === null && !isCollectingPricing) {
+      // Contact form was just completed, now show pricing form
+      console.log('✅ Contact info collected, now showing pricing form for team creation');
+      setIsCollectingPricing(true);
+      setPricingStep('teamSize');
+    }
+  }, [isDirectTeamCreation, isCollectingContact, contactStep, isCollectingPricing]);
+
   // Separate useEffect for focus
   useEffect(() => {
     if (isOpen && !isMinimized && !isCollectingContact && !isCollectingPricing) {
@@ -497,12 +507,23 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
         conversationHistory: [...messages, userMessage]
       });
       
-      // Direct team creation - immediately trigger pricing calculator
-      if (isDirectTeamCreation && !isCollectingPricing) {
-        console.log('🎯 Direct team creation detected, starting pricing calculator immediately');
-        setIsDirectTeamCreation(true);
-        setIsCollectingPricing(true);
-        setPricingStep('teamSize');
+      // Direct team creation - check for contact info first before showing pricing form
+      if (isDirectTeamCreation && !isCollectingPricing && !isCollectingContact) {
+        console.log('🎯 Direct team creation detected');
+        console.log('🔍 User data check:', userData);
+        
+        // First check if user has contact info (first name and last name)
+        if (!userData?.userProfile?.hasContactInfo) {
+          console.log('✅ User has no contact info, collecting name first before showing pricing form');
+          setIsDirectTeamCreation(true); // Keep flag so we can show pricing after contact is collected
+          setIsCollectingContact(true);
+          setContactStep('name');
+        } else {
+          console.log('✅ User has contact info, starting pricing calculator immediately');
+          setIsDirectTeamCreation(true);
+          setIsCollectingPricing(true);
+          setPricingStep('teamSize');
+        }
       }
       
       const assistantMessage: Message = {
@@ -813,7 +834,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
   return (
     <>
       {/* Background Overlay */}
-      {isOpen && (
+      {isOpen && !isMinimized && (
         <div 
           className="fixed inset-0 bg-black/20 z-[9998] transition-opacity duration-300"
           onClick={onClose}

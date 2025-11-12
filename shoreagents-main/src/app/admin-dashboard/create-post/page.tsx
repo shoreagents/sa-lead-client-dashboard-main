@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code, ExternalLink, Copy, Loader2 } from 'lucide-react'
+import { X, Save, Eye, Globe, Sparkles, FileEdit, ArrowRight, Code, ExternalLink, Copy, Loader2, FileText, RefreshCw, Bot, Target, Mic, PenSquare, Search } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCompileTsx, useImproveTsx, useAIResearch, useAIGenerateBlog } from '@/hooks/use-api'
 
@@ -56,7 +56,235 @@ export default function CreatePostPage() {
   const [previewLoading, setPreviewLoading] = useState(false)
   const [isImprovedByAI, setIsImprovedByAI] = useState(false)
   
-  // Preprocess TSX code for iframe (remove imports and exports)
+  // Use a ref to store the processed code for postMessage (avoids useEffect dependency issues)
+  const processedCodeRef = React.useRef<string>('')
+  
+  // Generate iframe HTML (memoized to avoid recreation on every render)
+  const iframeHtml = React.useMemo(() => {
+    // Build the HTML as a string to avoid template literal issues
+    const html = [
+      '<!DOCTYPE html>',
+      '<html lang="en">',
+      '<head>',
+      '  <meta charset="UTF-8">',
+      '  <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+      '  <title>TSX Preview</title>',
+      '  <script src="https://cdn.tailwindcss.com"></' + 'script>',
+      '  <script>',
+      '    tailwind.config = {',
+      '      theme: {',
+      '        extend: {',
+      '          colors: {',
+      '            lime: {',
+      '              50: "#f7fee7",',
+      '              100: "#ecfccb",',
+      '              200: "#d9f99d",',
+      '              300: "#bef264",',
+      '              400: "#a3e635",',
+      '              500: "#84cc16",',
+      '              600: "#65a30d",',
+      '              700: "#4d7c0f",',
+      '              800: "#3f6212",',
+      '              900: "#365314",',
+      '            }',
+      '          }',
+      '        }',
+      '      }',
+      '    }',
+      '  </' + 'script>',
+      '  <style>',
+      '    body { margin: 0; padding: 0; }',
+      '    #preview-root { min-height: 100vh; }',
+      '  </style>',
+      '</head>',
+      '<body>',
+      '  <div id="preview-root">',
+      '    <div style="padding: 2rem; text-align: center; color: #84cc16;">',
+      '      <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>',
+      '      <p>Waiting for code...</p>',
+      '    </div>',
+      '  </div>',
+      '  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></' + 'script>',
+      '  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></' + 'script>',
+      '  <script src="https://unpkg.com/sucrase@3.35.0/dist/browser/sucrase.iife.js"></' + 'script>',
+      '  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></' + 'script>',
+      '  <script>',
+      '    (function() {',
+      '      console.log("Iframe initializing...");',
+      '      ',
+      '      // Wait for all libraries to load',
+      '      const checkLibraries = setInterval(() => {',
+      '        if (typeof React !== "undefined" && typeof ReactDOM !== "undefined" && typeof Sucrase !== "undefined" && typeof lucide !== "undefined") {',
+      '          clearInterval(checkLibraries);',
+      '          window.React = React;',
+      '          window.ReactDOM = ReactDOM;',
+      '          window.Sucrase = Sucrase;',
+      '          window.lucide = lucide;',
+      '          console.log("All libraries loaded (React, ReactDOM, Sucrase, Lucide)");',
+      '          console.log("Sucrase version:", Sucrase.version);',
+      '          ',
+      '          // Notify parent that iframe is ready',
+      '          if (window.parent !== window) {',
+      '            window.parent.postMessage({ type: "iframe-ready" }, "*");',
+      '          }',
+      '        }',
+      '      }, 100);',
+      '      ',
+      '      // Listen for TSX code from parent',
+      '      window.addEventListener("message", function(event) {',
+      '        if (event.data && event.data.type === "tsx-code") {',
+      '          console.log("Received TSX code, length:", event.data.code ? event.data.code.length : 0);',
+      '          ',
+      '          if (!event.data.code) {',
+      '            console.error("No code received!");',
+      '            return;',
+      '          }',
+      '          ',
+      '          // Process the code',
+      '          processAndRenderCode(event.data.code);',
+      '        }',
+      '      });',
+      '      ',
+      '      // Process and render function',
+      '      function processAndRenderCode(tsxCode) {',
+      '        try {',
+      '          console.log("Processing TSX code...");',
+      '          ',
+      '          // Create Lucide icon components - comprehensive list',
+      '          const commonIcons = [',
+      '            "Bot", "Clock", "Globe", "Globe2", "Zap", "Users", "Users2", "TrendingUp", "TrendingDown",',
+      '            "Star", "ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown", "ArrowUpRight", "ArrowDownRight",',
+      '            "CheckCircle", "CheckCircle2", "Award", "Target", "Lightbulb", "Code", "Code2", "Database",',
+      '            "Shield", "ShieldCheck", "Smartphone", "Mail", "Phone", "MapPin", "Calendar", "FileText",',
+      '            "Image", "Video", "Music", "Heart", "Share", "Share2", "MessageCircle", "MessageSquare",',
+      '            "ThumbsUp", "ThumbsDown", "Eye", "EyeOff", "Lock", "Unlock", "User", "User2", "UserPlus",',
+      '            "UserMinus", "UserCheck", "Home", "Menu", "X", "ChevronDown", "ChevronUp", "ChevronLeft",',
+      '            "ChevronRight", "ChevronsDown", "ChevronsUp", "Plus", "Minus", "Check", "AlertCircle",',
+      '            "AlertTriangle", "Info", "HelpCircle", "ExternalLink", "Link", "Link2", "Unlink", "Copy",',
+      '            "Clipboard", "Trash", "Trash2", "Edit", "Edit2", "Edit3", "Save", "Download", "Upload",',
+      '            "Search", "Filter", "Settings", "Bell", "BellOff", "Volume", "Volume2", "VolumeX",',
+      '            "Play", "Pause", "Stop", "SkipBack", "SkipForward", "RefreshCw", "RotateCw", "RotateCcw",',
+      '            "Loader", "Loader2", "Circle", "Square", "Triangle", "Sun", "Moon", "Cloud", "CloudRain",',
+      '            "Wifi", "WifiOff", "Battery", "BatteryCharging", "Bookmark", "BookmarkPlus", "Tag",',
+      '            "Folder", "FolderOpen", "File", "FileEdit", "Package", "Gift", "ShoppingCart", "ShoppingBag",',
+      '            "CreditCard", "DollarSign", "TrendingUp", "BarChart", "BarChart2", "PieChart", "Activity",',
+      '            "Cpu", "HardDrive", "Server", "Layers", "Layout", "Grid", "List", "AlignLeft", "AlignCenter",',
+      '            "AlignRight", "Bold", "Italic", "Underline", "Type", "Maximize", "Minimize", "Move",',
+      '            "Navigation", "Navigation2", "Compass", "Flag", "Map", "MapPin", "Send", "Inbox", "Archive",',
+      '            "Twitter", "Facebook", "Instagram", "Linkedin", "Github", "Youtube", "Slack", "Chrome"',
+      '          ];',
+      '          ',
+      '          // Create simple placeholder icon components',
+      '          commonIcons.forEach(function(iconName) {',
+      '            window[iconName] = function(props) {',
+      '              var className = (props && props.className) || "";',
+      '              var kebabName = iconName.replace(/([A-Z])/g, "-$1").toLowerCase().replace(/^-/, "");',
+      '              ',
+      '              // Return a simple element that Lucide will replace',
+      '              return React.createElement("i", {',
+      '                "data-lucide": kebabName,',
+      '                className: className',
+      '              });',
+      '            };',
+      '          });',
+      '          ',
+      '          console.log("Created " + commonIcons.length + " icon components");',
+      '          ',
+      '          // Log the TSX code we received',
+      '          console.log("TSX code to transform (length: " + tsxCode.length + ")");',
+      '          ',
+      '          // Transform TSX using Sucrase (fast, no Babel!)',
+      '          var transpiledCode;',
+      '          ',
+      '          if (!window.Sucrase || typeof window.Sucrase.transform !== "function") {',
+      '            throw new Error("Sucrase is not loaded");',
+      '          }',
+      '          ',
+      '          try {',
+      '            var result = window.Sucrase.transform(tsxCode, {',
+      '              transforms: ["jsx"],',
+      '              jsxPragma: "React.createElement",',
+      '              jsxFragmentPragma: "React.Fragment"',
+      '            });',
+      '            ',
+      '            if (!result || !result.code) {',
+      '              throw new Error("Sucrase returned no code");',
+      '            }',
+      '            ',
+      '            transpiledCode = result.code;',
+      '            console.log("✅ Sucrase transformed JSX successfully");',
+      '            console.log("Transpiled code preview:", transpiledCode.substring(0, 300));',
+      '          } catch (sucraseError) {',
+      '            console.error("Sucrase error:", sucraseError);',
+      '            throw new Error("Failed to transform JSX: " + sucraseError.message);',
+      '          }',
+      '          ',
+      '          try {',
+      '            eval(transpiledCode);',
+      '            console.log("Code evaluated successfully");',
+      '          } catch (evalError) {',
+      '            console.error("Eval error:", evalError);',
+      '            console.error("Problematic code:", transpiledCode);',
+      '            throw new Error("Failed to execute: " + evalError.message);',
+      '          }',
+      '          ',
+      '          // Find component to render',
+      '          var componentToRender = null;',
+      '          var commonNames = ["VirtualAssistanceBlog", "BlogPost", "Post", "Page", "Component", "Article", "Blog", "Content", "App", "Main"];',
+      '          ',
+      '          for (var i = 0; i < commonNames.length; i++) {',
+      '            if (typeof window[commonNames[i]] === "function") {',
+      '              componentToRender = window[commonNames[i]];',
+      '              console.log("Found component:", commonNames[i]);',
+      '              break;',
+      '            }',
+      '          }',
+      '          ',
+      '          // Render the component',
+      '          if (componentToRender) {',
+      '            var root = ReactDOM.createRoot(document.getElementById("preview-root"));',
+      '            root.render(React.createElement(componentToRender));',
+      '            console.log("Component rendered");',
+      '            ',
+      '            // Initialize Lucide icons and notify success',
+      '            setTimeout(function() {',
+      '              if (window.lucide && window.lucide.createIcons) {',
+      '                console.log("Initializing Lucide icons...");',
+      '                window.lucide.createIcons();',
+      '                console.log("Lucide icons initialized");',
+      '              }',
+      '              if (window.parent !== window) {',
+      '                window.parent.postMessage({ type: "preview-success" }, "*");',
+      '              }',
+      '            }, 300);',
+      '            ',
+      '            // Re-initialize icons periodically for dynamic content',
+      '            setInterval(function() {',
+      '              if (window.lucide && window.lucide.createIcons) {',
+      '                window.lucide.createIcons();',
+      '              }',
+      '            }, 1000);',
+      '          } else {',
+      '            throw new Error("No component found to render");',
+      '          }',
+      '        } catch (error) {',
+      '          console.error("Preview error:", error);',
+      '          document.getElementById("preview-root").innerHTML = "<div style=\\"padding:2rem;color:#ef4444\\"><h2>Error</h2><p>" + error.message + "</p></div>";',
+      '          if (window.parent !== window) {',
+      '            window.parent.postMessage({ type: "preview-error", error: error.message }, "*");',
+      '          }',
+      '        }',
+      '      }',
+      '    })();',
+      '  </' + 'script>',
+      '</body>',
+      '</html>'
+    ].join('\n');
+    
+    return html;
+  }, []); // Version: 3.1 - Fixed Sucrase CDN and global variable
+  
+  // Preprocess TSX code for iframe (remove imports, exports, and TypeScript syntax)
   const processedTsxCode = React.useMemo(() => {
     if (!tsxCode) return ''
     
@@ -65,19 +293,119 @@ export default function CreatePostPage() {
     // Remove all import statements
     processed = processed.replace(/^import\s+.*?from\s+['"].*?['"];?\s*$/gm, '')
     
-    // Replace "export default function" with just "function"
-    processed = processed.replace(/export\s+default\s+function/g, 'function')
+    // Remove TypeScript interfaces (handle multi-line with balanced braces)
+    // First, find all interface declarations and remove them
+    const lines = processed.split('\n')
+    const filteredLines: string[] = []
+    let inInterface = false
+    let braceCount = 0
     
-    // Replace "export function" with just "function"  
-    processed = processed.replace(/export\s+function/g, 'function')
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      
+      // Check if this line starts an interface
+      if (/^\s*interface\s+\w+/.test(line)) {
+        inInterface = true
+        braceCount = (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length
+        continue // Skip this line
+      }
+      
+      // If we're inside an interface, count braces
+      if (inInterface) {
+        braceCount += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length
+        if (braceCount <= 0) {
+          inInterface = false
+          braceCount = 0
+        }
+        continue // Skip this line
+      }
+      
+      // Otherwise, keep the line
+      filteredLines.push(line)
+    }
     
-    // Replace "export default ComponentName" at the end
-    processed = processed.replace(/export\s+default\s+(\w+);?\s*$/gm, '// $1 is the component')
+    processed = filteredLines.join('\n')
+    
+    // Remove TypeScript type definitions (single line)
+    processed = processed.replace(/^\s*type\s+\w+\s*=\s*[^;]+;?\s*$/gm, '')
+    
+    // Remove React.FC and React.FunctionComponent type annotations (do this BEFORE other type removals)
+    processed = processed.replace(/:\s*React\.FC(?:<[^>]*>)?/g, '')
+    processed = processed.replace(/:\s*React\.FunctionComponent(?:<[^>]*>)?/g, '')
+    processed = processed.replace(/:\s*FC(?:<[^>]*>)?/g, '')
+    processed = processed.replace(/:\s*FunctionComponent(?:<[^>]*>)?/g, '')
+    
+    // Fix malformed patterns like "const BlogPost.FC =" or "BlogPost.FC ="
+    processed = processed.replace(/(\w+)\.FC\s*=/g, '$1 =')
+    processed = processed.replace(/(\w+)\.FunctionComponent\s*=/g, '$1 =')
+    
+    // Remove type annotations from variable declarations (including React.FC)
+    // This must come after React.FC removal to avoid creating malformed patterns
+    processed = processed.replace(/(const|let|var)\s+(\w+)\s*:\s*[^=]+=/g, '$1 $2 =')
+    
+    // Remove type annotations from function parameters (more comprehensive)
+    processed = processed.replace(/:\s*[A-Z]\w*(?:<[^>]*>)?(\[\])?/g, '')
+    processed = processed.replace(/:\s*\{[^}]*\}/g, '')
+    processed = processed.replace(/:\s*\([^)]*\)\s*=>/g, ' =>')
+    
+    // Remove return type annotations from functions
+    processed = processed.replace(/\)\s*:\s*[A-Z]\w*(?:\s*\{|\s*=>)/g, (match) => {
+      return match.includes('=>') ? ' =>' : ' {'
+    })
+    
+    // Remove generic type parameters from function declarations
+    processed = processed.replace(/function\s+\w+\s*<[^>]+>/g, (match) => {
+      return match.replace(/<[^>]+>/, '')
+    })
+    
+    // Remove generic type parameters from arrow functions
+    processed = processed.replace(/const\s+\w+\s*<[^>]+>\s*=/g, (match) => {
+      return match.replace(/<[^>]+>/, '')
+    })
+    
+    // Replace "export default function ComponentName" with "function ComponentName" and assign to window
+    processed = processed.replace(/export\s+default\s+function\s+(\w+)/g, (match, componentName) => {
+      return `function ${componentName}`;
+    });
+    
+    // Replace "export function ComponentName" with "function ComponentName" and assign to window
+    processed = processed.replace(/export\s+function\s+(\w+)/g, (match, componentName) => {
+      return `function ${componentName}`;
+    });
+    
+    // Add window assignments for all component functions at the end
+    // This will be done after transpilation in the iframe
+    
+    // Replace "export default ComponentName" at the end - assign to window
+    processed = processed.replace(/export\s+default\s+(\w+);?\s*$/gm, (match, componentName) => {
+      return `window.${componentName} = ${componentName};`;
+    });
+    
+    // Also handle: const Component = ...; export default Component;
+    processed = processed.replace(/(const\s+(\w+)\s*=\s*[^;]+);\s*export\s+default\s+(\w+);/g, (match, declaration, varName, exportName) => {
+      return `${declaration}; window.${varName} = ${varName};`;
+    });
+    
+    // Handle arrow function exports: const Component = () => ...; export default Component;
+    processed = processed.replace(/(const\s+(\w+)\s*=\s*\([^)]*\)\s*=>[^;]+);\s*export\s+default\s+(\w+);/g, (match, declaration, varName, exportName) => {
+      return `${declaration}; window.${varName} = ${varName};`;
+    });
+    
+    // Remove generic type parameters from function declarations
+    processed = processed.replace(/<[A-Z][\w\s,<>]*>/g, '')
+    
+    // Clean up multiple empty lines
+    processed = processed.replace(/\n\s*\n\s*\n/g, '\n\n')
     
     console.log('🔧 Processed TSX Code Sample (first 200 chars):', processed.substring(0, 200))
     
     return processed
   }, [tsxCode])
+  
+  // Update the ref whenever processedTsxCode changes
+  React.useEffect(() => {
+    processedCodeRef.current = processedTsxCode
+  }, [processedTsxCode])
   
   // AI Content Generation state
   const [aiTopic, setAiTopic] = useState('')
@@ -546,6 +874,79 @@ export default function CreatePostPage() {
     )
   }
 
+  // Listen for messages from iframe (for error reporting and ready signal)
+  React.useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'preview-error') {
+        console.error('❌ Preview error from iframe:', event.data.error)
+        setPreviewLoading(false)
+        toast.error(`Preview error: ${event.data.error}`)
+      }
+      
+      if (event.data?.type === 'preview-success') {
+        console.log('✅ Preview rendered successfully in iframe!')
+        setPreviewLoading(false)
+        
+        // Clear the timeout since preview loaded successfully
+        if ((window as any).__previewTimeoutId) {
+          clearTimeout((window as any).__previewTimeoutId)
+          delete (window as any).__previewTimeoutId
+        }
+      }
+      
+      if (event.data?.type === 'iframe-ready') {
+        console.log('✅ Iframe signaled ready, sending TSX code...')
+        console.log('📊 processedCodeRef.current length:', processedCodeRef.current?.length || 0)
+        
+        // Send the TSX code to the iframe using the ref
+        const iframe = document.querySelector('iframe[title="TSX Preview"]') as HTMLIFrameElement
+        console.log('🔍 Found iframe:', !!iframe)
+        console.log('🔍 Iframe has contentWindow:', !!iframe?.contentWindow)
+        console.log('🔍 Code is available:', !!processedCodeRef.current)
+        
+        const sendCodeToIframe = (retryCount = 0) => {
+          if (!iframe?.contentWindow) {
+            console.error('❌ iframe or contentWindow not available')
+            if (retryCount < 3) {
+              console.log(`⏳ Retry ${retryCount + 1}/3 in 200ms...`)
+              setTimeout(() => sendCodeToIframe(retryCount + 1), 200)
+            } else {
+              toast.error('Failed to connect to preview iframe')
+              setPreviewLoading(false)
+            }
+            return
+          }
+          
+          if (!processedCodeRef.current || processedCodeRef.current.length === 0) {
+            console.error('❌ processedCodeRef.current is empty!')
+            if (retryCount < 3) {
+              console.log(`⏳ Waiting for code... Retry ${retryCount + 1}/3 in 200ms...`)
+              setTimeout(() => sendCodeToIframe(retryCount + 1), 200)
+            } else {
+              console.error('❌ Code never became available after 3 retries')
+              toast.error('Preview code is not available. Please try clicking Preview again.')
+              setPreviewLoading(false)
+            }
+            return
+          }
+          
+          console.log('📤 Sending TSX code to iframe...')
+          iframe.contentWindow.postMessage({
+            type: 'tsx-code',
+            code: processedCodeRef.current
+          }, '*')
+          console.log('✅ Message sent! Code length:', processedCodeRef.current.length)
+        }
+        
+        // Send immediately, with retry logic if needed
+        setTimeout(() => sendCodeToIframe(), 100)
+      }
+    }
+    
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
+
   // Render Paste TSX Interface
   const renderPasteTSX = () => {
     const handleImproveWithAI = () => {
@@ -608,6 +1009,18 @@ export default function CreatePostPage() {
 
       console.log('🔍 Preview TSX clicked - generating preview...')
       console.log('TSX Code length:', tsxCode.length)
+      console.log('📊 processedTsxCode length:', processedTsxCode.length)
+      console.log('📊 processedCodeRef.current length:', processedCodeRef.current?.length || 0)
+      
+      // Ensure the ref is updated with the latest processed code before showing preview
+      if (processedTsxCode && processedTsxCode.length > 0) {
+        processedCodeRef.current = processedTsxCode
+        console.log('✅ Manually updated processedCodeRef to ensure it has the latest code')
+      } else {
+        console.error('❌ processedTsxCode is empty! Cannot preview.')
+        toast.error('Failed to process TSX code. Please check your code syntax.')
+        return
+      }
       
       // Set loading state
       setPreviewLoading(true)
@@ -616,12 +1029,16 @@ export default function CreatePostPage() {
       setCompiledContent('PREVIEW_READY')
       setContent(tsxCode) // Store the TSX code as content
       
-      // Remove loading state after a short delay to let iframe load
-      setTimeout(() => {
+      // Fallback: Remove loading state after max timeout (10 seconds) if iframe doesn't load
+      const timeoutId = setTimeout(() => {
         setPreviewLoading(false)
-        console.log('✅ Preview should be visible now')
-        toast.success('✅ Preview ready!')
-      }, 1500)
+        console.warn('⚠️ Preview loading timeout - iframe may have failed to load')
+        console.warn('📊 Final check - processedCodeRef.current length:', processedCodeRef.current?.length || 0)
+        toast.error('Preview timed out. Please try again or check the console for errors.')
+      }, 10000)
+      
+      // Store timeout ID to clear it when iframe loads
+      ;(window as any).__previewTimeoutId = timeoutId
       
       console.log('✅ State updated - compiledContent set to PREVIEW_READY')
     }
@@ -758,16 +1175,79 @@ export default function CreatePostPage() {
       });
       
       try {
-        const processedCode = \`${processedTsxCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
+        // Additional cleanup: Remove any remaining malformed patterns
+        // Escape backticks and dollar signs for template literal embedding
+        // Use String.fromCharCode to avoid template literal issues
+        const backtick = String.fromCharCode(96);
+        const dollar = String.fromCharCode(36);
+        const escapedBacktick = String.fromCharCode(92) + String.fromCharCode(96);
+        const escapedDollar = String.fromCharCode(92) + String.fromCharCode(36);
+        let cleanedCode = processedTsxCode.replace(/\\/g, '\\\\').replace(new RegExp(backtick, 'g'), escapedBacktick).replace(new RegExp(dollar, 'g'), escapedDollar);
+        
+        // Fix any remaining .FC or .FunctionComponent patterns
+        cleanedCode = cleanedCode.replace(/(\w+)\.FC\s*=/g, '$1 =');
+        cleanedCode = cleanedCode.replace(/(\w+)\.FunctionComponent\s*=/g, '$1 =');
+        
+        // Remove any standalone .FC or .FunctionComponent references
+        cleanedCode = cleanedCode.replace(/\.FC\b/g, '');
+        cleanedCode = cleanedCode.replace(/\.FunctionComponent\b/g, '');
+        
+        const processedCode = cleanedCode;
         const transpiledCode = Babel.transform(processedCode, {
           presets: ['react']
         }).code;
         
         eval(transpiledCode);
         
+        // After eval, automatically assign components to window
+        // Use string parsing instead of regex
+        const componentNames = new Set();
+        const lines = processedCode.split('\\n');
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          
+          // Check for: function ComponentName(
+          const funcIndex = line.indexOf('function ');
+          if (funcIndex >= 0) {
+            const afterFunc = line.substring(funcIndex + 9);
+            const parenIndex = afterFunc.indexOf('(');
+            if (parenIndex > 0) {
+              const name = afterFunc.substring(0, parenIndex).trim();
+              if (name.length > 0 && name.charAt(0) === name.charAt(0).toUpperCase()) {
+                componentNames.add(name);
+              }
+            }
+          }
+          
+          // Check for: const ComponentName =
+          const constIndex = line.indexOf('const ');
+          if (constIndex >= 0) {
+            const afterConst = line.substring(constIndex + 6);
+            const eqIndex = afterConst.indexOf('=');
+            if (eqIndex > 0) {
+              const name = afterConst.substring(0, eqIndex).trim();
+              if (name.length > 0 && name.charAt(0) === name.charAt(0).toUpperCase()) {
+                componentNames.add(name);
+              }
+            }
+          }
+        }
+        
+        for (const name of componentNames) {
+          try {
+            const component = eval(name);
+            if (typeof component === 'function') {
+              window[name] = component;
+            }
+          } catch (e) {
+            // Component might not be accessible
+          }
+        }
+        
         // Auto-detect any React component function
         let componentToRender = null;
-        const commonNames = ['VirtualAssistanceBlog', 'BlogPost', 'Post', 'Page', 'Component', 'Article', 'Blog', 'Content'];
+        const commonNames = ['VirtualAssistanceBlog', 'BlogPost', 'Post', 'Page', 'Component', 'Article', 'Blog', 'Content', 'App', 'Main', 'Home', 'Layout'];
         
         for (const name of commonNames) {
           if (typeof window[name] === 'function') {
@@ -777,9 +1257,28 @@ export default function CreatePostPage() {
         }
         
         if (!componentToRender) {
+          const lucideIcons = ['Bot', 'Clock', 'Globe', 'Globe2', 'Zap', 'Users', 'Users2', 'TrendingUp', 
+            'Star', 'ArrowRight', 'CheckCircle', 'CheckCircle2', 'Award', 'Target',
+            'Lightbulb', 'Code', 'Code2', 'Database', 'Shield', 'Smartphone',
+            'Mail', 'Phone', 'MapPin', 'Calendar', 'FileText', 'Image', 'Video', 
+            'Music', 'Download', 'Upload', 'Search', 'Filter', 'Settings', 'Bell', 
+            'Heart', 'Share', 'Share2', 'MessageCircle', 'ThumbsUp', 'Eye', 'EyeOff',
+            'Lock', 'Unlock', 'User', 'User2', 'UserPlus', 'UserMinus', 'Home', 
+            'Menu', 'X', 'ChevronDown', 'ChevronUp', 'ChevronLeft', 'ChevronRight',
+            'Plus', 'Minus', 'Check', 'AlertCircle', 'Info', 'HelpCircle', 
+            'ExternalLink', 'Link', 'Link2', 'Unlink', 'Copy', 'Clipboard', 'Trash', 
+            'Trash2', 'Edit', 'Edit2', 'Edit3', 'Save', 'RefreshCw', 'RotateCw',
+            'Play', 'Pause', 'Stop', 'SkipBack', 'SkipForward', 'Volume', 'Volume2',
+            'VolumeX', 'Wifi', 'WifiOff', 'Battery', 'BatteryCharging', 'Sun', 
+            'Moon', 'Cloud', 'CloudRain', 'Twitter', 'Linkedin', 'Facebook',
+            'Instagram', 'Github', 'Youtube'];
+          
+          const builtIns = ['Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'RegExp', 'Error', 'Function', 'Symbol', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array', 'DataView', 'ArrayBuffer', 'SharedArrayBuffer', 'Atomics', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl', 'WebAssembly', 'React', 'ReactDOM', 'Babel', 'loadScript', 'loadAllLibraries'];
+          
           for (const key in window) {
             if (key[0] === key[0].toUpperCase() && typeof window[key] === 'function') {
-              if (!['Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'RegExp', 'Error', 'Function', 'Symbol', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array', 'DataView', 'ArrayBuffer', 'SharedArrayBuffer', 'Atomics', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl', 'WebAssembly', 'React', 'ReactDOM', 'Babel'].includes(key)) {
+              // Skip built-in constructors and Lucide icons
+              if (!builtIns.includes(key) && !lucideIcons.includes(key)) {
                 componentToRender = window[key];
                 break;
               }
@@ -941,234 +1440,8 @@ export default function CreatePostPage() {
                         <span className="text-xs bg-lime-600 text-white px-2 py-1 rounded">✓ Ready</span>
                       </div>
                       <iframe
-                      key={compiledContent + tsxCode.length}
-                      srcDoc={`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TSX Preview</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            lime: {
-              50: '#f7fee7',
-              100: '#ecfccb',
-              200: '#d9f99d',
-              300: '#bef264',
-              400: '#a3e635',
-              500: '#84cc16',
-              600: '#65a30d',
-              700: '#4d7c0f',
-              800: '#3f6212',
-              900: '#365314',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body { margin: 0; padding: 0; }
-    #preview-root { min-height: 100vh; }
-  </style>
-</head>
-<body>
-  <div id="preview-root">
-    <div style="padding: 2rem; text-align: center; color: #84cc16;">
-      <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
-      <p>Loading preview...</p>
-    </div>
-  </div>
-  
-  <script>
-    // Load scripts sequentially
-    function loadScript(src) {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-    }
-    
-    async function loadAllLibraries() {
-      try {
-        console.log('📦 Loading React...');
-        await loadScript('https://unpkg.com/react@18/umd/react.production.min.js');
-        console.log('✅ React loaded');
-        
-        console.log('📦 Loading ReactDOM...');
-        await loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js');
-        console.log('✅ ReactDOM loaded');
-        
-        // Expose React globally
-        if (typeof React !== 'undefined') {
-          window.React = React;
-          window.ReactDOM = ReactDOM;
-          console.log('✅ React exposed globally');
-        } else {
-          throw new Error('React not loaded properly');
-        }
-        
-        console.log('📦 Loading Babel...');
-        await loadScript('https://unpkg.com/@babel/standalone/babel.min.js');
-        console.log('✅ Babel loaded');
-        
-        console.log('📦 Loading Lucide icons...');
-        await loadScript('https://unpkg.com/lucide@latest/dist/umd/lucide.min.js');
-        console.log('✅ Lucide loaded');
-        
-        console.log('✅ All libraries loaded successfully!');
-        return true;
-      } catch (error) {
-        console.error('❌ Error loading libraries:', error);
-        document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444;"><h2>Failed to load preview libraries</h2><p>' + error.message + '</p></div>';
-        return false;
-      }
-    }
-    
-    loadAllLibraries().then((success) => {
-      if (!success) return;
-      console.log('🚀 Starting preview render...');
-      
-      // Create Lucide icon components
-      console.log('🎨 Creating Lucide icon components');
-      
-      // Helper to convert kebab-case to PascalCase (e.g., 'arrow-right' to 'ArrowRight')
-      const toPascalCase = (str) => {
-        return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
-      };
-      
-      // Create React component wrapper for Lucide icons
-      const createLucideIcon = (iconName) => {
-        return (props) => {
-          const { className = '', style = {}, ...rest } = props || {};
-          
-          // Convert PascalCase to kebab-case for Lucide (e.g., 'ArrowRight' to 'arrow-right')
-          const kebabName = iconName.replace(/([A-Z])/g, '-$1').toLowerCase().replace(/^-/, '');
-          
-          // Create the icon element
-          const iconElement = React.createElement('i', {
-            'data-lucide': kebabName,
-            className: className,
-            style: { display: 'inline-block', ...style },
-            ...rest
-          });
-          
-          // Use effect to initialize the icon after render
-          React.useEffect(() => {
-            if (window.lucide && window.lucide.createIcons) {
-              window.lucide.createIcons();
-            }
-          }, []);
-          
-          return iconElement;
-        };
-      };
-      
-      // Common icon names used in blogs/articles
-      const commonIcons = [
-        'Bot', 'Clock', 'Globe', 'Globe2', 'Zap', 'Users', 'Users2', 'TrendingUp', 
-        'Star', 'ArrowRight', 'CheckCircle', 'CheckCircle2', 'Award', 'Target',
-        'Lightbulb', 'Code', 'Code2', 'Database', 'Shield', 'Smartphone',
-        'Mail', 'Phone', 'MapPin', 'Calendar', 'FileText', 'Image', 'Video', 
-        'Music', 'Download', 'Upload', 'Search', 'Filter', 'Settings', 'Bell', 
-        'Heart', 'Share', 'Share2', 'MessageCircle', 'ThumbsUp', 'Eye', 'EyeOff',
-        'Lock', 'Unlock', 'User', 'User2', 'UserPlus', 'UserMinus', 'Home', 
-        'Menu', 'X', 'ChevronDown', 'ChevronUp', 'ChevronLeft', 'ChevronRight',
-        'Plus', 'Minus', 'Check', 'AlertCircle', 'Info', 'HelpCircle', 
-        'ExternalLink', 'Link', 'Link2', 'Unlink', 'Copy', 'Clipboard', 'Trash', 
-        'Trash2', 'Edit', 'Edit2', 'Edit3', 'Save', 'RefreshCw', 'RotateCw',
-        'Play', 'Pause', 'Stop', 'SkipBack', 'SkipForward', 'Volume', 'Volume2',
-        'VolumeX', 'Wifi', 'WifiOff', 'Battery', 'BatteryCharging', 'Sun', 
-        'Moon', 'Cloud', 'CloudRain', 'Twitter', 'Linkedin', 'Facebook',
-        'Instagram', 'Github', 'Youtube'
-      ];
-      
-      // Auto-generate all icon components
-      commonIcons.forEach(iconName => {
-        window[iconName] = createLucideIcon(iconName);
-      });
-      
-      console.log('✅ Created', commonIcons.length, 'Lucide icon components');
-      
-      try {
-        console.log('📝 Transpiling TSX code...');
-        
-        // Transpile and execute the code
-        const transpiledCode = Babel.transform(\`${processedTsxCode.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`, {
-          presets: ['react']
-        }).code;
-        
-        console.log('✅ Code transpiled successfully');
-        eval(transpiledCode);
-        
-        console.log('🔍 Looking for component to render...');
-        
-        // Auto-detect any React component function in global scope
-        let componentToRender = null;
-        const commonNames = ['VirtualAssistanceBlog', 'BlogPost', 'Post', 'Page', 'Component', 'Article', 'Blog', 'Content'];
-        
-        // First, try common component names
-        for (const name of commonNames) {
-          if (typeof window[name] === 'function') {
-            componentToRender = window[name];
-            console.log('✅ Found component by common name:', name);
-            break;
-          }
-        }
-        
-        // If not found, scan all global functions starting with capital letter (React convention)
-        if (!componentToRender) {
-          console.log('🔍 Scanning global scope for React components...');
-          for (const key in window) {
-            if (key[0] === key[0].toUpperCase() && typeof window[key] === 'function') {
-              // Skip built-in constructors
-              if (!['Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'RegExp', 'Error', 'Function', 'Symbol', 'Promise', 'Map', 'Set', 'WeakMap', 'WeakSet', 'Int8Array', 'Uint8Array', 'Uint8ClampedArray', 'Int16Array', 'Uint16Array', 'Int32Array', 'Uint32Array', 'Float32Array', 'Float64Array', 'BigInt64Array', 'BigUint64Array', 'DataView', 'ArrayBuffer', 'SharedArrayBuffer', 'Atomics', 'JSON', 'Math', 'Reflect', 'Proxy', 'Intl', 'WebAssembly', 'React', 'ReactDOM', 'Babel'].includes(key)) {
-                componentToRender = window[key];
-                console.log('✅ Auto-detected component:', key);
-                break;
-              }
-            }
-          }
-        }
-        
-        console.log('🎯 Component found:', componentToRender ? 'YES' : 'NO');
-        console.log('Component name:', componentToRender?.name || 'Unknown');
-        
-        if (componentToRender) {
-          console.log('✨ Rendering component...');
-          const root = ReactDOM.createRoot(document.getElementById('preview-root'));
-          root.render(React.createElement(componentToRender));
-          console.log('✅ Component rendered successfully!');
-          
-          // Initialize Lucide icons after render
-          setTimeout(() => {
-            if (window.lucide && window.lucide.createIcons) {
-              window.lucide.createIcons();
-              console.log('✅ Lucide icons initialized!');
-            }
-          }, 100);
-        } else {
-          console.error('❌ No component found to render');
-          document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444; font-family: system-ui;"><h2 style="font-size: 1.5rem; margin-bottom: 1rem;">❌ Could not find component</h2><p>Make sure your TSX exports a component with:<br><code style="background: #fee; padding: 0.5rem; border-radius: 0.25rem; display: inline-block; margin-top: 1rem;">export default function ComponentName() {...}</code></p></div>';
-        }
-      } catch (error) {
-        console.error('❌ Preview error:', error);
-        console.error('Error stack:', error.stack);
-        document.getElementById('preview-root').innerHTML = '<div style="padding: 2rem; text-align: center; color: #ef4444; font-family: system-ui;"><h2 style="font-size: 1.5rem; margin-bottom: 1rem;">❌ Error rendering component</h2><p style="background: #fee; padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; text-align: left; overflow-x: auto;"><strong>Error:</strong> ' + error.message + '<br><br><strong>Stack:</strong><br><code style="font-size: 0.75rem; white-space: pre-wrap;">' + (error.stack || 'No stack trace') + '</code></p></div>';
-      }
-    });
-  </script>
-</body>
-</html>
-                      `}
+                      key={`preview-v3.1-${compiledContent}-${tsxCode.length}`}
+                      srcDoc={iframeHtml}
                       className="w-full h-[550px] border-0"
                       title="TSX Preview"
                       sandbox="allow-scripts allow-same-origin"
@@ -1176,731 +1449,105 @@ export default function CreatePostPage() {
                         console.log('📊 Preview iframe loaded')
                         console.log('📊 TSX Code length:', tsxCode.length)
                         console.log('📊 Processed Code length:', processedTsxCode.length)
-                      }}
-                      onError={(e) => {
-                        console.error('❌ Iframe error:', e)
-                        toast.error('Failed to load preview iframe')
+                        
+                        // Clear loading state when iframe loads
+                        setPreviewLoading(false)
+                        
+                        // Clear the timeout if it exists
+                        if ((window as any).__previewTimeoutId) {
+                          clearTimeout((window as any).__previewTimeoutId)
+                          delete (window as any).__previewTimeoutId
+                        }
+                        
+                        // Code will be sent when iframe signals it's ready via postMessage
+                        console.log('⏳ Waiting for iframe to signal ready...')
+                        
+                        // Check iframe content after delay
+                        setTimeout(() => {
+                          try {
+                            const iframeElement = document.querySelector('iframe[title="TSX Preview"]') as HTMLIFrameElement
+                            if (iframeElement?.contentWindow?.document) {
+                              const root = iframeElement.contentWindow.document.getElementById('preview-root')
+                              if (root && root.textContent?.includes('Error')) {
+                                toast.error('Preview loaded but contains errors. Check console for details.')
+                              } else if (root && !root.textContent?.includes('Waiting')) {
+                                console.log('✅ Preview appears to have content')
+                              }
+                            }
+                          } catch (e) {
+                            console.log('Could not access iframe content (expected for security)')
+                          }
+                        }, 1000)
                       }}
                     />
                     </>
                   ) : (
-                    <div className="flex items-center justify-center h-[400px] text-gray-400">
-                      <div className="text-center space-y-2">
-                        <Eye className="w-12 h-12 mx-auto opacity-50" />
-                        <p>Paste TSX code and click "Preview TSX" to see it with full styling</p>
-                      </div>
+                    <div className="flex flex-col items-center justify-center h-[600px] text-gray-400">
+                      <Eye className="w-16 h-16 mb-4 opacity-50" />
+                      <p className="text-lg">Preview will appear here</p>
+                      <p className="text-sm">Paste your TSX code and click "Preview Code"</p>
                     </div>
-                    )}
+                  )}
+                </div>
+
+                {/* Debug Info */}
+                <div className="mt-4 p-3 bg-gray-100 rounded text-xs font-mono">
+                  <div className="font-semibold text-gray-700 mb-2">Debug Info:</div>
+                  <div className="space-y-1 text-gray-600">
+                    <div>TSX Code: {tsxCode ? `${tsxCode.length} characters` : 'Empty'}</div>
+                    <div>Processed Code: {processedTsxCode ? `${processedTsxCode.length} characters (imports removed)` : 'Not processed'}</div>
+                    <div>Compiled Content: {compiledContent || 'Not set'}</div>
+                    <div>Preview Loading: {previewLoading ? '⏳ Yes' : '✓ No'}</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
+
           </div>
-
-          {/* Form fields for post metadata */}
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              {/* Title */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Title</CardTitle>
-                  <CardDescription>The main title of your post</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Input
-                    placeholder="Enter post title..."
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    className="text-lg"
-                  />
-                </CardContent>
-              </Card>
-
-              {/* URL Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>URL Settings</CardTitle>
-                  <CardDescription>Set the URL where your post will be published</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="post-url-tsx">Post URL</Label>
-                    <Input
-                      id="post-url-tsx"
-                      placeholder="/blog/my-post or /real-estate-outsourcing"
-                      value={customUrl || (slug ? `${urlPattern.replace('[slug]', slug)}` : '')}
-                      onChange={(e) => {
-                        let url = e.target.value.trim()
-                        if (url && !url.startsWith('/')) {
-                          url = '/' + url
-                        }
-                        if (url && url.length > 1) {
-                          const urlParts = url.split('/').filter(part => part.length > 0)
-                          const extractedSlug = urlParts[urlParts.length - 1] || ''
-                          if (extractedSlug) {
-                            setSlug(extractedSlug)
-                          }
-                          setCustomUrl(url)
-                          if (url.startsWith('/blog/')) {
-                            setUrlPattern('/blog/[slug]')
-                          } else if (url.startsWith('/blogs/')) {
-                            setUrlPattern('/blogs/[slug]')
-                          } else if (url.startsWith('/services/pillars/')) {
-                            setUrlPattern('/services/pillars/[slug]')
-                          } else {
-                            setUrlPattern(null)
-                          }
-                        } else {
-                          setCustomUrl(url)
-                        }
-                      }}
-                      required
-                      className="font-mono"
-                    />
-                    
-                    {/* Live URL Preview */}
-                    {(customUrl || slug) && (
-                      <div className="flex items-center gap-2 p-3 bg-lime-50 border border-lime-200 rounded-lg mt-3">
-                        <Globe className="w-4 h-4 text-lime-600 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-lime-700 font-medium mb-1">Live Preview:</p>
-                          <p className="text-sm text-lime-900 font-mono truncate">
-                            https://yourdomain.com{customUrl || (slug ? `${urlPattern.replace('[slug]', slug)}` : '')}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const fullUrl = `https://yourdomain.com${customUrl || (slug ? `${urlPattern.replace('[slug]', slug)}` : '')}`
-                            navigator.clipboard.writeText(fullUrl)
-                            toast.success('URL copied to clipboard!')
-                          }}
-                          className="p-2 hover:bg-lime-100 rounded transition-colors"
-                          title="Copy URL"
-                        >
-                          <Copy className="w-4 h-4 text-lime-600" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="slug-tsx">Slug</Label>
-                    <Input
-                      id="slug-tsx"
-                      value={slug}
-                      onChange={(e) => setSlug(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Description */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    placeholder="Enter a brief description..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={3}
-                  />
-                </CardContent>
-              </Card>
+          
+          {/* Action Buttons */}
+          {compiledContent && tsxCode && (
+            <div className="flex gap-4 mt-6">
+              <Button
+                type="button"
+                onClick={() => {
+                  setMode('preview');
+                  setContent(tsxCode);
+                }}
+                className="flex-1 bg-lime-600 hover:bg-lime-700 text-white"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Use This Content
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  setTsxCode('');
+                  setCompiledContent('');
+                  setContent('');
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Start Over
+              </Button>
             </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Status</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Select value={status} onValueChange={(value) => setStatus(value as 'draft' | 'published')}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button
-                    type="submit"
-                    className="w-full bg-lime-600 hover:bg-lime-700 text-white"
-                    disabled={loading || !title || !slug || !compiledContent}
-                    onClick={handleSubmit}
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {loading ? 'Saving...' : status === 'draft' ? 'Save as Draft' : 'Publish'}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      setCreationMethod(null)
-                      setShowMethodModal(true)
-                    }}
-                  >
-                    Choose Different Method
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          )}
         </form>
-      </div>
-    )
-  }
-
-  // Render Custom CMS Form
-  const renderCustomCMS = () => {
-    return (
-      <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger />
-          <h1 className="text-3xl font-bold text-gray-900">Create a Post</h1>
         </div>
+      )
+    }
 
-        <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Content Area */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Post Type Selection */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Post Type</CardTitle>
-                      <CardDescription>Select the type of content you want to create</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Select value={postType} onValueChange={(value) => setPostType(value as PostType)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select post type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="blog">Blog Post</SelectItem>
-                          <SelectItem value="article">Article</SelectItem>
-                          <SelectItem value="pillar">Pillar Page</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </CardContent>
-                  </Card>
-
-                  {/* Title */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Title</CardTitle>
-                      <CardDescription>The main title of your post</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Input
-                        placeholder="Enter post title..."
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        required
-                        className="text-lg"
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* URL Settings */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>URL Settings</CardTitle>
-                      <CardDescription>Set the URL where your post will be published</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <Label htmlFor="post-url">Post URL</Label>
-                        <Input
-                          id="post-url"
-                          placeholder="/blog/my-post or /real-estate-outsourcing"
-                          value={customUrl || (slug && urlPattern ? urlPattern.replace('[slug]', slug) : '')}
-                          onChange={(e) => {
-                            let url = e.target.value.trim()
-                            
-                            // Ensure it starts with /
-                            if (url && !url.startsWith('/')) {
-                              url = '/' + url
-                            }
-                            
-                            // Extract slug from URL (last part after /)
-                            if (url && url.length > 1) {
-                              const urlParts = url.split('/').filter(part => part.length > 0)
-                              const extractedSlug = urlParts[urlParts.length - 1] || ''
-                              
-                              if (extractedSlug) {
-                                setSlug(extractedSlug)
-                              }
-                              
-                              // Save the full URL
-                              setCustomUrl(url)
-                              
-                              // Auto-detect pattern if it matches known patterns
-                              if (url.startsWith('/blog/')) {
-                                setUrlPattern('/blog/[slug]')
-                              } else if (url.startsWith('/blogs/')) {
-                                setUrlPattern('/blogs/[slug]')
-                              } else if (url.startsWith('/services/pillars/')) {
-                                setUrlPattern('/services/pillars/[slug]')
-                              } else {
-                                // Custom URL, no pattern
-                                setUrlPattern(null)
-                              }
-                            } else {
-                              setCustomUrl(url)
-                            }
-                          }}
-                          required
-                          className="font-mono"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Type the full URL where your post will be published (e.g., /blog/my-post or /real-estate-outsourcing). This will be saved to the database.
-                        </p>
-                        
-                        {/* Live URL Preview */}
-                        {(customUrl || slug) && (
-                          <div className="flex items-center gap-2 p-3 bg-lime-50 border border-lime-200 rounded-lg mt-3">
-                            <Globe className="w-4 h-4 text-lime-600 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-lime-700 font-medium mb-1">Live Preview:</p>
-                              <p className="text-sm text-lime-900 font-mono truncate">
-                                https://yourdomain.com{customUrl || (slug && urlPattern ? urlPattern.replace('[slug]', slug) : '')}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const fullUrl = `https://yourdomain.com${customUrl || (slug && urlPattern ? urlPattern.replace('[slug]', slug) : '')}`
-                                navigator.clipboard.writeText(fullUrl)
-                                toast.success('URL copied to clipboard!')
-                              }}
-                              className="p-2 hover:bg-lime-100 rounded transition-colors"
-                              title="Copy URL"
-                            >
-                              <Copy className="w-4 h-4 text-lime-600" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label htmlFor="slug">Slug (Auto-generated from URL)</Label>
-                        <Input
-                          id="slug"
-                          placeholder="post-url-slug"
-                          value={slug}
-                          onChange={(e) => {
-                            setSlug(e.target.value)
-                            // Update customUrl if it exists
-                            if (customUrl) {
-                              const urlParts = customUrl.split('/').filter(part => part.length > 0)
-                              if (urlParts.length > 0) {
-                                urlParts[urlParts.length - 1] = e.target.value
-                                setCustomUrl('/' + urlParts.join('/'))
-                              }
-                            }
-                          }}
-                          required
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          URL-friendly identifier. Auto-extracted from URL above, but you can edit it.
-                        </p>
-                      </div>
-
-                      {/* URL Preview */}
-                      <div className="p-3 bg-lime-50 rounded-lg border border-lime-200">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                          <Globe className="w-4 h-4" />
-                          <span className="font-medium">URL to be saved:</span>
-                        </div>
-                        <code className="text-lime-700 font-mono text-sm break-all">
-                          {customUrl || (slug ? `/${slug}` : '') || 'Enter URL above...'}
-                        </code>
-                        <p className="text-xs text-lime-600 mt-2">
-                          ✓ This exact URL will be saved to the database
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Description */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Description</CardTitle>
-                      <CardDescription>Short description or excerpt for your post</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        placeholder="Enter a brief description..."
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        rows={3}
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Content */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Content</CardTitle>
-                      <CardDescription>The main content of your post</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Textarea
-                        placeholder="Write your post content here..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        rows={15}
-                        className="font-mono"
-                      />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Rich text editor coming soon. For now, use plain text or markdown.
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  {/* SEO Settings */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>SEO Settings</CardTitle>
-                      <CardDescription>Optimize your post for search engines</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <Label htmlFor="seo-title">SEO Title (Meta Title)</Label>
-                        <Input
-                          id="seo-title"
-                          placeholder="Leave empty to use post title"
-                          value={seoTitle}
-                          onChange={(e) => setSeoTitle(e.target.value)}
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Recommended: 50-60 characters. Will default to post title if empty.
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="seo-description">SEO Description (Meta Description)</Label>
-                        <Textarea
-                          id="seo-description"
-                          placeholder="Leave empty to use post description"
-                          value={seoDescription}
-                          onChange={(e) => setSeoDescription(e.target.value)}
-                          rows={3}
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Recommended: 150-160 characters. Will default to post description if empty.
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="seo-keywords">SEO Keywords</Label>
-                        <Input
-                          id="seo-keywords"
-                          placeholder="Add a keyword and press Enter"
-                          value={seoKeywordInput}
-                          onChange={(e) => setSeoKeywordInput(e.target.value)}
-                          onKeyDown={handleSeoKeywordAdd}
-                        />
-                        {seoKeywords.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {seoKeywords.map((keyword) => (
-                              <Badge key={keyword} variant="secondary" className="flex items-center gap-1">
-                                {keyword}
-                                <button
-                                  type="button"
-                                  onClick={() => handleSeoKeywordRemove(keyword)}
-                                  className="ml-1 hover:text-red-600"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </Badge>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label htmlFor="canonical-url">Canonical URL (Optional)</Label>
-                        <Input
-                          id="canonical-url"
-                          placeholder="https://example.com/canonical-page"
-                          value={canonicalUrl}
-                          onChange={(e) => setCanonicalUrlState(e.target.value)}
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Use if this content is duplicated from another URL.
-                        </p>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="og-image">Open Graph Image URL (Optional)</Label>
-                        <Input
-                          id="og-image"
-                          placeholder="https://example.com/image.jpg"
-                          value={ogImage}
-                          onChange={(e) => setOgImage(e.target.value)}
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Image shown when sharing on social media (1200x630px recommended).
-                        </p>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="no-index"
-                          checked={noIndex}
-                          onChange={(e) => setNoIndex(e.target.checked)}
-                          className="rounded border-gray-300"
-                        />
-                        <Label htmlFor="no-index" className="cursor-pointer">
-                          Prevent search engines from indexing this page
-                        </Label>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-6">
-                  {/* Status */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Status</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Select value={status} onValueChange={(value) => setStatus(value as 'draft' | 'published')}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </CardContent>
-                  </Card>
-
-                  {/* Category */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Category</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Input
-                        placeholder="e.g., Outsourcing, Real Estate"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Tags */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Tags</CardTitle>
-                      <CardDescription>Press Enter to add a tag</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Input
-                        placeholder="Add a tag and press Enter"
-                        value={tagInput}
-                        onChange={(e) => setTagInput(e.target.value)}
-                        onKeyDown={handleTagAdd}
-                      />
-                      {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                              {tag}
-                              <button
-                                type="button"
-                                onClick={() => handleTagRemove(tag)}
-                                className="ml-1 hover:text-red-600"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Actions */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Actions</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <Button
-                        type="submit"
-                        className="w-full bg-lime-600 hover:bg-lime-700 text-white"
-                        disabled={loading || !title || !slug}
-                      >
-                        <Save className="w-4 h-4 mr-2" />
-                        {loading ? 'Saving...' : status === 'draft' ? 'Save as Draft' : 'Publish'}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => router.back()}
-                      >
-                        Cancel
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            </form>
-          </div>
-    )
-  }
-
+  // Main component return
   return (
     <AdminGuard>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          {/* Method Selection Modal */}
-          <Dialog open={showMethodModal} onOpenChange={(open) => {
-            // Prevent closing modal without selecting a method
-            if (!open && !creationMethod) {
-              // Redirect back if user tries to close
-              router.back()
-            }
-          }}>
-            <DialogContent className="sm:max-w-[900px]" showCloseButton={false}>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold text-gray-900">
-                  Choose Creation Method
-                </DialogTitle>
-                <DialogDescription className="text-base">
-                  Select how you would like to create your post
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                {/* AI Generation Option */}
-                <Card 
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-lime-500"
-                  onClick={() => handleMethodSelect('ai')}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center">
-                        <Sparkles className="w-8 h-8 text-lime-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                          Generate with AI
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Let AI help you create content quickly. Provide a topic or prompt and get a complete post generated.
-                        </p>
-                      </div>
-                      <Button 
-                        className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-4"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleMethodSelect('ai')
-                        }}
-                      >
-                        Choose AI Generation
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Custom CMS Option */}
-                <Card 
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-lime-500"
-                  onClick={() => handleMethodSelect('custom')}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center">
-                        <FileEdit className="w-8 h-8 text-lime-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                          Custom CMS
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Create your post manually with full control over content, formatting, and structure.
-                        </p>
-                      </div>
-                      <Button 
-                        className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-4"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleMethodSelect('custom')
-                        }}
-                      >
-                        Choose Custom CMS
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Paste TSX Option */}
-                <Card 
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-lime-500"
-                  onClick={() => handleMethodSelect('paste')}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex flex-col items-center text-center space-y-4">
-                      <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center">
-                        <Code className="w-8 h-8 text-lime-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                          Paste TSX
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Paste your TSX code and compile it as a blog post. Perfect for custom React components.
-                        </p>
-                      </div>
-                      <Button 
-                        className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-4"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleMethodSelect('paste')
-                        }}
-                      >
-                        Choose Paste TSX
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {/* Render content based on selected method */}
-          {creationMethod === 'ai' && renderAIGeneration()}
-          {creationMethod === 'custom' && renderCustomCMS()}
-          {creationMethod === 'paste' && renderPasteTSX()}
+          {renderPasteTSX()}
         </SidebarInset>
       </SidebarProvider>
     </AdminGuard>
   )
 }
-

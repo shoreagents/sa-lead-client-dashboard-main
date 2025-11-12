@@ -5,6 +5,7 @@ import { UserDashboardSidebar } from '@/components/layout/UserDashboardSidebar'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { useUserAuth } from '@/lib/user-auth-context'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
 import ChatConsole from '@/components/ui/ai-chat-console'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
@@ -47,8 +48,9 @@ export default function UserDashboardPage() {
   const { data: recentQuotes = [], isLoading: isLoadingQuote, error: recentQuotesError } = useRecentQuotes(userId)
   const { data: recommendedCandidates = [], isLoading: isLoadingRecommended, error: recommendedCandidatesError } = useRecommendedCandidates(userId)
 
-  // Show loading state while user auth is loading, data is being fetched, or while userId is being determined
-  const isLoading = userLoading || !userId || isLoadingCandidate || isLoadingQuote || isLoadingRecommended
+  // Show loading state only while user auth is loading or userId is being determined
+  // Individual components will handle their own loading states with skeletons
+  const isLoading = userLoading || !userId
 
   const handleChatWithClaude = useCallback(() => {
     // // recordInteraction('chat')
@@ -134,12 +136,30 @@ export default function UserDashboardPage() {
       <SidebarProvider>
         <UserDashboardSidebar onChatOpen={handleChatOpen} />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-2 p-3 pt-20">
+          <div className="flex flex-1 flex-col gap-2 p-3 pt-20 w-full max-w-none">
             {isLoading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lime-500"></div>
-                  <span className="text-lg">Loading your dashboard...</span>
+              <div className="space-y-4">
+                {/* Header Skeleton */}
+                <div className="space-y-2">
+                  <Skeleton className="h-7 w-48" />
+                  <Skeleton className="h-4 w-96" />
+                </div>
+                
+                {/* Grid Skeleton */}
+                <div className="grid" style={{
+                  display: 'grid',
+                  height: '60%',
+                  width: '100%',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gridTemplateRows: 'repeat(4, 1fr)',
+                  gap: '12px',
+                  backgroundColor: '#ffffff',
+                  padding: '6px',
+                  borderRadius: '8px',
+                }}>
+                  {[...Array(6)].map((_, i) => (
+                    <Skeleton key={i} className="w-full h-full rounded-lg" />
+                  ))}
                 </div>
               </div>
             ) : (
@@ -155,25 +175,44 @@ export default function UserDashboardPage() {
             </div>
 
             {/* AI-Powered Sections - Grid Layout */}
-            <div className="grid" style={{
-              display: 'grid',
-              height: '60%',
+            <div style={{
+              display: 'flex',
+              height: '100%',
               width: '100%',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gridTemplateRows: 'repeat(4, 1fr)',
-              gap: '12px',
-              backgroundColor: '#ffffff',
-              padding: '6px',
-              borderRadius: '8px',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <div className="grid" style={{
+                display: 'grid',
+                height: '100%',
+                width: '100%',
+                gridTemplateColumns: 'repeat(6, 1fr)',
+                gridTemplateRows: 'repeat(5, 1fr)',
+                gap: '16px',
+                padding: '8px',
             }}>
               
-              {/* Section 1: Next Step CTA - 1x1 */}
-              <NextStepCard onSeePricing={handleSeePricing} />
+                {/* Section 1: Next Step CTA - Salmon (2x2) */}
+                <div style={{
+                  gridColumn: 'span 2',
+                  gridRow: 'span 2',
+                }} className="h-full">
+              <NextStepCard onSeePricing={handleSeePricing} isLoading={isLoading} />
+                </div>
 
-              {/* Section 2: Suggested Case Study - 1x2 */}
-              <CaseStudyCard onReadMore={() => router.push('/case-studies')} />
+                {/* Section 2: Suggested Case Study - Broccoli (2x3) */}
+                <div style={{
+                  gridColumn: 'span 2',
+                  gridRow: 'span 3',
+                }} className="h-full">
+              <CaseStudyCard onReadMore={() => router.push('/case-studies')} isLoading={isLoading} />
+                </div>
 
-              {/* Section 3: Top Candidate with Matches - 1x4 */}
+                {/* Section 3: Top Candidate with Matches - Tamago (2x5) */}
+                <div style={{
+                  gridColumn: 'span 2',
+                  gridRow: 'span 5',
+                }} className="h-full">
               <TopCandidateWithMatches 
                 topCandidate={topCandidate as Record<string, unknown> | null}
                 isLoadingCandidate={isLoadingCandidate}
@@ -182,19 +221,32 @@ export default function UserDashboardPage() {
                 isLoadingRecommended={isLoadingRecommended}
                 onAskForInterview={handleAskForInterview}
                 onViewMatchedProfile={handleViewMatchedProfile}
+                    userId={userId}
               />
+                </div>
 
-              {/* Section 4: Recent Quotes - 1x3 */}
+                {/* Section 4: Recent Quotes - Pork (2x3) */}
+                <div style={{
+                  gridColumn: 'span 2',
+                  gridRow: 'span 3',
+                }} className="h-full">
               <RecentQuoteCard 
                 recentQuotes={recentQuotes}
                 isLoading={isLoadingQuote}
                 onViewQuote={handleViewQuote}
                 onCreateQuote={handleCreateQuote}
               />
+                </div>
 
-              {/* Section 5: Empty/Reserved - 1x2 */}
+                {/* Section 5: Reserved/Empty - Edamame (2x2) */}
+                <div style={{
+                  gridColumn: 'span 2',
+                  gridRow: 'span 2',
+                }} className="h-full">
               <ReservedCard />
+                </div>
 
+              </div>
             </div>
               </>
             )}

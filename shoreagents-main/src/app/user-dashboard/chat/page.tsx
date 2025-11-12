@@ -10,6 +10,7 @@ import { ConversationComponent } from '@/components/chat/ConversationComponent'
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
 import { InterviewRequestModal } from '@/components/ui/interview-request-modal'
 import { AnonymousUserModal } from '@/components/ui/anonymous-user-modal'
@@ -398,10 +399,23 @@ function ChatPageContent() {
 export default function ChatPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-lime-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading chat...</p>
+      <div className="flex flex-col min-h-screen">
+        <div className="flex-1 p-4 space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-1 space-y-4">
+              <Skeleton className="h-12 w-full" />
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ))}
+            </div>
+            <div className="md:col-span-2 space-y-4">
+              <Skeleton className="h-96 w-full rounded-lg" />
+            </div>
+          </div>
         </div>
       </div>
     }>

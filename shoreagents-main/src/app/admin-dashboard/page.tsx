@@ -7,18 +7,9 @@ import { AdminGuard } from '@/components/auth/AdminGuard'
 import { AppSidebar } from '@/components/app-sidebar'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-// import { Loader } from '@/components/ui/loader' // Removed - will be recreated later
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Users, 
   Eye, 
@@ -31,14 +22,11 @@ import {
   RefreshCw,
   CheckCircle,
   LogOut,
-  Table as TableIcon,
-  ChevronDown,
-  ChevronRight
 } from 'lucide-react'
 import { ChartAreaInteractive } from '@/components/chart-area-interactive'
-import { getRealTimeSeriesData } from '@/lib/userEngagementService'
-import { useDashboardMetrics, useDeviceStats, useUserVisitData, clearAllCaches } from '@/hooks/use-api'
+import { useDashboardMetrics, useDeviceStats, useTimeSeriesData, clearAllCaches } from '@/hooks/use-api'
 import { useQueryClient } from '@tanstack/react-query'
+import { NotificationsCenter } from '@/components/admin/NotificationsCenter'
 
 interface PerformanceMetrics {
   pageViews: number
@@ -100,24 +88,22 @@ export default function AdminDashboard() {
   } = useDeviceStats()
   
   const { 
-    data: userVisitsData, 
-    isLoading: isLoadingUserVisits, 
-    error: userVisitsError,
-    refetch: refetchUserVisits 
-  } = useUserVisitData()
-
-  const [realTimeSeriesData, setRealTimeSeriesData] = useState<Array<{ date: string; desktop: number; mobile: number; tablet: number }>>([])
+    data: timeSeriesData, 
+    isLoading: isLoadingTimeSeries, 
+    error: timeSeriesError,
+    refetch: refetchTimeSeries 
+  } = useTimeSeriesData(90)
+  
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
-  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set())
   
   // Use TanStack Query data with proper defaults
   const realMetrics = dashboardMetrics || { totalPageViews: 0, uniqueIPs: 0, totalVisitors: 0 }
   const deviceStats = deviceStatsData || { desktop: 0, mobile: 0, tablet: 0 }
-  const userVisitData = userVisitsData || []
+  const realTimeSeriesData = timeSeriesData || []
   
   // Combined loading and error states
-  const isLoading = isLoadingMetrics || isLoadingDeviceStats || isLoadingUserVisits
-  const hasError = metricsError || deviceStatsError || userVisitsError
+  const isLoading = isLoadingMetrics || isLoadingDeviceStats || isLoadingTimeSeries
+  const hasError = metricsError || deviceStatsError || timeSeriesError
 
   // Redirect to home if not admin
   useEffect(() => {
@@ -126,38 +112,16 @@ export default function AdminDashboard() {
     }
   }, [loading, isAdmin, router])
 
-  // Fetch time-series data on mount
-  useEffect(() => {
-    if (!isAdmin || loading) return
-    
-    const fetchTimeSeriesData = async () => {
-      try {
-        const timeSeriesData = await getRealTimeSeriesData(90)
-        setRealTimeSeriesData(timeSeriesData)
-      } catch (error) {
-        console.error('Error fetching time-series data:', error)
-      }
-    }
-
-    fetchTimeSeriesData()
-  }, [isAdmin, loading])
+  // Time-series data is now handled by TanStack Query via useTimeSeriesData hook
 
   const refreshData = async () => {
-    // Trigger TanStack Query refetch
+    // Trigger TanStack Query refetch for all data
     setLastUpdated(new Date())
     await Promise.all([
       refetchMetrics(),
       refetchDeviceStats(),
-      refetchUserVisits()
+      refetchTimeSeries()
     ])
-    
-    // Refetch time-series data
-    try {
-      const timeSeriesData = await getRealTimeSeriesData(90)
-      setRealTimeSeriesData(timeSeriesData)
-    } catch (error) {
-      console.error('Error fetching time-series data:', error)
-    }
   }
 
   const handleLogout = async () => {
@@ -186,31 +150,6 @@ export default function AdminDashboard() {
   }
 
 
-  const formatTimeSpent = (seconds: number) => {
-    if (seconds < 60) {
-      return `${seconds}s`
-    } else if (seconds < 3600) {
-      const minutes = Math.floor(seconds / 60)
-      const remainingSeconds = seconds % 60
-      return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`
-    } else {
-      const hours = Math.floor(seconds / 3600)
-      const minutes = Math.floor((seconds % 3600) / 60)
-      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`
-    }
-  }
-
-  const toggleUserExpansion = (userId: string) => {
-    setExpandedUsers(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(userId)) {
-        newSet.delete(userId)
-      } else {
-        newSet.add(userId)
-      }
-      return newSet
-    })
-  }
 
 
   // Removed loading state - show content immediately
@@ -225,14 +164,81 @@ export default function AdminDashboard() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
-            <div className="max-w-7xl mx-auto w-full">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-22">
+            <div className="w-full">
 
         {/* Loading State */}
-        {isLoading && !dashboardMetrics && !deviceStatsData && !userVisitsData && (
-          <div className="flex items-center justify-center py-12">
-            <RefreshCw className="w-8 h-8 animate-spin text-lime-600 mr-3" />
-            <span className="text-lg text-muted-foreground">Loading dashboard data...</span>
+        {isLoading && !dashboardMetrics && !deviceStatsData && !timeSeriesData && (
+          <div className="grid grid-cols-4 grid-rows-4 gap-4 w-full">
+            {/* Page Views and Unique Visitors Skeleton - Top left, 3 columns, 1 row */}
+            <div className="col-span-3 row-span-1 grid grid-cols-2 gap-4">
+              <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-4 rounded" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-24 mb-2" />
+                  <Skeleton className="h-3 w-32" />
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-4 rounded" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-24 mb-2" />
+                  <Skeleton className="h-3 w-32" />
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Notifications Skeleton - Right side, 2 columns, 3 rows */}
+            <div className="col-span-2 row-span-3 h-full flex">
+              <Card className="w-full">
+                <CardHeader>
+                  <Skeleton className="h-6 w-32 mb-2" />
+                  <Skeleton className="h-4 w-48" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                      <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Chart Skeleton - Bottom left, 3 columns, 2 rows */}
+            <div className="col-span-3 row-span-2">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-48 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-full w-full min-h-[300px]" />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* System Health Skeleton - Bottom row, full width, 1 row */}
+            <div className="col-span-5 row-span-1">
+              <Card>
+                <CardHeader>
+                  <Skeleton className="h-6 w-32" />
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="h-16 w-full rounded-lg" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
 
@@ -241,7 +247,7 @@ export default function AdminDashboard() {
           <div className="text-center py-12 bg-red-50 rounded-lg border border-red-200">
             <div className="text-red-600 font-semibold mb-2">Failed to load dashboard data</div>
             <p className="text-sm text-red-500 mb-4">
-              {(metricsError || deviceStatsError || userVisitsError)?.message || 'Unknown error occurred'}
+              {(metricsError || deviceStatsError || timeSeriesError)?.message || 'Unknown error occurred'}
             </p>
             <Button 
               onClick={refreshData}
@@ -254,296 +260,80 @@ export default function AdminDashboard() {
         )}
 
 
-         {/* Dashboard Content - Only show when data is available */}
-         {(!isLoading || dashboardMetrics || deviceStatsData || userVisitsData) && !hasError && (
-         <>
-         {/* Chart and Metrics Layout */}
-         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-           {/* Chart - Takes 4/5 of the width */}
-           <div className="lg:col-span-4">
-             <ChartAreaInteractive 
-               totalVisitors={realMetrics.totalVisitors}
-               uniqueVisitors={realMetrics.uniqueIPs}
-               realTimeSeriesData={realTimeSeriesData}
-             />
-           </div>
-           
-           {/* Metrics - Takes 1/5 of the width */}
-           <div className="space-y-4">
-             <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                 <CardTitle className="text-sm font-medium">Page Views</CardTitle>
-                 <Eye className="h-4 w-4 text-lime-600" />
-               </CardHeader>
-               <CardContent>
-                 <div className="text-2xl font-bold text-lime-600 tabular-nums">
-                   {isLoading ? '...' : realMetrics.totalPageViews.toLocaleString()}
-                 </div>
-                 <div className="flex items-center gap-2 mt-2">
-                   <Badge variant="outline" className="text-lime-600 border-lime-200">
-                     <Database className="w-3 h-3 mr-1" />
-                     Live Data
-                   </Badge>
-                 </div>
-                 <p className="text-xs text-muted-foreground mt-2">
-                   Total from database
-                 </p>
-               </CardContent>
-             </Card>
-
-             <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                 <CardTitle className="text-sm font-medium">Unique Visitors</CardTitle>
-                 <Users className="h-4 w-4 text-lime-600" />
-               </CardHeader>
-               <CardContent>
-                 <div className="text-2xl font-bold text-lime-600 tabular-nums">
-                   {isLoading ? '...' : realMetrics.uniqueIPs.toLocaleString()}
-                 </div>
-                 <div className="flex items-center gap-2 mt-2">
-                   <Badge variant="outline" className="text-lime-600 border-lime-200">
-                     <Globe className="w-3 h-3 mr-1" />
-                     Anonymous IPs
-                   </Badge>
-                 </div>
-                 <p className="text-xs text-muted-foreground mt-2">
-                   Unique IP addresses
-                 </p>
-               </CardContent>
-             </Card>
-           </div>
-         </div>
-
-         {/* Detailed Analytics */}
-          <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="users">User Visits</TabsTrigger>
-            <TabsTrigger value="overview" disabled>Overview</TabsTrigger>
-            <TabsTrigger value="performance" disabled>Performance</TabsTrigger>
-            <TabsTrigger value="devices" disabled>Devices</TabsTrigger>
-            <TabsTrigger value="pages" disabled>Pages</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="users" className="space-y-6">
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TableIcon className="w-5 h-5 text-lime-600" />
-                  User Visit Analytics
-                </CardTitle>
-                <CardDescription>
-                  Real-time user visit data from your database - grouped by user ID
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="w-6 h-6 border-2 border-lime-600 border-t-transparent rounded-full animate-spin mr-2" />
-                    Loading user visit data...
-                  </div>
-                ) : userVisitData.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <Database className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No user visit data available</p>
-                    <p className="text-sm">Make sure your database is connected and has visit data</p>
-                  </div>
-                ) : (
-                  <div className="border rounded-lg overflow-hidden">
-                    {/* Independent Table Header */}
-                    <Table>
-                      <TableHeader className="bg-lime-50 border-b">
-                        <TableRow>
-                          <TableHead className="w-[150px] font-semibold text-gray-900">User ID</TableHead>
-                          <TableHead className="w-[200px] font-semibold text-gray-900">Page Name</TableHead>
-                          <TableHead className="w-[120px] font-semibold text-gray-900">Visit Count</TableHead>
-                          <TableHead className="w-[120px] font-semibold text-gray-900">Time Spent</TableHead>
-                          <TableHead className="w-[150px] font-semibold text-gray-900">Last Visit</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {userVisitData.map((userData) => {
-                          // Calculate performance score based on visit count and time spent
-                          const visitsWithScore = userData.visits.map(visit => {
-                            // Normalize visit count (0-100 scale)
-                            const maxVisits = Math.max(...userData.visits.map(v => v.visitCount))
-                            const normalizedVisits = (visit.visitCount / maxVisits) * 100
-                            
-                            // Normalize time spent (0-100 scale) - cap at 1 hour for normalization
-                            const maxTime = Math.max(...userData.visits.map(v => Math.min(v.timeSpent, 3600)))
-                            const normalizedTime = (Math.min(visit.timeSpent, 3600) / maxTime) * 100
-                            
-                            // Combined score: 60% visit count, 40% time spent
-                            const performanceScore = (normalizedVisits * 0.6) + (normalizedTime * 0.4)
-                            
-                            return {
-                              ...visit,
-                              performanceScore
-                            }
-                          })
-                          
-                          // Sort by performance score and get top performer
-                          const sortedVisits = visitsWithScore.sort((a, b) => b.performanceScore - a.performanceScore)
-                          const topPerformer = sortedVisits[0]
-                          
-                          // Find the page with highest time spent
-                          const topTimePage = userData.visits.reduce((max, visit) => 
-                            visit.timeSpent > max.timeSpent ? visit : max
-                          )
-                          
-                          const isExpanded = expandedUsers.has(userData.userId)
-                          
-                          return (
-                            <React.Fragment key={userData.userId}>
-                              {/* Default View - Top Performer Row */}
-                              <TableRow 
-                                className="bg-lime-50/50 border-l-4 border-l-lime-500 cursor-pointer hover:bg-lime-100/50 transition-colors"
-                                onClick={() => toggleUserExpansion(userData.userId)}
-                              >
-                                {/* User ID Column */}
-                                <TableCell className="font-medium">
-                                  <div className="flex items-center gap-2">
-                                    {isExpanded ? (
-                                      <ChevronDown className="w-4 h-4 text-lime-600" />
-                                    ) : (
-                                      <ChevronRight className="w-4 h-4 text-lime-600" />
-                                    )}
-                                    <Users className="w-4 h-4 text-lime-600" />
-                                    <span className="text-sm font-semibold text-gray-900">
-                                      {userData.userId}
-                                    </span>
-                                  </div>
-                                </TableCell>
-                                
-                                {/* Page Name Column */}
-                                <TableCell className="font-medium">
-                                  <div className="flex items-center gap-2">
-                                    <Globe className="w-4 h-4 text-gray-400" />
-                                    {topPerformer?.pageName}
-                                    <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300">
-                                      Top Performer
-                                    </Badge>
-                                  </div>
-                                </TableCell>
-                                
-                                {/* Visit Count Column */}
-                                <TableCell>
-                                  <Badge className="bg-lime-600 text-white">
-                                    {topPerformer?.visitCount}
-                                  </Badge>
-                                </TableCell>
-                                
-                                {/* Time Spent Column */}
-                                <TableCell>
-                                  <div className="flex items-center gap-1">
-                                    <Clock className="w-4 h-4 text-gray-400" />
-                                    <span className="text-sm">
-                                      {topPerformer ? formatTimeSpent(topPerformer.timeSpent) : '0s'}
-                                    </span>
-                                    {topTimePage && topTimePage.pageName === topPerformer?.pageName && (
-                                      <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300 text-xs">
-                                        Top Time
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </TableCell>
-                                
-                                {/* Last Visit Column */}
-                                <TableCell>
-                                  <span className="text-sm text-gray-600">
-                                    {topPerformer ? new Date(topPerformer.lastVisit).toLocaleDateString() + ' ' + new Date(topPerformer.lastVisit).toLocaleTimeString() : ''}
-                                  </span>
-                                </TableCell>
-                              </TableRow>
-
-                              {/* Expanded View - All Details Rows */}
-                              {isExpanded && userData.visits.map((visit, visitIndex) => {
-                                const isTopPage = topPerformer?.pageName === visit.pageName
-                                const isTopTime = topTimePage.pageName === visit.pageName
-                                const isHighlighted = isTopPage || isTopTime
-                                
-                                return (
-                                  <TableRow 
-                                    key={`${userData.userId}-${visitIndex}`}
-                                    className={isHighlighted ? "bg-lime-50/50 border-l-4 border-l-lime-500" : ""}
-                                  >
-                                    {/* Empty User ID Column - User ID only shown in header row */}
-                                    <TableCell className="font-medium">
-                                      {/* Empty - User ID only shown in header row */}
-                                    </TableCell>
-                                    <TableCell className="font-medium">
-                                      <div className="flex items-center gap-2">
-                                        <Globe className="w-4 h-4 text-gray-400" />
-                                        {visit.pageName}
-                                        {isTopPage && (
-                                          <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300">
-                                            Top Performer
-                                          </Badge>
-                                        )}
-                                        {isTopTime && !isTopPage && (
-                                          <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300">
-                                            Top Time
-                                          </Badge>
-                                        )}
-                                      </div>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Badge 
-                                        variant={isHighlighted ? "default" : "outline"} 
-                                        className={isHighlighted ? "bg-lime-600 text-white" : "text-lime-600 border-lime-200"}
-                                      >
-                                        {visit.visitCount}
-                                      </Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                      <div className="flex items-center gap-1">
-                                        <Clock className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm">
-                                          {formatTimeSpent(visit.timeSpent)}
-                                        </span>
-                                        {isTopTime && (
-                                          <Badge className="ml-2 bg-lime-100 text-lime-800 border-lime-300 text-xs">
-                                            Top Time
-                                          </Badge>
-                                        )}
-                                      </div>
-                                    </TableCell>
-                                    <TableCell>
-                                      <span className="text-sm text-gray-600">
-                                        {new Date(visit.lastVisit).toLocaleDateString()} {new Date(visit.lastVisit).toLocaleTimeString()}
-                                      </span>
-                                    </TableCell>
-                                  </TableRow>
-                                )
-                              })}
-                            </React.Fragment>
-                          )
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-lime-600" />
-                    Conversion Metrics (Coming Soon)
-                  </CardTitle>
+          {/* Dashboard Content - Only show when data is available */}
+          {(!isLoading || dashboardMetrics || deviceStatsData || timeSeriesData) && !hasError && (
+          <>
+          {/* Grid Layout: 5 columns, 7 rows */}
+          <div className="grid grid-cols-4 grid-rows-4 gap-4 w-full">
+            {/* Page Views and Unique Visitors Cards - Top left, 3 columns, 2 rows */}
+            <div className="col-span-3 row-span-1 grid grid-cols-2 gap-4">
+              <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Page Views</CardTitle>
+                  <Eye className="h-4 w-4 text-lime-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <TrendingUp className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p>Conversion metrics will be available soon</p>
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-24 mb-2" />
+                  ) : (
+                    <div className="text-2xl font-bold text-lime-600 tabular-nums">
+                      {realMetrics.totalPageViews.toLocaleString()}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-lime-600 border-lime-200">
+                      <Database className="w-3 h-3 mr-1" />
+                      Live Data
+                    </Badge>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Total from database
+                  </p>
                 </CardContent>
               </Card>
 
+              <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Unique Visitors</CardTitle>
+                  <Users className="h-4 w-4 text-lime-600" />
+                </CardHeader>
+                <CardContent>
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-24 mb-2" />
+                  ) : (
+                    <div className="text-2xl font-bold text-lime-600 tabular-nums">
+                      {realMetrics.uniqueIPs.toLocaleString()}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-lime-600 border-lime-200">
+                      <Globe className="w-3 h-3 mr-1" />
+                      Anonymous IPs
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Unique IP addresses
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Notifications - Right side, 2 columns, 6 rows (extends from top to bottom) */}
+            <div className="col-span-2 row-span-3 h-full flex">
+              <NotificationsCenter />
+            </div>
+
+            {/* Chart - Bottom left, 3 columns, 4 rows */}
+            <div className="col-span-3 row-span-2">
+              <ChartAreaInteractive 
+                totalVisitors={realMetrics.totalVisitors}
+                uniqueVisitors={realMetrics.uniqueIPs}
+                realTimeSeriesData={realTimeSeriesData}
+              />
+            </div>
+
+            {/* System Health - Bottom row, full width, 1 row (row 7) */}
+            <div className="col-span-5 row-span-1">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -551,120 +341,41 @@ export default function AdminDashboard() {
                     System Health
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">Database Status</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Healthy
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">API Status</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Operational
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">CDN Status</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Active
-                    </Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">SSL Certificate</span>
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Valid
-                    </Badge>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="flex justify-between items-center p-4 border rounded-lg">
+                      <span className="text-sm font-medium">Database Status</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Healthy
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-4 border rounded-lg">
+                      <span className="text-sm font-medium">API Status</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Operational
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-4 border rounded-lg">
+                      <span className="text-sm font-medium">CDN Status</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Active
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center p-4 border rounded-lg">
+                      <span className="text-sm font-medium">SSL Certificate</span>
+                      <Badge className="bg-green-100 text-green-800">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Valid
+                      </Badge>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="performance" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance Metrics</CardTitle>
-                <CardDescription>
-                  Real-time performance monitoring (Coming Soon)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Clock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p>Performance monitoring will be available soon</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="devices" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Device Analytics</CardTitle>
-                <CardDescription>
-                  Traffic breakdown by device type
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Monitor className="w-5 h-5 text-lime-600" />
-                      <span>Desktop</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold">{deviceStats.desktop}%</div>
-                      <div className="text-sm text-gray-600">Most popular</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Smartphone className="w-5 h-5 text-lime-600" />
-                      <span>Mobile</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold">{deviceStats.mobile}%</div>
-                      <div className="text-sm text-gray-600">Growing</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Globe className="w-5 h-5 text-lime-600" />
-                      <span>Tablet</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold">{deviceStats.tablet}%</div>
-                      <div className="text-sm text-gray-600">Stable</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="pages" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Page Performance</CardTitle>
-                <CardDescription>
-                  Performance metrics for each page (Coming Soon)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-muted-foreground">
-                  <Database className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <p>Page performance tracking will be available soon</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-        </Tabs>
+          </div>
         </>
          )}
             </div>

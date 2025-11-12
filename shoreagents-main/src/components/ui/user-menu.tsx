@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback, useEffect } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -13,61 +13,16 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { User, LogOut, Settings, Building } from "lucide-react"
 import { useUserAuth } from "@/lib/user-auth-context"
+import { useAuth } from "@/lib/auth-context"
 import { toast } from "sonner"
-import { createClient } from "@/lib/supabase/client"
-
-const supabase = createClient()
 
 export function UserMenu() {
   const { user, signOut, isClient, loading: authLoading } = useUserAuth()
+  const { isAdmin: isAdminFromAuth } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [isUserAdmin, setIsUserAdmin] = useState(false)
-
-  // Check if user is an admin by querying the database
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsUserAdmin(false)
-        return
-      }
-
-      // Quick check: if email matches admin email
-      if (user.email === 'admin@shoreagents.com') {
-        setIsUserAdmin(true)
-        return
-      }
-
-      // If we have auth_user_id, query database
-      if (user.auth_user_id) {
-        try {
-          const { data, error } = await supabase
-            .from('users')
-            .select('is_admin, user_type')
-            .eq('auth_user_id', user.auth_user_id)
-            .single()
-
-          if (error) {
-            console.error('Error checking admin status:', error)
-            setIsUserAdmin(false)
-            return
-          }
-
-          // Check if user is admin
-          setIsUserAdmin(!!(data?.is_admin || data?.user_type === 'Admin'))
-        } catch (error) {
-          console.error('Error in checkAdminStatus:', error)
-          setIsUserAdmin(false)
-        }
-      } else {
-        // No auth_user_id available, default to false
-        setIsUserAdmin(false)
-      }
-    }
-
-    if (user) {
-      checkAdminStatus()
-    }
-  }, [user?.auth_user_id, user?.email])
+  
+  // Use isAdmin from auth context, or check user_type directly
+  const isUserAdmin = isAdminFromAuth || (user?.user_type as string) === 'Admin'
 
 
   // Memoize the sign out handler to prevent unnecessary re-renders

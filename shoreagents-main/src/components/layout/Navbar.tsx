@@ -223,7 +223,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} sticky top-0 z-50 transition-all duration-300 ${isMounted && isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
+    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isMounted && isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
       <div className="w-full relative">
         <div className="flex items-center h-16">
           {/* Logo - Absolute left edge */}
@@ -405,7 +405,7 @@ export function Navbar() {
                           {/* Top Cards Section */}
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             {/* Outsourcing Services Card */}
-                            <Link href="/services/pillars/outsourcing-services" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            <Link href="/outsourcing" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <h4 className="font-bold text-lime-700 mb-2">Outsourcing Services</h4>
@@ -419,7 +419,7 @@ export function Navbar() {
                           </Link>
                           
                             {/* Virtual Assistants Card */}
-                            <Link href="/services/pillars/virtual-assistants" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            <Link href="/virtual-assistant" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <h4 className="font-bold text-lime-700 mb-2">Virtual Assistants</h4>

@@ -7,6 +7,7 @@ export interface CandidateViewData {
   candidate_name?: string;
   view_duration?: number;
   scroll_percentage?: number;
+  incrementPageViews?: boolean; // Flag to indicate if page_views should be incremented
 }
 
 export class CandidateTrackingService {
@@ -14,6 +15,9 @@ export class CandidateTrackingService {
   private currentCandidateId: string | null = null;
   private currentUserId: string | null = null;
   private startTime: number = 0;
+  private lastUpdateTime: number = 0; // Track when we last saved duration
+  private updateInterval: NodeJS.Timeout | null = null; // For periodic updates
+  private hasIncrementedPageViews: boolean = false; // Track if we've incremented page_views for this session
 
   private constructor() {}
 
@@ -35,10 +39,10 @@ export class CandidateTrackingService {
       });
 
       // Use the provided userId directly (this should be the device ID from content tracking)
-      let trackingUserId: string | null = userId;
+      let trackingUserId: string | null = userId?.trim() || null;
       
-      if (!trackingUserId) {
-        console.log('❌ No user ID provided for candidate tracking');
+      if (!trackingUserId || trackingUserId === '') {
+        console.warn('❌ No valid user ID provided for candidate tracking:', { userId, candidateId });
         return;
       }
       
@@ -54,6 +58,8 @@ export class CandidateTrackingService {
       this.currentUserId = trackingUserId;
       this.currentCandidateId = candidateId;
       this.startTime = Date.now(); // Record start time for duration tracking
+      this.lastUpdateTime = Date.now(); // Initialize last update time
+      this.hasIncrementedPageViews = false; // Reset flag for new tracking session
 
       // Get candidate name from BPOC API if not provided
       let finalCandidateName = candidateName;
@@ -61,19 +67,96 @@ export class CandidateTrackingService {
         finalCandidateName = await this.getCandidateNameFromBPOC(candidateId) || undefined;
       }
 
+      // Check if this is a new visit (record doesn't exist) or a revisit (record exists)
+      const supabase = createClient();
+      const { data: existingRecord } = await supabase
+        .from('candidate_views')
+        .select('id, page_views')
+        .eq('user_id', trackingUserId)
+        .eq('candidate_id', candidateId)
+        .maybeSingle();
+
+      const isNewVisit = !existingRecord;
+      
+      console.log('📊 Visit check:', {
+        isNewVisit,
+        existingPageViews: existingRecord?.page_views || 0,
+        willIncrement: isNewVisit
+      });
+
+      // If it's a revisit, increment page_views first using direct update (not RPC)
+      // This avoids the RPC function incrementing it again
+      if (!isNewVisit && existingRecord) {
+        const currentPageViews = existingRecord.page_views || 0;
+        const { error: incrementError } = await supabase
+          .from('candidate_views')
+          .update({ 
+            page_views: currentPageViews + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existingRecord.id);
+        
+        if (incrementError) {
+          console.error('❌ Error incrementing page_views:', incrementError);
+        } else {
+          console.log(`✅ Incremented page_views for revisit: ${currentPageViews} → ${currentPageViews + 1}`);
+          this.hasIncrementedPageViews = true;
+        }
+      }
+
       // Record initial view using the new function that accepts actual user_id
       // This will either create a new record or update an existing one
+      // IMPORTANT: We pass view_duration as undefined/null when starting - this tells the function to preserve existing duration
+      // Only endTracking() should accumulate duration by passing the actual duration value
+      // For revisits, we pass incrementPageViews: false to prevent double increment
       await this.recordInteractionDirect({
         user_id: trackingUserId,
         candidate_id: candidateId,
         candidate_name: finalCandidateName,
-        view_duration: 0, // Initial duration, will be updated in endTracking()
-        scroll_percentage: 0 // Initial scroll percentage, will be updated during tracking
+        view_duration: undefined, // Pass undefined - will be treated as NULL, preserving existing duration
+        scroll_percentage: 0, // Initial scroll percentage, will be updated during tracking
+        incrementPageViews: isNewVisit // Only increment page_views for new visits (RPC will handle it)
       });
+      
+      if (isNewVisit) {
+        this.hasIncrementedPageViews = true;
+      }
+
+      // Start periodic updates every 5 seconds to save duration incrementally
+      // This ensures duration is saved even if tracking ends prematurely
+      this.startPeriodicUpdates();
 
       console.log(`✅ Started tracking view for candidate: ${finalCandidateName || candidateId} (User: ${trackingUserId})`);
     } catch (error) {
       console.error('❌ Error starting candidate tracking:', error);
+    }
+  }
+
+  // Start periodic updates to save duration incrementally
+  private startPeriodicUpdates(): void {
+    // Clear any existing interval
+    this.stopPeriodicUpdates();
+
+    // Update every 5 seconds
+    this.updateInterval = setInterval(async () => {
+      if (this.currentUserId && this.currentCandidateId && this.startTime > 0) {
+        const now = Date.now();
+        const durationSinceLastUpdate = Math.max(0, Math.round((now - this.lastUpdateTime) / 1000));
+        
+        if (durationSinceLastUpdate > 0) {
+          console.log(`⏱️ Periodic update: saving ${durationSinceLastUpdate} seconds of viewing time`);
+          await this.updateViewDuration(this.currentUserId, this.currentCandidateId, durationSinceLastUpdate);
+          this.lastUpdateTime = now; // Update the last update time
+        }
+      }
+    }, 5000); // Update every 5 seconds
+  }
+
+  // Stop periodic updates
+  private stopPeriodicUpdates(): void {
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null;
     }
   }
 
@@ -107,23 +190,47 @@ export class CandidateTrackingService {
   // Ensure user exists in users table (create if needed)
   private async ensureUserExists(userId: string): Promise<string | null> {
     try {
+      // Skip on server-side
+      if (typeof window === 'undefined') {
+        console.warn('⚠️ ensureUserExists called on server-side, skipping');
+        return null;
+      }
+
+      // Validate userId
+      if (!userId || userId.trim() === '') {
+        console.warn('❌ Invalid userId provided to ensureUserExists:', userId);
+        return null;
+      }
+
+      // Skip placeholder IDs
+      if (userId === 'server_placeholder' || userId.startsWith('server_')) {
+        console.warn('⚠️ Server placeholder userId detected, skipping:', userId);
+        return null;
+      }
+
       const supabase = createClient();
+      
+      // Check if Supabase client is available
+      if (!supabase) {
+        console.error('❌ Supabase client not available');
+        return null;
+      }
       
       // First check if user already exists
       const { data: existingUser, error: checkError } = await supabase
         .from('users')
         .select('user_id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors when no rows found
 
       // If user exists, return it
-      if (!checkError && existingUser) {
+      if (existingUser && existingUser.user_id) {
         console.log('✅ User already exists:', userId);
         return userId;
       }
 
-      // If user doesn't exist (checkError.code === 'PGRST116' means no rows found)
-      if (checkError && checkError.code === 'PGRST116') {
+      // If no user found (checkError is null or code is 'PGRST116'), create new user
+      if (!checkError || checkError.code === 'PGRST116') {
         console.log('🔧 User does not exist, creating new user:', userId);
         
         const { data: newUser, error: createError } = await supabase
@@ -136,19 +243,75 @@ export class CandidateTrackingService {
           .single();
 
         if (createError) {
-          console.error('❌ Error creating user:', createError);
+          // Check if it's a duplicate key error (user was created between check and insert)
+          if (createError.code === '23505' || createError.message?.includes('duplicate')) {
+            console.log('🔄 User was created by another process, using existing user');
+            return userId; // Return the userId since it exists now
+          }
+          
+          console.error('❌ Error creating user:', {
+            error: createError,
+            message: createError?.message || 'Unknown error',
+            details: createError?.details || 'No details',
+            hint: createError?.hint || 'No hint',
+            code: createError?.code || 'No code',
+            userId: userId,
+            fullError: JSON.stringify(createError, Object.getOwnPropertyNames(createError))
+          });
           return null;
         }
 
+        if (newUser && newUser.user_id) {
         console.log('✅ Created new user:', newUser.user_id);
         return newUser.user_id;
+        } else {
+          console.error('❌ User creation succeeded but no user_id returned');
+          return null;
+        }
       } else {
         // Some other error occurred
-        console.error('❌ Error checking user existence:', checkError);
+        const errorDetails = {
+          error: checkError,
+          message: checkError?.message || 'Unknown error',
+          details: checkError?.details || 'No details',
+          hint: checkError?.hint || 'No hint',
+          code: checkError?.code || 'No code',
+          userId: userId
+        };
+        
+        // Try to stringify the error to see all properties
+        try {
+          errorDetails['fullError'] = JSON.stringify(checkError, Object.getOwnPropertyNames(checkError));
+        } catch (e) {
+          errorDetails['stringifyError'] = 'Could not stringify error';
+        }
+        
+        console.error('❌ Error checking user existence:', errorDetails);
         return null;
       }
     } catch (error) {
-      console.error('❌ Error in ensureUserExists:', error);
+      const errorInfo: Record<string, unknown> = {
+        error: error,
+        errorType: error?.constructor?.name || typeof error,
+        userId: userId
+      };
+      
+      if (error instanceof Error) {
+        errorInfo.errorMessage = error.message;
+        errorInfo.errorStack = error.stack;
+        errorInfo.errorName = error.name;
+      } else {
+        errorInfo.errorString = String(error);
+      }
+      
+      // Try to get all properties of the error
+      try {
+        errorInfo['fullError'] = JSON.stringify(error, Object.getOwnPropertyNames(error));
+      } catch (e) {
+        errorInfo['stringifyError'] = 'Could not stringify error';
+      }
+      
+      console.error('❌ Exception in ensureUserExists:', errorInfo);
       return null;
     }
   }
@@ -255,108 +418,390 @@ export class CandidateTrackingService {
   // Record interaction directly with actual user_id from frontend
   public async recordInteractionDirect(data: CandidateViewData): Promise<void> {
     try {
+      // Validate input data
+      if (!data.user_id || data.user_id.trim() === '') {
+        console.warn('❌ Invalid user_id provided to recordInteractionDirect:', data);
+        return;
+      }
+
+      if (!data.candidate_id || data.candidate_id.trim() === '') {
+        console.warn('❌ Invalid candidate_id provided to recordInteractionDirect:', data);
+        return;
+      }
+
       console.log('🔍 Attempting to record interaction directly:', {
         user_id: data.user_id,
         candidate_id: data.candidate_id,
         candidate_name: data.candidate_name,
-        scroll_percentage: data.scroll_percentage
+        view_duration: data.view_duration,
+        scroll_percentage: data.scroll_percentage,
+        timestamp: new Date().toISOString()
       });
 
       const supabase = createClient();
       
+      // Check if Supabase client is available
+      if (!supabase) {
+        console.error('❌ Supabase client not available in recordInteractionDirect');
+        return;
+      }
+      
       // Try the new database function first
       try {
-        const { data: result, error } = await supabase.rpc('record_candidate_view_simple', {
+        // Handle view_duration:
+        // - If undefined/null: pass NULL to preserve existing duration (for starting tracking)
+        // - If 0: pass 0 (will preserve: existing + 0 = existing)
+        // - If > 0: pass the value (will accumulate: existing + value)
+        const rpcParams: {
+          p_user_id: string;
+          p_candidate_id: string;
+          p_candidate_name: string | null | undefined;
+          p_view_duration: number | null;
+          p_scroll_percentage: number;
+        } = {
           p_user_id: data.user_id,
           p_candidate_id: data.candidate_id,
           p_candidate_name: data.candidate_name,
-          p_view_duration: data.view_duration,
-          p_scroll_percentage: data.scroll_percentage
-        });
+          p_view_duration: data.view_duration === undefined || data.view_duration === null ? null : data.view_duration,
+          p_scroll_percentage: data.scroll_percentage || 0
+        };
+        
+        console.log('📤 Calling RPC function with params:', rpcParams);
+        
+        // First, check the current state of the record to verify accumulation
+        const { data: currentRecord } = await supabase
+          .from('candidate_views')
+          .select('id, view_duration, page_views')
+          .eq('user_id', data.user_id)
+          .eq('candidate_id', data.candidate_id)
+          .maybeSingle();
+        
+        if (currentRecord) {
+          console.log('📊 Current record state BEFORE RPC call:', {
+            view_id: currentRecord.id,
+            current_duration: currentRecord.view_duration,
+            page_views: currentRecord.page_views,
+            incoming_duration: rpcParams.p_view_duration,
+            expected_result: (currentRecord.view_duration || 0) + (rpcParams.p_view_duration || 0),
+            incrementPageViews: data.incrementPageViews
+          });
+        }
+        
+        // If incrementPageViews is false, we've already incremented it manually for revisits
+        // Use direct update instead to avoid RPC incrementing it again
+        if (data.incrementPageViews === false && currentRecord) {
+          console.log('⏭️ Skipping RPC call - page_views already incremented, using direct update instead');
+          
+          const updateData: Record<string, unknown> = {
+            updated_at: new Date().toISOString()
+          };
+          
+          // Update candidate_name if provided
+          if (data.candidate_name) {
+            updateData.candidate_name = data.candidate_name;
+          }
+          
+          // Only update view_duration if it's not undefined/null (preserve existing)
+          if (data.view_duration !== undefined && data.view_duration !== null) {
+            const currentDuration = currentRecord.view_duration || 0;
+            if (data.view_duration === 0) {
+              // Preserve existing duration
+              updateData.view_duration = currentDuration;
+            } else {
+              // Accumulate duration
+              updateData.view_duration = currentDuration + data.view_duration;
+            }
+          }
+          
+          // Update scroll percentage if provided (use GREATEST to track max)
+          if (data.scroll_percentage !== undefined) {
+            const { data: currentView } = await supabase
+              .from('candidate_views')
+              .select('scroll_percentage')
+              .eq('id', currentRecord.id)
+              .maybeSingle();
+            
+            const currentScroll = currentView?.scroll_percentage || 0;
+            updateData.scroll_percentage = Math.max(currentScroll, data.scroll_percentage || 0);
+          }
+          
+          const { error: updateError } = await supabase
+            .from('candidate_views')
+            .update(updateData)
+            .eq('id', currentRecord.id);
+          
+          if (updateError) {
+            console.error('❌ Error updating record directly:', updateError);
+            throw updateError; // This will trigger the fallback
+          } else {
+            console.log('✅ Updated record directly (avoiding page_views double increment)');
+            return;
+          }
+        }
+        
+        const { data: result, error } = await supabase.rpc('record_candidate_view_simple', rpcParams);
 
         if (error) {
-          console.warn('⚠️ RPC function failed, falling back to direct table operations:', error);
+          console.warn('⚠️ RPC function failed, falling back to direct table operations:', {
+            error: error,
+            message: error?.message,
+            details: error?.details,
+            hint: error?.hint,
+            code: error?.code,
+            user_id: data.user_id,
+            candidate_id: data.candidate_id
+          });
           throw error; // This will trigger the fallback
         }
 
-        console.log(`✅ Successfully recorded view using RPC for candidate: ${data.candidate_name || data.candidate_id}`, result);
+        // Verify the result after RPC call
+        const { data: updatedRecord } = await supabase
+          .from('candidate_views')
+          .select('id, view_duration, page_views')
+          .eq('user_id', data.user_id)
+          .eq('candidate_id', data.candidate_id)
+          .maybeSingle();
+        
+        console.log(`✅ Successfully recorded view using RPC for candidate: ${data.candidate_name || data.candidate_id}`, {
+          result: result,
+          viewId: result,
+          user_id: data.user_id,
+          candidate_id: data.candidate_id,
+          view_duration_passed: data.view_duration,
+          duration_before: currentRecord?.view_duration || 0,
+          duration_after: updatedRecord?.view_duration || 0,
+          note: data.view_duration === 0 ? 'Duration preserved (0 + existing = existing)' : 'Duration accumulated'
+        });
         return;
       } catch (rpcError) {
         console.log('🔄 RPC function not available, using fallback method...');
         
         // Fallback: Use direct table operations with duplicate prevention
+        // Since there's a unique constraint on (user_id, candidate_id), we can query directly
         const { data: existingView, error: findError } = await supabase
           .from('candidate_views')
           .select('id, view_duration, scroll_percentage')
           .eq('user_id', data.user_id)
           .eq('candidate_id', data.candidate_id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+          .maybeSingle(); // Use maybeSingle() - unique constraint ensures only one record
 
         if (findError && findError.code !== 'PGRST116') {
-          console.error('❌ Error checking for existing view:', findError);
+          console.error('❌ Error checking for existing view:', {
+            error: findError,
+            message: findError?.message,
+            details: findError?.details,
+            hint: findError?.hint,
+            code: findError?.code,
+            user_id: data.user_id,
+            candidate_id: data.candidate_id
+          });
           return;
         }
 
         if (existingView) {
           // Update existing record instead of creating new one
-          console.log('🔄 Updating existing view record instead of creating duplicate');
-          const { error: updateError } = await supabase
-            .from('candidate_views')
-            .update({
+          console.log('🔄 Updating existing view record instead of creating duplicate', {
+            existingViewId: existingView.id,
+            currentDuration: existingView.view_duration,
+            incomingDuration: data.view_duration
+          });
+          
+          // Build update object
+          // For view_duration: 
+          // - If undefined/null (starting tracking), preserve existing duration
+          // - If 0 (starting tracking), preserve existing duration (0 + existing = existing)
+          // - If > 0 (ending session), add it to existing
+          const viewDurationToAdd = data.view_duration ?? 0;
+          const currentDuration = existingView.view_duration || 0;
+          
+          // IMPORTANT: If view_duration is undefined/null/0 (starting new session), preserve existing duration
+          // If view_duration > 0 (ending session), add it to existing
+          const newDuration = (viewDurationToAdd === undefined || viewDurationToAdd === null || viewDurationToAdd === 0) 
+            ? currentDuration 
+            : (currentDuration + viewDurationToAdd);
+          
+          console.log(`📊 Duration calculation: current=${currentDuration}, incoming=${viewDurationToAdd}, result=${newDuration}`, {
+            preserve: (viewDurationToAdd === undefined || viewDurationToAdd === null || viewDurationToAdd === 0)
+          });
+          
+          const updateData: Record<string, unknown> = {
               candidate_name: data.candidate_name,
-              view_duration: (existingView.view_duration || 0) + (data.view_duration || 0),
+            view_duration: newDuration, // Preserve if 0, accumulate otherwise
               scroll_percentage: Math.max(existingView.scroll_percentage || 0, data.scroll_percentage || 0),
               updated_at: new Date().toISOString()
-            })
+          };
+          
+          console.log('📤 Updating existing view with data:', {
+            view_id: existingView.id,
+            previous_duration: currentDuration,
+            incoming_duration: viewDurationToAdd,
+            new_duration: newDuration,
+            duration_preserved: viewDurationToAdd === 0
+          });
+          
+          const { error: updateError } = await supabase
+            .from('candidate_views')
+            .update(updateData)
             .eq('id', existingView.id);
 
           if (updateError) {
-            console.error('❌ Error updating existing view:', updateError);
+            console.error('❌ Error updating existing view:', {
+              error: updateError,
+              message: updateError?.message,
+              details: updateError?.details,
+              hint: updateError?.hint,
+              code: updateError?.code,
+              view_id: existingView.id,
+              user_id: data.user_id,
+              candidate_id: data.candidate_id,
+              updateData: updateData
+            });
           } else {
-            console.log('✅ Existing view record updated successfully');
+            console.log('✅ Existing view record updated successfully', {
+              view_id: existingView.id,
+              new_duration: newDuration,
+              previous_duration: currentDuration,
+              duration_preserved: viewDurationToAdd === 0
+            });
           }
         } else {
           // Insert new record when no existing record found
-          const { data: result, error } = await supabase
-            .from('candidate_views')
-            .insert({
+          console.log('🆕 No existing view found, creating new record:', {
               user_id: data.user_id,
               candidate_id: data.candidate_id,
               candidate_name: data.candidate_name,
-              view_duration: data.view_duration,
-              scroll_percentage: data.scroll_percentage,
+            view_duration: data.view_duration ?? 0,
+            scroll_percentage: data.scroll_percentage || 0
+          });
+          
+          const insertData = {
+            user_id: data.user_id,
+            candidate_id: data.candidate_id,
+            candidate_name: data.candidate_name,
+            view_duration: data.view_duration ?? 0, // Default to 0 for new records
+            scroll_percentage: data.scroll_percentage || 0,
               page_views: 1
-            })
+          };
+          
+          console.log('📤 Inserting candidate view with data:', insertData);
+          
+          const { data: result, error } = await supabase
+            .from('candidate_views')
+            .insert(insertData)
             .select('id')
             .single();
 
           if (error) {
+            // Check if it's a unique constraint violation (record already exists)
+            if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique')) {
+              console.log('🔄 Record already exists (unique constraint), attempting to update instead...');
+              
+              // Try to find and update the existing record
+              const { data: existingRecord, error: findError } = await supabase
+                .from('candidate_views')
+                .select('id, view_duration, scroll_percentage')
+                .eq('user_id', data.user_id)
+                .eq('candidate_id', data.candidate_id)
+                .maybeSingle();
+              
+              if (existingRecord && !findError) {
+                const updateData: Record<string, unknown> = {
+                  candidate_name: data.candidate_name,
+                  scroll_percentage: Math.max(existingRecord.scroll_percentage || 0, data.scroll_percentage || 0),
+                  updated_at: new Date().toISOString()
+                };
+                
+                // Only update view_duration if it's not 0 (preserve existing when starting)
+                if (data.view_duration !== 0) {
+                  updateData.view_duration = (existingRecord.view_duration || 0) + data.view_duration;
+                }
+                
+                const { error: updateError } = await supabase
+                  .from('candidate_views')
+                  .update(updateData)
+                  .eq('id', existingRecord.id);
+                
+                if (updateError) {
+                  console.error('❌ Error updating existing record after unique constraint violation:', {
+                    error: updateError,
+                    message: updateError?.message,
+                    code: updateError?.code
+                  });
+                } else {
+                  console.log('✅ Updated existing record after unique constraint violation');
+                }
+                return;
+              }
+            }
+            
             console.error('❌ Error recording candidate interaction:', {
               error: error,
-              message: error.message,
-              details: error.details,
-              hint: error.hint,
-              code: error.code
+              message: error?.message,
+              details: error?.details,
+              hint: error?.hint,
+              code: error?.code,
+              fullError: JSON.stringify(error, Object.getOwnPropertyNames(error)),
+              insertData: insertData
             });
             return;
           }
 
-          console.log(`✅ Successfully recorded view for candidate: ${data.candidate_name || data.candidate_id}`, result);
+          console.log(`✅ Successfully recorded view for candidate: ${data.candidate_name || data.candidate_id}`, {
+            result: result,
+            insertedId: result?.id
+          });
         }
       }
     } catch (error) {
-      console.error('❌ Exception in recordInteractionDirect:', error);
+      console.error('❌ Exception in recordInteractionDirect:', {
+        error: error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        user_id: data.user_id,
+        candidate_id: data.candidate_id
+      });
     }
   }
 
   // Record scroll percentage during viewing
   public async recordScrollPercentage(scrollPercentage: number): Promise<void> {
-    if (!this.currentUserId || !this.currentCandidateId) return;
+    if (!this.currentUserId || !this.currentCandidateId) {
+      console.log('⚠️ Cannot record scroll percentage - no active tracking session', {
+        currentUserId: this.currentUserId,
+        currentCandidateId: this.currentCandidateId
+      });
+      return;
+    }
+
+    // Ensure scroll percentage is within valid range (0-100)
+    const validScrollPercentage = Math.max(0, Math.min(100, Math.round(scrollPercentage)));
 
     try {
       const supabase = createClient();
+      
+      if (!supabase) {
+        console.error('❌ Supabase client not available for scroll percentage update');
+        return;
+      }
+
+      // First, get current scroll percentage to only update if it increased
+      const { data: currentRecord } = await supabase
+        .from('candidate_views')
+        .select('scroll_percentage')
+        .eq('user_id', this.currentUserId)
+        .eq('candidate_id', this.currentCandidateId)
+        .maybeSingle();
+
+      const currentScrollPercentage = currentRecord?.scroll_percentage || 0;
+
+      // Only update if the new scroll percentage is greater than the current one
+      // (We want to track the maximum scroll percentage reached)
+      if (validScrollPercentage <= currentScrollPercentage) {
+        console.log(`⏭️ Skipping scroll percentage update: ${validScrollPercentage}% <= ${currentScrollPercentage}% (current max)`);
+        return;
+      }
+
+      console.log(`📜 Updating scroll percentage: ${currentScrollPercentage}% → ${validScrollPercentage}%`);
       
       // Use the new database function to update scroll percentage
       const { error } = await supabase.rpc('record_candidate_view_simple', {
@@ -364,13 +809,19 @@ export class CandidateTrackingService {
         p_candidate_id: this.currentCandidateId,
         p_candidate_name: null, // Keep existing name
         p_view_duration: null, // Keep existing duration
-        p_scroll_percentage: scrollPercentage
+        p_scroll_percentage: validScrollPercentage
       });
 
       if (error) {
-        console.error('❌ Error updating scroll percentage:', error);
+        console.error('❌ Error updating scroll percentage:', {
+          error: error,
+          message: error?.message,
+          details: error?.details,
+          code: error?.code,
+          scrollPercentage: validScrollPercentage
+        });
       } else {
-        console.log(`✅ Updated scroll percentage: ${scrollPercentage}%`);
+        console.log(`✅ Updated scroll percentage: ${validScrollPercentage}% (was ${currentScrollPercentage}%)`);
       }
     } catch (error) {
       console.error('❌ Exception in recordScrollPercentage:', error);
@@ -381,23 +832,67 @@ export class CandidateTrackingService {
   public async endTracking(): Promise<void> {
     try {
       if (!this.currentUserId || !this.currentCandidateId || this.startTime === 0) {
-        console.log('⚠️ No active tracking session to end');
+        console.log('⚠️ No active tracking session to end', {
+          currentUserId: this.currentUserId,
+          currentCandidateId: this.currentCandidateId,
+          startTime: this.startTime
+        });
         return;
       }
 
-      // Calculate view duration in seconds
-      const viewDuration = Math.round((Date.now() - this.startTime) / 1000);
-      console.log(`📊 Ending tracking session - Duration: ${viewDuration} seconds`);
+      // Stop periodic updates first
+      this.stopPeriodicUpdates();
 
-      // Update the candidate view record with the calculated duration
-      await this.updateViewDuration(this.currentUserId, this.currentCandidateId, viewDuration);
+      // Calculate remaining duration since last update (to avoid double-counting)
+      const endTime = Date.now();
+      const durationSinceLastUpdate = Math.max(0, Math.round((endTime - this.lastUpdateTime) / 1000));
+      
+      const userId = this.currentUserId;
+      const candidateId = this.currentCandidateId;
+      
+      // Calculate total duration for logging
+      const totalDurationMs = endTime - this.startTime;
+      const totalDurationSeconds = Math.max(0, Math.round(totalDurationMs / 1000));
+      
+      console.log(`📊 Ending tracking session - Total Duration: ${totalDurationSeconds} seconds`, {
+        userId: userId,
+        candidateId: candidateId,
+        startTime: this.startTime,
+        startTimeFormatted: new Date(this.startTime).toISOString(),
+        endTime: endTime,
+        endTimeFormatted: new Date(endTime).toISOString(),
+        lastUpdateTime: this.lastUpdateTime,
+        durationSinceLastUpdate: durationSinceLastUpdate,
+        totalDurationMs: totalDurationMs,
+        totalDurationSeconds: totalDurationSeconds,
+        calculation: `${totalDurationMs}ms / 1000 = ${totalDurationSeconds}s`
+      });
 
-      // Reset tracking state
+      // Save remaining duration since last periodic update
+      // (Periodic updates already saved previous chunks)
+      if (durationSinceLastUpdate > 0) {
+        console.log(`💾 Saving remaining ${durationSinceLastUpdate} seconds since last update`);
+        await this.updateViewDuration(userId, candidateId, durationSinceLastUpdate);
+      } else {
+        console.log('⚠️ No remaining duration to save (already saved by periodic updates)');
+      }
+
+      // Reset tracking state AFTER updating (in case update fails, we can retry)
       this.currentCandidateId = null;
       this.currentUserId = null;
       this.startTime = 0;
+      this.lastUpdateTime = 0;
+      
+      console.log('✅ Tracking session ended and state reset');
     } catch (error) {
-      console.error('Error ending candidate tracking:', error);
+      console.error('❌ Error ending candidate tracking:', {
+        error: error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        currentUserId: this.currentUserId,
+        currentCandidateId: this.currentCandidateId,
+        startTime: this.startTime
+      });
     }
   }
 
@@ -408,7 +903,26 @@ export class CandidateTrackingService {
       
       console.log(`🔍 Updating view duration: user=${userId}, candidate=${candidateId}, duration=${duration}`);
       
-      // Try the RPC function first
+      if (!supabase) {
+        console.error('❌ Supabase client not available');
+        return;
+      }
+      
+      // First, get the current duration to verify accumulation
+      const { data: currentRecord } = await supabase
+        .from('candidate_views')
+        .select('id, view_duration')
+        .eq('user_id', userId)
+        .eq('candidate_id', candidateId)
+        .maybeSingle();
+      
+      const currentDuration = currentRecord?.view_duration || 0;
+      const expectedNewDuration = currentDuration + duration;
+      
+      console.log(`📊 Duration update: current=${currentDuration}, adding=${duration}, expected=${expectedNewDuration}`);
+      
+      // Use the RPC function which handles upsert and accumulation
+      // This ensures the record exists and duration is accumulated correctly
       try {
         const { data: result, error } = await supabase.rpc('record_candidate_view_simple', {
           p_user_id: userId,
@@ -419,31 +933,70 @@ export class CandidateTrackingService {
         });
 
         if (error) {
-          console.warn('⚠️ RPC function failed for duration update, using fallback:', error);
+          console.warn('⚠️ RPC function failed for duration update, using fallback:', {
+            error: error,
+            message: error?.message,
+            details: error?.details,
+            hint: error?.hint,
+            code: error?.code
+          });
           throw error; // This will trigger the fallback
         }
 
-        console.log(`✅ Updated view duration using RPC for candidate ${candidateId}:`, result);
+        // Verify the update was successful by querying the record again
+        const { data: updatedRecord } = await supabase
+          .from('candidate_views')
+          .select('id, view_duration')
+          .eq('user_id', userId)
+          .eq('candidate_id', candidateId)
+          .maybeSingle();
+        
+        const actualNewDuration = updatedRecord?.view_duration || 0;
+        
+        console.log(`✅ Updated view duration using RPC for candidate ${candidateId}:`, {
+          result: result,
+          duration_before: currentDuration,
+          duration_added: duration,
+          duration_after: actualNewDuration,
+          expected: expectedNewDuration,
+          match: actualNewDuration === expectedNewDuration ? '✅' : '⚠️ MISMATCH'
+        });
+        
+        // If there's a mismatch, log a warning but don't fail (data might still be saved)
+        if (actualNewDuration !== expectedNewDuration) {
+          console.warn('⚠️ Duration mismatch detected!', {
+            expected: expectedNewDuration,
+            actual: actualNewDuration,
+            difference: actualNewDuration - expectedNewDuration
+          });
+        }
+        
         return;
       } catch (rpcError) {
         console.log('🔄 RPC function not available for duration update, using fallback method...');
         
-        // Fallback: Use direct table operations with duration accumulation
+        // Fallback: Use direct table operations with proper upsert logic
+        // Since there's a unique constraint on (user_id, candidate_id), we can query directly
         const { data: existingView, error: findError } = await supabase
           .from('candidate_views')
-          .select('id, view_duration, scroll_percentage')
+          .select('id, view_duration, scroll_percentage, page_views')
           .eq('user_id', userId)
           .eq('candidate_id', candidateId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+          .maybeSingle(); // Use maybeSingle() - unique constraint ensures only one record
 
         if (findError && findError.code !== 'PGRST116') {
-          console.error('❌ Error finding candidate view to update duration:', findError);
+          console.error('❌ Error finding candidate view to update duration:', {
+            error: findError,
+            message: findError?.message,
+            details: findError?.details,
+            code: findError?.code,
+            user_id: userId,
+            candidate_id: candidateId
+          });
           return;
         }
 
-        if (existingView) {
+        if (existingView && existingView.id) {
           // Update existing record by ADDING to the existing duration
           const currentDuration = existingView.view_duration || 0;
           const newTotalDuration = currentDuration + duration;
@@ -459,16 +1012,73 @@ export class CandidateTrackingService {
             .eq('id', existingView.id);
 
           if (updateError) {
-            console.error('❌ Error updating view duration:', updateError);
+            console.error('❌ Error updating view duration:', {
+              error: updateError,
+              message: updateError?.message,
+              details: updateError?.details,
+              code: updateError?.code,
+              view_id: existingView.id
+            });
+            throw updateError; // Re-throw to ensure caller knows it failed
           } else {
-            console.log(`✅ Updated view duration: ${newTotalDuration} seconds (${currentDuration} + ${duration}) for candidate ${candidateId}`);
+            // Verify the update was successful
+            const { data: verifiedRecord } = await supabase
+              .from('candidate_views')
+              .select('view_duration')
+              .eq('id', existingView.id)
+              .maybeSingle();
+            
+            const actualDuration = verifiedRecord?.view_duration || 0;
+            
+            console.log(`✅ Updated view duration: ${newTotalDuration} seconds (${currentDuration} + ${duration}) for candidate ${candidateId}`, {
+              expected: newTotalDuration,
+              actual: actualDuration,
+              verified: actualDuration === newTotalDuration ? '✅' : '⚠️ MISMATCH'
+            });
+            
+            if (actualDuration !== newTotalDuration) {
+              console.warn('⚠️ Duration mismatch in fallback update!', {
+                expected: newTotalDuration,
+                actual: actualDuration
+              });
+            }
           }
         } else {
-          console.log('⚠️ No existing view record found for duration update');
+          // Record doesn't exist - this shouldn't happen if startTracking() was called
+          // But create it anyway to ensure data integrity
+          console.warn('⚠️ No existing view record found for duration update, creating new record');
+          
+          const { error: insertError } = await supabase
+            .from('candidate_views')
+            .insert({
+              user_id: userId,
+              candidate_id: candidateId,
+              view_duration: duration, // Set initial duration
+              scroll_percentage: 0,
+              page_views: 1
+            });
+
+          if (insertError) {
+            console.error('❌ Error creating view record for duration update:', {
+              error: insertError,
+              message: insertError?.message,
+              details: insertError?.details,
+              code: insertError?.code
+            });
+          } else {
+            console.log(`✅ Created new view record with duration ${duration} seconds for candidate ${candidateId}`);
+          }
         }
       }
     } catch (error) {
-      console.error('❌ Exception in updateViewDuration:', error);
+      console.error('❌ Exception in updateViewDuration:', {
+        error: error,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorStack: error instanceof Error ? error.stack : undefined,
+        userId: userId,
+        candidateId: candidateId,
+        duration: duration
+      });
     }
   }
 

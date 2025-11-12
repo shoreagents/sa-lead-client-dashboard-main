@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { 
   User, 
   Mail, 
@@ -132,10 +133,30 @@ export default function ProfilePage() {
               <SidebarTrigger className="-ml-1" />
               <h1 className="text-lg font-semibold">Profile</h1>
             </header>
-            <div className="flex flex-1 items-center justify-center pt-20">
-              <div className="flex items-center gap-2">
-                <RefreshCw className="w-6 h-6 animate-spin text-lime-600" />
-                <span className="text-lime-600">Loading profile...</span>
+            <div className="flex flex-1 flex-col gap-6 p-6 pt-20">
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-48" />
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Card>
+                    <CardHeader>
+                      <Skeleton className="h-6 w-32" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardHeader>
+                      <Skeleton className="h-6 w-32" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             </div>
           </SidebarInset>
