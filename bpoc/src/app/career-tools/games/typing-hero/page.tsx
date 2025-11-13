@@ -1897,9 +1897,10 @@ export default function TypingHeroPage() {
       // Check if this is the final chapter (5 chapters total)
       if (chapterNum >= 5) {
         console.log('🏆 GAME COMPLETED! All 5 chapters finished!');
-        // Delay to show celebration, then go to complete state
+        // Delay to show celebration, then save and go to complete state
         setTimeout(() => {
-          setGameState('complete');
+          // Save the game session to database before showing complete state
+          endGame(true);
           isChapterCompleteRef.current = false; // Reset flag
           setIsChapterComplete(false); // Reset flag
         }, 3000); // 3 second celebration for game completion
@@ -2551,7 +2552,8 @@ export default function TypingHeroPage() {
             // Game complete! Final celebration
             setTimeout(() => {
               console.log('🏆 All 5 chapters completed! Game finished!');
-              setGameState('complete');
+              // Save the game session to database before showing complete state
+              endGame(true);
               isChapterCompleteRef.current = false; // Reset flag
               setIsChapterComplete(false); // Reset flag
             }, 3000); // 3 second celebration for game completion

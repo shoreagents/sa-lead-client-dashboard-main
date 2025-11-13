@@ -251,31 +251,48 @@ function HomePageContent() {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
 
-      // Check if user just signed up (not signed in yet)
-      // If user has no session or is in signup flow, don't check profile yet
-      const isSignupFlow = (typeof window !== 'undefined' && sessionStorage.getItem('googleOAuthFlow') === 'signup') || 
-                          (typeof window !== 'undefined' && sessionStorage.getItem('justSignedUp') === 'true')
+      // Check signup flow flags
+      const googleOAuthFlow = typeof window !== 'undefined' ? sessionStorage.getItem('googleOAuthFlow') : null
+      const justSignedUp = typeof window !== 'undefined' ? sessionStorage.getItem('justSignedUp') : null
+      const manualSignupAutoSignIn = typeof window !== 'undefined' ? sessionStorage.getItem('manualSignupAutoSignIn') : null
       
       console.log('🔍 HomePage: Checking signup flow flags:', {
-        googleOAuthFlow: typeof window !== 'undefined' ? sessionStorage.getItem('googleOAuthFlow') : null,
-        justSignedUp: typeof window !== 'undefined' ? sessionStorage.getItem('justSignedUp') : null,
-        isSignupFlow,
+        googleOAuthFlow,
+        justSignedUp,
+        manualSignupAutoSignIn,
         userId: user.id,
         userEmail: user.email
       })
       
-      if (isSignupFlow) {
-        console.log('🚫 HomePage: User just signed up, not checking profile yet')
+      // For Google OAuth signup, wait for OAuth callback to complete
+      if (googleOAuthFlow === 'signup') {
+        console.log('🚫 HomePage: Google OAuth signup flow in progress, not checking profile yet')
         setProfileLoading(false)
         return
       }
-
+      
+      // For manual signup without auto sign-in, don't check profile (user needs to sign in first)
+      if (justSignedUp === 'true' && !manualSignupAutoSignIn) {
+        console.log('🚫 HomePage: Manual signup completed, user needs to sign in first')
+        setProfileLoading(false)
+        return
+      }
+      
       // Additional check: if user was just created (no profile data yet), don't show stepper immediately
       // This prevents the stepper from showing right after signup
+      // BUT allow it for manual signup with auto sign-in
       const userCreatedRecently = user.created_at && 
         (new Date().getTime() - new Date(user.created_at).getTime()) < 30000 // 30 seconds
       
-      if (userCreatedRecently && (typeof window === 'undefined' || !sessionStorage.getItem('hasSignedIn'))) {
+      // For manual signup with auto sign-in, proceed to check profile (stepper will show)
+      // Skip the recent user check for manual signup with auto sign-in
+      if (manualSignupAutoSignIn === 'true') {
+        console.log('✅ HomePage: Manual signup with auto sign-in, proceeding to check profile')
+        // Clear the flag after using it
+        sessionStorage.removeItem('manualSignupAutoSignIn')
+        // Set hasSignedIn flag to bypass recent user check
+        sessionStorage.setItem('hasSignedIn', 'true')
+      } else if (userCreatedRecently && (typeof window === 'undefined' || !sessionStorage.getItem('hasSignedIn'))) {
         console.log('🚫 HomePage: User created recently and hasn\'t signed in yet, not checking profile')
         setProfileLoading(false)
         return

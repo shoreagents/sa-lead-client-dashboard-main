@@ -34,7 +34,7 @@ interface SignUpFormProps {
 }
 
 export default function SignUpForm({ open, onOpenChange, onSwitchToLogin }: SignUpFormProps) {
-  const { signUp, signInWithGoogle, signOut } = useAuth()
+  const { signUp, signIn, signInWithGoogle, signOut } = useAuth()
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -273,23 +273,43 @@ export default function SignUpForm({ open, onOpenChange, onSwitchToLogin }: Sign
         // Successful registration
         console.log('Registration successful:', data.user.email)
         
-        // Set flag to indicate user just signed up (not signed in yet)
-        sessionStorage.setItem('justSignedUp', 'true')
+        // Set flag to indicate manual signup with auto sign-in
+        sessionStorage.setItem('manualSignupAutoSignIn', 'true')
         sessionStorage.removeItem('googleOAuthFlow')
-        sessionStorage.removeItem('hasSignedIn')
+        sessionStorage.removeItem('justSignedUp')
         
-        // Sign out the user so they need to sign in manually
+          // Automatically sign in the user after successful registration
         try {
-          await signOut()
-          console.log('✅ User signed out after registration, must sign in manually')
-        } catch (signOutError) {
-          console.error('Error during sign out after registration:', signOutError)
+          console.log('🔄 Auto-signing in user after manual registration...')
+          const signInResult = await signIn(formData.email, formData.password)
+          
+          if (signInResult.error) {
+            console.error('❌ Auto sign-in failed:', signInResult.error)
+            // If auto sign-in fails, fall back to manual sign-in flow
+            sessionStorage.setItem('justSignedUp', 'true')
+            sessionStorage.removeItem('manualSignupAutoSignIn')
+            setErrors({ general: 'Account created successfully! Please sign in to continue.' })
+            setIsLoading(false)
+            return
+          }
+          
+          console.log('✅ User auto-signed in after manual registration')
+          sessionStorage.setItem('hasSignedIn', 'true')
+          
+          // Close the signup modal
+          onOpenChange(false)
+          
+          // Dispatch event to trigger profile completion check
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('userSignedIn'))
+          }
+        } catch (signInError) {
+          console.error('❌ Error during auto sign-in after registration:', signInError)
+          // Fall back to manual sign-in flow
+          sessionStorage.setItem('justSignedUp', 'true')
+          sessionStorage.removeItem('manualSignupAutoSignIn')
+          setErrors({ general: 'Account created successfully! Please sign in to continue.' })
         }
-        
-        // Close the signup modal
-        onOpenChange(false)
-        
-        // Don't dispatch userSignedIn event - user needs to sign in manually
       }
     } catch (error) {
       console.error('Registration error:', error)

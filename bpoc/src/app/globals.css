@@ -2,6 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Date input styling for white text */
+input[type="date"] {
+  color: #ffffff;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  color: #ffffff;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field {
+  color: #ffffff;
+}
+
+input[type="date"]::-webkit-datetime-edit-day-field {
+  color: #ffffff;
+}
+
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: #ffffff;
+}
+
+/* Firefox date input styling */
+input[type="date"]::-moz-placeholder {
+  color: #9ca3af;
+}
+
+input[type="date"]:focus {
+  color: #ffffff;
+}
+
 /* Custom scrollbar styles for Critical Issues card */
 .critical-issues-scrollbar::-webkit-scrollbar {
   width: 8px;
