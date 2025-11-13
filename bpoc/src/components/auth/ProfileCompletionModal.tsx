@@ -16,6 +16,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { format } from 'date-fns'
+import { cn } from '@/lib/utils'
 import { 
   Select,
   SelectContent,
@@ -29,7 +33,7 @@ import {
   Phone, 
   Briefcase, 
   FileText, 
-  Calendar,
+  Calendar as CalendarIcon,
   ChevronRight,
   ChevronLeft,
   CheckCircle,
@@ -834,15 +838,63 @@ export default function ProfileCompletionModal({
                 <label className="block text-sm font-medium text-white">
                   Birthday <span className="text-red-400">*</span>
                 </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="date"
-                    value={formData.birthday}
-                    onChange={(e) => handleInputChange('birthday', e.target.value)}
-                    className="pl-10 h-9 bg-white/5 border-white/20 text-white focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:outline-none"
-                  />
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal h-9 bg-white/5 border-white/20 text-white hover:bg-white/10",
+                        !formData.birthday && "text-gray-400"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.birthday ? (
+                        format(new Date(formData.birthday), "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 bg-gray-900 border-gray-700" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.birthday ? new Date(formData.birthday) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          handleInputChange('birthday', format(date, 'yyyy-MM-dd'))
+                        }
+                      }}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date('1900-01-01')
+                      }
+                      initialFocus
+                      className="bg-gray-900 text-white"
+                      classNames={{
+                        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                        month: "space-y-4",
+                        caption: "flex justify-center pt-1 relative items-center text-white",
+                        caption_label: "text-sm font-medium text-white",
+                        nav: "space-x-1 flex items-center",
+                        nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white border-gray-600 hover:bg-gray-800",
+                        nav_button_previous: "absolute left-1",
+                        nav_button_next: "absolute right-1",
+                        table: "w-full border-collapse space-y-1",
+                        head_row: "flex",
+                        head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
+                        row: "flex w-full mt-2",
+                        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-gray-800/50 [&:has([aria-selected])]:bg-gray-800 first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                        day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100 text-white hover:bg-gray-800",
+                        day_range_end: "day-range-end",
+                        day_selected: "bg-cyan-600 text-white hover:bg-cyan-700 hover:text-white focus:bg-cyan-600 focus:text-white",
+                        day_today: "bg-gray-800 text-white",
+                        day_outside: "day-outside text-gray-500 opacity-50 aria-selected:bg-gray-800/50 aria-selected:text-gray-400 aria-selected:opacity-30",
+                        day_disabled: "text-gray-600 opacity-50",
+                        day_range_middle: "aria-selected:bg-gray-800 aria-selected:text-white",
+                        day_hidden: "invisible",
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
                 {errors.birthday && <p className="text-xs text-red-400">{errors.birthday}</p>}
                 {age !== null && <p className="text-xs text-cyan-400">Age: {age} years old</p>}
               </div>

@@ -28,6 +28,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 
 interface SidebarItem {
@@ -72,7 +73,7 @@ export default function AdminLayout({
   titleContent,
   adminUser 
 }: AdminLayoutProps) {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const { adminUser: contextAdminUser } = useAdmin()
   const router = useRouter()
   
@@ -81,6 +82,8 @@ export default function AdminLayout({
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set(['platform']))
   const [userExpanded, setUserExpanded] = useState(false)
   const [sidebarMinimized, setSidebarMinimized] = useState(false)
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const pathname = usePathname()
 
   const toggleExpanded = (itemTitle: string) => {
@@ -318,7 +321,10 @@ export default function AdminLayout({
                 
                 {userExpanded && !sidebarMinimized && (
                   <div className="ml-4 mt-2">
-                    <button className="w-full flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 hover:bg-white/5 text-gray-300 hover:text-white">
+                    <button 
+                      onClick={() => setIsLogoutDialogOpen(true)}
+                      className="w-full flex items-center space-x-3 px-3 py-2 text-sm rounded-lg transition-all duration-200 hover:bg-white/5 text-gray-300 hover:text-white"
+                    >
                       <LogOut className="w-4 h-4" />
                       <span>Log out</span>
                     </button>
@@ -359,6 +365,49 @@ export default function AdminLayout({
           </motion.div>
         </div>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+        <AlertDialogContent className="bg-[#0b0b0d] text-white border border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white flex items-center gap-2">
+              <LogOut className="h-5 w-5 text-cyan-400" />
+              Log Out
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-300">
+              Are you sure you want to log out? You will need to sign in again to access the admin panel.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel 
+              className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+              onClick={() => setIsLogoutDialogOpen(false)}
+              disabled={isLoggingOut}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white"
+              onClick={async () => {
+                setIsLoggingOut(true)
+                try {
+                  console.log('🔍 AdminLayout - Starting sign out...')
+                  await signOut()
+                  console.log('✅ AdminLayout - Sign out completed')
+                  router.push('/')
+                } catch (error) {
+                  console.error('❌ AdminLayout - Sign out error:', error)
+                  setIsLoggingOut(false)
+                  setIsLogoutDialogOpen(false)
+                }
+              }}
+              disabled={isLoggingOut}
+            >
+              {isLoggingOut ? 'Logging out...' : 'Log Out'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 } 
