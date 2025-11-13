@@ -366,7 +366,13 @@ export default function ResumeBuilderPage() {
     if (e.type === 'dragenter' || e.type === 'dragover') {
       setDragActive(true);
     } else if (e.type === 'dragleave') {
-      setDragActive(false);
+      // Only set dragActive to false if we're leaving the drop zone (not just a child element)
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX;
+      const y = e.clientY;
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        setDragActive(false);
+      }
     }
   }, []);
 
@@ -376,8 +382,10 @@ export default function ResumeBuilderPage() {
     setDragActive(false);
     if (!user) { openSignup(); return; }
     const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
-  }, []);
+    if (files.length > 0) {
+      handleFiles(files);
+    }
+  }, [user]);
 
   const handleFiles = (files: File[]) => {
     if (!user) { openSignup(); return; }

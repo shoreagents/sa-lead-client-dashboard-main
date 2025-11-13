@@ -2442,8 +2442,8 @@ export default function AnalysisPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5 }}
                     >
-                      <Card className="glass-card border-green-500/30 shadow-lg shadow-green-500/20 bg-gradient-to-br from-green-500/5 to-emerald-500/5 h-full">
-                        <CardHeader className="pb-4">
+                      <Card className="glass-card border-green-500/30 shadow-lg shadow-green-500/20 bg-gradient-to-br from-green-500/5 to-emerald-500/5 h-full flex flex-col max-h-[600px]">
+                        <CardHeader className="pb-4 flex-shrink-0">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-green-500/20 rounded-lg">
                               <Clock className="h-5 w-5 text-green-400" />
@@ -2454,13 +2454,13 @@ export default function AnalysisPage() {
                             {finalAnalysisResults?.careerPath?.timelineCardDescription || 'Expected timeline for career progression'}
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-3">
+                        <CardContent className="space-y-3 flex-1 overflow-y-auto pr-2 career-timeline-scrollbar min-h-0 flex flex-col">
                           {finalAnalysisResults?.careerPath?.timeline && (
                             <motion.div
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.6 }}
-                              className="p-3 rounded-lg bg-green-500/10 border border-green-400/20"
+                              className="p-3 rounded-lg bg-green-500/10 border border-green-400/20 flex-shrink-0"
                             >
                               <div className="text-center">
                                 <div className="text-3xl font-bold text-green-400 mb-2">
@@ -2478,10 +2478,10 @@ export default function AnalysisPage() {
                               initial={{ opacity: 0, x: -20 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.7 }}
-                              className="p-3 rounded-lg bg-green-500/10 border border-green-400/20"
+                              className="p-3 rounded-lg bg-green-500/10 border border-green-400/20 flex-1 flex flex-col"
                             >
-                              <h4 className="font-semibold text-white mb-2 text-sm">Timeline Details</h4>
-                              <p className="text-gray-300 text-sm">
+                              <h4 className="font-semibold text-white mb-3 text-sm">Timeline Details</h4>
+                              <p className="text-gray-300 text-sm leading-relaxed flex-1">
                                 {finalAnalysisResults.careerPath.timelineDetails}
                               </p>
                             </motion.div>
@@ -2496,8 +2496,8 @@ export default function AnalysisPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.6 }}
                     >
-                      <Card className="glass-card border-cyan-500/30 shadow-lg shadow-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 h-full">
-                        <CardHeader className="pb-4">
+                      <Card className="glass-card border-cyan-500/30 shadow-lg shadow-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 h-full flex flex-col max-h-[600px]">
+                        <CardHeader className="pb-4 flex-shrink-0">
                           <div className="flex items-center gap-3">
                             <div className="p-2 bg-cyan-500/20 rounded-lg">
                               <TrendingUp className="h-5 w-5 text-cyan-400" />
@@ -2508,7 +2508,7 @@ export default function AnalysisPage() {
                             {finalAnalysisResults?.salaryAnalysis?.marketPositionCardDescription || 'Your competitive position in the job market'}
                           </CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-3">
+                        <CardContent className="space-y-3 flex-1 overflow-y-auto pr-2 market-position-scrollbar min-h-0">
                           {finalAnalysisResults?.salaryAnalysis?.marketPosition && (
                             <motion.div
                               initial={{ opacity: 0, x: -20 }}

@@ -25,7 +25,8 @@ import {
   Upload,
   X,
   Camera,
-  User
+  User,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +44,8 @@ import { getSessionToken } from '@/lib/auth-helpers';
 import { cleanupLocalStorageAfterSave } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { toast } from '@/components/ui/toast';
+import Cropper from 'react-easy-crop';
+import { getCroppedImg } from '@/lib/image-crop-utils';
 
 interface ResumeTemplate {
   id: string;
@@ -196,10 +199,16 @@ export default function ResumeBuilderPage() {
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [photoUploading, setPhotoUploading] = useState(false);
   
+  // Image crop states
+  const [showCropDialog, setShowCropDialog] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  
 
   // Photo upload functions
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handlePhotoUpload = async (file: File | null) => {
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
         alert('File size must be less than 5MB');
@@ -211,65 +220,106 @@ export default function ResumeBuilderPage() {
         return;
       }
 
-      setPhotoUploading(true);
+      // Create image preview URL for cropping
+      const imageUrl = URL.createObjectURL(file);
+      setImageToCrop(imageUrl);
+      setShowCropDialog(true);
+      setShowPhotoUpload(false);
+    }
+  };
+
+  const onCropComplete = async (croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
+  const handleCropConfirm = async () => {
+    if (!imageToCrop || !croppedAreaPixels) return;
+
+    setPhotoUploading(true);
+    setShowCropDialog(false);
+    
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Please log in to upload photos');
+        setPhotoUploading(false);
+        setImageToCrop(null);
+        if (imageToCrop) URL.revokeObjectURL(imageToCrop);
+        return;
+      }
+
+      // Crop the image
+      const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels);
       
-      try {
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          alert('Please log in to upload photos');
-          setPhotoUploading(false);
-          return;
-        }
+      // Convert blob to File
+      const fileExt = 'png';
+      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+      const filePath = `resume_headshots/${fileName}`;
+      const file = new File([croppedImage], fileName, { type: 'image/png' });
 
-        // Create unique filename
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}_${Date.now()}.${fileExt}`;
-        const filePath = `resume_headshots/${fileName}`;
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('resume_headshot')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-        // Upload to Supabase Storage
-        const { data, error } = await supabase.storage
-          .from('resume_headshot')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false
-          });
-
-        if (error) {
-          console.error('Upload error:', error);
-          alert('Failed to upload photo. Please try again.');
-          setPhotoUploading(false);
-          return;
-        }
-
-        // Get public URL
-        const { data: urlData } = supabase.storage
-          .from('resume_headshot')
-          .getPublicUrl(filePath);
-
-        console.log('🔗 Generated photo URL:', urlData?.publicUrl);
-        console.log('📁 File path used:', filePath);
-        console.log('🪣 Bucket name:', 'resume_headshot');
-
-        if (urlData?.publicUrl) {
-          setProfilePhoto(urlData.publicUrl);
-          console.log('✅ Photo uploaded successfully and set to state:', urlData.publicUrl);
-          // Close the photo upload dialog
-          setShowPhotoUpload(false);
-          // Show success message
-          alert('Photo uploaded successfully!');
-        } else {
-          throw new Error('Failed to get public URL');
-        }
-
-      } catch (error) {
+      if (error) {
         console.error('Upload error:', error);
         alert('Failed to upload photo. Please try again.');
-      } finally {
         setPhotoUploading(false);
-        setShowPhotoUpload(false);
+        setImageToCrop(null);
+        if (imageToCrop) URL.revokeObjectURL(imageToCrop);
+        return;
       }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('resume_headshot')
+        .getPublicUrl(filePath);
+
+      console.log('🔗 Generated photo URL:', urlData?.publicUrl);
+      console.log('📁 File path used:', filePath);
+      console.log('🪣 Bucket name:', 'resume_headshot');
+
+      if (urlData?.publicUrl) {
+        setProfilePhoto(urlData.publicUrl);
+        console.log('✅ Photo uploaded successfully and set to state:', urlData.publicUrl);
+        // Show success message
+        toast.success('Photo uploaded successfully!');
+      } else {
+        throw new Error('Failed to get public URL');
+      }
+
+      // Clean up
+      if (imageToCrop) URL.revokeObjectURL(imageToCrop);
+      setImageToCrop(null);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
+
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload photo. Please try again.');
+      if (imageToCrop) URL.revokeObjectURL(imageToCrop);
+      setImageToCrop(null);
+    } finally {
+      setPhotoUploading(false);
     }
+  };
+
+  const handleCropCancel = () => {
+    setShowCropDialog(false);
+    if (imageToCrop) {
+      URL.revokeObjectURL(imageToCrop);
+      setImageToCrop(null);
+    }
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+    setShowPhotoUpload(true);
   };
 
   const removePhoto = async () => {
@@ -2860,11 +2910,48 @@ export default function ResumeBuilderPage() {
               </div>
             )}
             
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+            <div 
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors relative"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.add('border-purple-400', 'bg-purple-50');
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Only remove highlight if we're actually leaving the drop zone
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = e.clientX;
+                const y = e.clientY;
+                if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+                  e.currentTarget.classList.remove('border-purple-400', 'bg-purple-50');
+                }
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                e.currentTarget.classList.remove('border-purple-400', 'bg-purple-50');
+                const file = e.dataTransfer.files?.[0];
+                if (file) {
+                  // Validate file type
+                  if (!file.type.startsWith('image/')) {
+                    alert('Please drop an image file');
+                    return;
+                  }
+                  // Validate file size
+                  if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                  }
+                  handlePhotoUpload(file);
+                }
+              }}
+            >
               <input
                 type="file"
                 accept="image/*"
-                onChange={handlePhotoUpload}
+                onChange={(e) => handlePhotoUpload(e.target.files?.[0] || null)}
                 className="hidden"
                 id="photo-upload"
               />
@@ -2905,6 +2992,91 @@ export default function ResumeBuilderPage() {
             )}
             <Button variant="outline" onClick={() => setShowPhotoUpload(false)}>
               Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Crop Dialog */}
+      <Dialog open={showCropDialog} onOpenChange={handleCropCancel}>
+        <DialogContent className="bg-gradient-to-br from-gray-900 via-purple-900/50 to-cyan-900/50 border-2 border-white/20 text-white max-w-3xl [&>button]:hidden backdrop-blur-xl">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Camera className="h-5 w-5 text-cyan-400" />
+              Crop & Adjust Photo
+            </DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Adjust the position and zoom of your photo. Drag to reposition and use the slider to zoom.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {imageToCrop && (
+              <div className="relative w-full h-[400px] bg-gray-900 rounded-lg overflow-hidden">
+                <Cropper
+                  image={imageToCrop}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                  cropShape="round"
+                  showGrid={false}
+                  style={{
+                    containerStyle: {
+                      backgroundColor: '#111827',
+                    },
+                    cropAreaStyle: {
+                      borderColor: 'rgba(34, 211, 238, 0.5)',
+                      borderWidth: '2px',
+                    },
+                  }}
+                />
+              </div>
+            )}
+            
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-medium text-gray-300 w-20">Zoom:</label>
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => setZoom(Number(e.target.value))}
+                  className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                />
+                <span className="text-sm text-gray-400 w-12 text-right">{zoom.toFixed(1)}x</span>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleCropCancel}
+              className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCropConfirm}
+              disabled={photoUploading}
+              className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white"
+            >
+              {photoUploading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Confirm & Upload
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
