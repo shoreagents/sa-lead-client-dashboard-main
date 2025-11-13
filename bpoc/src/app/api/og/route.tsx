@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     const avatarUrl = profile?.avatar_url || null;
     const resumeScore = profile?.resume_score || null;
 
-    return new ImageResponse(
+    const imageResponse = new ImageResponse(
       (
         <div
           style={{
@@ -281,8 +281,14 @@ export async function GET(request: NextRequest) {
       {
         width: 1200,
         height: 630,
+        headers: {
+          'Content-Type': 'image/png',
+          'Cache-Control': 'public, max-age=31536000, immutable',
+        },
       }
     );
+
+    return imageResponse;
   } catch (error) {
     console.error('Error generating OG image:', error);
     return new Response('Error generating image', { status: 500 });

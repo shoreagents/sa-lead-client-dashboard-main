@@ -163,6 +163,27 @@ export default function ProfilePage() {
   const [isCulturalStrengthsExpanded, setIsCulturalStrengthsExpanded] = useState<boolean>(false);
   const [isTypingAnalysisExpanded, setIsTypingAnalysisExpanded] = useState<boolean>(false);
   const [isTypingStrengthsExpanded, setIsTypingStrengthsExpanded] = useState<boolean>(false);
+  const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
+  const shareRef = React.useRef<HTMLDivElement>(null);
+
+  // Close share dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+        setIsShareOpen(false);
+      }
+    };
+
+    if (isShareOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isShareOpen]);
 
   // Function to determine rank based on overall score (matching leaderboards and talent search system)
   const getRank = (score: number) => {
@@ -941,30 +962,106 @@ export default function ProfilePage() {
                   {/* View Resume Button - Hidden for all users viewing other profiles */}
                   {/* Removed - no longer showing View Resume button for other users */}
 
-                  {/* Share Button - Only show for owners */}
+                  {/* Share Button with Dropdown - Only show for owners */}
                   {isOwner && (
-                    <Button 
-                      onClick={() => {
-                        // Create a clean public-only version of the profile URL with ?public=true
-                        const currentUrl = new URL(window.location.href);
-                        const baseUrl = currentUrl.origin;
-                        const currentPath = currentUrl.pathname;
-                        
-                        // Create a clean public URL by adding ?public=true query parameter
-                        const publicProfileUrl = `${baseUrl}${currentPath}?public=true`;
-                        
-                        navigator.clipboard.writeText(publicProfileUrl).then(() => {
-                          alert('Public profile link copied to clipboard!');
-                        }).catch(() => {
-                          alert('Failed to copy link. Please copy manually: ' + publicProfileUrl);
-                        });
-                      }}
-                      className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 text-emerald-300 hover:from-emerald-500/40 hover:to-teal-500/40 hover:border-emerald-400/70 hover:text-emerald-200 transition-all duration-300 hover:scale-105 relative z-50 cursor-pointer"
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      <Share className="w-4 h-4 mr-2" />
-                      Share Profile
-                    </Button>
+                    <div className="relative" ref={shareRef}>
+                      <Button 
+                        onClick={() => setIsShareOpen(!isShareOpen)}
+                        className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 text-emerald-300 hover:from-emerald-500/40 hover:to-teal-500/40 hover:border-emerald-400/70 hover:text-emerald-200 transition-all duration-300 hover:scale-105 relative z-50 cursor-pointer"
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        <Share className="w-4 h-4 mr-2" />
+                        Share Profile
+                      </Button>
+                      
+                      {/* Share Dropdown Menu */}
+                      {isShareOpen && (
+                        <div className="absolute top-full right-0 mt-2 bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[60] min-w-[240px]">
+                          <div className="py-2">
+                            {/* Facebook Share */}
+                            <button
+                              onClick={async () => {
+                                const currentUrl = new URL(window.location.href);
+                                const baseUrl = currentUrl.origin;
+                                const currentPath = currentUrl.pathname;
+                                const profileUrl = `${baseUrl}${currentPath}`;
+                                const shareText = `🚀 Check out my profile: ${profileUrl}\n\n💼 Looking to land your dream BPO job? BPOC.IO is THE platform for you!\n\n✨ AI-powered resume analysis\n🎯 Skills assessments & career games\n🤝 Direct connections to top employers\n📈 Build your future with thousands of professionals!\n\nJoin us today! 💪`;
+                                
+                                try {
+                                  await navigator.clipboard.writeText(shareText);
+                                  setShareModalData({ platform: 'Facebook', text: shareText, url: profileUrl });
+                                  setShowShareModal(true);
+                                  setTimeout(() => {
+                                    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`;
+                                    window.open(facebookUrl, '_blank', 'width=600,height=400');
+                                  }, 1500);
+                                } catch (err) {
+                                  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`;
+                                  window.open(facebookUrl, '_blank', 'width=600,height=400');
+                                }
+                                setIsShareOpen(false);
+                              }}
+                              className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                            >
+                              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
+                              <span className="font-medium">Share on Facebook</span>
+                            </button>
+
+                            {/* LinkedIn Share */}
+                            <button
+                              onClick={async () => {
+                                const currentUrl = new URL(window.location.href);
+                                const baseUrl = currentUrl.origin;
+                                const currentPath = currentUrl.pathname;
+                                const profileUrl = `${baseUrl}${currentPath}`;
+                                const shareText = `🌟 Check out my profile: ${profileUrl}\n\n💼 Ready to land your dream job in the BPO industry?\n\nBPOC.IO offers:\n✅ AI-powered resume analysis\n✅ Professional skills assessments\n✅ Direct connections to top employers\n✅ Career development tools\n\n🚀 Join thousands of professionals building their future!\n\n#BPO #CareerGrowth #JobSearch #ProfessionalDevelopment`;
+                                
+                                try {
+                                  await navigator.clipboard.writeText(shareText);
+                                  setShareModalData({ platform: 'LinkedIn', text: shareText, url: profileUrl });
+                                  setShowShareModal(true);
+                                  setTimeout(() => {
+                                    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`;
+                                    window.open(linkedinUrl, '_blank', 'width=600,height=400');
+                                  }, 1500);
+                                } catch (err) {
+                                  const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`;
+                                  window.open(linkedinUrl, '_blank', 'width=600,height=400');
+                                }
+                                setIsShareOpen(false);
+                              }}
+                              className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                            >
+                              <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
+                              <span className="font-medium">Share on LinkedIn</span>
+                            </button>
+
+                            <div className="border-t border-white/10 my-1"></div>
+
+                            {/* Copy Link */}
+                            <button
+                              onClick={() => {
+                                const currentUrl = new URL(window.location.href);
+                                const baseUrl = currentUrl.origin;
+                                const currentPath = currentUrl.pathname;
+                                const profileUrl = `${baseUrl}${currentPath}`;
+                                
+                                navigator.clipboard.writeText(profileUrl).then(() => {
+                                  alert('Profile link copied to clipboard!');
+                                  setIsShareOpen(false);
+                                }).catch(() => {
+                                  alert('Failed to copy link. Please copy manually: ' + profileUrl);
+                                });
+                              }}
+                              className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                            >
+                              <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">📋</div>
+                              <span className="font-medium">Copy Link</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 
@@ -3883,6 +3980,130 @@ export default function ProfilePage() {
           }
         }
       `}</style>
+
+      {/* Share Success Modal with BPOC Branding */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="relative w-full max-w-2xl"
+          >
+            {/* Glow Effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
+            
+            {/* Modal Content */}
+            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl border-2 border-cyan-400/30 shadow-2xl overflow-hidden">
+              {/* Header with Gradient */}
+              <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                      <span className="text-3xl">✓</span>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Text Copied Successfully!</h3>
+                      <p className="text-cyan-100 text-sm">Ready to share on {shareModalData.platform}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowShareModal(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6">
+                {/* Instructions */}
+                <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-xl p-5 border border-cyan-400/20">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-xl">💡</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
+                      <ol className="space-y-2 text-gray-300">
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                          <span>The {shareModalData.platform} share dialog will open in 1.5 seconds</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                          <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                          <span>Your profile image will appear automatically - just hit Share!</span>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text Preview */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Post Text Preview</label>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(shareModalData.text);
+                          const btn = document.getElementById('copy-again-btn');
+                          if (btn) {
+                            btn.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                              btn.textContent = 'Copy Again';
+                            }, 2000);
+                          }
+                        } catch (err) {
+                          console.error('Failed to copy:', err);
+                        }
+                      }}
+                      id="copy-again-btn"
+                      className="text-xs px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-400/30 transition-all duration-200 hover:scale-105 font-medium"
+                    >
+                      Copy Again
+                    </button>
+                  </div>
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto">
+                    <p className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                      {shareModalData.text}
+                    </p>
+                  </div>
+                </div>
+
+                {/* BPOC Branding Footer */}
+                <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">B</span>
+                  </div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    BPOC.IO
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-400 text-sm">Where BPO Careers Begin</span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowShareModal(false)}
+                    className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
+                  >
+                    Got It! 👍
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
