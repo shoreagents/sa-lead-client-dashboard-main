@@ -36,12 +36,17 @@ export async function GET(request: NextRequest) {
       const user = userResult.rows[0];
 
       // Check all three job sources to find the job
-      const isRecruiterJob = jobId.includes('-') || isNaN(Number(jobId));
+      // Normalize jobId for comparison (handle UUIDs)
+      const normalizedJobId = String(jobId).trim();
+      const isRecruiterJob = normalizedJobId.includes('-') || isNaN(Number(normalizedJobId));
       let jobResult = { rows: [] };
+      
+      console.log(`🔍 Individual match request: jobId=${normalizedJobId}, isRecruiterJob=${isRecruiterJob}`);
       
       if (isRecruiterJob) {
         // Check recruiter_jobs table
         try {
+          console.log(`🔍 Querying recruiter_jobs for jobId: ${normalizedJobId}`);
           jobResult = await client.query(`
             SELECT 
               rj.id, rj.job_title, rj.job_description, 
@@ -51,13 +56,19 @@ export async function GET(request: NextRequest) {
               COALESCE(rj.skills, ARRAY[]::text[]) as skills, 
               rj.experience_level,
               rj.industry, rj.department, rj.work_arrangement, rj.salary_min, rj.salary_max,
-              COALESCE(rj.company_id, u.company) as company_name, 'recruiter_jobs' as source
+              COALESCE(rj.company_id::text, u.company) as company_name, 'recruiter_jobs' as source
             FROM recruiter_jobs rj
             LEFT JOIN users u ON u.id = rj.recruiter_id
             WHERE rj.id = $1 AND rj.status = 'active'
-          `, [jobId]);
-        } catch (error) {
-          console.error('Error fetching recruiter job:', error);
+          `, [normalizedJobId]);
+          console.log(`🔍 Recruiter job query result: found ${jobResult.rows.length} rows`);
+        } catch (error: any) {
+          console.error('❌ Error fetching recruiter job:', error);
+          console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            detail: error.detail
+          });
         }
       } else {
         // Check job_requests table first (admin jobs)
@@ -106,13 +117,20 @@ export async function GET(request: NextRequest) {
       // jobResult is already set above
 
       if (jobResult.rows.length === 0) {
-        return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+        console.error(`❌ Job not found: jobId=${normalizedJobId}, isRecruiterJob=${isRecruiterJob}`);
+        return NextResponse.json({ 
+          error: 'Job not found',
+          details: `No active job found with ID: ${normalizedJobId}`
+        }, { status: 404 });
       }
+      
+      console.log(`✅ Job found: id=${jobResult.rows[0].id}, title=${jobResult.rows[0].job_title}, source=${jobResult.rows[0].source}`);
 
       const job = jobResult.rows[0];
 
       // Check if we already have a recent analysis for this user-job combination (24 hours)
       // Only use cached results if they have a valid score (not null)
+      // Use normalizedJobId for cache lookup (UUIDs need to match exactly)
       try {
         const existingResult = await client.query(`
           SELECT score, reasoning, breakdown, analyzed_at
@@ -121,7 +139,7 @@ export async function GET(request: NextRequest) {
           AND analyzed_at > NOW() - INTERVAL '24 hours'
           AND score IS NOT NULL
           AND score > 0
-        `, [userId, jobId]);
+        `, [userId, normalizedJobId]);
 
         if (existingResult.rows.length > 0) {
           const cached = existingResult.rows[0];
@@ -262,10 +280,11 @@ export async function GET(request: NextRequest) {
       // If there's an error or score is null, don't cache it and return error
       if (matchScore.error || matchScore.failed || matchScore.score === null || matchScore.score === undefined) {
         // Clear any old cached error results for this job
+        // Use normalizedJobId for consistency
         await client.query(`
           DELETE FROM job_match_results
-          WHERE user_id = $1 AND job_id = $2 AND score IS NULL
-        `, [userId, jobId]).catch(err => {
+          WHERE user_id = $1 AND job_id = $2 AND (score IS NULL OR score = 0)
+        `, [userId, normalizedJobId]).catch(err => {
           console.warn('Failed to clear old error results:', err);
         });
         
@@ -282,7 +301,7 @@ export async function GET(request: NextRequest) {
            VALUES ($1, $2, $3, $4, $5, NOW())
            ON CONFLICT (user_id, job_id)
            DO UPDATE SET score = EXCLUDED.score, reasoning = EXCLUDED.reasoning, breakdown = EXCLUDED.breakdown, analyzed_at = NOW()`,
-          [userId, jobId, Math.round(matchScore.score), matchScore.reasoning ?? '', JSON.stringify(matchScore.breakdown ?? {})]
+          [userId, normalizedJobId, Math.round(matchScore.score), matchScore.reasoning ?? '', JSON.stringify(matchScore.breakdown ?? {})]
         )
       } catch (persistErr) {
         console.warn('job_match_results upsert failed (table may not exist yet):', persistErr)
@@ -308,9 +327,19 @@ export async function GET(request: NextRequest) {
       client.release();
     }
 
-  } catch (error) {
-    console.error('Error analyzing job match:', error);
-    return NextResponse.json({ error: 'Failed to analyze job match' }, { status: 500 });
+  } catch (error: any) {
+    console.error('❌ Error analyzing job match:', error);
+    console.error('❌ Error details:', {
+      message: error?.message,
+      stack: error?.stack,
+      userId,
+      jobId
+    });
+    return NextResponse.json({ 
+      error: 'Failed to analyze job match',
+      details: error?.message || 'Unknown error occurred',
+      code: error?.code
+    }, { status: 500 });
   }
 }
 
