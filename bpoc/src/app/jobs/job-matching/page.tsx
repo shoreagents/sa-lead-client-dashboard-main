@@ -278,7 +278,13 @@ function JobMatchingContent() {
               if (data.results) {
                 Object.entries(data.results).forEach(([originalId, result]: [string, any]) => {
                   // Find the corresponding job with this originalId
-                  const job = mapped.find((j: any) => j.originalId === originalId)
+                  // Normalize IDs for comparison (recruiter jobs use UUIDs)
+                  const normalizedOriginalId = String(originalId).toLowerCase().trim();
+                  const job = mapped.find((j: any) => {
+                    const jobOriginalId = String(j.originalId).toLowerCase().trim();
+                    return jobOriginalId === normalizedOriginalId;
+                  });
+                  
                   if (job) {
                     scores[job.id] = {
                       score: result.score,
@@ -287,6 +293,10 @@ function JobMatchingContent() {
                       cached: result.cached,
                       error: result.error || result.failed || false
                     }
+                    console.log(`✅ Mapped match result: originalId=${originalId}, job.id=${job.id}, job.originalId=${job.originalId}, score=${result.score}, error=${result.error || result.failed || false}`);
+                  } else {
+                    console.warn(`⚠️ Could not find job for originalId=${originalId} in mapped jobs`);
+                    console.warn(`⚠️ Available originalIds:`, mapped.map((j: any) => ({ id: j.id, originalId: j.originalId })));
                   }
                 })
               }
@@ -353,23 +363,60 @@ function JobMatchingContent() {
             setAnalysisProgress(progress)
             
             try {
-              const matchRes = await fetch(`/api/jobs/match?userId=${user.id}&jobId=${job.originalId}`)
+              // Normalize originalId for the API call (ensure it's the database ID)
+              const normalizedJobId = String(job.originalId).trim();
+              console.log(`🔄 Fetching individual match for job: id=${job.id}, originalId=${normalizedJobId}, source=${job.source}`);
+              
+              const matchRes = await fetch(`/api/jobs/match?userId=${user.id}&jobId=${normalizedJobId}`)
               if (matchRes.ok) {
                 const matchData = await matchRes.json()
-                scores[job.id] = {
+                scores[job.id] = { 
                   score: Math.round(matchData.matchScore),
                   reasoning: matchData.reasoning,
                   breakdown: matchData.breakdown,
                   error: false
                 }
+                console.log(`✅ Individual match result for ${job.id}: score=${matchData.matchScore}, error=false`);
               } else {
-                const errorData = await matchRes.json().catch(() => ({}))
+                let errorData: any = {};
+                let errorText = '';
+                
+                try {
+                  // Try to get the response as text first
+                  errorText = await matchRes.clone().text();
+                  console.log(`❌ Individual match failed - Raw response:`, errorText);
+                  
+                  // Try to parse as JSON
+                  if (errorText && errorText.trim().startsWith('{')) {
+                    errorData = JSON.parse(errorText);
+                  } else if (errorText) {
+                    errorData = { error: errorText, details: errorText };
+                  } else {
+                    errorData = { 
+                      error: `Server error (${matchRes.status})`,
+                      details: `The server returned an error but no error message. Status: ${matchRes.status} ${matchRes.statusText}`
+                    };
+                  }
+                } catch (parseError) {
+                  console.error('Error parsing error response:', parseError);
+                  errorData = { 
+                    error: `HTTP ${matchRes.status}: ${matchRes.statusText}`,
+                    details: errorText || `Failed to parse error response. Status: ${matchRes.status}`
+                  };
+                }
+                
                 scores[job.id] = { 
-                  score: null, 
-                  reasoning: errorData.error || 'Analysis failed', 
+                  score: null,
+                  reasoning: errorData.error || errorData.details || 'Analysis failed',
                   breakdown: {},
                   error: true
                 }
+                console.error(`❌ Individual match failed for ${job.id}:`, {
+                  status: matchRes.status,
+                  statusText: matchRes.statusText,
+                  errorData,
+                  errorText
+                });
               }
             } catch (error) {
               console.error('Error fetching match score for job:', job.id, error)

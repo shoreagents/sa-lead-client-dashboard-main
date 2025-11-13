@@ -197,7 +197,12 @@ export async function POST(request: NextRequest) {
           // Map database job_id to frontend ID format for matching
           const dbJobId = String(row.job_id);
           // Find which job this corresponds to (match by database ID)
-          const job = jobs.find(j => String(j.id) === dbJobId);
+          // Normalize UUIDs for comparison (recruiter jobs use UUIDs)
+          const job = jobs.find(j => {
+            const jobIdStr = String(j.id).toLowerCase().trim();
+            const dbJobIdStr = dbJobId.toLowerCase().trim();
+            return jobIdStr === dbJobIdStr;
+          });
           if (job) {
             // Use frontendId as the key for internal cache map
             cachedMap.set(job.frontendId, {
@@ -205,9 +210,10 @@ export async function POST(request: NextRequest) {
               reasoning: row.reasoning,
               breakdown: typeof row.breakdown === 'string' ? JSON.parse(row.breakdown) : row.breakdown
             });
-            console.log(`📦 Cached: dbId=${dbJobId}, frontendId=${job.frontendId}, score=${row.score}%`);
+            console.log(`📦 Cached: dbId=${dbJobId}, frontendId=${job.frontendId}, source=${job.source}, score=${row.score}%`);
           } else {
             console.warn(`⚠️ Cached result found for job_id ${dbJobId} but job not found in current job list`);
+            console.warn(`⚠️ Available job IDs:`, jobs.map(j => ({ id: String(j.id), frontendId: j.frontendId, source: j.source })));
           }
         }
       });
@@ -228,8 +234,11 @@ export async function POST(request: NextRequest) {
         const job = jobs.find(j => j.frontendId === frontendId);
         if (job) {
           // Use originalId (database ID) as the key to match frontend expectations
-          results[String(job.id)] = { ...value, cached: true, error: false };
-          console.log(`✅ Using cached result for job ${frontendId} (db: ${job.id}): ${value.score}%`);
+          const resultKey = String(job.id);
+          results[resultKey] = { ...value, cached: true, error: false };
+          console.log(`✅ Using cached result for job ${frontendId} (db: ${job.id}, source: ${job.source}): ${value.score}%`);
+        } else {
+          console.warn(`⚠️ Cached result found for frontendId ${frontendId} but job not found in current job list`);
         }
       });
 
@@ -237,6 +246,11 @@ export async function POST(request: NextRequest) {
       // Process in batches to avoid hitting API rate limits
       if (uncachedJobs.length > 0) {
         console.log(`Processing ${uncachedJobs.length} uncached jobs in batches of 5`);
+        console.log(`📋 Uncached jobs breakdown:`, {
+          recruiter: uncachedJobs.filter(j => j.source === 'recruiter_jobs').length,
+          processed: uncachedJobs.filter(j => j.source === 'processed_job_requests').length,
+          job_requests: uncachedJobs.filter(j => j.source === 'job_requests').length
+        });
         
         // Process jobs in batches of 5 to avoid rate limits
         const batchSize = 5;
@@ -424,12 +438,26 @@ export async function POST(request: NextRequest) {
 
           // The frontend sends originalId (database ID) and expects results keyed by originalId
           // So we need to return results using the database ID (job.id), not frontendId
-          const job = jobs.find(j => String(j.id) === String(result.jobId));
+          // For recruiter jobs, job.id is a UUID, so we need to ensure proper string comparison
+          const job = jobs.find(j => {
+            const jobIdStr = String(j.id);
+            const resultIdStr = String(result.jobId);
+            // Normalize UUIDs for comparison (remove any whitespace, ensure lowercase)
+            const normalizedJobId = jobIdStr.toLowerCase().trim();
+            const normalizedResultId = resultIdStr.toLowerCase().trim();
+            return normalizedJobId === normalizedResultId;
+          });
+          
           if (job) {
             // Return result keyed by database ID (originalId) to match frontend expectations
-            results[String(job.id)] = result;
+            // Use the job's actual ID (which is the originalId) as the key
+            const resultKey = String(job.id);
+            results[resultKey] = result;
+            console.log(`✅ Mapped result for job: dbId=${job.id}, frontendId=${job.frontendId}, source=${job.source}, score=${result.score}, error=${result.error}`);
           } else {
             // Fallback: use the jobId directly
+            console.warn(`⚠️ Could not find job for result.jobId=${result.jobId}, using jobId directly as key`);
+            console.warn(`⚠️ Available job IDs:`, jobs.map(j => ({ id: j.id, frontendId: j.frontendId, source: j.source })));
             results[String(result.jobId)] = result;
           }
         }
