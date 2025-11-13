@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { getSessionToken } from '@/lib/auth-helpers'
 import { Plus, MoreHorizontal, Edit, Trash2, MapPin, User, CheckCircle, AlertCircle, Pause, X, Loader2, Briefcase } from 'lucide-react'
@@ -118,6 +118,30 @@ function JobsPage() {
   })
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Refs for auto-resizing textareas
+  const jobDescriptionRef = useRef<HTMLTextAreaElement>(null)
+  const requirementsRef = useRef<HTMLTextAreaElement>(null)
+  const responsibilitiesRef = useRef<HTMLTextAreaElement>(null)
+  const benefitsRef = useRef<HTMLTextAreaElement>(null)
+  const skillsRef = useRef<HTMLTextAreaElement>(null)
+  
+  // Auto-resize textarea function
+  const autoResizeTextarea = (textarea: HTMLTextAreaElement | null) => {
+    if (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = `${textarea.scrollHeight}px`
+    }
+  }
+  
+  // Effect to auto-resize textareas when content changes
+  useEffect(() => {
+    autoResizeTextarea(jobDescriptionRef.current)
+    autoResizeTextarea(requirementsRef.current)
+    autoResizeTextarea(responsibilitiesRef.current)
+    autoResizeTextarea(benefitsRef.current)
+    autoResizeTextarea(skillsRef.current)
+  }, [newJobData.jobDescription, newJobData.requirements, newJobData.responsibilities, newJobData.benefits, newJobData.skills])
   const [isValidating, setIsValidating] = useState(false)
 
   // Format salary input with commas for better readability
@@ -242,7 +266,8 @@ function JobsPage() {
           const existing = prevJobs.find(j => j.id === String(data.originalJobId)) || ({} as any)
           const processed = data.processedJob || {}
           const priority = processed.priority || existing.priority || 'medium'
-          return [{ ...processed, priority }, ...withoutOriginal]
+          // Map status to 'approved' for column display
+          return [{ ...processed, priority, status: 'approved', source: 'processed' as any }, ...withoutOriginal]
         })
         // Immediately hydrate with full processed fields
         try {
@@ -254,6 +279,7 @@ function JobsPage() {
               ...j,
               title: pj.job_title || j.title,
               source: 'processed' as any,
+              status: j.status || 'approved', // Preserve status for column display
               job_description: pj.job_description,
               requirements: pj.requirements,
               responsibilities: pj.responsibilities,
@@ -282,7 +308,7 @@ function JobsPage() {
         // Only allow if currently active/hiring
         if (!(job.status === 'hiring' || job.status === 'active')) return
         const prev = jobs
-        // Optimistic UI update
+        // Optimistic UI update - immediately show in closed column
         setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? { ...j, status: 'closed', source: 'processed' as any } : j))
         try {
           const token = await getSessionToken()
@@ -324,8 +350,15 @@ function JobsPage() {
       if (status === 'approved' || status === 'hiring') {
         const prev = jobs
         const newProcessedStatus = status === 'approved' ? 'processed' : 'active'
-        // Optimistic UI update
-        setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? { ...j, status, source: 'processed' as any } : j))
+        // Optimistic UI update - map status correctly for column filtering
+        setJobs(prevJobs => prevJobs.map(j => {
+          if (j.id === jobId) {
+            // Map processed status to 'approved' for column display, active status to 'hiring'
+            const displayStatus = newProcessedStatus === 'processed' ? 'approved' : 'hiring'
+            return { ...j, status: displayStatus, source: 'processed' as any }
+          }
+          return j
+        }))
         try {
           const token = await getSessionToken()
           if (!token) throw new Error('Not authenticated')
@@ -343,6 +376,7 @@ function JobsPage() {
             setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? {
               ...j,
               title: pj.job_title || j.title,
+              status: j.status || (newProcessedStatus === 'processed' ? 'approved' : 'hiring'), // Preserve status for column display
               job_description: pj.job_description,
               requirements: pj.requirements,
               responsibilities: pj.responsibilities,
@@ -387,6 +421,7 @@ function JobsPage() {
           const processed = data.processedJob || {}
           const existing = jobs.find(j => j.id === String(data.originalJobId)) || ({} as any)
           const priority = processed.priority || existing.priority || 'medium'
+          // Map status to 'hiring' for column display
           return [{ ...processed, status: 'hiring', source: 'processed' as any, priority }, ...withoutOriginal]
         })
         // Hydrate processed details
@@ -397,6 +432,7 @@ function JobsPage() {
           setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? {
             ...j,
             title: pj.job_title || j.title,
+            status: j.status || 'hiring', // Preserve status for column display
             job_description: pj.job_description,
             requirements: pj.requirements,
             responsibilities: pj.responsibilities,
@@ -1664,10 +1700,12 @@ function JobsPage() {
                   Job Description
                 </label>
                 <textarea 
+                  ref={jobDescriptionRef}
                   value={newJobData.jobDescription} 
                   onChange={(e)=> {
                     const value = e.target.value
                     setNewJobData(p=> ({...p, jobDescription: value}))
+                    autoResizeTextarea(e.target)
                     
                     // Real-time validation
                     const fieldErrors = validateField('jobDescription', value)
@@ -1680,8 +1718,12 @@ function JobsPage() {
                       }
                       return newErrors
                     })
-                  }} 
-                  className={`w-full min-h-[100px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
+                  }}
+                  onPaste={(e) => {
+                    // Auto-resize after paste
+                    setTimeout(() => autoResizeTextarea(e.currentTarget), 0)
+                  }}
+                  className={`w-full min-h-[100px] bg-white/10 border rounded-lg px-3 py-2 text-white resize-none overflow-hidden ${
                     formErrors.jobDescription ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
                   placeholder="Describe the role, responsibilities, and what makes this position unique..."
@@ -1696,10 +1738,12 @@ function JobsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Requirements (one per line)</label>
                 <textarea 
+                  ref={requirementsRef}
                   value={newJobData.requirements} 
                   onChange={(e)=> {
                     const value = e.target.value
                     setNewJobData(p=> ({...p, requirements: value}))
+                    autoResizeTextarea(e.target)
                     
                     // Real-time validation
                     const fieldErrors = validateField('requirements', value)
@@ -1712,8 +1756,11 @@ function JobsPage() {
                       }
                       return newErrors
                     })
-                  }} 
-                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
+                  }}
+                  onPaste={(e) => {
+                    setTimeout(() => autoResizeTextarea(e.currentTarget), 0)
+                  }}
+                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white resize-none overflow-hidden ${
                     formErrors.requirements ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
                   placeholder="• Bachelor's degree in Computer Science&#10;• 3+ years of experience&#10;• Strong communication skills"
@@ -1726,10 +1773,12 @@ function JobsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Responsibilities (one per line)</label>
                 <textarea 
+                  ref={responsibilitiesRef}
                   value={newJobData.responsibilities} 
                   onChange={(e)=> {
                     const value = e.target.value
                     setNewJobData(p=> ({...p, responsibilities: value}))
+                    autoResizeTextarea(e.target)
                     
                     // Real-time validation
                     const fieldErrors = validateField('responsibilities', value)
@@ -1742,8 +1791,11 @@ function JobsPage() {
                       }
                       return newErrors
                     })
-                  }} 
-                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
+                  }}
+                  onPaste={(e) => {
+                    setTimeout(() => autoResizeTextarea(e.currentTarget), 0)
+                  }}
+                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white resize-none overflow-hidden ${
                     formErrors.responsibilities ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
                   placeholder="• Develop and maintain web applications&#10;• Collaborate with cross-functional teams&#10;• Write clean, maintainable code"
@@ -1756,10 +1808,12 @@ function JobsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Benefits (one per line)</label>
                 <textarea 
+                  ref={benefitsRef}
                   value={newJobData.benefits} 
                   onChange={(e)=> {
                     const value = e.target.value
                     setNewJobData(p=> ({...p, benefits: value}))
+                    autoResizeTextarea(e.target)
                     
                     // Real-time validation
                     const fieldErrors = validateField('benefits', value)
@@ -1772,8 +1826,11 @@ function JobsPage() {
                       }
                       return newErrors
                     })
-                  }} 
-                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
+                  }}
+                  onPaste={(e) => {
+                    setTimeout(() => autoResizeTextarea(e.currentTarget), 0)
+                  }}
+                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white resize-none overflow-hidden ${
                     formErrors.benefits ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
                   placeholder="• Health insurance&#10;• 401(k) matching&#10;• Flexible work hours"
@@ -1786,10 +1843,12 @@ function JobsPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Skills (one per line)</label>
                 <textarea 
+                  ref={skillsRef}
                   value={newJobData.skills} 
                   onChange={(e)=> {
                     const value = e.target.value
                     setNewJobData(p=> ({...p, skills: value}))
+                    autoResizeTextarea(e.target)
                     
                     // Real-time validation
                     const fieldErrors = validateField('skills', value)
@@ -1802,8 +1861,11 @@ function JobsPage() {
                       }
                       return newErrors
                     })
-                  }} 
-                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white ${
+                  }}
+                  onPaste={(e) => {
+                    setTimeout(() => autoResizeTextarea(e.currentTarget), 0)
+                  }}
+                  className={`w-full min-h-[80px] bg-white/10 border rounded-lg px-3 py-2 text-white resize-none overflow-hidden ${
                     formErrors.skills ? 'border-red-400 bg-red-500/10' : 'border-white/20'
                   }`} 
                   placeholder="• JavaScript/TypeScript&#10;• React.js&#10;• Node.js&#10;• PostgreSQL"
