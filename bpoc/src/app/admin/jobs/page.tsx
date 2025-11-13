@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import AdminLayout from '@/components/layout/AdminLayout'
 import React from 'react'
@@ -82,6 +82,9 @@ function JobsPage() {
   const [isAddJobDialogOpen, setIsAddJobDialogOpen] = useState(false)
   const [isAddStatusDialogOpen, setIsAddStatusDialogOpen] = useState(false)
   const [isEditJobDialogOpen, setIsEditJobDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [members, setMembers] = useState<Array<{ company_id: string, company: string }>>([])
   const [addingQuickJob, setAddingQuickJob] = useState<boolean>(false)
   const [editingJob, setEditingJob] = useState<any | null>(null)
@@ -1054,8 +1057,21 @@ function JobsPage() {
   }
 
   const handleDeleteJob = async (jobId: string) => {
+    // Set the job to delete and open the confirmation dialog
+    setJobToDelete(jobId)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteJob = async () => {
+    if (!jobToDelete) return
+
     const prev = jobs
-    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId))
+    // Extract numeric ID from jobId (remove prefixes like "job_requests_" or "processed_job_requests_")
+    const numericId = jobToDelete.replace(/^(job_requests_|processed_job_requests_)/, '')
+    
+    setIsDeleting(true)
+    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobToDelete))
+    
     try {
       const token = await getSessionToken()
       if (!token) throw new Error('Not authenticated')
@@ -1064,11 +1080,20 @@ function JobsPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ action: 'delete', data: { id: numericId } })
       })
-      if (!res.ok) throw new Error('Failed to delete')
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to delete')
+      }
+      // Close the dialog on success
+      setIsDeleteDialogOpen(false)
+      setJobToDelete(null)
     } catch (err) {
-      console.error(err)
+      console.error('Error deleting job:', err)
       setJobs(prev)
-      alert('Failed to delete job')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete job'
+      alert(errorMessage)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -1195,7 +1220,10 @@ function JobsPage() {
                               <DropdownMenuContent className="glass-card border-white/10 backdrop-blur-md">
                                 <DropdownMenuItem 
                                   className="text-red-400 hover:bg-red-500/10 focus:bg-red-500/10"
-                                  onClick={(e) => { e.stopPropagation(); handleDeleteJob(job.id) }}
+                                  onClick={(e) => { 
+                                    e.stopPropagation()
+                                    handleDeleteJob(job.id)
+                                  }}
                                 >
                                   <Trash2 className="mr-2 h-4 w-4" />
                                   Delete
@@ -2450,6 +2478,47 @@ function JobsPage() {
              >
                OK
              </AlertDialogAction>
+           </AlertDialogContent>
+         </AlertDialog>
+
+         {/* Delete Confirmation Dialog */}
+         <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+           <AlertDialogContent className="bg-[#0b0b0d] text-white border border-white/10">
+             <AlertDialogHeader>
+               <AlertDialogTitle className="text-white flex items-center gap-2">
+                 <Trash2 className="h-5 w-5 text-red-400" />
+                 Delete Job
+               </AlertDialogTitle>
+               <AlertDialogDescription className="text-gray-300">
+                 Are you sure you want to delete this job? This action cannot be undone and will permanently remove the job from the database.
+               </AlertDialogDescription>
+             </AlertDialogHeader>
+             <AlertDialogFooter>
+               <AlertDialogCancel 
+                 className="bg-gray-800 hover:bg-gray-700 text-white border-gray-600"
+                 onClick={() => {
+                   setIsDeleteDialogOpen(false)
+                   setJobToDelete(null)
+                 }}
+                 disabled={isDeleting}
+               >
+                 Cancel
+               </AlertDialogCancel>
+               <AlertDialogAction
+                 className="bg-red-600 hover:bg-red-700 text-white"
+                 onClick={confirmDeleteJob}
+                 disabled={isDeleting}
+               >
+                 {isDeleting ? (
+                   <>
+                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                     Deleting...
+                   </>
+                 ) : (
+                   'Delete'
+                 )}
+               </AlertDialogAction>
+             </AlertDialogFooter>
            </AlertDialogContent>
          </AlertDialog>
 
