@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
               width: 1200,
               height: 630,
               alt: `${fullName} - ${position} profile on BPOC.IO`,
+              type: 'image/png',
             },
           ],
           locale: 'en_US',
@@ -56,6 +57,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           title: `${fullName} - ${position}`,
           description,
           images: [ogImageUrl],
+        },
+        other: {
+          'og:image:width': '1200',
+          'og:image:height': '630',
+          'og:image:type': 'image/png',
         },
       };
     }
@@ -79,6 +85,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           width: 1200,
           height: 630,
           alt: `${slug} profile on BPOC.IO`,
+          type: 'image/png',
         },
       ],
       locale: 'en_US',
@@ -89,6 +96,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${slug} | BPOC.IO`,
       description: 'View profile on BPOC.IO - Where BPO Careers Begin',
       images: [ogImageUrl],
+    },
+    other: {
+      'og:image:width': '1200',
+      'og:image:height': '630',
+      'og:image:type': 'image/png',
     },
   };
 }
