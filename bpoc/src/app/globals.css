@@ -45,6 +45,56 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
+/* Custom scrollbar styles for Career Timeline (green) */
+.career-timeline-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.career-timeline-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.career-timeline-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(74, 222, 128, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.career-timeline-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 222, 128, 0.5);
+}
+
+.career-timeline-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(74, 222, 128, 0.3) transparent;
+}
+
+/* Custom scrollbar styles for Market Position (cyan) */
+.market-position-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.market-position-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.market-position-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.market-position-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.5);
+}
+
+.market-position-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 211, 238, 0.3) transparent;
+}
+
 /* Firefox scrollbar styles */
 .scrollbar-thin {
   scrollbar-width: thin;
