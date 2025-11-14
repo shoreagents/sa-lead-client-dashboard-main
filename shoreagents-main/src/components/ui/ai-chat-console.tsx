@@ -8,6 +8,7 @@ import { useChatContext, Message } from '@/lib/chat-context';
 import { useAuth } from '@/lib/auth-context';
 import { MayaTextField, MayaNameFields, MayaAnonymousUserForm, MayaTalentSearchModal, MayaPricingCalculatorModal, MayaPricingForm } from '@/components/maya';
 import { generateUserId } from '@/lib/userEngagementService';
+import { getPreGeneratedGreeting, markGreetingAsUsed, hasUsedGreeting } from '@/lib/pre-greeting-service';
 import { 
   useConversations, 
   useMessages, 
@@ -186,12 +187,12 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Separate useEffect for scrolling - only when loading
+  // Separate useEffect for scrolling - only when messages change
   useEffect(() => {
-    if (isLoading) {
+    if (messages.length > 0) {
       scrollToBottom();
     }
-  }, [isLoading]);
+  }, [messages.length]);
 
   // Auto-show pricing form after contact info is collected (if team creation was requested)
   useEffect(() => {
@@ -334,71 +335,61 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
       
       console.log('🎯 Bottom nav generating greeting for NEW conversation:', currentConversationId);
       
-      const generatePersonalizedGreeting = async () => {
+      const generateInstantGreeting = async () => {
         try {
           // Mark this conversation as greeted immediately to prevent duplicates
           greetedConversations.current.add(currentConversationId);
           saveGreetedConversations();
           
-          setIsLoading(true);
-          const { response, relatedContent, userData } = await generateAIResponse('', [], userId);
+          // Check if we have a pre-generated greeting (INSTANT!)
+          const preGreeting = getPreGeneratedGreeting(userId);
+          let greetingText: string;
+          
+          if (preGreeting && !hasUsedGreeting(currentConversationId)) {
+            // Use pre-generated greeting (ZERO DELAY!)
+            console.log('✨ Using pre-generated greeting (INSTANT!)');
+            greetingText = preGreeting.greeting;
+            markGreetingAsUsed(currentConversationId);
+          } else {
+            // Fallback to instant greeting generation
+            console.log('⚡ Generating instant greeting (fallback)');
+            const userName = appUser?.first_name || '';
+            greetingText = userName 
+              ? `Hi ${userName}! 👋 I'm Maya from ShoreAgents. I'm here to help you build your perfect offshore team. What can I help you with today?`
+              : `Hi there! 👋 I'm Maya from ShoreAgents. I'm here to help you build your perfect offshore team. What can I help you with today?`;
+          }
           
           const greetingMessage: Message = {
-            id: 'personalized-greeting-' + Date.now(),
+            id: 'instant-greeting-' + Date.now(),
             role: 'assistant',
-            content: response,
+            content: greetingText,
             timestamp: new Date(),
-            relatedContent: relatedContent.length > 0 ? relatedContent : undefined,
-            userData: userData,
             contextSnapshot: saveContextSnapshot()
           };
 
+          // Add message instantly (no loading)
           addMessage(greetingMessage);
           
-          // Save greeting message to database
+          // Save greeting message to database in background (don't wait)
           if (currentConversationId) {
-            await sendMessageMutation.mutateAsync({
+            sendMessageMutation.mutateAsync({
               conversationId: currentConversationId,
               userId: userId,
               role: 'assistant',
-              content: response,
+              content: greetingText,
               contextSnapshot: saveContextSnapshot()
+            }).catch(error => {
+              console.error('Error saving greeting message:', error);
             });
           }
         } catch (error) {
-          console.error('Error generating personalized greeting:', error);
-          // Fallback to generic greeting if personalized greeting fails
-          const fallbackMessage: Message = {
-            id: 'fallback-greeting-' + Date.now(),
-            role: 'assistant',
-            content: "Hello! I'm Maya from ShoreAgents. What would you like to know?",
-            timestamp: new Date(),
-            contextSnapshot: saveContextSnapshot()
-          };
-          addMessage(fallbackMessage);
-          
-          // Save fallback message to database
-          if (currentConversationId) {
-            try {
-              await sendMessageMutation.mutateAsync({
-                conversationId: currentConversationId,
-                userId: userId,
-                role: 'assistant',
-                content: fallbackMessage.content,
-                contextSnapshot: saveContextSnapshot()
-              });
-            } catch (dbError) {
-              console.error('Error saving fallback message:', dbError);
-            }
-          }
-        } finally {
-          setIsLoading(false);
+          console.error('Error generating instant greeting:', error);
         }
       };
 
-      generatePersonalizedGreeting();
+      generateInstantGreeting();
     }
-  }, [isOpen, messages.length, isLoading, generateAIResponse, userId, addMessage, currentConversationId, sendMessageMutation, saveContextSnapshot, conversations]);
+  }, [isOpen, messages.length, userId, currentConversationId, conversations]);
 
   useEffect(() => {
     if (isOpen && inputRef.current && !isCollectingContact && !isCollectingPricing) {
@@ -860,9 +851,13 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
            height: isMinimized ? '42px' : (isFullHeight ? '100vh' : '520px')
          }}
        >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-lime-500 to-lime-600 text-white p-2 rounded-t-xl flex items-center justify-between">
-          <div className="flex items-center gap-3">
+       {/* Header */}
+       <div className={`p-2 rounded-t-xl flex items-center justify-between transition-colors duration-300 ${
+         isMinimized 
+           ? 'bg-white text-lime-600 border-2 border-lime-500 shadow-lg' 
+           : 'bg-gradient-to-r from-lime-500 to-lime-600 text-white'
+       }`}>
+         <div className="flex items-center gap-3">
             {/* Maya Santos Avatar - Hidden when minimized */}
             {!isMinimized && (
               <div className="relative pl-2">
@@ -896,7 +891,11 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-1 hover:bg-lime-400/20 rounded-full transition-colors duration-300 ease-out"
+                className={`p-1 rounded-full transition-colors duration-300 ease-out ${
+                  isMinimized 
+                    ? 'hover:bg-lime-100' 
+                    : 'hover:bg-lime-400/20'
+                }`}
                 title="More options"
               >
                 <MoreVertical size={18} />
@@ -941,7 +940,11 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
             
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1 hover:bg-lime-400/20 rounded-full transition-colors duration-300 ease-out"
+              className={`p-1 rounded-full transition-colors duration-300 ease-out ${
+                isMinimized 
+                  ? 'hover:bg-lime-100' 
+                  : 'hover:bg-lime-400/20'
+              }`}
               title={isMinimized ? "Expand chat" : "Minimize chat"}
             >
               {isMinimized ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -952,7 +955,11 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                 // Delay the actual close to allow animation to complete
                 setTimeout(() => onClose(), 300);
               }}
-              className="p-1 hover:bg-lime-400/20 rounded-full transition-colors duration-200"
+              className={`p-1 rounded-full transition-colors duration-200 ${
+                isMinimized 
+                  ? 'hover:bg-lime-100' 
+                  : 'hover:bg-lime-400/20'
+              }`}
               title="Close chat"
             >
               <X size={18} />
@@ -976,12 +983,10 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
               {isLoading && (
                 <div className="flex justify-start mb-4">
                   <div className="max-w-[90%]">
-                    <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100 shadow-sm">
-                      <div className="flex items-center justify-center">
-                        <div className="flex items-center space-x-2">
-                          <div className="animate-spin rounded-full border-2 border-current border-t-transparent w-6 h-6" />
-                          <span className="text-sm text-gray-600">Maya is thinking...</span>
-                        </div>
+                    <div className="bg-gradient-to-r from-lime-50 to-lime-100 rounded-2xl px-4 py-3 border border-lime-200 shadow-sm">
+                      <div className="flex items-center space-x-2">
+                        <LimeLoader />
+                        <span className="text-sm text-lime-800 font-medium">Maya is thinking...</span>
                       </div>
                     </div>
                   </div>

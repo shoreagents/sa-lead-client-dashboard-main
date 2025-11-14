@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { X, Users, Building, Briefcase, DollarSign, CheckCircle, ArrowRight, ArrowLeft, Loader2, Calculator, Brain, Sparkles, Zap } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './alert-dialog';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog-videocall';
 import { useCurrency } from '@/lib/currencyContext';
 import { Button } from './button';
 import { Input } from './input';

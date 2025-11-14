@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog-videocall"
 import { LogIn, UserPlus, ChevronLeft, ChevronRight, User, Mail, Building, Lock, Eye, EyeOff, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"

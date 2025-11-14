@@ -3,6 +3,7 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/admin-auth-context'
+import { useCurrency } from '@/lib/currencyContext'
 import { AdminGuard } from '@/components/auth/AdminGuard'
 import { AppSidebar } from '@/components/app-sidebar'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
@@ -71,6 +72,7 @@ const fetchQuotations = async (): Promise<QuotationsResponse> => {
 export default function LeadQuotations() {
   const router = useRouter()
   const { admin, loading, signOut, isAdmin } = useAdminAuth()
+  const { selectedCurrency } = useCurrency()
   
   // Use TanStack React Query
   const { data: quotationsData, isLoading, error, refetch } = useQuery({
@@ -146,63 +148,83 @@ export default function LeadQuotations() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
+          <div className="flex flex-1 flex-col gap-3 p-4 pt-6">
             <div className="w-full">
 
               {/* Summary Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <FileText className="h-8 w-8 text-lime-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Total Quotes</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats.totalQuotes}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                {isLoading ? (
+                  <>
+                    {[...Array(4)].map((_, i) => (
+                      <Card key={i}>
+                        <CardContent className="p-3">
+                          <div className="flex items-center">
+                            <Skeleton className="h-8 w-8 rounded" />
+                            <div className="ml-3 flex-1">
+                              <Skeleton className="h-4 w-20 mb-2" />
+                              <Skeleton className="h-6 w-16" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className="flex items-center">
+                          <FileText className="h-8 w-8 text-lime-600" />
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-600">Total Quotes</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.totalQuotes}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <DollarSign className="h-8 w-8 text-lime-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Total Value</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue, 'PHP')}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className="flex items-center">
+                          <DollarSign className="h-8 w-8 text-lime-600" />
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-600">Total Value</p>
+                            <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue, selectedCurrency.code)}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <Calculator className="h-8 w-8 text-lime-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Average Value</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.averageValue, 'PHP')}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className="flex items-center">
+                          <Calculator className="h-8 w-8 text-lime-600" />
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-600">Average Value</p>
+                            <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.averageValue, selectedCurrency.code)}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="flex items-center">
-                      <CheckCircle className="h-8 w-8 text-lime-600" />
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-600">Completed</p>
-                        <p className="text-2xl font-bold text-gray-900">{stats.completedQuotes}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className="flex items-center">
+                          <CheckCircle className="h-8 w-8 text-lime-600" />
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-600">Completed</p>
+                            <p className="text-2xl font-bold text-gray-900">{stats.completedQuotes}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
 
               {/* Quotations List */}
               <Card>
-                <CardHeader>
+                <CardHeader className="pt-4 pb-2">
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-lime-600" />
                     Lead Quotations
@@ -211,11 +233,11 @@ export default function LeadQuotations() {
                     All pricing quotes generated by your leads
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-2">
                   {isLoading ? (
-                    <div className="space-y-4 py-4">
+                    <div className="space-y-3 py-2">
                       {[...Array(5)].map((_, i) => (
-                        <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
+                        <div key={i} className="flex items-center space-x-3 p-3 border rounded-lg">
                           <Skeleton className="h-12 w-12 rounded" />
                           <div className="space-y-2 flex-1">
                             <Skeleton className="h-4 w-[250px]" />
@@ -226,14 +248,14 @@ export default function LeadQuotations() {
                       ))}
                     </div>
                   ) : error ? (
-                    <div className="flex items-center justify-center py-8">
+                    <div className="flex items-center justify-center py-6">
                       <div className="text-center">
-                        <AlertCircle className="w-12 h-12 text-lime-500 mx-auto mb-4" />
+                        <AlertCircle className="w-12 h-12 text-lime-500 mx-auto mb-3" />
                         <p className="text-lime-600 font-medium">Failed to load quotations</p>
-                        <p className="text-sm text-gray-600 mt-2">Please try refreshing the page</p>
+                        <p className="text-sm text-gray-600 mt-1">Please try refreshing the page</p>
                         <Button 
                           onClick={() => refetch()} 
-                          className="mt-4 bg-lime-600 hover:bg-lime-700 text-white"
+                          className="mt-3 bg-lime-600 hover:bg-lime-700 text-white"
                         >
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Retry
@@ -241,19 +263,19 @@ export default function LeadQuotations() {
                       </div>
                     </div>
                   ) : quotations.length === 0 ? (
-                    <div className="text-center py-8">
-                      <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <div className="text-center py-6">
+                      <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                       <p className="text-gray-600">No quotations found</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {quotations.map((quotation) => (
                         <Card key={quotation.quote_id} className="border-lime-200 shadow-sm">
-                          <CardContent className="p-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                          <CardContent className="p-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                               {/* Quote Info */}
-                              <div className="space-y-3 border-r border-gray-200 pr-6 bg-gray-50/30 p-4 rounded-lg">
-                                <div className="flex items-center gap-2 mb-3">
+                              <div className="space-y-2 border-r border-gray-200 pr-4 bg-gray-50/30 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
                                   <Users className="w-4 h-4 text-gray-600" />
                                   <h4 className="font-medium text-gray-900">Lead Information</h4>
                                 </div>
@@ -267,7 +289,7 @@ export default function LeadQuotations() {
                                   )}
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                   <div className="flex items-center gap-2">
                                     {getStatusBadge(quotation.status)}
                                     {quotation.industry && (
@@ -275,7 +297,7 @@ export default function LeadQuotations() {
                                     )}
                                   </div>
                                   
-                                  <div className="text-sm text-gray-600">
+                                  <div className="text-sm text-gray-600 space-y-0.5">
                                     <p><strong>Quote #:</strong> {quotation.quote_number}</p>
                                     <p><strong>Created:</strong> {new Date(quotation.created_at).toLocaleDateString()}</p>
                                     <p><strong>Updated:</strong> {new Date(quotation.updated_at).toLocaleDateString()}</p>
@@ -284,12 +306,12 @@ export default function LeadQuotations() {
                               </div>
 
                               {/* Quote Details */}
-                              <div className="space-y-4 border-r border-gray-200 pr-6 bg-lime-50/30 p-4 rounded-lg">
-                                <div className="flex items-center gap-2 mb-3">
+                              <div className="space-y-2 border-r border-gray-200 pr-4 bg-lime-50/30 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
                                   <Calculator className="w-4 h-4 text-lime-600" />
                                   <h4 className="font-medium text-gray-900">Quote Details</h4>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                   <div className="flex justify-between">
                                     <span className="text-sm text-gray-600">Total Employees:</span>
                                     <span className="font-medium">{quotation.total_employees.toLocaleString()}</span>
@@ -302,12 +324,12 @@ export default function LeadQuotations() {
                               </div>
 
                               {/* Progress Steps */}
-                              <div className="space-y-4 border-r border-gray-200 pr-6 bg-lime-50/30 p-4 rounded-lg">
-                                <div className="flex items-center gap-2 mb-3">
+                              <div className="space-y-2 border-r border-gray-200 pr-4 bg-lime-50/30 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
                                   <TrendingUp className="w-4 h-4 text-lime-600" />
                                   <h4 className="font-medium text-gray-900">Progress</h4>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                   {getStepProgress(quotation.step_completed).map((step, index) => (
                                     <div key={index} className="flex items-center gap-2">
                                       {step.completed ? (
@@ -324,12 +346,12 @@ export default function LeadQuotations() {
                               </div>
 
                               {/* Actions */}
-                              <div className="space-y-4 bg-green-50/30 p-4 rounded-lg">
-                                <div className="flex items-center gap-2 mb-3">
+                              <div className="space-y-2 bg-green-50/30 p-3 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
                                   <Target className="w-4 h-4 text-green-600" />
                                   <h4 className="font-medium text-gray-900">Actions</h4>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="space-y-1.5">
                                   <Button 
                                     variant="outline" 
                                     size="sm" 

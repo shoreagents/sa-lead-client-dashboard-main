@@ -245,21 +245,20 @@ export default function LeadManagement() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-20 h-screen overflow-hidden">
-            <div className="w-full flex flex-col flex-1 min-h-0">
+          <div className="flex items-center justify-center h-screen w-full p-4 pt-6 overflow-hidden">
+            <div className="grid h-full w-full grid-cols-4 grid-rows-[auto_1fr] gap-4">
 
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
                 {isLoading ? (
                   <>
                     {[...Array(4)].map((_, i) => (
-                      <Card key={i} className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0 pt-1.5 px-2.5">
+                      <Card key={i} className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
                           <Skeleton className="h-3 w-20" />
-                          <Skeleton className="h-3 w-3 rounded" />
+                          <Skeleton className="h-3.5 w-3.5 rounded" />
                         </CardHeader>
-                        <CardContent className="px-2.5 pb-1.5 pt-0">
-                          <Skeleton className="h-5 w-12 mb-1" />
+                        <CardContent className="px-2.5 pb-1 !pt-0">
+                          <Skeleton className="h-7 w-12 mb-1" />
                           <Skeleton className="h-2.5 w-28" />
                         </CardContent>
                       </Card>
@@ -267,12 +266,12 @@ export default function LeadManagement() {
                   </>
                 ) : (
                   <>
-                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                    <Card className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">Total Leads</CardTitle>
                         <Users className="h-3.5 w-3.5 text-lime-600" />
                       </CardHeader>
-                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                      <CardContent className="px-2.5 pb-1 !pt-0">
                         <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
                           {leadsData?.total || 0}
                         </div>
@@ -282,12 +281,12 @@ export default function LeadManagement() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                    <Card className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">New Leads</CardTitle>
                         <UserPlus className="h-3.5 w-3.5 text-lime-600" />
                       </CardHeader>
-                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                      <CardContent className="px-2.5 pb-1 !pt-0">
                         <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
                           {stats.new}
                         </div>
@@ -297,12 +296,12 @@ export default function LeadManagement() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-3 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                    <Card className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">In Progress</CardTitle>
                         <Clock className="h-3.5 w-3.5 text-lime-600" />
                       </CardHeader>
-                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                      <CardContent className="px-2.5 pb-1 !pt-0">
                         <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
                           {stats.stage1 + stats.stage2 + stats.pending + stats.meeting_booked + stats.signed_up}
                         </div>
@@ -312,12 +311,12 @@ export default function LeadManagement() {
                       </CardContent>
                     </Card>
 
-                    <Card className="border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm py-3 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1.5 px-2.5">
+                    <Card className="col-span-1 border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm py-2 !gap-0">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
                         <CardTitle className="text-sm font-medium !mb-0">Closed Won</CardTitle>
                         <CheckCircle className="h-3.5 w-3.5 text-green-600" />
                       </CardHeader>
-                      <CardContent className="px-2.5 pb-1.5 !pt-0">
+                      <CardContent className="px-2.5 pb-1 !pt-0">
                         <div className="text-2xl font-bold text-green-600 leading-none -mt-0.5">
                           {stats.closed_won}
                         </div>
@@ -328,30 +327,35 @@ export default function LeadManagement() {
                     </Card>
                   </>
                 )}
-              </div>
 
               {/* Kanban Board */}
-              <Card className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <CardHeader className="flex-shrink-0">
-                  <CardTitle className="flex items-center gap-2">
+              <Card className="col-span-4 row-span-1 flex flex-col min-h-0 overflow-hidden">
+                <CardHeader className="flex-shrink-0 pt-4 pb-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
                     <Target className="w-5 h-5 text-lime-600" />
                     Lead Tracking
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs">
                     Drag and drop leads between stages to update their status
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 min-h-0 overflow-hidden p-0">
+                <CardContent className="flex-1 min-h-0 overflow-hidden p-0 pt-0">
                   {isLoading ? (
-                    <div className="space-y-4 p-4">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
-                          <Skeleton className="h-12 w-12 rounded" />
-                          <div className="space-y-2 flex-1">
-                            <Skeleton className="h-4 w-[200px]" />
-                            <Skeleton className="h-4 w-[150px]" />
+                    <div className="grid grid-cols-7 gap-2 p-4 h-full">
+                      {[...Array(7)].map((_, colIndex) => (
+                        <div key={colIndex} className="flex flex-col gap-2 border rounded-md bg-secondary p-2">
+                          <div className="bg-lime-50 p-2 rounded-md border-b border-lime-200">
+                            <Skeleton className="h-4 w-20" />
                           </div>
-                          <Skeleton className="h-8 w-24" />
+                          <div className="space-y-2 flex-1">
+                            {[...Array(2)].map((_, cardIndex) => (
+                              <div key={cardIndex} className="p-3 bg-white rounded-md border space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-3 w-3/4" />
+                                <Skeleton className="h-3 w-1/2" />
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>

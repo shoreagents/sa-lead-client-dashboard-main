@@ -16,94 +16,97 @@ export function FailureReality() {
         <div>
           <h3 className="text-2xl font-bold text-gray-900 mb-4">How they fail:</h3>
           
-          <Card className="border-lime-200 bg-white mb-4 shadow-md">
-            <CardContent className="p-6">
-              <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                <XCircle className="w-6 h-6 text-lime-600 mr-2" />
-                The Client Messes Up
-              </h4>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>No documented processes (expects VA to "just know")</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Unrealistic expectations ("trained and ready Day 1!")</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Quits during the 30-60 day frustration phase</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Delegates strategy instead of execution</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>No systems, no patience, no management time</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+          {/* 3 Column Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="border-lime-200 bg-white shadow-md">
+              <CardContent className="p-6">
+                <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
+                  <XCircle className="w-6 h-6 text-lime-600 mr-2" />
+                  The Client Messes Up
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>No documented processes (expects VA to "just know")</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Unrealistic expectations ("trained and ready Day 1!")</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Quits during the 30-60 day frustration phase</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Delegates strategy instead of execution</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>No systems, no patience, no management time</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-          <Card className="border-lime-200 bg-white mb-4 shadow-md">
-            <CardContent className="p-6">
-              <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                <XCircle className="w-6 h-6 text-lime-600 mr-2" />
-                The Staff Messes Up
-              </h4>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Doesn't show up (Day 1 no-shows happen)</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Performance drops after a few months</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Takes better offer and ghosts</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Works multiple clients, divided attention</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Lies about experience or availability</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+            <Card className="border-lime-200 bg-white shadow-md">
+              <CardContent className="p-6">
+                <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
+                  <XCircle className="w-6 h-6 text-lime-600 mr-2" />
+                  The Staff Messes Up
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Doesn't show up (Day 1 no-shows happen)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Performance drops after a few months</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Takes better offer and ghosts</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Works multiple clients, divided attention</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Lies about experience or availability</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
 
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6">
-              <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                <XCircle className="w-6 h-6 text-lime-600 mr-2" />
-                Both Mess Up
-              </h4>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>No clear communication</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Misaligned expectations</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>Trust issues from the start</span>
-                </li>
-                <li className="flex items-start">
-                  <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
-                  <span>No backup plan when it goes sideways</span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+            <Card className="border-lime-200 bg-white shadow-md">
+              <CardContent className="p-6">
+                <h4 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
+                  <XCircle className="w-6 h-6 text-lime-600 mr-2" />
+                  Both Mess Up
+                </h4>
+                <ul className="space-y-2">
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>No clear communication</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Misaligned expectations</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>Trust issues from the start</span>
+                  </li>
+                  <li className="flex items-start">
+                    <X className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-1" />
+                    <span>No backup plan when it goes sideways</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="bg-lime-100 rounded-lg p-6 border-l-4 border-lime-600">

@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { UserType } from '@/types/user'
 
-const prisma = new PrismaClient()
+// Cache constants outside the handler for better performance
+const STATUS_HIERARCHY = ['new_lead', 'stage_1', 'stage_2', 'pending', 'meeting_booked', 'signed_up', 'closed_won']
+const STATUS_MAP: { [key: string]: string } = {
+  'new_lead': 'New Lead',
+  'stage_1': 'Stage 1',
+  'stage_2': 'Stage 2',
+  'pending': 'Pending',
+  'meeting_booked': 'Meeting Booked',
+  'signed_up': 'Signed Up',
+  'closed_won': 'Closed Won'
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,11 +30,12 @@ export async function GET(request: NextRequest) {
           take: 3 // Get latest 3 quotes
         },
         interviewRequests: {
-          orderBy: { created_at: 'desc' }
-          // Get all interview requests
+          orderBy: { created_at: 'desc' },
+          take: 5 // Limit to 5 most recent interview requests
         }
       },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
+      take: 1000 // Limit to 1000 most recent users for performance
     })
 
     // Transform data to match the expected format
@@ -32,36 +43,17 @@ export async function GET(request: NextRequest) {
       const currentProgress = user.leadProgress // Since it's one-to-one, access directly
       const hasInterviewRequest = user.interviewRequests.length > 0
       
-      // Debug logging
-      console.log(`🔍 User ${user.user_id}:`, {
-        hasInterviewRequest,
-        interviewRequestCount: user.interviewRequests.length,
-        interviewRequests: user.interviewRequests
-      })
-      
       // If user has an interview request, automatically set status to 'pending'
       // unless they're already in a more advanced stage
       let currentStatus = currentProgress?.status || 'new_lead'
       if (hasInterviewRequest) {
-        const statusHierarchy = ['new_lead', 'stage_1', 'stage_2', 'pending', 'meeting_booked', 'signed_up', 'closed_won']
-        const currentIndex = statusHierarchy.indexOf(currentStatus)
-        const pendingIndex = statusHierarchy.indexOf('pending')
+        const currentIndex = STATUS_HIERARCHY.indexOf(currentStatus)
+        const pendingIndex = STATUS_HIERARCHY.indexOf('pending')
         
         // Only move to pending if current status is not more advanced than pending
         if (currentIndex < pendingIndex) {
           currentStatus = 'pending'
         }
-      }
-      
-      // Determine status display name
-      const statusMap: { [key: string]: string } = {
-        'new_lead': 'New Lead',
-        'stage_1': 'Stage 1',
-        'stage_2': 'Stage 2',
-        'pending': 'Pending',
-        'meeting_booked': 'Meeting Booked',
-        'signed_up': 'Signed Up',
-        'closed_won': 'Closed Won'
       }
 
       // Calculate priority based on user type and activity
@@ -85,7 +77,7 @@ export async function GET(request: NextRequest) {
         name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Anonymous User',
         company: user.company || 'Not specified',
         email: user.email || 'No email provided',
-        status: statusMap[currentStatus] || 'New Lead',
+        status: STATUS_MAP[currentStatus] || 'New Lead',
         priority,
         source,
         created: user.created_at?.toISOString() || new Date().toISOString(),
@@ -101,7 +93,11 @@ export async function GET(request: NextRequest) {
         thirdLeadCapture: user.third_lead_capture || false,
         hasInterviewRequest: hasInterviewRequest,
         interviewRequestCount: user.interviewRequests.length,
-        allInterviewRequests: user.interviewRequests || []
+        allInterviewRequests: user.interviewRequests || [],
+        changedBy: currentProgress?.changed_by || null,
+        changeReason: currentProgress?.change_reason || null,
+        previousStatus: currentProgress?.previous_status || null,
+        progressCreatedAt: currentProgress?.created_at?.toISOString() || null
       }
     })
 

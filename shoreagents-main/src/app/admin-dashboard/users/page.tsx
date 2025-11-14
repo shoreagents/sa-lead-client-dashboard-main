@@ -33,7 +33,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog-videocall'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,13 +49,11 @@ import { Label } from '@/components/ui/label'
 import {
   Users,
   Search,
-  Plus,
   Edit,
   Trash2,
   UserX,
   Download,
   Filter,
-  MoreVertical,
   Mail,
   Building,
   Calendar,
@@ -66,14 +64,6 @@ import {
 } from 'lucide-react'
 import { UserType } from '@/types/user'
 import { toast } from 'sonner'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 
 interface User {
   id: string
@@ -107,7 +97,6 @@ export default function UsersPage() {
   const limit = 20
 
   // Dialog states
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isBulkActionDialogOpen, setIsBulkActionDialogOpen] = useState(false)
@@ -177,31 +166,6 @@ export default function UsersPage() {
     setPage(1)
     fetchUsers()
   }, [userTypeFilter])
-
-  // Create user
-  const handleCreateUser = async () => {
-    try {
-      const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      })
-
-      const result = await response.json()
-
-      if (result.success) {
-        toast.success('User created successfully')
-        setIsCreateDialogOpen(false)
-        resetForm()
-        fetchUsers()
-      } else {
-        toast.error(result.error || 'Failed to create user')
-      }
-    } catch (error) {
-      console.error('Error creating user:', error)
-      toast.error('Failed to create user')
-    }
-  }
 
   // Update user
   const handleUpdateUser = async () => {
@@ -375,7 +339,7 @@ export default function UsersPage() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-5">
             <div className="w-full">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
@@ -394,22 +358,12 @@ export default function UsersPage() {
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Refresh
                   </Button>
-                  <Button
-                    onClick={() => {
-                      resetForm()
-                      setIsCreateDialogOpen(true)
-                    }}
-                    className="bg-lime-600 hover:bg-lime-700"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create User
-                  </Button>
                 </div>
               </div>
 
               {/* Filters and Search */}
               <Card className="mb-6">
-                <CardContent className="pt-6">
+                <CardContent className="py-2 px-2">
                   <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1">
                       <div className="relative">
@@ -448,19 +402,19 @@ export default function UsersPage() {
               </Card>
 
               {/* Users Table */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+              <Card className="flex flex-col h-[calc(100vh-280px)]">
+                <CardHeader className="flex-shrink-0">
+                  <CardTitle className="flex items-center gap-2 pt-2">
                     <Users className="w-5 h-5 text-lime-600" />
                     Users ({total})
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs">
                     Showing {filteredUsers.length} of {total} users
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="flex-1 overflow-hidden flex flex-col p-0">
                   {loadingUsers ? (
-                    <div className="space-y-4 py-4">
+                    <div className="space-y-4 py-4 px-6">
                       {[...Array(5)].map((_, i) => (
                         <div key={i} className="flex items-center space-x-4 p-4 border rounded-lg">
                           <Skeleton className="h-10 w-10 rounded-full" />
@@ -479,101 +433,94 @@ export default function UsersPage() {
                     </div>
                   ) : (
                     <>
-                      <div className="border rounded-lg overflow-hidden">
-                        <Table>
-                          <TableHeader className="bg-lime-50">
-                            <TableRow>
-                              <TableHead className="w-12">
-                                <Checkbox
-                                  checked={selectedUsers.size === filteredUsers.length}
-                                  onCheckedChange={toggleAllUsers}
-                                />
-                              </TableHead>
-                              <TableHead>User</TableHead>
-                              <TableHead>Company</TableHead>
-                              <TableHead>Type</TableHead>
-                              <TableHead>Created</TableHead>
-                              <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {filteredUsers.map((user) => (
-                              <TableRow key={user.user_id}>
-                                <TableCell>
+                      <div className="flex-1 overflow-y-auto border-t">
+                        <div className="border-x border-b rounded-b-lg overflow-hidden mx-6 mb-4">
+                          <Table>
+                            <TableHeader className="bg-lime-50 sticky top-0 z-10">
+                              <TableRow>
+                                <TableHead className="w-12 bg-lime-50">
                                   <Checkbox
-                                    checked={selectedUsers.has(user.user_id)}
-                                    onCheckedChange={() => toggleUserSelection(user.user_id)}
+                                    checked={selectedUsers.size === filteredUsers.length}
+                                    onCheckedChange={toggleAllUsers}
                                   />
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex flex-col">
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="w-4 h-4 text-gray-400" />
-                                      <span className="font-medium">
-                                        {user.first_name && user.last_name
-                                          ? `${user.first_name} ${user.last_name}`
-                                          : user.email || 'Anonymous User'}
-                                      </span>
+                                </TableHead>
+                                <TableHead className="bg-lime-50">User</TableHead>
+                                <TableHead className="bg-lime-50">Company</TableHead>
+                                <TableHead className="bg-lime-50">Type</TableHead>
+                                <TableHead className="text-right bg-lime-50">Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {filteredUsers.map((user) => (
+                                <TableRow key={user.user_id}>
+                                  <TableCell>
+                                    <Checkbox
+                                      checked={selectedUsers.has(user.user_id)}
+                                      onCheckedChange={() => toggleUserSelection(user.user_id)}
+                                    />
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex flex-col">
+                                      <div className="flex items-center gap-2">
+                                        <Mail className="w-4 h-4 text-gray-400" />
+                                        <span className="font-medium">
+                                          {user.first_name && user.last_name
+                                            ? `${user.first_name} ${user.last_name}`
+                                            : user.email || 'Anonymous User'}
+                                        </span>
+                                      </div>
+                                      {user.email && (
+                                        <span className="text-sm text-gray-500">{user.email}</span>
+                                      )}
+                                      <span className="text-xs text-gray-400">ID: {user.user_id}</span>
                                     </div>
-                                    {user.email && (
-                                      <span className="text-sm text-gray-500">{user.email}</span>
+                                  </TableCell>
+                                  <TableCell>
+                                    {user.company ? (
+                                      <div className="flex items-center gap-2">
+                                        <Building className="w-4 h-4 text-gray-400" />
+                                        <span>{user.company}</span>
+                                      </div>
+                                    ) : (
+                                      <span className="text-gray-400">—</span>
                                     )}
-                                    <span className="text-xs text-gray-400">ID: {user.user_id}</span>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  {user.company ? (
-                                    <div className="flex items-center gap-2">
-                                      <Building className="w-4 h-4 text-gray-400" />
-                                      <span>{user.company}</span>
-                                    </div>
-                                  ) : (
-                                    <span className="text-gray-400">—</span>
-                                  )}
-                                </TableCell>
-                                <TableCell>{getUserTypeBadge(user.user_type)}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                                    <Calendar className="w-4 h-4" />
-                                    {new Date(user.created_at).toLocaleDateString()}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm">
-                                        <MoreVertical className="w-4 h-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem onClick={() => openEditDialog(user)}>
-                                        <Edit className="w-4 h-4 mr-2" />
+                                  </TableCell>
+                                  <TableCell>{getUserTypeBadge(user.user_type)}</TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => openEditDialog(user)}
+                                        className="hover:bg-lime-50 hover:text-lime-700 hover:border-lime-600"
+                                      >
+                                        <Edit className="w-4 h-4 mr-1" />
                                         Edit
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
                                         onClick={() => {
                                           setSelectedUser(user)
                                           setIsDeleteDialogOpen(true)
                                         }}
-                                        className="text-red-600"
+                                        className="hover:bg-red-50 hover:text-red-700 hover:border-red-600"
                                       >
-                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        <Trash2 className="w-4 h-4 mr-1" />
                                         Delete
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
                       </div>
 
                       {/* Pagination */}
                       {totalPages > 1 && (
-                        <div className="flex items-center justify-between mt-4">
+                        <div className="flex-shrink-0 flex items-center justify-between px-6 pb-4 border-t pt-4">
                           <div className="text-sm text-gray-600">
                             Page {page} of {totalPages}
                           </div>
@@ -605,108 +552,6 @@ export default function UsersPage() {
           </div>
         </SidebarInset>
       </SidebarProvider>
-
-      {/* Create User Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create New User</DialogTitle>
-            <DialogDescription>
-              Add a new user to the system. All fields are optional except User ID.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="user_id">User ID *</Label>
-                <Input
-                  id="user_id"
-                  value={formData.user_id}
-                  onChange={(e) => setFormData({ ...formData, user_id: e.target.value })}
-                  placeholder="unique-user-id"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="user_type">User Type</Label>
-                <Select
-                  value={formData.user_type}
-                  onValueChange={(value) => setFormData({ ...formData, user_type: value as UserType })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={UserType.ANONYMOUS}>Anonymous</SelectItem>
-                    <SelectItem value={UserType.REGULAR}>Regular</SelectItem>
-                    <SelectItem value={UserType.ADMIN}>Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first_name">First Name</Label>
-                <Input
-                  id="first_name"
-                  value={formData.first_name}
-                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name</Label>
-                <Input
-                  id="last_name"
-                  value={formData.last_name}
-                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="company">Company</Label>
-                <Input
-                  id="company"
-                  value={formData.company}
-                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="country">Country</Label>
-                <Input
-                  id="country"
-                  value={formData.country}
-                  onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone_number">Phone Number</Label>
-              <Input
-                id="phone_number"
-                value={formData.phone_number}
-                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleCreateUser} className="bg-lime-600 hover:bg-lime-700">
-              Create User
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit User Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
@@ -784,14 +629,6 @@ export default function UsersPage() {
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit_phone_number">Phone Number</Label>
-              <Input
-                id="edit_phone_number"
-                value={formData.phone_number}
-                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-              />
             </div>
           </div>
           <DialogFooter>
