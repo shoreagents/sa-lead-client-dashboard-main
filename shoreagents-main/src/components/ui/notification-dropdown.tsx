@@ -1,21 +1,18 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useState, useEffect, useMemo } from 'react'
+import { usePathname } from 'next/navigation'
+import { Bell, Check, X, AlertCircle, Info, CheckCircle, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import {
-  Bell,
-  Check,
-  X,
-  AlertCircle,
-  Info,
-  CheckCircle,
-  AlertTriangle,
-} from 'lucide-react'
 import { toast } from 'sonner'
 import { useSocket } from '@/lib/socket-client'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
 
 interface Notification {
   id: string
@@ -27,24 +24,35 @@ interface Notification {
   link?: string
 }
 
-export function NotificationsCenter() {
+export function NotificationDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const { socket, isConnected } = useSocket()
-  const socketRef = useRef<any>(null)
+  const pathname = usePathname()
+  
+  const isEmployeePage = useMemo(() => pathname?.startsWith('/employee/'), [pathname])
+  const isUserDashboard = useMemo(() => pathname?.startsWith('/user-dashboard'), [pathname])
+  const isAdminDashboard = useMemo(() => pathname?.startsWith('/admin-dashboard'), [pathname])
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/admin/notifications?unread_only=false')
+      const response = await fetch('/api/admin/notifications?unread_only=false&limit=10')
       const result = await response.json()
 
       if (result.success) {
         setNotifications(result.data || [])
         setUnreadCount(result.data?.filter((n: Notification) => !n.read).length || 0)
+      } else {
+        // If not authenticated or not admin, just show empty state
+        setNotifications([])
+        setUnreadCount(0)
       }
     } catch (error) {
       console.error('Error fetching notifications:', error)
+      // On error, show empty state
+      setNotifications([])
+      setUnreadCount(0)
     } finally {
       setLoading(false)
     }
@@ -52,43 +60,33 @@ export function NotificationsCenter() {
 
   // Set up Socket.io real-time subscription
   useEffect(() => {
-    // Initial fetch
     fetchNotifications()
 
     if (socket) {
-      // Join admin notifications room
       socket.emit('join-admin-room')
 
-      // Listen for new notifications
       const handleNewNotification = (notification: Notification) => {
-        console.log('🔔 New notification received:', notification)
         setNotifications((prev) => [notification, ...prev])
         if (!notification.read) {
           setUnreadCount((prev) => prev + 1)
-          // Show toast for new notifications
           toast.info(notification.title, {
             description: notification.message,
           })
         }
       }
 
-      // Listen for notification updates
       const handleNotificationUpdate = (notification: Notification) => {
-        console.log('🔔 Notification updated:', notification)
         setNotifications((prev) => {
           const updated = prev.map((n) => 
             n.id === notification.id ? notification : n
           )
-          // Recalculate unread count based on updated list
           const unread = updated.filter((n) => !n.read).length
           setUnreadCount(unread)
           return updated
         })
       }
 
-      // Listen for notification deletion
       const handleNotificationDelete = (notificationId: string) => {
-        console.log('🔔 Notification deleted:', notificationId)
         setNotifications((prev) => {
           const deleted = prev.find((n) => n.id === notificationId)
           if (deleted && !deleted.read) {
@@ -102,24 +100,13 @@ export function NotificationsCenter() {
       socket.on('notification-updated', handleNotificationUpdate)
       socket.on('notification-deleted', handleNotificationDelete)
 
-      socketRef.current = socket
-
-      console.log('✅ Socket.io real-time notifications enabled')
-
-      // Cleanup on unmount
       return () => {
         if (socket) {
           socket.off('new-notification', handleNewNotification)
           socket.off('notification-updated', handleNotificationUpdate)
           socket.off('notification-deleted', handleNotificationDelete)
-          socket.emit('leave-admin-room')
         }
       }
-    } else {
-      // Fallback to polling if Socket.io is not available
-      console.log('📡 Socket.io not available, using polling fallback')
-      const interval = setInterval(fetchNotifications, 5000) // Poll every 5 seconds
-      return () => clearInterval(interval)
     }
   }, [socket, isConnected])
 
@@ -156,140 +143,101 @@ export function NotificationsCenter() {
     }
   }
 
-  const deleteNotification = async (id: string) => {
-    try {
-      const response = await fetch(`/api/admin/notifications/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        setNotifications((prev) => prev.filter((n) => n.id !== id))
-        toast.success('Notification deleted')
-      }
-    } catch (error) {
-      console.error('Error deleting notification:', error)
-    }
-  }
-
-  useEffect(() => {
-    fetchNotifications()
-    // Poll for new notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000)
-    return () => clearInterval(interval)
-  }, [])
-
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-green-600" />
+        return <CheckCircle className="w-4 h-4 text-green-600" />
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-yellow-600" />
+        return <AlertTriangle className="w-4 h-4 text-yellow-600" />
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-600" />
+        return <AlertCircle className="w-4 h-4 text-red-600" />
       default:
-        return <Info className="w-5 h-5 text-blue-600" />
+        return <Info className="w-4 h-4 text-blue-600" />
     }
   }
 
-  const getNotificationBadge = (type: Notification['type']) => {
-    const variants = {
-      info: 'default',
-      success: 'default',
-      warning: 'secondary',
-      error: 'destructive',
-    } as const
-
-    return <Badge variant={variants[type]}>{type}</Badge>
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2 pt-2">
-              <Bell className="w-5 h-5 text-lime-600" />
-              Notifications
-              {unreadCount > 0 && (
-                <Badge className="ml-2 bg-lime-600">{unreadCount}</Badge>
-              )}
-            </CardTitle>
-            <CardDescription>
-              System notifications and alerts
-            </CardDescription>
-          </div>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={`relative ${isEmployeePage || isUserDashboard || isAdminDashboard ? 'text-white hover:bg-lime-700' : 'text-gray-600 hover:bg-gray-50'} transition-colors`}
+        >
+          <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Button variant="outline" size="sm" onClick={markAllAsRead}>
-              Mark all as read
-            </Button>
+            <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-lime-600 text-white text-xs flex items-center justify-center font-semibold">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
           )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 p-0" align="end">
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-base">Notifications</h3>
+            {unreadCount > 0 && (
+              <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+                Mark all read
+              </Button>
+            )}
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="w-6 h-6 border-2 border-lime-600 border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : notifications.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Bell className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>No notifications</p>
-          </div>
-        ) : (
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-2">
+        <ScrollArea className="h-[400px]">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-lime-600 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Bell className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+              <p className="text-sm">No notifications</p>
+            </div>
+          ) : (
+            <div className="p-2 space-y-2">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 rounded-lg border ${
+                  className={`p-3 rounded-lg border ${
                     notification.read
                       ? 'bg-gray-50 border-gray-200'
                       : 'bg-lime-50 border-lime-200'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2">
                     {getNotificationIcon(notification.type)}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
                           <h4 className="font-semibold text-sm">{notification.title}</h4>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                             {notification.message}
                           </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            {getNotificationBadge(notification.type)}
-                            <span className="text-xs text-gray-400">
-                              {new Date(notification.created_at).toLocaleString()}
-                            </span>
-                          </div>
+                          <span className="text-xs text-gray-400 mt-1 block">
+                            {new Date(notification.created_at).toLocaleString()}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           {!notification.read && (
                             <Button
                               variant="ghost"
                               size="sm"
+                              className="h-6 w-6 p-0"
                               onClick={() => markAsRead(notification.id)}
                             >
-                              <Check className="w-4 h-4" />
+                              <Check className="w-3 h-3" />
                             </Button>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteNotification(notification.id)}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
                         </div>
                       </div>
                       {notification.link && (
                         <Button
                           variant="link"
                           size="sm"
-                          className="mt-2 p-0 h-auto"
+                          className="mt-2 p-0 h-auto text-xs"
                           onClick={() => window.location.href = notification.link!}
                         >
-                          View details →
+                          View →
                         </Button>
                       )}
                     </div>
@@ -297,10 +245,20 @@ export function NotificationsCenter() {
                 </div>
               ))}
             </div>
-          </ScrollArea>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </ScrollArea>
+        <div className="p-3 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full"
+            onClick={() => window.location.href = '/admin-dashboard'}
+          >
+            View all notifications
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
 

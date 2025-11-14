@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { emitNotificationDelete } from '@/lib/emit-notification'
 
 // DELETE - Delete a notification
 export async function DELETE(
@@ -16,7 +17,9 @@ export async function DELETE(
     }
 
     // In a real app, delete the notification from the database
-    // For mock data, just return success
+    // Emit real-time delete event via Socket.io
+    emitNotificationDelete(id, 'admin')
+
     return NextResponse.json({
       success: true,
       message: 'Notification deleted',

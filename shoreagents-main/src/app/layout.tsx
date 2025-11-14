@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Poppins, Roboto } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -19,20 +18,7 @@ import { FavoritesProvider } from "@/lib/favorites-context";
 import { QueryProvider } from "@/lib/query-client-provider";
 import { ChatProvider } from "@/lib/chat-context";
 import { Toaster } from "@/components/ui/sonner";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
-});
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
-  variable: "--font-roboto",
-  display: "swap",
-});
+import MayaPreGreeting from "@/components/MayaPreGreeting";
 
 export const metadata: Metadata = {
   title: "ShoreAgents - Professional Offshore Solutions",
@@ -47,10 +33,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
       </head>
       <body
-        className={`${poppins.variable} ${roboto.variable} font-sans antialiased`}
+        className="antialiased"
+        style={{ fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}
       >
         <QueryProvider>
           <CurrencyProvider>
@@ -61,6 +51,7 @@ export default function RootLayout({
                     <FavoritesProvider>
                       <ChatProvider>
                       {/* <AnonymousUserInitializer /> */}
+                      <MayaPreGreeting />
                       <GlobalEngagementTracker />
                       <ScrollToTop />
                       <Navbar />

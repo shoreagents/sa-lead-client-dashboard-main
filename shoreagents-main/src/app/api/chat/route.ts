@@ -280,41 +280,29 @@ export async function POST(request: NextRequest) {
       content: message || 'hello'
     });
 
-    // Fetch user data for personalization if userId is provided
+    // Fetch user data for personalization if userId is provided (OPTIMIZED - Parallel queries)
     let userData = null;
     if (userId) {
       try {
         const supabase = createClient();
         
-        // Fetch user data
-        const { data: user, error: userError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
+        // Fetch all data in parallel for better performance
+        const [
+          { data: user, error: userError },
+          { data: quotes, error: quotesError },
+          { data: pageVisits, error: visitsError }
+        ] = await Promise.all([
+          supabase.from('users').select('*').eq('user_id', userId).single(),
+          supabase.from('pricing_quotes').select('*').eq('user_id', userId).order('quote_timestamp', { ascending: false }).limit(3),
+          supabase.from('user_page_visits').select('*').eq('user_id', userId).order('visit_timestamp', { ascending: false }).limit(3)
+        ]);
 
         if (userError && userError.code !== 'PGRST116') {
           console.error('Error fetching user:', userError);
         } else if (user) {
-          // Fetch user's pricing quotes
-          const { data: quotes, error: quotesError } = await supabase
-            .from('pricing_quotes')
-            .select('*')
-            .eq('user_id', userId)
-            .order('quote_timestamp', { ascending: false });
-
           if (quotesError) {
             console.error('Error fetching quotes:', quotesError);
           }
-
-          // Fetch recent page visits for activity tracking
-          const { data: pageVisits, error: visitsError } = await supabase
-            .from('user_page_visits')
-            .select('*')
-            .eq('user_id', userId)
-            .order('visit_timestamp', { ascending: false })
-            .limit(5);
-
           if (visitsError) {
             console.error('Error fetching page visits:', visitsError);
           }
@@ -758,12 +746,13 @@ CRITICAL INSTRUCTIONS:
     console.log('Conversation history length:', conversationHistory.length);
     console.log('🔍 Final System Prompt (first 200 chars):', systemPrompt.substring(0, 200));
 
-    // Call Anthropic API
+    // Call Anthropic API (OPTIMIZED - Reduced max_tokens for faster responses)
     const anthropicResponse = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 1000,
+      max_tokens: 600, // Reduced from 1000 for faster responses
       system: systemPrompt,
       messages: messages,
+      temperature: 0.7, // Add temperature for more focused responses
     });
 
     console.log('API response received successfully');

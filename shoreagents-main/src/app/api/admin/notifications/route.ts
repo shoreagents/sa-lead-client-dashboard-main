@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { emitNotification } from '@/lib/emit-notification'
 
 // GET - Get all notifications
 export async function GET(request: NextRequest) {
@@ -132,10 +133,24 @@ export async function POST(request: NextRequest) {
     }
 
     // In a real app, save to notifications table
-    // For now, return success
+    // Create notification object
+    const notification = {
+      id: Date.now().toString(),
+      title,
+      message,
+      type: type || 'info',
+      read: false,
+      created_at: new Date().toISOString(),
+      link: link || undefined,
+    }
+
+    // Emit real-time notification via Socket.io
+    emitNotification(notification, 'admin')
+
     return NextResponse.json({
       success: true,
       message: 'Notification created',
+      data: notification,
     })
   } catch (error) {
     console.error('Error creating notification:', error)

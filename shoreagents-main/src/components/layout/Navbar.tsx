@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, Menu, X, Star, ArrowRight } from 'lucide-react'
 import { useCurrency, currencies, Currency } from '@/lib/currencyContext'
 import { AuthButtons } from '@/components/ui/auth-buttons'
+import { NotificationDropdown } from '@/components/ui/notification-dropdown'
 
 // Country name mapping for currencies - moved outside component to prevent recreation
 const CURRENCY_COUNTRY_NAMES: Record<string, string> = {
@@ -114,7 +115,7 @@ export function Navbar() {
               {/* Navigation items removed - keeping only logo, currency, and auth */}
             </div>
 
-            {/* Right side - Currency and Auth */}
+            {/* Right side - Currency, Notifications, and Auth */}
             <div className="hidden md:flex items-center space-x-2 absolute right-4 top-0 h-16">
               {/* Currency Selector */}
               <div className="relative group">
@@ -182,12 +183,18 @@ export function Navbar() {
                 </div>
               </div>
 
+              {/* Notification Button */}
+              <NotificationDropdown />
+
               {/* Auth Buttons */}
               <AuthButtons />
             </div>
 
             {/* Mobile menu button */}
             <div className="lg:hidden absolute right-0 top-0 h-16 flex items-center space-x-1 pr-2">
+              {/* Mobile Notification Button */}
+              <NotificationDropdown />
+              
               <Button
                 variant="ghost"
                 size="icon"
@@ -577,13 +584,47 @@ export function Navbar() {
               </div>
             </div>
 
-            {/* Other Navigation Items */}
-            <Link href="/how-it-works" className={`px-3 py-2 whitespace-nowrap font-semibold transition-colors duration-200 relative group ${isEmployeePage || isAdminDashboard ? (isActive('/how-it-works') ? 'text-white' : 'text-white hover:text-gray-200') : (isActive('/how-it-works') ? 'text-lime-600' : 'text-gray-700 hover:text-lime-600')}`}>
-              <span className="relative inline-block">
-              How it works
-                <span className={`absolute -bottom-1 left-1/2 h-0.5 ${isEmployeePage || isAdminDashboard ? 'bg-white' : 'bg-lime-600'} transition-all duration-300 ease-out transform -translate-x-1/2 ${isActive('/how-it-works') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-              </span>
-            </Link>
+            {/* How It Works Dropdown */}
+            <div className="relative group">
+              <div className="flex items-center space-x-0.5">
+                <Link href="/how-it-works" className={`px-3 py-2 whitespace-nowrap font-semibold transition-colors duration-200 relative ${isEmployeePage || isAdminDashboard ? (isActive('/how-it-works') ? 'text-white' : 'text-white hover:text-gray-200') : (isActive('/how-it-works') ? 'text-lime-600' : 'text-gray-700 hover:text-lime-600')}`}>
+                  <span className="relative inline-block">
+                    How it works
+                    <span className={`absolute -bottom-1 left-1/2 h-0.5 ${isEmployeePage || isAdminDashboard ? 'bg-white' : 'bg-lime-600'} transition-all duration-300 ease-out transform -translate-x-1/2 ${isActive('/how-it-works') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                  </span>
+                </Link>
+                <div className={`px-1 py-2 cursor-pointer ${isEmployeePage || isAdminDashboard ? 'text-white' : 'text-gray-700'}`}>
+                  <ChevronDown className="h-4 w-4 -rotate-90 transition-transform duration-200 group-hover:rotate-0" />
+                </div>
+              </div>
+              
+              {/* How It Works Dropdown Content */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[280px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                <div className="p-4">
+                  {/* Header - Now Clickable */}
+                  <Link href="/how-it-works" className="block px-4 py-3 bg-lime-50 rounded-lg hover:bg-lime-100 transition-all duration-200 group/item mb-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-lime-700 text-base">How It Works</h4>
+                        <p className="text-xs text-gray-600 mt-0.5">Complete process guide</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-lime-600 group-hover/item:translate-x-1 transition-transform duration-200" />
+                    </div>
+                  </Link>
+                  
+                  {/* Management Software Link */}
+                  <Link href="/management-software" className="block px-4 py-3 bg-lime-50 rounded-lg hover:bg-lime-100 transition-all duration-200 group/item">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-bold text-lime-700 text-sm">Management Software</h4>
+                        <p className="text-xs text-gray-600 mt-0.5">Coming soon</p>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-lime-600 group-hover/item:translate-x-1 transition-transform duration-200" />
+                    </div>
+                  </Link>
+                </div>
+              </div>
+            </div>
             <Link href="/pricing" className={`px-3 py-2 whitespace-nowrap font-semibold transition-colors duration-200 relative group ${isEmployeePage || isAdminDashboard ? (isActive('/pricing') ? 'text-white' : 'text-white hover:text-gray-200') : (isActive('/pricing') ? 'text-lime-600' : 'text-gray-700 hover:text-lime-600')}`}>
               <span className="relative inline-block">
               Pricing
@@ -667,9 +708,6 @@ export function Navbar() {
                   <div className="grid grid-cols-3 gap-8">
                     {/* First Column */}
                           <div className="space-y-0">
-                      <Link href="/how-it-works" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        How It Works
-                            </Link>
                       <Link href="/about/team" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
                         Our Team
                           </Link>
@@ -789,6 +827,9 @@ export function Navbar() {
               </div>
             </div>
 
+            {/* Notification Button */}
+            <NotificationDropdown />
+
             {/* Auth Buttons */}
             <AuthButtons />
           </div>
@@ -877,6 +918,9 @@ export function Navbar() {
               </div>
             </div>
 
+            {/* Mobile Notification Button */}
+            <NotificationDropdown />
+
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -896,12 +940,27 @@ export function Navbar() {
               <div className="px-2 pt-2 pb-3 space-y-1">
                 
                 {/* Main Navigation Items */}
-                <Link href="/how-it-works" className={`block px-3 py-3 font-semibold relative group border-b border-gray-100 ${isActive('/how-it-works') ? 'text-lime-600 bg-lime-50' : 'text-gray-700 hover:text-lime-600 hover:bg-gray-50'}`}>
-              <span className="relative inline-block">
-              How it works
-                <span className={`absolute -bottom-1 left-1/2 h-0.5 bg-lime-600 transition-all duration-300 ease-out transform -translate-x-1/2 ${isActive('/how-it-works') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-              </span>
-            </Link>
+                {/* How It Works Section with Dropdown */}
+                <div className="border-b border-gray-100">
+                  <button 
+                    onClick={() => toggleSection('howitworks')}
+                    className="w-full flex items-center justify-between px-3 py-3 font-semibold text-gray-700 hover:text-lime-600 hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <span>How It Works</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedSections.includes('howitworks') ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {expandedSections.includes('howitworks') && (
+                    <div className="pl-4 space-y-1 pb-3">
+                      <Link href="/how-it-works" className="block text-gray-600 hover:text-lime-600 py-2 text-sm font-medium px-3 rounded hover:bg-lime-50">
+                        How It Works Overview
+                      </Link>
+                      <Link href="/management-software" className="block text-gray-600 hover:text-lime-600 py-2 text-sm font-medium px-3 rounded hover:bg-lime-50">
+                        Management Software
+                      </Link>
+                    </div>
+                  )}
+                </div>
                 
                 <Link href="/pricing" className={`block px-3 py-3 font-semibold relative group border-b border-gray-100 ${isActive('/pricing') ? 'text-lime-600 bg-lime-50' : 'text-gray-700 hover:text-lime-600 hover:bg-gray-50'}`}>
               <span className="relative inline-block">
