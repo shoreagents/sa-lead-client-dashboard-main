@@ -10,3 +10,4 @@ export async function GET(request: NextRequest) {
   return new Response('Socket.io endpoint - use custom server', { status: 200 })
 }
 
+
