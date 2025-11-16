@@ -55,8 +55,8 @@ app.prepare().then(() => {
   // Make io available globally for emitting notifications
   global.io = io
 
-  // Next.js request handling
-  expressApp.all('*', (req, res) => {
+  // Next.js request handling - use middleware instead of wildcard route
+  expressApp.use((req, res) => {
     const parsedUrl = parse(req.url, true)
     handle(req, res, parsedUrl)
   })

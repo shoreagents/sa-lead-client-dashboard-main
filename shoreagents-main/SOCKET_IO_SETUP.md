@@ -91,3 +91,4 @@ The notification should appear in real-time in the NotificationsCenter component
 - User-specific rooms: `user-{userId}`
 - Falls back to polling every 5 seconds if Socket.io is unavailable
 
+
