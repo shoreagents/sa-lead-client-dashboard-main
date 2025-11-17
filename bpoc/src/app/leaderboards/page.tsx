@@ -90,6 +90,7 @@ export default function LeaderboardsPage() {
 	const [loadingBreakdown, setLoadingBreakdown] = useState(false)
 	const [refreshing, setRefreshing] = useState(false)
 	const [refreshNonce, setRefreshNonce] = useState(0)
+	const [top3Overall, setTop3Overall] = useState<Array<GameResult | SimpleResult | OverallResult>>([])
 
 	const offset = useMemo(() => (page - 1) * pageSize, [page, pageSize])
 	const totalPages = Math.max(1, Math.ceil(total / pageSize))
@@ -137,6 +138,28 @@ export default function LeaderboardsPage() {
 		fetchData()
 	}, [category, page, pageSize, offset, refreshNonce])
 
+	// Fetch top 3 overall separately for Hall of Fame (always shows top 3, regardless of pagination)
+	useEffect(() => {
+		const fetchTop3 = async () => {
+			try {
+				const params = new URLSearchParams()
+				params.set('category', 'overall')
+				params.set('limit', '3')
+				params.set('offset', '0')
+				
+				const res = await fetch(`/api/leaderboards?${params.toString()}`, { cache: 'no-store' })
+				if (res.ok) {
+					const data = await res.json()
+					setTop3Overall(data.results || [])
+				}
+			} catch (e) {
+				console.error('Failed to fetch top 3:', e)
+				setTop3Overall([])
+			}
+		}
+		fetchTop3()
+	}, [refreshNonce]) // Only refetch when refreshNonce changes, not when pagination changes
+
 	useEffect(() => { setPage(1) }, [category])
 
 	useEffect(() => {
@@ -144,14 +167,14 @@ export default function LeaderboardsPage() {
 			if (!openUserId) return
 			try {
 				setLoadingBreakdown(true)
-			const [bRes, rRes] = await Promise.all([
+			const [bRes, pRes] = await Promise.all([
 				fetch(`/api/leaderboards/user/${openUserId}`, { cache: 'no-store' }),
-				fetch(`/api/users/${openUserId}/resume`, { cache: 'no-store' })
+				fetch(`/api/users/${openUserId}/profile`, { cache: 'no-store' })
 			])
 				const b = bRes.ok ? await bRes.json() : null
-				const r = rRes.ok ? await rRes.json() : null
+				const p = pRes.ok ? await pRes.json() : null
 				setUserBreakdown(b)
-				setUserResumeSlug(r?.slug || null)
+				setUserResumeSlug(p?.slug || null) // Reusing this state for profile slug
 			} finally {
 				setLoadingBreakdown(false)
 			}
@@ -162,14 +185,11 @@ export default function LeaderboardsPage() {
 	const openUserModal = (userId: string) => setOpenUserId(userId)
 	const closeUserModal = () => { setOpenUserId(null); setUserBreakdown(null); setUserResumeSlug(null) }
 
-	const goToResume = async (e: React.MouseEvent, userId: string) => {
+	const goToProfile = (e: React.MouseEvent, userSlug: string | null) => {
 		e.stopPropagation()
-		try {
-			const res = await fetch(`/api/users/${userId}/resume`, { cache: 'no-store' })
-			if (!res.ok) return
-			const data = await res.json()
-			if (data?.slug) router.push(`/${data.slug}`)
-		} catch {}
+		if (userSlug) {
+			router.push(`/${userSlug}`)
+		}
 	}
 
 	const refreshLeaderboards = async () => {
@@ -301,7 +321,7 @@ export default function LeaderboardsPage() {
                 )}
 				</div>
 				<div className="flex-1 min-w-0">
-					<button onClick={(e) => goToResume(e, row.userId)} className={`text-left truncate hover:underline font-semibold ${
+					<button onClick={(e) => goToProfile(e, row.user?.slug || null)} className={`text-left truncate hover:underline font-semibold ${
 						row.rank === 1 ? 'text-yellow-300' :
 						row.rank === 2 ? 'text-gray-200' :
 						row.rank === 3 ? 'text-orange-300' :
@@ -475,17 +495,17 @@ export default function LeaderboardsPage() {
                 >
                   <div className="bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 rounded-t-lg p-4 h-32 flex flex-col items-center justify-center shadow-xl">
                     <div className="w-16 h-16 rounded-full overflow-hidden bg-white/20 ring-4 ring-gray-300/50 mb-2">
-                      {filteredResults[1]?.user?.avatar_url ? (
-                        <img src={filteredResults[1].user.avatar_url} alt={filteredResults[1].user?.full_name || filteredResults[1].userId} className="w-full h-full object-cover" />
+                      {top3Overall[1]?.user?.avatar_url ? (
+                        <img src={top3Overall[1].user.avatar_url} alt={top3Overall[1].user?.full_name || top3Overall[1].userId} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">{generateFirstLetter(filteredResults[1]?.user?.full_name || null)}</span>
+                          <span className="text-white font-bold text-sm">{generateFirstLetter(top3Overall[1]?.user?.full_name || null)}</span>
                         </div>
                       )}
                     </div>
-                    <div className="text-gray-800 font-bold text-sm text-center truncate w-full">{filteredResults[1]?.user?.full_name ? filteredResults[1].user.full_name.split(' ')[0] : filteredResults[1]?.userId}</div>
-                    {filteredResults[1]?.user?.slug && (
-                      <div className="text-gray-600 text-xs text-center truncate w-full">@{filteredResults[1].user.slug}</div>
+                    <div className="text-gray-800 font-bold text-sm text-center truncate w-full">{top3Overall[1]?.user?.full_name ? top3Overall[1].user.full_name.split(' ')[0] : top3Overall[1]?.userId}</div>
+                    {top3Overall[1]?.user?.slug && (
+                      <div className="text-gray-600 text-xs text-center truncate w-full">@{top3Overall[1].user.slug}</div>
                     )}
                   </div>
                   <div className="bg-gray-500 text-white text-center py-2 rounded-b-lg font-bold">
@@ -516,17 +536,17 @@ export default function LeaderboardsPage() {
                       <Crown className="w-8 h-8 text-yellow-800" />
                     </motion.div>
                     <div className="w-20 h-20 rounded-full overflow-hidden bg-yellow-200/30 ring-4 ring-yellow-300/70 mb-2 mt-4">
-                      {filteredResults[0]?.user?.avatar_url ? (
-                        <img src={filteredResults[0].user.avatar_url} alt={filteredResults[0].user?.full_name || filteredResults[0].userId} className="w-full h-full object-cover" />
+                      {top3Overall[0]?.user?.avatar_url ? (
+                        <img src={top3Overall[0].user.avatar_url} alt={top3Overall[0].user?.full_name || top3Overall[0].userId} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">{generateFirstLetter(filteredResults[0]?.user?.full_name || null)}</span>
+                          <span className="text-white font-bold text-sm">{generateFirstLetter(top3Overall[0]?.user?.full_name || null)}</span>
                         </div>
                       )}
                     </div>
-                    <div className="text-yellow-900 font-bold text-sm text-center truncate w-full">{filteredResults[0]?.user?.full_name ? filteredResults[0].user.full_name.split(' ')[0] : filteredResults[0]?.userId}</div>
-                    {filteredResults[0]?.user?.slug && (
-                      <div className="text-yellow-700 text-xs text-center truncate w-full">@{filteredResults[0].user.slug}</div>
+                    <div className="text-yellow-900 font-bold text-sm text-center truncate w-full">{top3Overall[0]?.user?.full_name ? top3Overall[0].user.full_name.split(' ')[0] : top3Overall[0]?.userId}</div>
+                    {top3Overall[0]?.user?.slug && (
+                      <div className="text-yellow-700 text-xs text-center truncate w-full">@{top3Overall[0].user.slug}</div>
                     )}
                   </div>
                   <div className="bg-gradient-to-r from-yellow-500 to-amber-600 text-yellow-900 text-center py-2 rounded-b-lg font-bold">
@@ -543,17 +563,17 @@ export default function LeaderboardsPage() {
                 >
                   <div className="bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 rounded-t-lg p-4 h-28 flex flex-col items-center justify-center shadow-xl">
                     <div className="w-14 h-14 rounded-full overflow-hidden bg-orange-200/30 ring-4 ring-orange-300/50 mb-2">
-                      {filteredResults[2]?.user?.avatar_url ? (
-                        <img src={filteredResults[2].user.avatar_url} alt={filteredResults[2].user?.full_name || filteredResults[2].userId} className="w-full h-full object-cover" />
+                      {top3Overall[2]?.user?.avatar_url ? (
+                        <img src={top3Overall[2].user.avatar_url} alt={top3Overall[2].user?.full_name || top3Overall[2].userId} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">{generateFirstLetter(filteredResults[2]?.user?.full_name || null)}</span>
+                          <span className="text-white font-bold text-sm">{generateFirstLetter(top3Overall[2]?.user?.full_name || null)}</span>
                         </div>
                       )}
                     </div>
-                    <div className="text-orange-900 font-bold text-sm text-center truncate w-full">{filteredResults[2]?.user?.full_name ? filteredResults[2].user.full_name.split(' ')[0] : filteredResults[2]?.userId}</div>
-                    {filteredResults[2]?.user?.slug && (
-                      <div className="text-orange-700 text-xs text-center truncate w-full">@{filteredResults[2].user.slug}</div>
+                    <div className="text-orange-900 font-bold text-sm text-center truncate w-full">{top3Overall[2]?.user?.full_name ? top3Overall[2].user.full_name.split(' ')[0] : top3Overall[2]?.userId}</div>
+                    {top3Overall[2]?.user?.slug && (
+                      <div className="text-orange-700 text-xs text-center truncate w-full">@{top3Overall[2].user.slug}</div>
                     )}
                   </div>
                   <div className="bg-orange-600 text-orange-100 text-center py-2 rounded-b-lg font-bold">
