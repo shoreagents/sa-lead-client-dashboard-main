@@ -1650,6 +1650,43 @@ Make it deeply personal and actionable based on their actual choices.`;
     );
   }
 
+  // Update meta tags when results are shown (for OG image)
+  useEffect(() => {
+    if (showResults && discResult && user) {
+      const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
+      const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&title=${encodeURIComponent(userTitle)}&v=1`;
+      const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
+      
+      // Update or create meta tags
+      const updateMetaTag = (property: string, content: string) => {
+        let meta = document.querySelector(`meta[property="${property}"]`) || 
+                   document.querySelector(`meta[name="${property}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('property', property);
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      updateMetaTag('og:title', `${personalityType.title} - ${animalName} Personality`);
+      updateMetaTag('og:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}. Take the BPOC DISC Personality Assessment to find your perfect BPO role.`);
+      updateMetaTag('og:image', ogImageUrl);
+      updateMetaTag('og:url', pageUrl);
+      updateMetaTag('og:type', 'website');
+      updateMetaTag('og:site_name', 'BPOC.IO');
+      
+      // Twitter meta tags
+      updateMetaTag('twitter:card', 'summary_large_image');
+      updateMetaTag('twitter:title', `${personalityType.title} - ${animalName} Personality`);
+      updateMetaTag('twitter:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}.`);
+      updateMetaTag('twitter:image', ogImageUrl);
+    }
+  }, [showResults, discResult, user]);
+
   // Results screen
   if (showResults && discResult) {
     // Stop music when reaching results
