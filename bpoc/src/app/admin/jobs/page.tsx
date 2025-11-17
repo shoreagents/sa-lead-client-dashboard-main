@@ -495,8 +495,8 @@ function JobsPage() {
       case 'jobDescription':
         if (value?.trim() && value.length < 50) {
           errors.jobDescription = 'Job description must be at least 50 characters if provided'
-        } else if (value?.trim() && value.length > 2000) {
-          errors.jobDescription = 'Job description must be less than 2000 characters'
+        } else if (value?.trim() && value.length > 5000) {
+          errors.jobDescription = 'Job description must be less than 5000 characters'
         }
         break
         
@@ -655,9 +655,9 @@ function JobsPage() {
       case 'responsibilities':
       case 'benefits':
       case 'skills':
-        if (value && value.length > 2000) {
+        if (value && value.length > 5000) {
           const fieldName = field.charAt(0).toUpperCase() + field.slice(1)
-          errors[field] = `${fieldName} must be less than 2000 characters (currently ${value.length})`
+          errors[field] = `${fieldName} must be less than 5000 characters (currently ${value.length})`
         }
         break
     }
@@ -683,8 +683,8 @@ function JobsPage() {
     
     if (newJobData.jobDescription?.trim() && newJobData.jobDescription.length < 50) {
       errors.jobDescription = 'Job description must be at least 50 characters if provided'
-    } else if (newJobData.jobDescription?.trim() && newJobData.jobDescription.length > 2000) {
-      errors.jobDescription = 'Job description must be less than 2000 characters'
+    } else if (newJobData.jobDescription?.trim() && newJobData.jobDescription.length > 5000) {
+      errors.jobDescription = 'Job description must be less than 5000 characters'
     }
     
     if (!newJobData.experienceLevel) {
@@ -793,8 +793,8 @@ function JobsPage() {
     
     textAreas.forEach(({ field, name }) => {
       const value = newJobData[field as keyof typeof newJobData] as string
-      if (value && value.length > 2000) {
-        errors[field] = `${name} must be less than 2000 characters (currently ${value.length})`
+      if (value && value.length > 5000) {
+        errors[field] = `${name} must be less than 5000 characters (currently ${value.length})`
       }
     })
     
@@ -1732,7 +1732,7 @@ function JobsPage() {
                   <p className="text-red-400 text-xs mt-1">{formErrors.jobDescription}</p>
                 )}
                 <p className="text-gray-400 text-xs">
-                  {newJobData.jobDescription.length}/2000 characters (minimum 50 if provided)
+                  {newJobData.jobDescription.length}/5000 characters (minimum 50 if provided)
                 </p>
               </div>
               <div className="space-y-2">
@@ -1768,7 +1768,7 @@ function JobsPage() {
                 {formErrors.requirements && (
                   <p className="text-red-400 text-xs mt-1">{formErrors.requirements}</p>
                 )}
-                <p className="text-gray-400 text-xs">{newJobData.requirements.length}/2000 characters</p>
+                <p className="text-gray-400 text-xs">{newJobData.requirements.length}/5000 characters</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Responsibilities (one per line)</label>
@@ -1803,7 +1803,7 @@ function JobsPage() {
                 {formErrors.responsibilities && (
                   <p className="text-red-400 text-xs mt-1">{formErrors.responsibilities}</p>
                 )}
-                <p className="text-gray-400 text-xs">{newJobData.responsibilities.length}/2000 characters</p>
+                <p className="text-gray-400 text-xs">{newJobData.responsibilities.length}/5000 characters</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Benefits (one per line)</label>
@@ -1838,7 +1838,7 @@ function JobsPage() {
                 {formErrors.benefits && (
                   <p className="text-red-400 text-xs mt-1">{formErrors.benefits}</p>
                 )}
-                <p className="text-gray-400 text-xs">{newJobData.benefits.length}/2000 characters</p>
+                <p className="text-gray-400 text-xs">{newJobData.benefits.length}/5000 characters</p>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-300">Skills (one per line)</label>
@@ -1873,7 +1873,7 @@ function JobsPage() {
                 {formErrors.skills && (
                   <p className="text-red-400 text-xs mt-1">{formErrors.skills}</p>
                 )}
-                <p className="text-gray-400 text-xs">{newJobData.skills.length}/2000 characters</p>
+                <p className="text-gray-400 text-xs">{newJobData.skills.length}/5000 characters</p>
               </div>
 
               {/* Priority + AI improve (status is implicitly New Job Request/inactive) */}
