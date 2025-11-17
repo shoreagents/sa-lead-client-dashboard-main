@@ -264,7 +264,7 @@ export async function GET(request: NextRequest) {
                     display: 'flex',
                   }}
                 >
-                  View Full Resume
+                  Sign Up Now
                 </div>
               </div>
 
