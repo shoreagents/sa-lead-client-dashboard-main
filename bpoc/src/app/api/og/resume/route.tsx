@@ -241,8 +241,8 @@ export async function GET(request: NextRequest) {
                   alignItems: 'center',
                 }}
               >
-                <div style={{ display: 'flex' }}>Professional Resume</div>
-                <div style={{ display: 'flex', marginTop: 10 }}>Built with AI</div>
+                <div style={{ display: 'flex' }}>Build Your Professional Resume</div>
+                <div style={{ display: 'flex', marginTop: 10 }}>with AI-Powered Tools</div>
               </div>
 
               {/* CTA Button */}
