@@ -3,29 +3,53 @@ import pool from '@/lib/database'
 
 export async function GET(request: NextRequest) {
   try {
+    const rawJobId = (request.nextUrl.searchParams.get('jobId') || '').trim()
+    if (!rawJobId) return NextResponse.json({ error: 'jobId required' }, { status: 400 })
+
+    // Check if it's a recruiter job (UUID format or starts with 'recruiter_')
+    const isRecruiterJob = rawJobId.startsWith('recruiter_') || rawJobId.includes('-')
+    const actualJobId = isRecruiterJob ? rawJobId.replace('recruiter_', '') : rawJobId
+    const numericJobId = isRecruiterJob ? null : Number(actualJobId)
+
     // For development, allow access without strict authentication
     if (process.env.NODE_ENV === 'development') {
-      const jobId = Number((request.nextUrl.searchParams.get('jobId') || '').trim())
-      if (!jobId || Number.isNaN(jobId)) return NextResponse.json({ error: 'jobId required' }, { status: 400 })
-
-      const res = await pool.query(
-        `SELECT a.*, 
-                u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
-                sr.resume_title as saved_resume_title,
-                sr.resume_slug as saved_resume_slug
-         FROM applications a
-         LEFT JOIN users u ON u.id = a.user_id
-         LEFT JOIN saved_resumes sr ON sr.id = a.resume_id
-         WHERE a.job_id = $1
-         ORDER BY a.created_at DESC`,
-        [jobId]
-      )
+      let res
+      if (isRecruiterJob) {
+        // Query recruiter_applications for recruiter jobs
+        res = await pool.query(
+          `SELECT ra.*, 
+                  u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
+                  sr.resume_title as saved_resume_title,
+                  sr.resume_slug as saved_resume_slug
+           FROM recruiter_applications ra
+           LEFT JOIN users u ON u.id = ra.user_id
+           LEFT JOIN saved_resumes sr ON sr.id = ra.resume_id
+           WHERE ra.job_id = $1
+           ORDER BY ra.created_at DESC`,
+          [actualJobId]
+        )
+      } else {
+        if (!numericJobId || Number.isNaN(numericJobId)) return NextResponse.json({ error: 'Invalid jobId' }, { status: 400 })
+        // Query applications for regular jobs
+        res = await pool.query(
+          `SELECT a.*, 
+                  u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
+                  sr.resume_title as saved_resume_title,
+                  sr.resume_slug as saved_resume_slug
+           FROM applications a
+           LEFT JOIN users u ON u.id = a.user_id
+           LEFT JOIN saved_resumes sr ON sr.id = a.resume_id
+           WHERE a.job_id = $1
+           ORDER BY a.created_at DESC`,
+          [numericJobId]
+        )
+      }
 
       const applications = res.rows.map(r => ({
         id: r.id,
         user_id: r.user_id,
         job_id: r.job_id,
-        resume_slug: r.saved_resume_slug || r.resume_slug, // Use saved_resume_slug if available, fallback to applications.resume_slug
+        resume_slug: r.saved_resume_slug || r.resume_slug,
         status: r.status,
         created_at: r.created_at,
         user: { email: r.user_email, full_name: r.user_full_name, avatar_url: r.user_avatar, position: r.user_position, location: r.user_location },
@@ -42,27 +66,43 @@ export async function GET(request: NextRequest) {
     const adminCheck = await pool.query('SELECT admin_level FROM users WHERE id = $1', [userId])
     if (adminCheck.rows[0]?.admin_level !== 'admin') return NextResponse.json({ error: 'Admin only' }, { status: 403 })
 
-    const jobId = Number((request.nextUrl.searchParams.get('jobId') || '').trim())
-    if (!jobId || Number.isNaN(jobId)) return NextResponse.json({ error: 'jobId required' }, { status: 400 })
-
-    const res = await pool.query(
-      `SELECT a.*, 
-              u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
-              sr.resume_title as saved_resume_title,
-              sr.resume_slug as saved_resume_slug
-       FROM applications a
-       LEFT JOIN users u ON u.id = a.user_id
-       LEFT JOIN saved_resumes sr ON sr.id = a.resume_id
-       WHERE a.job_id = $1
-       ORDER BY a.created_at DESC`,
-      [jobId]
-    )
+    let res
+    if (isRecruiterJob) {
+      // Query recruiter_applications for recruiter jobs
+      res = await pool.query(
+        `SELECT ra.*, 
+                u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
+                sr.resume_title as saved_resume_title,
+                sr.resume_slug as saved_resume_slug
+         FROM recruiter_applications ra
+         LEFT JOIN users u ON u.id = ra.user_id
+         LEFT JOIN saved_resumes sr ON sr.id = ra.resume_id
+         WHERE ra.job_id = $1
+         ORDER BY ra.created_at DESC`,
+        [actualJobId]
+      )
+    } else {
+      if (!numericJobId || Number.isNaN(numericJobId)) return NextResponse.json({ error: 'Invalid jobId' }, { status: 400 })
+      // Query applications for regular jobs
+      res = await pool.query(
+        `SELECT a.*, 
+                u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
+                sr.resume_title as saved_resume_title,
+                sr.resume_slug as saved_resume_slug
+         FROM applications a
+         LEFT JOIN users u ON u.id = a.user_id
+         LEFT JOIN saved_resumes sr ON sr.id = a.resume_id
+         WHERE a.job_id = $1
+         ORDER BY a.created_at DESC`,
+        [numericJobId]
+      )
+    }
 
     const applications = res.rows.map(r => ({
       id: r.id,
       user_id: r.user_id,
       job_id: r.job_id,
-      resume_slug: r.saved_resume_slug || r.resume_slug, // Use saved_resume_slug if available, fallback to applications.resume_slug
+      resume_slug: r.saved_resume_slug || r.resume_slug,
       status: r.status,
       created_at: r.created_at,
       user: { email: r.user_email, full_name: r.user_full_name, avatar_url: r.user_avatar, position: r.user_position, location: r.user_location },

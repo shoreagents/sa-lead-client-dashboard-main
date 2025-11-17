@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Download, 
   Palette, 
   Type, 
   Move, 
@@ -35,8 +34,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useRouter } from 'next/navigation';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import LoadingScreen from '@/components/ui/loading-screen';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
@@ -1311,8 +1308,12 @@ export default function ResumeBuilderPage() {
         fullTemplate: completeResumeData.template
       });
 
-      // Generate a title for the resume
-      const resumeTitle = `${improvedResume.name || 'My'}'s Resume`;
+      // Generate a title for the resume - use getHeaderInfo() to prioritize user's full name
+      const headerInfo = getHeaderInfo();
+      const userName = headerInfo.name && headerInfo.name !== 'Name not found' 
+        ? headerInfo.name 
+        : (improvedResume?.name || userProfile?.full_name || 'My');
+      const resumeTitle = `${userName}'s Resume`;
       
       // Generate the new slug format: first_name-last_name-last2digitsofuid
       let resumeSlug = '';

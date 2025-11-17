@@ -20,8 +20,11 @@ import {
   RefreshCw,
   ChevronDown,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Loader2
 } from 'lucide-react'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -83,6 +86,7 @@ export default function ResumesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
   const [sortOrder, setSortOrder] = useState<string>('latest')
+  const [exportingResumeId, setExportingResumeId] = useState<string | null>(null)
 
   // Fetch resumes from database
   const fetchResumes = async () => {
@@ -193,6 +197,589 @@ export default function ResumesPage() {
     } finally {
       setPreviewLoading(false)
     }
+  }
+
+  // Export to PDF function (for when preview is already open)
+  const exportToPDF = async () => {
+    if (!previewResume) {
+      toast.error('No resume to export')
+      return
+    }
+
+    setExportingResumeId(previewResume.id)
+
+    try {
+      // Wait for fonts to load
+      await document.fonts.ready
+
+      let element: HTMLElement | null = null
+
+      // Try to get the resume content element
+      // First, try to get from iframe if it exists
+      if (previewResume?.resume_slug) {
+        // Wait a bit for iframe to load
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        const iframe = document.querySelector('iframe[title="Resume Preview"]') as HTMLIFrameElement
+        if (iframe?.contentDocument) {
+          element = iframe.contentDocument.getElementById('resume-content')
+          if (!element) {
+            // Try to get the body of the iframe
+            const iframeBody = iframe.contentDocument.body
+            if (iframeBody) {
+              element = iframeBody
+            }
+          }
+        }
+      }
+
+      // If not found in iframe, try to get from the HTML content div
+      if (!element) {
+        const htmlContentDiv = document.querySelector('.resume-preview-content') as HTMLElement
+        if (htmlContentDiv) {
+          element = htmlContentDiv
+        }
+      }
+
+      if (!element) {
+        toast.error('Resume content not found. Please ensure the preview is loaded.')
+        return
+      }
+
+      await generatePDFFromElement(element, previewResume.user_name || 'Resume')
+
+    } catch (error) {
+      console.error('Error exporting PDF:', error)
+      toast.error('Error generating PDF. Please try again.')
+    } finally {
+      setExportingResumeId(null)
+    }
+  }
+
+  // Direct export function (fetches resume and exports without opening preview)
+  const exportResumeToPDF = async (resumeId: string, userName: string) => {
+    setExportingResumeId(resumeId)
+
+    try {
+      // Fetch resume data
+      const response = await fetch(`/api/admin/resumes/${resumeId}/preview?t=${Date.now()}`, { cache: 'no-store' })
+      const data = await response.json()
+      
+      if (!response.ok) {
+        toast.error('Failed to fetch resume data')
+        return
+      }
+
+      const resumeData = data.resume
+
+      // Wait for fonts to load
+      await document.fonts.ready
+
+      let element: HTMLElement | null = null
+
+      // Get HTML content - prefer resume_html, or fetch from resume_slug if needed
+      let htmlContent = resumeData?.resume_html
+
+      // If HTML content contains "preview not available" or is missing, fetch from slug
+      if ((!htmlContent || htmlContent.includes('preview not available') || htmlContent.includes('Resume preview not available')) && resumeData?.resume_slug) {
+        try {
+          // Fetch the resume page HTML
+          const htmlResponse = await fetch(`/${resumeData.resume_slug}`, { cache: 'no-store' })
+          const htmlText = await htmlResponse.text()
+          
+          // Extract the resume-content div from the HTML using regex
+          // Look for the div with id="resume-content"
+          const resumeContentMatch = htmlText.match(/<div[^>]*id=["']resume-content["'][^>]*>([\s\S]*?)<\/div>/i)
+          
+          if (resumeContentMatch && resumeContentMatch[1]) {
+            // Found the resume-content div
+            htmlContent = `<div id="resume-content">${resumeContentMatch[1]}</div>`
+          } else {
+            // Try to find any div with class containing "resume"
+            const resumeDivMatch = htmlText.match(/<div[^>]*class=["'][^"']*resume[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)
+            if (resumeDivMatch && resumeDivMatch[1]) {
+              htmlContent = `<div id="resume-content">${resumeDivMatch[1]}</div>`
+            } else {
+              // Last resort: try to get the main content area
+              const mainMatch = htmlText.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
+              if (mainMatch && mainMatch[1]) {
+                htmlContent = `<div id="resume-content">${mainMatch[1]}</div>`
+              }
+            }
+          }
+        } catch (fetchError) {
+          console.warn('Failed to fetch resume HTML, using available data:', fetchError)
+          // If fetch fails, check if we have resume_data to generate HTML
+          if (resumeData?.resume_data) {
+            // We'll handle this below
+          }
+        }
+      }
+
+      // If still no valid HTML content, try to generate from resume_data
+      if (!htmlContent || htmlContent.includes('preview not available') || htmlContent.includes('Resume preview not available')) {
+        if (resumeData?.resume_data) {
+          // Generate HTML from resume_data structure
+          const resumeDataObj = typeof resumeData.resume_data === 'string' 
+            ? JSON.parse(resumeData.resume_data) 
+            : resumeData.resume_data
+          
+          htmlContent = generateResumeHTMLFromData(resumeDataObj, userName)
+        } else {
+          throw new Error('No resume content available to export')
+        }
+      }
+
+      // Create a properly attached container in the main document
+      const hiddenContainer = document.createElement('div')
+      hiddenContainer.id = 'pdf-export-container'
+      hiddenContainer.style.position = 'fixed'
+      hiddenContainer.style.left = '0'
+      hiddenContainer.style.top = '0'
+      hiddenContainer.style.width = '800px' // Match the content width
+      hiddenContainer.style.minHeight = '297mm'
+      hiddenContainer.style.backgroundColor = '#ffffff'
+      hiddenContainer.style.zIndex = '9999'
+      hiddenContainer.style.opacity = '0'
+      hiddenContainer.style.pointerEvents = 'none'
+      hiddenContainer.style.overflow = 'visible' // Allow content to flow naturally
+      
+      // Ensure it's attached to the main document body
+      document.body.appendChild(hiddenContainer)
+
+      try {
+        // Create the resume content div
+        const htmlDiv = document.createElement('div')
+        htmlDiv.id = 'resume-content'
+        htmlDiv.className = 'resume-preview-content'
+        htmlDiv.style.padding = '40px'
+        htmlDiv.style.backgroundColor = 'white'
+        htmlDiv.style.color = '#333'
+        htmlDiv.style.fontSize = '14px'
+        htmlDiv.style.lineHeight = '1.6'
+        htmlDiv.style.fontFamily = 'Arial, sans-serif'
+        htmlDiv.style.width = '800px' // Fixed width for consistent rendering
+        htmlDiv.style.maxWidth = '800px'
+        htmlDiv.style.margin = '0 auto'
+        htmlDiv.style.boxSizing = 'border-box'
+        htmlDiv.style.overflow = 'hidden' // Prevent content overflow
+        htmlDiv.innerHTML = htmlContent
+        hiddenContainer.appendChild(htmlDiv)
+        element = htmlDiv
+        
+        // Force a reflow to ensure content is rendered
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        // Wait for content to render and images to load
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Wait for any images to load
+        const images = htmlDiv.getElementsByTagName('img')
+        if (images.length > 0) {
+          await Promise.all(
+            Array.from(images).map(img => {
+              if (img.complete) return Promise.resolve()
+              return new Promise((resolve, reject) => {
+                img.onload = resolve
+                img.onerror = resolve // Continue even if image fails
+                setTimeout(resolve, 3000) // Timeout after 3 seconds
+              })
+            })
+          )
+        }
+
+        // Generate PDF from the element
+        await generatePDFFromElement(element, userName)
+
+      } finally {
+        // Clean up hidden container
+        if (hiddenContainer.parentNode) {
+          document.body.removeChild(hiddenContainer)
+        }
+      }
+
+    } catch (error) {
+      console.error('Error exporting PDF:', error)
+      toast.error('Error generating PDF. Please try again.')
+    } finally {
+      setExportingResumeId(null)
+    }
+  }
+
+  // Helper function to generate HTML from resume data (matches the resume view page structure)
+  const generateResumeHTMLFromData = (resumeData: any, userName: string): string => {
+    // Extract the actual content structure
+    const content = resumeData?.content || resumeData
+    const template = resumeData?.template || {}
+    const headerInfo = resumeData?.headerInfo || {}
+    const profilePhoto = resumeData?.profilePhoto
+    
+    const primaryColor = template?.primaryColor || '#6366f1'
+    const secondaryColor = template?.secondaryColor || '#6b7280'
+    const fontFamily = template?.fontFamily || 'Inter, sans-serif'
+    
+    // Get name from headerInfo or content
+    const name = headerInfo?.name || content?.name || userName || 'Professional'
+    const title = headerInfo?.title || content?.bestJobTitle || content?.title || 'Professional'
+    const location = headerInfo?.location || content?.location || ''
+    const email = headerInfo?.email || content?.email || ''
+    const phone = headerInfo?.phone || content?.phone || ''
+    
+    let html = `<div id="resume-content" style="font-family: ${fontFamily}, sans-serif; width: 100%; max-width: 800px; margin: 0 auto; padding: 40px; background: white; color: #1f2937; box-sizing: border-box; overflow: hidden;">`
+    
+    // Header Section
+    html += `<div style="margin-bottom: 32px; position: relative;">`
+    if (profilePhoto) {
+      html += `<div style="text-align: left;">`
+    } else {
+      html += `<div style="text-align: center;">`
+    }
+    html += `<h1 style="font-size: 24px; font-weight: bold; margin-bottom: 8px; color: ${primaryColor};">${escapeHtml(name)}</h1>`
+    html += `<p style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: ${secondaryColor};">${escapeHtml(title)}</p>`
+    if (location) {
+      html += `<p style="color: #4b5563; margin-bottom: 8px;">${escapeHtml(location)}</p>`
+    }
+    if (email || phone) {
+      html += `<div style="margin-top: 8px;">`
+      if (email) html += `<span style="color: #4b5563; margin-right: 16px;">${escapeHtml(email)}</span>`
+      if (phone) html += `<span style="color: #4b5563;">${escapeHtml(phone)}</span>`
+      html += `</div>`
+    }
+    html += `</div>`
+    
+    if (profilePhoto) {
+      html += `<div style="position: absolute; top: 0; right: 0;">`
+      html += `<img src="${profilePhoto}" alt="Profile" style="width: 128px; height: 128px; border-radius: 8px; object-fit: cover; border: 4px solid ${primaryColor}; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" />`
+      html += `</div>`
+    }
+    html += `</div>`
+    
+    // Divider
+    html += `<div style="width: 100%; height: 2px; margin: 24px 0; background-color: ${primaryColor}; opacity: 0.3;"></div>`
+    
+    // Professional Summary
+    if (content?.summary) {
+      html += `<div style="margin-bottom: 24px;">`
+      html += `<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">`
+      html += `<div style="width: 4px; height: 24px; border-radius: 2px; background-color: ${primaryColor};"></div>`
+      html += `<h2 style="font-size: 18px; font-weight: 600; color: ${primaryColor};">Professional Summary</h2>`
+      html += `</div>`
+      html += `<p style="color: #374151; line-height: 1.75; padding-left: 12px; border-left: 2px solid ${secondaryColor};">${escapeHtml(content.summary)}</p>`
+      html += `</div>`
+    }
+    
+    // Work Experience
+    if (content?.experience && Array.isArray(content.experience) && content.experience.length > 0) {
+      html += `<div style="margin-bottom: 24px;">`
+      html += `<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">`
+      html += `<div style="width: 4px; height: 24px; border-radius: 2px; background-color: ${primaryColor};"></div>`
+      html += `<h2 style="font-size: 18px; font-weight: 600; color: ${primaryColor};">Work Experience</h2>`
+      html += `</div>`
+      html += `<div style="space-y: 16px;">`
+      content.experience.forEach((exp: any) => {
+        html += `<div style="border-left: 4px solid ${secondaryColor}; padding-left: 16px; margin-bottom: 16px;">`
+        html += `<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">`
+        html += `<h3 style="font-weight: 600; color: #1f2937; margin: 0;">${escapeHtml(exp.title || exp.position || '')}</h3>`
+        if (exp.duration) {
+          html += `<span style="font-size: 14px; color: #6b7280; background: #f3f4f6; padding: 4px 8px; border-radius: 9999px;">${escapeHtml(exp.duration)}</span>`
+        }
+        html += `</div>`
+        if (exp.company) {
+          html += `<p style="color: #4b5563; margin-bottom: 8px; font-weight: 500;">${escapeHtml(exp.company)}</p>`
+        }
+        if (exp.description) {
+          html += `<p style="color: #374151; font-size: 14px; margin-bottom: 8px;">${escapeHtml(exp.description)}</p>`
+        }
+        if (exp.achievements && Array.isArray(exp.achievements) && exp.achievements.length > 0) {
+          html += `<ul style="list-style: disc; padding-left: 20px; margin: 8px 0; font-size: 14px; color: #374151;">`
+          exp.achievements.forEach((ach: string) => {
+            html += `<li style="margin-bottom: 4px;">${escapeHtml(ach)}</li>`
+          })
+          html += `</ul>`
+        }
+        html += `</div>`
+      })
+      html += `</div>`
+      html += `</div>`
+    }
+    
+    // Education
+    if (content?.education && Array.isArray(content.education) && content.education.length > 0) {
+      html += `<div style="margin-bottom: 24px;">`
+      html += `<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">`
+      html += `<div style="width: 4px; height: 24px; border-radius: 2px; background-color: ${primaryColor};"></div>`
+      html += `<h2 style="font-size: 18px; font-weight: 600; color: ${primaryColor};">Education</h2>`
+      html += `</div>`
+      html += `<div style="space-y: 16px;">`
+      content.education.forEach((edu: any) => {
+        html += `<div style="border-left: 4px solid ${secondaryColor}; padding-left: 16px; margin-bottom: 16px;">`
+        html += `<div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">`
+        html += `<h3 style="font-weight: 600; color: #1f2937; margin: 0;">${escapeHtml(edu.degree || '')}</h3>`
+        if (edu.year) {
+          html += `<span style="font-size: 14px; color: #6b7280; background: #f3f4f6; padding: 4px 8px; border-radius: 9999px;">${escapeHtml(edu.year)}</span>`
+        }
+        html += `</div>`
+        if (edu.institution) {
+          html += `<p style="color: #4b5563; margin-bottom: 8px; font-weight: 500;">${escapeHtml(edu.institution)}</p>`
+        }
+        if (edu.major) {
+          html += `<p style="color: #374151; font-size: 14px; margin-bottom: 8px;">Major: ${escapeHtml(edu.major)}</p>`
+        }
+        if (edu.highlights && Array.isArray(edu.highlights) && edu.highlights.length > 0) {
+          html += `<ul style="list-style: disc; padding-left: 20px; margin: 8px 0; font-size: 14px; color: #374151;">`
+          edu.highlights.forEach((highlight: string) => {
+            html += `<li style="margin-bottom: 4px;">${escapeHtml(highlight)}</li>`
+          })
+          html += `</ul>`
+        }
+        html += `</div>`
+      })
+      html += `</div>`
+      html += `</div>`
+    }
+    
+    // Skills
+    if (content?.skills) {
+      html += `<div style="margin-bottom: 24px;">`
+      html += `<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">`
+      html += `<div style="width: 4px; height: 24px; border-radius: 2px; background-color: ${primaryColor};"></div>`
+      html += `<h2 style="font-size: 18px; font-weight: 600; color: ${primaryColor};">Skills</h2>`
+      html += `</div>`
+      html += `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">`
+      
+      if (content.skills.technical && Array.isArray(content.skills.technical) && content.skills.technical.length > 0) {
+        html += `<div>`
+        html += `<h3 style="font-weight: 500; color: #1f2937; margin-bottom: 12px;">Technical Skills</h3>`
+        html += `<div style="display: flex; flex-wrap: wrap; gap: 8px;">`
+        content.skills.technical.forEach((skill: string) => {
+          html += `<span style="background-color: ${secondaryColor}; color: white; font-size: 12px; padding: 4px 8px; border-radius: 4px;">${escapeHtml(skill)}</span>`
+        })
+        html += `</div>`
+        html += `</div>`
+      }
+      
+      if (content.skills.soft && Array.isArray(content.skills.soft) && content.skills.soft.length > 0) {
+        html += `<div>`
+        html += `<h3 style="font-weight: 500; color: #1f2937; margin-bottom: 12px;">Soft Skills</h3>`
+        html += `<div style="display: flex; flex-wrap: wrap; gap: 8px;">`
+        content.skills.soft.forEach((skill: string) => {
+          html += `<span style="border: 1px solid #d1d5db; color: #374151; font-size: 12px; padding: 4px 8px; border-radius: 4px;">${escapeHtml(skill)}</span>`
+        })
+        html += `</div>`
+        html += `</div>`
+      }
+      
+      if (content.skills.languages && Array.isArray(content.skills.languages) && content.skills.languages.length > 0) {
+        html += `<div>`
+        html += `<h3 style="font-weight: 500; color: #1f2937; margin-bottom: 12px;">Languages</h3>`
+        html += `<div style="display: flex; flex-wrap: wrap; gap: 8px;">`
+        content.skills.languages.forEach((skill: string) => {
+          html += `<span style="border: 1px solid #60a5fa; color: #1e40af; font-size: 12px; padding: 4px 8px; border-radius: 4px;">${escapeHtml(skill)}</span>`
+        })
+        html += `</div>`
+        html += `</div>`
+      }
+      
+      html += `</div>`
+      html += `</div>`
+    }
+    
+    // Certifications
+    if (content?.certifications && Array.isArray(content.certifications) && content.certifications.length > 0) {
+      html += `<div style="margin-bottom: 24px;">`
+      html += `<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">`
+      html += `<div style="width: 4px; height: 24px; border-radius: 2px; background-color: ${primaryColor};"></div>`
+      html += `<h2 style="font-size: 18px; font-weight: 600; color: ${primaryColor};">Certifications</h2>`
+      html += `</div>`
+      html += `<div style="space-y: 12px;">`
+      content.certifications.forEach((cert: string) => {
+        html += `<div style="border-left: 4px solid ${secondaryColor}; padding-left: 16px;">`
+        html += `<p style="color: #374151; font-size: 14px;">${escapeHtml(cert)}</p>`
+        html += `</div>`
+      })
+      html += `</div>`
+      html += `</div>`
+    }
+    
+    // Projects
+    if (content?.projects && Array.isArray(content.projects) && content.projects.length > 0) {
+      html += `<div style="margin-bottom: 24px;">`
+      html += `<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">`
+      html += `<div style="width: 4px; height: 24px; border-radius: 2px; background-color: ${primaryColor};"></div>`
+      html += `<h2 style="font-size: 18px; font-weight: 600; color: ${primaryColor};">Projects</h2>`
+      html += `</div>`
+      html += `<div style="space-y: 16px;">`
+      content.projects.forEach((proj: any) => {
+        html += `<div style="border-left: 4px solid ${secondaryColor}; padding-left: 16px; margin-bottom: 16px;">`
+        if (proj.title) {
+          html += `<h3 style="font-weight: 600; color: #1f2937; margin-bottom: 8px;">${escapeHtml(proj.title)}</h3>`
+        }
+        if (proj.description) {
+          html += `<p style="color: #374151; font-size: 14px; margin-bottom: 8px; line-height: 1.6;">${escapeHtml(proj.description)}</p>`
+        }
+        if (proj.technologies && Array.isArray(proj.technologies) && proj.technologies.length > 0) {
+          html += `<p style="color: #6b7280; font-size: 12px; margin-top: 8px;"><strong>Technologies:</strong> ${escapeHtml(proj.technologies.join(', '))}</p>`
+        }
+        if (proj.impact && Array.isArray(proj.impact) && proj.impact.length > 0) {
+          html += `<ul style="list-style: disc; padding-left: 20px; margin: 8px 0; font-size: 14px; color: #374151;">`
+          proj.impact.forEach((impact: string) => {
+            html += `<li style="margin-bottom: 4px;">${escapeHtml(impact)}</li>`
+          })
+          html += `</ul>`
+        }
+        html += `</div>`
+      })
+      html += `</div>`
+      html += `</div>`
+    }
+    
+    html += `</div>`
+    return html
+  }
+  
+  // Helper function to escape HTML
+  const escapeHtml = (text: string): string => {
+    if (!text) return ''
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+  }
+
+  // Helper function to generate PDF from an element
+  const generatePDFFromElement = async (element: HTMLElement, userName: string) => {
+    console.log('Capturing resume content...')
+
+    // Capture the resume content as a high-quality image
+    const canvas = await html2canvas(element, {
+      scale: 2, // Higher quality
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      width: element.scrollWidth,
+      height: element.scrollHeight,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight
+    })
+
+    console.log('Canvas created, generating PDF...')
+
+    // Initialize PDF with A4 dimensions
+    const pdf = new jsPDF('p', 'mm', 'a4')
+
+    // A4 dimensions in mm
+    const pdfWidth = 210
+    const pdfHeight = 297
+
+    // Add margins for better appearance (10mm on all sides)
+    const margin = 10
+    const contentWidth = pdfWidth - (margin * 2)
+    // Reduce content height by 15mm to add larger buffer and prevent text from being cut off
+    const pageBuffer = 15 // Larger buffer to prevent cutting text at page boundaries
+    const contentHeight = pdfHeight - (margin * 2) - pageBuffer
+
+    // Use the full content width to maintain readability
+    const scaledWidth = contentWidth
+    const scaledHeight = (canvas.height * scaledWidth) / canvas.width
+
+    // Calculate total content height in PDF units
+    const totalContentHeight = scaledHeight
+
+    // Calculate how many pages we need (add small buffer to prevent rounding errors)
+    const totalPages = Math.ceil((totalContentHeight + 0.1) / contentHeight)
+
+    console.log(`Resume height: ${totalContentHeight.toFixed(2)}mm, Pages needed: ${totalPages}`)
+    console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}px`)
+    console.log(`Content height per page: ${contentHeight}mm (with ${pageBuffer}mm buffer)`)
+
+    // Work in pixels to ensure perfect continuity between pages
+    const totalPixels = canvas.height
+    const pixelsPerPageFloat = (contentHeight * totalPixels) / totalContentHeight
+    // Use floor with additional safety margin to ensure we don't cut text
+    // Subtract 20 pixels as additional safety margin
+    const pixelsPerPage = Math.max(100, Math.floor(pixelsPerPageFloat) - 20)
+
+    let processedPixels = 0
+
+    // Split content across pages
+    for (let page = 0; page < totalPages; page++) {
+      if (page > 0) {
+        pdf.addPage()
+      }
+
+      // Calculate remaining pixels
+      const remainingPixels = totalPixels - processedPixels
+
+      // Determine pixels for this page
+      let pixelsForThisPage: number
+      if (page === totalPages - 1) {
+        // Last page: capture all remaining content
+        pixelsForThisPage = remainingPixels
+      } else {
+        // Regular pages: use calculated pixels per page
+        // Be conservative - use slightly less to ensure we don't cut text
+        pixelsForThisPage = Math.min(pixelsPerPage, remainingPixels)
+      }
+
+      if (pixelsForThisPage <= 0 || processedPixels >= totalPixels) {
+        break
+      }
+
+      // Calculate source rectangle
+      const sourceY = processedPixels
+      const sourceHeight = pixelsForThisPage
+
+      // Create canvas for this page
+      const pageCanvas = document.createElement('canvas')
+      pageCanvas.width = canvas.width
+      pageCanvas.height = sourceHeight
+      const pageCtx = pageCanvas.getContext('2d')
+
+      if (pageCtx) {
+        // Draw the portion for this page
+        pageCtx.drawImage(
+          canvas,
+          0, sourceY, canvas.width, sourceHeight,
+          0, 0, canvas.width, sourceHeight
+        )
+
+        const pageImgData = pageCanvas.toDataURL('image/png', 1.0)
+
+        // Calculate height in PDF units for this page
+        const pageHeightInMM = (sourceHeight * scaledWidth) / canvas.width
+
+        // Position content at the top of the content area (with margin)
+        const xPosition = margin
+        const yPosition = margin
+
+        // Add image to PDF with proper positioning and margins
+        pdf.addImage(
+          pageImgData,
+          'PNG',
+          xPosition,
+          yPosition,
+          scaledWidth,
+          pageHeightInMM
+        )
+
+        // Update processed pixels
+        processedPixels += sourceHeight
+      }
+    }
+
+    // Format filename as FirstName-LastName-BPOC-Resume.pdf
+    const fullName = userName || 'Resume'
+    const nameParts = fullName.trim().split(/\s+/)
+    const firstName = nameParts[0] || 'Resume'
+    const lastName = nameParts.slice(1).join('-') || 'User'
+    const fileName = `${firstName}-${lastName}-BPOC-Resume.pdf`
+    pdf.save(fileName)
+
+    console.log('PDF saved successfully')
+    toast.success('Resume exported to PDF successfully!')
   }
 
 
@@ -370,15 +957,6 @@ export default function ResumesPage() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button
-                  size="sm"
-                  onClick={fetchResumes}
-                  className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
-                </Button>
-
               </div>
             </div>
           </CardContent>
@@ -426,7 +1004,11 @@ export default function ResumesPage() {
 
                                              {/* Resume Title */}
                        <div className="mb-3">
-                         <h3 className="text-white font-semibold text-sm mb-1 truncate">{resume.resume_title}</h3>
+                         <h3 className="text-white font-semibold text-sm mb-1 truncate">
+                           {resume.resume_title && !resume.resume_title.toLowerCase().includes('candidate') 
+                             ? resume.resume_title 
+                             : `${resume.user_name || 'User'}'s Resume`}
+                         </h3>
                          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                            {resume.template_used}
                          </Badge>
@@ -470,13 +1052,19 @@ export default function ResumesPage() {
                             variant="ghost"
                             size="sm"
                             className="h-7 w-7 p-0 text-gray-400 hover:text-white hover:bg-white/10"
-                            title="Download"
+                            title="Download PDF"
+                            onClick={() => exportResumeToPDF(resume.id, resume.user_name)}
+                            disabled={exportingResumeId === resume.id}
                           >
-                            <Download className="w-3 h-3" />
+                            {exportingResumeId === resume.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Download className="w-3 h-3" />
+                            )}
                           </Button>
                               </TooltipTrigger>
                               <TooltipContent className="bg-gray-800 border-white/10 text-white">
-                                Coming Soon
+                                {exportingResumeId === resume.id ? 'Exporting PDF...' : 'Download PDF'}
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -583,6 +1171,25 @@ export default function ResumesPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={exportToPDF}
+                    disabled={exportingResumeId !== null || !previewResume}
+                    className="border-white/10 text-white hover:bg-white/10 px-4 py-2"
+                  >
+                    {exportingResumeId !== null ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Exporting...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download PDF
+                      </>
+                    )}
+                  </Button>
                   {previewResume?.resume_slug && (
                     <Button
                       variant="outline"
@@ -614,7 +1221,11 @@ export default function ResumesPage() {
                   {/* Resume Header */}
                   <div className="flex items-center justify-between p-6 bg-white/5 rounded-lg border border-white/10">
                     <div>
-                      <h2 className="text-2xl font-bold text-white">{previewResume.resume_title}</h2>
+                      <h2 className="text-2xl font-bold text-white">
+                        {previewResume.resume_title && !previewResume.resume_title.toLowerCase().includes('candidate')
+                          ? previewResume.resume_title
+                          : `${previewResume.user_name || 'User'}'s Resume`}
+                      </h2>
                       <p className="text-gray-400 text-lg">Created by {previewResume.user_name}</p>
                     </div>
                     <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 text-lg px-4 py-2">

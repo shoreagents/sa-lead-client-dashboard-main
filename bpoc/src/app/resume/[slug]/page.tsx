@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 // Client-side only particles component to avoid hydration mismatch
 function ClientParticles() {
@@ -223,6 +224,10 @@ export default function ResumeSlugPage() {
   const [activeSection, setActiveSection] = useState<string>('resume');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
+  const shareRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
 
 
   const [typingStats, setTypingStats] = useState<any | null>(null);
@@ -236,16 +241,49 @@ export default function ResumeSlugPage() {
   const [isGameResultsDropdownOpen, setIsGameResultsDropdownOpen] = useState<boolean>(false);
 
 
-  // Close share dropdown when clicking outside
+  // Calculate dropdown position and close when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (isShareOpen && !target.closest('.share-dropdown') && !target.closest('[data-share-button]')) {
-        setIsShareOpen(false);
+    const updatePosition = () => {
+      if (isShareOpen && shareRef.current) {
+        const rect = shareRef.current.getBoundingClientRect();
+        // For fixed positioning, use viewport coordinates directly (no scroll offsets)
+        setDropdownPosition({
+          top: rect.bottom + 8, // 8px = mt-2
+          right: window.innerWidth - rect.right
+        });
+      } else {
+        setDropdownPosition(null);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    if (isShareOpen) {
+      // Use setTimeout to ensure the DOM is updated before calculating position
+      setTimeout(updatePosition, 0);
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    } else {
+      setDropdownPosition(null);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isShareOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+        const target = event.target as Element;
+        if (!target.closest('[data-share-dropdown]')) {
+          setIsShareOpen(false);
+        }
+      }
+    };
+
+    if (isShareOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -331,52 +369,74 @@ export default function ResumeSlugPage() {
 
   // Share resume function
   const shareResume = async (platform?: string) => {
-    const url = `${window.location.origin}/resume/${slug}`;
-    const title = resume?.title || 'Resume';
-    const text = `Check out ${resume?.user.fullName}'s resume`;
+    const currentUrl = new URL(window.location.href);
+    const baseUrl = currentUrl.origin;
+    const currentPath = currentUrl.pathname;
+    const resumeUrl = `${baseUrl}${currentPath}`;
+    const userName = resume?.user.fullName || 'Professional';
+    const resumeTitle = resume?.title || 'Resume';
 
     switch (platform) {
       case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+        const facebookShareText = `📄 Check out my professional resume: ${resumeUrl}\n\n💼 Looking to build your career in the BPO industry?\n\nBPOC.IO offers:\n✨ AI-powered resume builder\n🎯 Skills assessments & career games\n🤝 Direct connections to top employers\n📈 Build your future with thousands of professionals!\n\nJoin us today! 💪`;
+        
+        try {
+          await navigator.clipboard.writeText(facebookShareText);
+          setShareModalData({ platform: 'Facebook', text: facebookShareText, url: resumeUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resumeUrl)}`;
+            window.open(facebookUrl, '_blank', 'width=600,height=400');
+          }, 1500);
+        } catch (err) {
+          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resumeUrl)}`;
+          window.open(facebookUrl, '_blank', 'width=600,height=400');
+        }
+        setIsShareOpen(false);
         break;
 
       case 'linkedin':
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-        break;
-
-      case 'instagram':
-        // Instagram doesn't support direct URL sharing, so we'll copy the URL
-        await copyUrl(url);
+        const linkedinShareText = `📄 Check out my professional resume: ${resumeUrl}\n\n💼 Ready to advance your career in the BPO industry?\n\nBPOC.IO offers:\n✅ AI-powered resume builder\n✅ Professional skills assessments\n✅ Direct connections to top employers\n✅ Career development tools\n\n🚀 Join thousands of professionals building their future!\n\n#BPO #CareerGrowth #Resume #ProfessionalDevelopment`;
+        
+        try {
+          await navigator.clipboard.writeText(linkedinShareText);
+          setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: resumeUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resumeUrl)}`;
+            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+          }, 1500);
+        } catch (err) {
+          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resumeUrl)}`;
+          window.open(linkedinUrl, '_blank', 'width=600,height=400');
+        }
+        setIsShareOpen(false);
         break;
 
       case 'copy':
-        await copyUrl(url);
+        await copyUrl(resumeUrl);
+        setIsShareOpen(false);
         break;
 
       default:
         // Default native sharing
+        const text = `Check out ${userName}'s resume: ${resumeTitle}`;
         if (navigator.share) {
           try {
             await navigator.share({
-              title: title,
+              title: resumeTitle,
               text: text,
-              url: url
+              url: resumeUrl
             });
           } catch (error) {
             console.error('Error sharing:', error);
           }
         } else {
           // Fallback to copying to clipboard
-          await copyUrl(url);
+          await copyUrl(resumeUrl);
         }
+        setIsShareOpen(false);
     }
-    
-    // Close share dropdown
-    setIsShareOpen(false);
   };
 
   // Edit resume function
@@ -433,39 +493,130 @@ export default function ResumeSlugPage() {
       
       console.log('Capturing resume content...');
       
+      // Capture the resume content as a high-quality image
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 2, // Higher quality
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
         logging: false,
         width: element.scrollWidth,
-        height: element.scrollHeight
+        height: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight
       });
 
       console.log('Canvas created, generating PDF...');
 
-      const imgData = canvas.toDataURL('image/png');
+      // Initialize PDF with A4 dimensions
       const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // A4 dimensions in mm
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      
+      // Add margins for better appearance (10mm on all sides)
+      const margin = 10;
+      const contentWidth = pdfWidth - (margin * 2);
+      // Reduce content height by 15mm to add larger buffer and prevent text from being cut off
+      const pageBuffer = 15; // Larger buffer to prevent cutting text at page boundaries
+      const contentHeight = pdfHeight - (margin * 2) - pageBuffer;
+      
+      // Use the full content width to maintain readability
+      // Don't scale down - maintain original proportions at a readable size
+      const scaledWidth = contentWidth; // Use full available width
+      const scaledHeight = (canvas.height * scaledWidth) / canvas.width;
+      
+      // Calculate total content height in PDF units
+      const totalContentHeight = scaledHeight;
+      
+      // Calculate how many pages we need (add small buffer to prevent rounding errors)
+      const totalPages = Math.ceil((totalContentHeight + 0.1) / contentHeight);
+      
+      console.log(`Resume height: ${totalContentHeight.toFixed(2)}mm, Pages needed: ${totalPages}`);
+      console.log(`Content width: ${scaledWidth}mm, Content height per page: ${contentHeight}mm (with ${pageBuffer}mm buffer)`);
+      
+      // Work in pixels to ensure perfect continuity between pages
+      const totalPixels = canvas.height;
+      const pixelsPerPageFloat = (contentHeight * totalPixels) / totalContentHeight;
+      // Use floor with additional safety margin to ensure we don't cut text
+      // Subtract 20 pixels as additional safety margin
+      const pixelsPerPage = Math.max(100, Math.floor(pixelsPerPageFloat) - 20);
+      
+      let processedPixels = 0;
+      
+      // Split content across pages
+      for (let page = 0; page < totalPages; page++) {
+        if (page > 0) {
+          pdf.addPage();
+        }
+        
+        // Calculate remaining pixels
+        const remainingPixels = canvas.height - processedPixels;
+        
+        // Determine pixels for this page
+        let pixelsForThisPage: number;
+        if (page === totalPages - 1) {
+          // Last page: capture all remaining content
+          pixelsForThisPage = remainingPixels;
+        } else {
+          // Regular pages: use calculated pixels per page
+          // Be conservative - use slightly less to ensure we don't cut text
+          pixelsForThisPage = Math.min(pixelsPerPage, remainingPixels);
+        }
+        
+        if (pixelsForThisPage <= 0) {
+          break;
+        }
+        
+        // Calculate source rectangle
+        const sourceY = processedPixels;
+        const sourceHeight = pixelsForThisPage;
+        
+        // Create canvas for this page
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = sourceHeight;
+        const pageCtx = pageCanvas.getContext('2d');
+        
+        if (pageCtx) {
+          // Draw the portion for this page
+          pageCtx.drawImage(
+            canvas,
+            0, sourceY, canvas.width, sourceHeight,
+            0, 0, canvas.width, sourceHeight
+          );
+          
+          const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
+          
+          // Calculate height in PDF units for this page
+          const pageHeightInMM = (sourceHeight * scaledWidth) / canvas.width;
+          
+          // Position content at the top of the content area (with margin)
+          const xPosition = margin;
+          const yPosition = margin;
+          
+          // Add image to PDF with proper positioning and margins
+          pdf.addImage(
+            pageImgData,
+            'PNG',
+            xPosition,
+            yPosition,
+            scaledWidth,
+            pageHeightInMM
+          );
+          
+          // Update processed pixels
+          processedPixels += sourceHeight;
+        }
       }
 
-      const fileName = `${resume?.user.fullName || 'Resume'}-Resume.pdf`;
+      // Format filename as FirstName-LastName-BPOC-Resume.pdf
+      const fullName = resume?.user.fullName || 'Resume';
+      const nameParts = fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || 'Resume';
+      const lastName = nameParts.slice(1).join('-') || 'User';
+      const fileName = `${firstName}-${lastName}-BPOC-Resume.pdf`;
       pdf.save(fileName);
 
       console.log('PDF saved successfully');
@@ -658,80 +809,60 @@ export default function ResumeSlugPage() {
                    )}
                    
                    {/* Share Button with Dropdown */}
-                   <div className="relative">
+                   <div className="relative z-50" ref={shareRef}>
                      <Button
                        onClick={() => setIsShareOpen(!isShareOpen)}
                        variant="outline"
                        className="border-cyan-400/30 text-cyan-400 hover:bg-cyan-400/10"
-                       data-share-button
                      >
                        <Share2 className="h-4 w-4 mr-2" />
                        Share
                      </Button>
-                     
-                     {/* Share Dropdown Menu */}
-                     {isShareOpen && (
-                       <div className="absolute top-full right-0 mt-2 w-64 bg-black/90 border border-white/20 rounded-lg shadow-xl backdrop-blur-sm z-50 share-dropdown">
-                         <div className="p-2 space-y-1">
-                           {/* Native Share (if available) */}
-                           {typeof navigator !== 'undefined' && 'share' in navigator && (
-                             <div
-                               onClick={() => shareResume()}
-                               className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                             >
-                               <Share2 className="h-4 w-4 text-blue-400" />
-                               <span>Share via...</span>
-                             </div>
-                           )}
-                           
-                           {/* Facebook */}
-                           <div
-                             onClick={() => shareResume('facebook')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                           >
-                             <Facebook className="h-4 w-4 text-blue-600" />
-                             <span>Share on Facebook</span>
-                           </div>
-                           
-                           {/* X (Twitter) */}
-                           <div
-                             onClick={() => shareResume('twitter')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                           >
-                             <Twitter className="h-4 w-4 text-blue-400" />
-                             <span>Share on X (Twitter)</span>
-                           </div>
-                           
-                           {/* LinkedIn */}
-                           <div
-                             onClick={() => shareResume('linkedin')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                           >
-                             <Linkedin className="h-4 w-4 text-blue-700" />
-                             <span>Share on LinkedIn</span>
-                           </div>
-                           
-                           {/* Instagram */}
-                           <div
-                             onClick={() => shareResume('instagram')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                           >
-                             <Instagram className="h-4 w-4 text-pink-500" />
-                             <span>Copy URL for Instagram</span>
-                           </div>
-                           
-                           {/* Copy URL */}
-                           <div
-                             onClick={() => shareResume('copy')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                           >
-                             <Copy className="h-4 w-4 text-green-400" />
-                             <span>Copy URL</span>
-                           </div>
-                         </div>
-                       </div>
-                     )}
                    </div>
+                   
+                   {/* Share Dropdown Menu - Rendered via Portal to avoid overflow clipping */}
+                   {isShareOpen && dropdownPosition && typeof document !== 'undefined' && createPortal(
+                     <div
+                       data-share-dropdown
+                       className="fixed bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[9999] min-w-[240px]"
+                       style={{
+                         top: `${dropdownPosition.top}px`,
+                         right: `${dropdownPosition.right}px`
+                       }}
+                     >
+                       <div className="py-2">
+                         {/* Facebook Share */}
+                         <button
+                           onClick={() => shareResume('facebook')}
+                           className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                         >
+                           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
+                           <span className="font-medium">Share on Facebook</span>
+                         </button>
+
+                         {/* LinkedIn Share */}
+                         <button
+                           onClick={() => shareResume('linkedin')}
+                           className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                         >
+                           <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
+                           <span className="font-medium">Share on LinkedIn</span>
+                         </button>
+
+                         <div className="border-t border-white/10 my-1"></div>
+
+                         {/* Copy Link */}
+                         <button
+                           onClick={() => shareResume('copy')}
+                           className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                         >
+                           <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">📋</div>
+                           <span className="font-medium">Copy Link</span>
+                         </button>
+                       </div>
+                     </div>,
+                     document.body
+                   )}
                    
                    {/* Export PDF Button */}
                    <Button
@@ -1160,6 +1291,130 @@ export default function ResumeSlugPage() {
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="relative w-full max-w-2xl"
+          >
+            {/* Glow Effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
+            
+            {/* Modal Content */}
+            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl border-2 border-cyan-400/30 shadow-2xl overflow-hidden">
+              {/* Header with Gradient */}
+              <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                      <span className="text-3xl">✓</span>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Text Copied Successfully!</h3>
+                      <p className="text-cyan-100 text-sm">Ready to share on {shareModalData.platform}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowShareModal(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6">
+                {/* Instructions */}
+                <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-xl p-5 border border-cyan-400/20">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-xl">💡</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
+                      <ol className="space-y-2 text-gray-300">
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                          <span>The {shareModalData.platform} share dialog will open in 1.5 seconds</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                          <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                          <span>Your resume image will appear automatically - just hit Share!</span>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text Preview */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Post Text Preview</label>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(shareModalData.text);
+                          const btn = document.getElementById('copy-again-btn');
+                          if (btn) {
+                            btn.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                              btn.textContent = 'Copy Again';
+                            }, 2000);
+                          }
+                        } catch (err) {
+                          console.error('Failed to copy:', err);
+                        }
+                      }}
+                      id="copy-again-btn"
+                      className="text-xs px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-400/30 transition-all duration-200 hover:scale-105 font-medium"
+                    >
+                      Copy Again
+                    </button>
+                  </div>
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto">
+                    <p className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                      {shareModalData.text}
+                    </p>
+                  </div>
+                </div>
+
+                {/* BPOC Branding Footer */}
+                <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">B</span>
+                  </div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    BPOC.IO
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-400 text-sm">Where BPO Careers Begin</span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowShareModal(false)}
+                    className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
+                  >
+                    Got It! 👍
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
