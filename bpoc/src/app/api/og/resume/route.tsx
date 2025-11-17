@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
     // Default values if resume not found
     // Use username/slug if available, otherwise use full_name
     const displayName = resume?.username || resume?.user_slug || resume?.full_name || slug || username || 'Professional';
+    const firstName = resume?.full_name?.split(' ')[0] || displayName?.split(' ')[0] || 'Professional';
     const title = resume?.position || 'BPO Professional';
     const location = resume?.location || 
       (resume?.location_city 
@@ -215,7 +216,7 @@ export async function GET(request: NextRequest) {
                   display: 'flex',
                 }}
               >
-                View Resume
+                View {firstName}'s Resume
               </div>
               <div
                 style={{
