@@ -404,16 +404,16 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
 
   return (
     <AdminLayout title="Users" description="Manage platform users and their accounts">
-      <div className="admin-users-page space-y-6">
+      <div className="admin-users-page space-y-6 max-w-full overflow-x-hidden">
                  {/* Header Stats */}
-         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="glass-card">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full min-w-0">
+          <Card className="glass-card min-w-0">
+            <CardContent className="p-6 min-w-0">
+              <div className="flex items-center space-x-4 min-w-0">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <Users className="w-6 h-6 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm text-gray-400">Total Users</p>
                   <p className="text-2xl font-bold text-white">{users.length}</p>
                 </div>
@@ -421,13 +421,13 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
             </CardContent>
           </Card>
 
-          <Card className="glass-card">
-            <CardContent className="p-6">
+          <Card className="glass-card min-w-0">
+            <CardContent className="p-6 min-w-0">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <UserCheck className="w-6 h-6 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm text-gray-400">Active Users</p>
                   <p className="text-2xl font-bold text-white">
                     {users.filter(u => u.last_sign_in_at).length}
@@ -438,13 +438,13 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
           </Card>
 
 
-                     <Card className="glass-card">
-             <CardContent className="p-6">
+                     <Card className="glass-card min-w-0">
+             <CardContent className="p-6 min-w-0">
                <div className="flex items-center space-x-4">
-                 <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center">
+                 <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
                    <UserCheck className="w-6 h-6 text-white" />
                  </div>
-                 <div>
+                 <div className="min-w-0">
                    <p className="text-sm text-gray-400">Admin Users</p>
                    <p className="text-2xl font-bold text-white">
                      {users.filter(u => u.admin_level === 'admin').length}
@@ -454,13 +454,13 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
              </CardContent>
            </Card>
 
-           <Card className="glass-card">
-             <CardContent className="p-6">
-               <div className="flex items-center space-x-4">
-                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+           <Card className="glass-card min-w-0">
+             <CardContent className="p-6 min-w-0">
+               <div className="flex items-center space-x-4 min-w-0">
+                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center flex-shrink-0">
                    <Users className="w-6 h-6 text-white" />
                  </div>
-                 <div>
+                 <div className="min-w-0">
                    <p className="text-sm text-gray-400">With Work Status</p>
                    <p className="text-2xl font-bold text-white">
                      {userWorkStatuses.length}
@@ -474,11 +474,11 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
 
 
                  {/* Filters and Search */}
-         <Card className="glass-card">
-           <CardContent className="p-6">
+         <Card className="glass-card w-full overflow-hidden">
+           <CardContent className="p-6 w-full min-w-0">
              
-             <div className="flex flex-col sm:flex-row gap-4">
-               <div className="flex-1 relative">
+             <div className="flex flex-col sm:flex-row gap-4 w-full min-w-0">
+               <div className="flex-1 relative min-w-0">
                  <Search className="absolute left-4 top-1/3 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                                   <Input
                    placeholder="Search users by name, email, location, phone, bio, or position..."
@@ -492,10 +492,10 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
                      })
                      setSearchTerm(newValue)
                    }}
-                   className="pl-12 bg-white/5 border-white/10 text-white placeholder:text-gray-400 focus:border-white/20 focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-white/20 invalid:border-white/20"
+                   className="pl-12 bg-white/5 border-white/10 text-white placeholder:text-gray-400 focus:border-white/20 focus:ring-0 focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-white/20 invalid:border-white/20 w-full min-w-0"
                  />
                </div>
-                                                           <div className="flex gap-2">
+                                                           <div className="flex gap-2 flex-shrink-0">
                  <DropdownMenu>
                    <DropdownMenuTrigger asChild>
                      <Button variant="outline" className="border-white/10 text-white hover:bg-white/10">
@@ -571,28 +571,29 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
         </Card>
 
         {/* Users Table */}
-        <Card className="glass-card">
+        <Card className="glass-card w-full overflow-hidden">
           <CardHeader>
             <CardTitle className="text-white">User Management</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6 w-full">
             {loading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400"></div>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="w-full flex flex-col">
+                <div className="overflow-x-auto w-full mb-6 -mx-6 px-6 admin-users-table-scroll">
+                  <Table className="w-full min-w-[1200px]">
                                      <TableHeader>
                                            <TableRow className="border-white/10 hover:bg-white/5">
-                        <TableHead className="text-white font-medium w-64">Full Name</TableHead>
-                        <TableHead className="text-white font-medium w-48">Location</TableHead>
-                        <TableHead className="text-white font-medium w-32">Created At</TableHead>
-                        <TableHead className="text-white font-medium w-32">Last Sign In</TableHead>
-                        <TableHead className="text-white font-medium w-48">Position</TableHead>
-                        <TableHead className="text-white font-medium w-32">Completed Data</TableHead>
-                        <TableHead className="text-white font-medium w-32">Admin Level</TableHead>
-                        <TableHead className="text-white font-medium text-right w-24">Actions</TableHead>
+                        <TableHead className="text-white font-medium min-w-[200px]">Full Name</TableHead>
+                        <TableHead className="text-white font-medium min-w-[150px]">Location</TableHead>
+                        <TableHead className="text-white font-medium min-w-[120px]">Created At</TableHead>
+                        <TableHead className="text-white font-medium min-w-[120px]">Last Sign In</TableHead>
+                        <TableHead className="text-white font-medium min-w-[180px]">Position</TableHead>
+                        <TableHead className="text-white font-medium min-w-[120px]">Completed Data</TableHead>
+                        <TableHead className="text-white font-medium min-w-[100px]">Admin Level</TableHead>
+                        <TableHead className="text-white font-medium text-right min-w-[80px]">Actions</TableHead>
                       </TableRow>
                    </TableHeader>
                   <TableBody>
@@ -715,17 +716,16 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
                       </TableRow>
                     ))}
                   </TableBody>
-                </Table>
-              </div>
-            )}
+                  </Table>
+                </div>
 
-            {/* Pagination */}
-            {!loading && filteredUsers.length > 0 && (
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-400">
+                {/* Pagination */}
+                {!loading && filteredUsers.length > 0 && (
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10 flex-wrap gap-4 w-full mt-6">
+                <div className="text-sm text-gray-400 whitespace-nowrap">
                   Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} users
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap">
                   <Button
                     variant="outline"
                     size="sm"
@@ -777,6 +777,8 @@ const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set())
                     Next
                   </Button>
                 </div>
+              </div>
+                )}
               </div>
             )}
           </CardContent>
