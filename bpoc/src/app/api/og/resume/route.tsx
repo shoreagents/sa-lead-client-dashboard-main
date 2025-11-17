@@ -288,7 +288,9 @@ export async function GET(request: NextRequest) {
         height: 630,
         headers: {
           'Content-Type': 'image/png',
-          'Cache-Control': 'public, max-age=3600, must-revalidate',
+          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
         },
       }
     );

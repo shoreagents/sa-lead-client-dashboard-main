@@ -196,6 +196,7 @@ export async function GET() {
       // 5. Fetch Profile Update Activities
       try {
         console.log('🔍 Starting to fetch Profile Update activities...')
+        // Only show profile updates from the last 7 days to avoid showing stale updates
         const profileQuery = `
           SELECT 
             'profile' as type,
@@ -206,6 +207,7 @@ export async function GET() {
             u.updated_at as activity_time
           FROM users u
           WHERE u.updated_at > u.created_at
+            AND u.updated_at > NOW() - INTERVAL '7 days'
           ORDER BY u.updated_at DESC
           LIMIT 10
         `
