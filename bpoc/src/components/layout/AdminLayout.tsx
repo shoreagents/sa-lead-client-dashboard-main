@@ -337,13 +337,13 @@ export default function AdminLayout({
 
         {/* Main Content */}
         <div className={cn(
-          "flex-1 p-8 transition-all duration-300",
+          "flex-1 p-8 transition-all duration-300 overflow-x-hidden",
           sidebarMinimized ? "ml-16" : "ml-64"
         )}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
+            className="space-y-6 max-w-full"
           >
             {/* Header */}
             <div className="flex items-center justify-between">
