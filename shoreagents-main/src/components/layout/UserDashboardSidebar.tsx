@@ -30,6 +30,8 @@ import {
   Clock,
   Trash2,
   Plus,
+  Video,
+  Phone,
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -47,6 +49,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { useChatContext } from '@/lib/chat-context'
+import { IncomingCallModal } from '@/components/ui/incoming-call-modal'
 
 const userNavItems = [
   {
@@ -101,6 +104,7 @@ export function UserDashboardSidebar({ onChatOpen, onConversationChange }: UserD
   const [showDropdown, setShowDropdown] = useState(false)
   const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null)
   const [conversationToDelete, setConversationToDelete] = useState<string | null>(null)
+  const [incomingCall, setIncomingCall] = useState<{ meetingLink: string; leadName?: string } | null>(null)
   
   // Get conversations from ChatContext (database source via TanStack Query)
   const { 
@@ -269,6 +273,79 @@ export function UserDashboardSidebar({ onChatOpen, onConversationChange }: UserD
       .map(part => part.charAt(0).toUpperCase())
       .join('')
       .slice(0, 2)
+  }
+
+  // Get user ID for Socket.io room
+  const userId = user?.user_id || 
+    (typeof window !== 'undefined' 
+      ? localStorage.getItem('content_tracking_device_id') || 
+        localStorage.getItem('device_id') || 
+        localStorage.getItem('session_id') || 
+        null
+      : null)
+
+  // Listen for incoming calls via Socket.io and join user room
+  useEffect(() => {
+    if (typeof window !== 'undefined' && userId) {
+      import('@/lib/socket-client').then(({ getSocket }) => {
+        const socket = getSocket()
+        
+        if (socket) {
+          // Join user room for notifications
+          socket.emit('join-user-room', userId)
+          console.log('📢 UserDashboardSidebar: Joined user room:', userId)
+
+          // Listen for incoming calls
+          socket.on('incoming-call', (data: { meetingLink: string; leadName?: string; userName?: string }) => {
+            console.log('📞 Received incoming call:', data)
+            setIncomingCall({
+              meetingLink: data.meetingLink,
+              leadName: data.leadName || data.userName,
+            })
+          })
+
+          // Listen for new notifications (for call invitations)
+          socket.on('new-notification', (notification: any) => {
+            console.log('📬 Received new notification in sidebar:', notification.title)
+            // Check if it's a call-related notification
+            if (
+              notification.title?.toLowerCase().includes('call') ||
+              notification.title?.toLowerCase().includes('video') ||
+              notification.link?.includes('video-call')
+            ) {
+              // Could trigger a toast or update UI here
+              console.log('📞 Call-related notification received')
+            }
+          })
+
+          return () => {
+            socket.off('incoming-call')
+            socket.off('new-notification')
+            socket.emit('leave-user-room', userId)
+          }
+        } else {
+          console.warn('⚠️ Socket.io not available in UserDashboardSidebar')
+        }
+      }).catch((error) => {
+        console.error('❌ Error loading socket-client in UserDashboardSidebar:', error)
+      })
+    }
+  }, [userId])
+
+  const handleAcceptCall = () => {
+    if (incomingCall?.meetingLink) {
+      // Ensure we have a full URL
+      const meetingLink = incomingCall.meetingLink.startsWith('http')
+        ? incomingCall.meetingLink
+        : `${window.location.origin}${incomingCall.meetingLink}`
+      window.open(meetingLink, '_blank', 'width=1200,height=800')
+      setIncomingCall(null) // Clear after accepting
+    }
+  }
+
+  const handleDeclineCall = () => {
+    setIncomingCall(null) // Clear the incoming call
+    // Optional: Send a notification to admin that call was declined
   }
 
   return (
@@ -446,7 +523,38 @@ export function UserDashboardSidebar({ onChatOpen, onConversationChange }: UserD
 
 
       <SidebarFooter>
-        <div className="flex items-center gap-3 px-3 py-3">
+        <div className="flex flex-col gap-2 px-3 py-3">
+          {/* Accept a Call Button - Top */}
+          <Button
+            size="sm"
+            className={`w-full ${
+              incomingCall 
+                ? 'bg-lime-600 hover:bg-lime-700 text-white animate-pulse' 
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            }`}
+            disabled={!incomingCall}
+            onClick={handleAcceptCall}
+            tooltip={incomingCall ? 'Accept incoming call' : 'No incoming calls'}
+          >
+            <Phone className="w-4 h-4 mr-2" />
+            <span className="data-[collapsible=icon]:!hidden">Accept a Call</span>
+          </Button>
+          
+          {/* Call Invitations Button - Between Accept Call and Email */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full border-lime-600 text-lime-600 hover:bg-lime-50"
+            asChild
+          >
+            <Link href="/user-dashboard/call-invitations">
+              <Video className="w-4 h-4 mr-2" />
+              <span className="data-[collapsible=icon]:!hidden">Call Invitations</span>
+            </Link>
+          </Button>
+          
+          {/* User Info */}
+          <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
             <AvatarImage src={user?.avatar || undefined} alt={user?.first_name} />
             <AvatarFallback className="bg-lime-600 text-white text-sm font-semibold">
@@ -469,6 +577,7 @@ export function UserDashboardSidebar({ onChatOpen, onConversationChange }: UserD
           >
             <LogOut className="h-5 w-5" />
           </Button>
+          </div>
         </div>
       </SidebarFooter>
       
@@ -520,6 +629,14 @@ export function UserDashboardSidebar({ onChatOpen, onConversationChange }: UserD
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Incoming Call Modal */}
+      <IncomingCallModal
+        isOpen={!!incomingCall}
+        callerName={incomingCall?.leadName || 'Admin'}
+        onAccept={handleAcceptCall}
+        onDecline={handleDeclineCall}
+      />
     </Sidebar>
   )
 }

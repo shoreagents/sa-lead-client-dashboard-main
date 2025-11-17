@@ -7,10 +7,16 @@ const globalForPrisma = globalThis as unknown as {
 
 // Enhanced Prisma client with better connection handling
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn', 'query'] : ['error'],
   datasources: {
     db: {
       url: process.env.DATABASE_URL,
+    },
+  },
+  // Add connection timeout and retry settings
+  __internal: {
+    engine: {
+      connectTimeout: 10000, // 10 seconds
     },
   },
 });
@@ -38,14 +44,40 @@ export async function withRetry<T>(
 // Test database connection on startup
 async function testConnection() {
   try {
+    // Check if DATABASE_URL is set
+    if (!process.env.DATABASE_URL) {
+      console.error('❌ DATABASE_URL is not set in environment variables');
+      console.error('Please add DATABASE_URL to your .env.local file');
+      return;
+    }
+
+    // Log connection string (without password) for debugging
+    const dbUrl = process.env.DATABASE_URL;
+    const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':****@'); // Mask password
+    console.log('🔌 Attempting database connection to:', maskedUrl);
+
     await prisma.$queryRaw`SELECT 1`;
     console.log('✅ Database connection successful');
   } catch (error: any) {
     console.error('❌ Database connection failed:', error.message);
+    console.error('Error code:', error.code);
     console.error('Please check:');
     console.error('1. Is your Supabase project active (not paused)?');
     console.error('2. Is DATABASE_URL correctly set in .env or .env.local?');
     console.error('3. Is your database password correct?');
+    console.error('4. Connection string format should be:');
+    console.error('   postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres?sslmode=require');
+    console.error('   OR for pooler:');
+    console.error('   postgresql://postgres:[PASSWORD]@[HOST].pooler.supabase.com:5432/postgres?pgbouncer=true&connection_limit=1');
+    
+    // Check for common connection issues
+    if (error.message?.includes('Can\'t reach database server')) {
+      console.error('\n💡 Connection troubleshooting:');
+      console.error('   - Verify Supabase project is not paused');
+      console.error('   - Check if you can ping the host');
+      console.error('   - Try using direct connection instead of pooler');
+      console.error('   - Verify firewall/network settings');
+    }
   }
 }
 

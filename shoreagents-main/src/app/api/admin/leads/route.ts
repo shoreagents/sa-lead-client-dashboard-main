@@ -16,6 +16,45 @@ const STATUS_MAP: { [key: string]: string } = {
 
 export async function GET(request: NextRequest) {
   try {
+    // Check if DATABASE_URL is set
+    if (!process.env.DATABASE_URL) {
+      console.error('❌ DATABASE_URL is not set in environment variables')
+      return NextResponse.json({ 
+        success: false,
+        error: 'Database configuration missing',
+        message: 'DATABASE_URL environment variable is not set. Please add it to your .env.local file.',
+        details: {
+          fix: 'Add DATABASE_URL to .env.local file',
+          format: 'postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres?sslmode=require'
+        }
+      }, { status: 503 })
+    }
+
+    // Test database connection first
+    try {
+      await prisma.$queryRaw`SELECT 1`
+      console.log('✅ Database connection verified')
+    } catch (dbError: any) {
+      console.error('❌ Database connection error:', dbError.message)
+      console.error('Connection string (masked):', process.env.DATABASE_URL.replace(/:[^:@]+@/, ':****@'))
+      
+      return NextResponse.json({ 
+        success: false,
+        error: 'Database connection failed',
+        message: dbError.message || 'Cannot connect to database server',
+        details: process.env.NODE_ENV === 'development' ? {
+          code: dbError.code,
+          meta: dbError.meta,
+          troubleshooting: [
+            '1. Verify Supabase project is active (not paused)',
+            '2. Check DATABASE_URL format in .env.local',
+            '3. Try direct connection instead of pooler',
+            '4. Verify network/firewall settings'
+          ]
+        } : undefined
+      }, { status: 503 })
+    }
+
     // Get all users with their latest lead progress using Prisma
     const usersWithProgress = await prisma.user.findMany({
       where: {

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import { emitNotificationDelete } from '@/lib/emit-notification'
 
-// DELETE - Delete a notification
+// DELETE - Delete a notification (soft delete)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -16,9 +17,35 @@ export async function DELETE(
       )
     }
 
-    // In a real app, delete the notification from the database
+    // Get notification to determine target for Socket.io
+    const notification = await prisma.notification.findUnique({
+      where: { id },
+      select: {
+        target_type: true,
+        target_user_id: true,
+      },
+    })
+
+    if (!notification) {
+      return NextResponse.json(
+        { success: false, error: 'Notification not found' },
+        { status: 404 }
+      )
+    }
+
+    // Soft delete the notification
+    await prisma.notification.update({
+      where: { id },
+      data: {
+        deleted_at: new Date(),
+      },
+    })
+
     // Emit real-time delete event via Socket.io
-    emitNotificationDelete(id, 'admin')
+    const target = notification.target_type === 'admin' 
+      ? 'admin' 
+      : (notification.target_user_id || 'admin')
+    emitNotificationDelete(id, target)
 
     return NextResponse.json({
       success: true,

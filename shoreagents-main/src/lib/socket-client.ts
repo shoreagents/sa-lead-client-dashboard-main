@@ -7,10 +7,10 @@ let socket: Socket | null = null
 
 export const getSocket = () => {
   if (!socket) {
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 
-                     (typeof window !== 'undefined' ? window.location.origin : '')
+    // Connect to the separate Socket.io server on port 3001
+    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
     socket = io(socketUrl, {
-      path: '/api/socket',
+      path: '/socket.io',
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
@@ -19,14 +19,28 @@ export const getSocket = () => {
 
     socket.on('connect', () => {
       console.log('✅ Socket.io connected:', socket?.id)
+      console.log('🔌 Socket.io connection URL:', socketUrl)
+      console.log('🔌 Socket.io path:', '/socket.io')
     })
 
-    socket.on('disconnect', () => {
-      console.log('❌ Socket.io disconnected')
+    socket.on('disconnect', (reason) => {
+      console.log('❌ Socket.io disconnected:', reason)
     })
 
     socket.on('connect_error', (error) => {
       console.error('❌ Socket.io connection error:', error)
+      console.error('❌ Connection error details:', {
+        message: error.message,
+        description: error.description,
+        context: error.context,
+      })
+    })
+    
+    // Debug: Log all events
+    socket.onAny((eventName, ...args) => {
+      if (eventName === 'new-notification' || eventName === 'notification-updated' || eventName === 'notification-deleted') {
+        console.log('🔔 socket-client: Received event:', eventName, args)
+      }
     })
   }
 

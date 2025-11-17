@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import { emitNotificationUpdate } from '@/lib/emit-notification'
 
 // POST - Mark notification as read
@@ -16,24 +17,58 @@ export async function POST(
       )
     }
 
-    // In a real app, update the notification in the database
-    // For now, create updated notification object
-    const updatedNotification = {
-      id,
-      title: 'Updated',
-      message: 'Notification marked as read',
-      type: 'info' as const,
+    // Check if notification exists
+    const existingNotification = await prisma.notification.findUnique({
+      where: { id },
+    })
+
+    if (!existingNotification) {
+      return NextResponse.json(
+        { success: false, error: 'Notification not found' },
+        { status: 404 }
+      )
+    }
+
+    // Update notification in database
+    const updatedNotification = await prisma.notification.update({
+      where: { id },
+      data: {
       read: true,
-      created_at: new Date().toISOString(),
+        read_at: new Date(),
+        updated_at: new Date(),
+      },
+    })
+
+    // Format notification for Socket.io emission
+    const formattedNotification = {
+      id: updatedNotification.id,
+      title: updatedNotification.title,
+      message: updatedNotification.message,
+      type: updatedNotification.type,
+      read: updatedNotification.read,
+      created_at: updatedNotification.created_at.toISOString(),
+      link: updatedNotification.link || undefined,
     }
 
     // Emit real-time update via Socket.io
-    emitNotificationUpdate(updatedNotification, 'admin')
+    const target = updatedNotification.target_type === 'admin'
+      ? 'admin'
+      : (updatedNotification.target_user_id || 'admin')
+    emitNotificationUpdate(formattedNotification, target)
 
     return NextResponse.json({
       success: true,
       message: 'Notification marked as read',
-      data: updatedNotification,
+      data: {
+        id: updatedNotification.id,
+        title: updatedNotification.title,
+        message: updatedNotification.message,
+        type: updatedNotification.type,
+        read: updatedNotification.read,
+        read_at: updatedNotification.read_at?.toISOString() || null,
+        created_at: updatedNotification.created_at.toISOString(),
+        link: updatedNotification.link || undefined,
+      },
     })
   } catch (error) {
     console.error('Error marking notification as read:', error)

@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useSidebar } from '@/components/ui/sidebar'
+import { useLeads } from '@/hooks/use-api'
 import {
   LayoutDashboard,
   Users,
@@ -39,6 +40,9 @@ import {
   TabsTrigger,
   TabsContent,
 } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -128,44 +132,134 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   // State to control video call modal
   const [isVideoCallModalOpen, setIsVideoCallModalOpen] = React.useState(false)
-  const [leads, setLeads] = React.useState<any[]>([])
-  const [loadingLeads, setLoadingLeads] = React.useState(false)
+  const [onlineUsers, setOnlineUsers] = React.useState<Set<string>>(new Set())
+  
+  // Use TanStack Query for leads data (with caching)
+  const { data: leadsData, isLoading: loadingLeads, error: leadsError, refetch: refetchLeads } = useLeads()
+  const leads = leadsData?.data || []
+  
+  // Ensure leads are fetched on component mount and when modal opens
+  React.useEffect(() => {
+    // Always fetch leads when component mounts
+    console.log('🔄 Component mounted, ensuring leads are fetched...')
+    console.log('📊 Current leads state:', {
+      hasData: !!leadsData,
+      leadsCount: leads.length,
+      isLoading: loadingLeads,
+      error: leadsError,
+    })
+    // Only refetch if we don't have data and we're not already loading
+    if (!leadsData && !loadingLeads) {
+      refetchLeads()
+    }
+  }, []) // Only run on mount
+  
+  // Also fetch when modal opens
+  React.useEffect(() => {
+    if (isVideoCallModalOpen) {
+      console.log('🔄 Modal opened, forcing leads refetch...')
+      refetchLeads({
+        cancelRefetch: false, // Don't cancel if already fetching
+      })
+    }
+  }, [isVideoCallModalOpen, refetchLeads])
+  
+  // Debug: Log leads data and errors
+  React.useEffect(() => {
+    console.log('📋 Leads query state:', {
+      hasData: !!leadsData,
+      leadsCount: leads.length,
+      isLoading: loadingLeads,
+      error: leadsError,
+      leadsDataStructure: leadsData ? Object.keys(leadsData) : null,
+    })
+    
+    if (leadsError) {
+      console.error('❌ Leads fetch error:', leadsError)
+    }
+    
+    if (isVideoCallModalOpen) {
+      console.log('📋 Modal opened - Leads data:', {
+        leadsData,
+        leadsCount: leads.length,
+        isLoading: loadingLeads,
+        error: leadsError,
+        firstLead: leads[0] || null,
+      })
+    }
+  }, [isVideoCallModalOpen, leadsData, leads, loadingLeads, leadsError])
   
   // State for interview details modal
   const [isInterviewDetailsOpen, setIsInterviewDetailsOpen] = React.useState(false)
   const [selectedLeadRequests, setSelectedLeadRequests] = React.useState<any>(null)
   
+  // State for send invite confirmation modal
+  const [isSendInviteModalOpen, setIsSendInviteModalOpen] = React.useState(false)
+  const [selectedLeadForInvite, setSelectedLeadForInvite] = React.useState<any>(null)
+  const [inviteMessage, setInviteMessage] = React.useState('')
+  const [sendingInvite, setSendingInvite] = React.useState(false)
+  const [scheduleDate, setScheduleDate] = React.useState('')
+  const [scheduleTime, setScheduleTime] = React.useState('')
+  
   // Update dropdown state when pathname changes
   React.useEffect(() => {
     setIsLeadManagementOpen(pathname.startsWith('/admin-dashboard/leads'))
   }, [pathname])
-  
-  // Fetch leads when video call modal opens
+
+  // Fetch and track online users
   React.useEffect(() => {
-    const fetchLeads = async () => {
-      if (isVideoCallModalOpen) {
-        setLoadingLeads(true)
-        try {
-          console.log('Fetching leads data...')
-          const response = await fetch('/api/admin/leads')
-          console.log('Response status:', response.status)
-          const data = await response.json()
-          console.log('Fetched data:', data)
-          if (data.success && data.data) {
-            console.log('Setting leads:', data.data.length, 'leads')
-            setLeads(data.data)
-          } else {
-            console.error('API response not successful:', data)
-          }
-        } catch (error) {
-          console.error('Error fetching leads:', error)
-        } finally {
-          setLoadingLeads(false)
+    const fetchOnlineUsers = async () => {
+      try {
+        const response = await fetch('/api/admin/users/online')
+        const data = await response.json()
+        if (data.success && data.data?.onlineUsers) {
+          setOnlineUsers(new Set(data.data.onlineUsers))
+        }
+      } catch (error) {
+        console.error('Error fetching online users:', error)
+      }
+    }
+
+    // Fetch initially
+    fetchOnlineUsers()
+
+    // Set up Socket.io listener for real-time updates
+    if (typeof window !== 'undefined') {
+      const getSocket = () => {
+        if ((window as any).io && typeof (window as any).io === 'function') {
+          return (window as any).io()
+        }
+        return null
+      }
+
+      const socket = getSocket()
+      if (socket) {
+        // Join admin room to receive user online/offline events
+        socket.emit('join-admin-room')
+
+        socket.on('user-online', (data: { userId: string }) => {
+          setOnlineUsers((prev) => new Set([...prev, data.userId]))
+        })
+
+        socket.on('user-offline', (data: { userId: string }) => {
+          setOnlineUsers((prev) => {
+            const newSet = new Set(prev)
+            newSet.delete(data.userId)
+            return newSet
+          })
+        })
+
+        // Poll for online users every 10 seconds as backup
+        const interval = setInterval(fetchOnlineUsers, 10000)
+
+        return () => {
+          socket.off('user-online')
+          socket.off('user-offline')
+          clearInterval(interval)
         }
       }
     }
-    fetchLeads()
-  }, [isVideoCallModalOpen])
+  }, [])
   
   const toggleLeadManagement = () => {
     setIsLeadManagementOpen(!isLeadManagementOpen)
@@ -187,6 +281,173 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       .map(part => part.charAt(0).toUpperCase())
       .join('')
       .slice(0, 2)
+  }
+
+  // Handle opening send invite confirmation modal
+  const handleOpenSendInviteModal = (lead: any) => {
+    setSelectedLeadForInvite(lead)
+    
+    // Set default schedule to current date and time
+    const now = new Date()
+    const defaultDate = now.toISOString().split('T')[0] // YYYY-MM-DD format
+    const defaultTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}` // HH:MM format
+    
+    setScheduleDate(defaultDate)
+    setScheduleTime(defaultTime)
+    
+    // Set default message with current schedule
+    const scheduleText = ` on ${now.toLocaleString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })}`
+    
+    setInviteMessage(`Hello ${lead.name},\n\nYou've been invited to a video call with ShoreAgents${scheduleText}.\n\nPlease join the meeting at your scheduled time.\n\nBest regards,\nShoreAgents Team`)
+    setIsSendInviteModalOpen(true)
+  }
+
+  // Update message when schedule changes
+  React.useEffect(() => {
+    if (selectedLeadForInvite && (scheduleDate || scheduleTime)) {
+      const scheduleText = scheduleDate && scheduleTime 
+        ? ` on ${new Date(scheduleDate + 'T' + scheduleTime).toLocaleString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          })}`
+        : scheduleDate 
+        ? ` on ${new Date(scheduleDate).toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+          })}`
+        : ''
+      
+      setInviteMessage(`Hello ${selectedLeadForInvite.name},\n\nYou've been invited to a video call with ShoreAgents${scheduleText}.\n\nPlease join the meeting at your scheduled time.\n\nBest regards,\nShoreAgents Team`)
+    } else if (selectedLeadForInvite) {
+      setInviteMessage(`Hello ${selectedLeadForInvite.name},\n\nYou've been invited to a video call with ShoreAgents.\n\nPlease join the meeting at your scheduled time.\n\nBest regards,\nShoreAgents Team`)
+    }
+  }, [scheduleDate, scheduleTime, selectedLeadForInvite])
+
+  // Handle sending video call invite (after confirmation)
+  const handleSendInvite = async () => {
+    if (!selectedLeadForInvite) return
+
+    try {
+      setSendingInvite(true)
+      
+      // First create a meeting link (skip notification since we'll create "Video Call Invitation" notification)
+      const createResponse = await fetch('/api/admin/video-call/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: selectedLeadForInvite.id, // lead.id = user.user_id
+          userName: selectedLeadForInvite.name,
+          userEmail: selectedLeadForInvite.email,
+          skipNotification: true, // Skip "Incoming Call" notification - we'll create "Video Call Invitation" instead
+        }),
+      })
+
+      if (!createResponse.ok) {
+        const errorData = await createResponse.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || errorData.details || `Failed to create meeting (${createResponse.status})`)
+      }
+
+      const createData = await createResponse.json()
+
+      if (!createData.success) {
+        throw new Error(createData.error || createData.details || 'Failed to create meeting')
+      }
+
+      // Then send the invite email
+      const inviteResponse = await fetch('/api/admin/video-call/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: selectedLeadForInvite.id, // lead.id = user.user_id
+          userEmail: selectedLeadForInvite.email,
+          userName: selectedLeadForInvite.name,
+          meetingLink: createData.data.meetingLink,
+          customMessage: inviteMessage, // Pass custom message if needed
+          scheduleDate: scheduleDate, // Pass schedule date
+          scheduleTime: scheduleTime, // Pass schedule time
+        }),
+      })
+
+      const inviteData = await inviteResponse.json()
+
+      if (!inviteData.success) {
+        throw new Error(inviteData.error || 'Failed to send invite')
+      }
+
+      // Close modal and show success
+      setIsSendInviteModalOpen(false)
+      setSelectedLeadForInvite(null)
+      setInviteMessage('')
+      setScheduleDate('')
+      setScheduleTime('')
+      
+      // Show success message
+      alert(`Video call invite sent successfully to ${selectedLeadForInvite.name}`)
+      
+      // Refresh leads to show updated video call link (TanStack Query will handle this)
+      refetchLeads()
+    } catch (error) {
+      console.error('Error sending invite:', error)
+      alert(`Failed to send invite: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    } finally {
+      setSendingInvite(false)
+    }
+  }
+
+  // Handle starting video call
+  const handleStartCall = async (lead: any) => {
+    try {
+      // Check if lead already has a meeting link
+      let meetingLink = lead.video_call_link
+
+      if (!meetingLink) {
+        // Create a new meeting if one doesn't exist
+        const createResponse = await fetch('/api/admin/video-call/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: lead.id, // lead.id = user.user_id
+            userName: lead.name,
+            userEmail: lead.email,
+          }),
+        })
+
+        const createData = await createResponse.json()
+
+        if (!createData.success) {
+          throw new Error(createData.error || 'Failed to create meeting')
+        }
+
+        meetingLink = createData.data.meetingLink
+      }
+
+      // Open the video call in a new window/tab
+      window.open(meetingLink, '_blank', 'width=1200,height=800')
+    } catch (error) {
+      console.error('Error starting call:', error)
+      alert(`Failed to start call: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    }
   }
 
   return (
@@ -350,6 +611,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <div className="w-8 h-8 border-4 border-lime-600 border-t-transparent rounded-full animate-spin" />
               <span className="ml-3 text-base text-gray-700">Loading leads...</span>
             </div>
+          ) : leadsError ? (
+            <div className="flex flex-col items-center justify-center py-12 flex-1">
+              <div className="text-red-600 mb-2 font-semibold text-lg">Error loading leads</div>
+              <div className="text-sm text-gray-600 mb-4 text-center px-4 max-w-md">
+                {leadsError instanceof Error 
+                  ? leadsError.message 
+                  : typeof leadsError === 'string'
+                  ? leadsError
+                  : 'Unknown error occurred. Please check the console for details.'}
+              </div>
+              <div className="text-xs text-gray-400 mb-4 text-center px-4">
+                If this persists, check:
+                <ul className="list-disc list-inside mt-2 text-left">
+                  <li>Database connection is active</li>
+                  <li>Server is running</li>
+                  <li>Network connection is stable</li>
+                </ul>
+              </div>
+              <Button
+                onClick={() => {
+                  console.log('🔄 Retrying leads fetch...')
+                  refetchLeads()
+                }}
+                className="bg-lime-600 hover:bg-lime-700 text-white"
+              >
+                Retry
+              </Button>
+            </div>
           ) : (
             <Tabs defaultValue="leads" className="w-full flex flex-col flex-1 overflow-hidden">
               <TabsList className="grid w-full grid-cols-3 bg-gray-100 mb-4">
@@ -389,16 +678,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                               <TableCell className="font-medium flex-1 min-w-0 text-center">{lead.name}</TableCell>
                               <TableCell className="flex-1 min-w-0 text-center">{lead.company}</TableCell>
                               <TableCell className="text-sm text-gray-600 flex-1 min-w-0 text-center">{lead.email}</TableCell>
+                              <TableCell className="flex-[0.5] min-w-0 text-center">
+                                {lead.user_id && onlineUsers.has(lead.user_id) ? (
+                                  <Button
+                                    size="sm"
+                                    className="bg-lime-600 hover:bg-lime-700 text-white text-xs px-2 py-1 h-6"
+                                    disabled
+                                  >
+                                    Online
+                                  </Button>
+                                ) : (
+                                  <span className="text-xs text-gray-400">Offline</span>
+                                )}
+                              </TableCell>
                               <TableCell className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 justify-center w-full">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     className="border-lime-600 text-lime-600 hover:bg-lime-50 whitespace-nowrap"
-                                    onClick={() => {
-                                      console.log('Sending invite to:', lead.name, lead.email)
-                                      // Add your send invite logic here
-                                    }}
+                                    onClick={() => handleOpenSendInviteModal(lead)}
                                   >
                                     <Mail className="w-4 h-4 mr-1" />
                                     Send Invite
@@ -406,10 +705,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                   <Button
                                     size="sm"
                                     className="bg-lime-600 hover:bg-lime-700 text-white whitespace-nowrap"
-                                    onClick={() => {
-                                      console.log('Starting call with:', lead.name)
-                                      // Add your video call logic here
-                                    }}
+                                    onClick={() => handleStartCall(lead)}
                                   >
                                     <Video className="w-4 h-4 mr-1" />
                                     Call
@@ -420,7 +716,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           ))}
                         {leads.filter(lead => !lead.hasInterviewRequest && lead.column !== 'meeting_booked').length === 0 && (
                           <TableRow className="flex">
-                            <TableCell colSpan={4} className="text-center py-8 text-gray-500 w-full">
+                            <TableCell colSpan={5} className="text-center py-8 text-gray-500 w-full">
                               No leads available
                             </TableCell>
                           </TableRow>
@@ -441,6 +737,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Name</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Company</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Email</TableHead>
+                            <TableHead className="font-semibold flex-[0.5] py-3 min-w-0 text-center">Status</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Requests</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Action</TableHead>
                           </TableRow>
@@ -457,6 +754,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                               <TableCell className="font-medium flex-1 min-w-0 text-center">{lead.name}</TableCell>
                               <TableCell className="flex-1 min-w-0 text-center">{lead.company}</TableCell>
                               <TableCell className="text-sm text-gray-600 flex-1 min-w-0 text-center">{lead.email}</TableCell>
+                              <TableCell className="flex-[0.5] min-w-0 text-center">
+                                {lead.user_id && onlineUsers.has(lead.user_id) ? (
+                                  <Button
+                                    size="sm"
+                                    className="bg-lime-600 hover:bg-lime-700 text-white text-xs px-2 py-1 h-6"
+                                    disabled
+                                  >
+                                    Online
+                                  </Button>
+                                ) : (
+                                  <span className="text-xs text-gray-400">Offline</span>
+                                )}
+                              </TableCell>
                               <TableCell className="flex-1 min-w-0 text-center">
                                 <span 
                                   className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded cursor-pointer hover:bg-blue-200 transition-colors"
@@ -472,11 +782,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 <div className="flex items-center gap-2 justify-center w-full">
                                   <Button
                                     size="sm"
+                                    variant="outline"
+                                    className="border-lime-600 text-lime-600 hover:bg-lime-50 whitespace-nowrap"
+                                    onClick={() => handleOpenSendInviteModal(lead)}
+                                  >
+                                    <Mail className="w-4 h-4 mr-1" />
+                                    Send Invite
+                                  </Button>
+                                  <Button
+                                    size="sm"
                                     className="bg-lime-600 hover:bg-lime-700 text-white whitespace-nowrap"
-                                    onClick={() => {
-                                      console.log('Starting call with:', lead.name)
-                                      // Add your video call logic here
-                                    }}
+                                    onClick={() => handleStartCall(lead)}
                                   >
                                     <Video className="w-4 h-4 mr-1" />
                                     Call
@@ -487,7 +803,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           ))}
                         {leads.filter(lead => lead.hasInterviewRequest && lead.column !== 'meeting_booked').length === 0 && (
                           <TableRow className="flex">
-                            <TableCell colSpan={5} className="text-center py-8 text-gray-500 w-full">
+                            <TableCell colSpan={6} className="text-center py-8 text-gray-500 w-full">
                               No interview requests
                             </TableCell>
                           </TableRow>
@@ -508,6 +824,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Name</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Company</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Email</TableHead>
+                            <TableHead className="font-semibold flex-[0.5] py-3 min-w-0 text-center">Status</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Requests</TableHead>
                             <TableHead className="font-semibold flex-1 py-3 min-w-0 text-center">Action</TableHead>
                           </TableRow>
@@ -524,6 +841,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                               <TableCell className="font-medium flex-1 min-w-0 text-center">{lead.name}</TableCell>
                               <TableCell className="flex-1 min-w-0 text-center">{lead.company}</TableCell>
                               <TableCell className="text-sm text-gray-600 flex-1 min-w-0 text-center">{lead.email}</TableCell>
+                              <TableCell className="flex-[0.5] min-w-0 text-center">
+                                {lead.user_id && onlineUsers.has(lead.user_id) ? (
+                                  <Button
+                                    size="sm"
+                                    className="bg-lime-600 hover:bg-lime-700 text-white text-xs px-2 py-1 h-6"
+                                    disabled
+                                  >
+                                    Online
+                                  </Button>
+                                ) : (
+                                  <span className="text-xs text-gray-400">Offline</span>
+                                )}
+                              </TableCell>
                               <TableCell className="flex-1 min-w-0 text-center">
                                 {lead.hasInterviewRequest && (
                                   <span 
@@ -541,11 +871,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 <div className="flex items-center gap-2 justify-center w-full">
                                   <Button
                                     size="sm"
+                                    variant="outline"
+                                    className="border-lime-600 text-lime-600 hover:bg-lime-50 whitespace-nowrap"
+                                    onClick={() => handleOpenSendInviteModal(lead)}
+                                  >
+                                    <Mail className="w-4 h-4 mr-1" />
+                                    Send Invite
+                                  </Button>
+                                  <Button
+                                    size="sm"
                                     className="bg-lime-600 hover:bg-lime-700 text-white whitespace-nowrap"
-                                    onClick={() => {
-                                      console.log('Starting call with:', lead.name)
-                                      // Add your video call logic here
-                                    }}
+                                    onClick={() => handleStartCall(lead)}
                                   >
                                     <Video className="w-4 h-4 mr-1" />
                                     Call
@@ -556,7 +892,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           ))}
                         {leads.filter(lead => lead.column === 'meeting_booked').length === 0 && (
                           <TableRow className="flex">
-                            <TableCell colSpan={5} className="text-center py-8 text-gray-500 w-full">
+                            <TableCell colSpan={6} className="text-center py-8 text-gray-500 w-full">
                               No final interviews scheduled
                             </TableCell>
                           </TableRow>
@@ -645,6 +981,120 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 No interview requests found
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Send Invite Confirmation Modal */}
+      <Dialog open={isSendInviteModalOpen} onOpenChange={setIsSendInviteModalOpen}>
+        <DialogContent className="!w-[90%] !max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl">
+              <Mail className="w-6 h-6 text-lime-600" />
+              Send Invite to {selectedLeadForInvite?.name}
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Review and customize the invitation message before sending
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-gray-50 rounded-lg border">
+              <h3 className="font-semibold text-base mb-2">Recipient Information</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="text-gray-600">Name:</span>
+                  <span className="ml-2 font-medium">{selectedLeadForInvite?.name}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Company:</span>
+                  <span className="ml-2 font-medium">{selectedLeadForInvite?.company || 'Not specified'}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-gray-600">Email:</span>
+                  <span className="ml-2 font-medium">{selectedLeadForInvite?.email || 'No email provided'}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-date" className="text-base font-semibold">
+                    Schedule Date
+                  </Label>
+                  <Input
+                    id="schedule-date"
+                    type="date"
+                    value={scheduleDate}
+                    onChange={(e) => setScheduleDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-time" className="text-base font-semibold">
+                    Schedule Time
+                  </Label>
+                  <Input
+                    id="schedule-time"
+                    type="time"
+                    value={scheduleTime}
+                    onChange={(e) => setScheduleTime(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="invite-message" className="text-base font-semibold">
+                  Message to send:
+                </Label>
+                <Textarea
+                  id="invite-message"
+                  value={inviteMessage}
+                  onChange={(e) => setInviteMessage(e.target.value)}
+                  className="min-h-[200px] text-sm"
+                  placeholder="Enter the invitation message..."
+                />
+                <p className="text-xs text-gray-500">
+                  This message will be included in the email invitation sent to {selectedLeadForInvite?.name}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsSendInviteModalOpen(false)
+                setSelectedLeadForInvite(null)
+                setInviteMessage('')
+                setScheduleDate('')
+                setScheduleTime('')
+              }}
+              disabled={sendingInvite}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-lime-600 hover:bg-lime-700 text-white"
+              onClick={handleSendInvite}
+              disabled={sendingInvite || !inviteMessage.trim()}
+            >
+              {sendingInvite ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4 mr-2" />
+                  Send Invite
+                </>
+              )}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

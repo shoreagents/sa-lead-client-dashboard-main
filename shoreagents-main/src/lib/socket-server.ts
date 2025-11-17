@@ -3,6 +3,8 @@ import { Server as SocketIOServer } from 'socket.io'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 let io: SocketIOServer | null = null
+// Track online users: Map<userId, Set<socketId>>
+const onlineUsers = new Map<string, Set<string>>()
 
 export const initSocketIO = (httpServer: HTTPServer) => {
   if (!io) {
@@ -28,16 +30,51 @@ export const initSocketIO = (httpServer: HTTPServer) => {
       socket.on('join-user-room', (userId: string) => {
         socket.join(`user-${userId}`)
         console.log(`📢 Client ${socket.id} joined user-${userId} room`)
+        
+        // Track user as online
+        if (!onlineUsers.has(userId)) {
+          onlineUsers.set(userId, new Set())
+        }
+        onlineUsers.get(userId)!.add(socket.id)
+        
+        // Notify admin that user is online
+        io!.to('admin-notifications').emit('user-online', { userId })
+        console.log(`🟢 User ${userId} is now online`)
       })
 
       // Leave user room
       socket.on('leave-user-room', (userId: string) => {
         socket.leave(`user-${userId}`)
         console.log(`📢 Client ${socket.id} left user-${userId} room`)
+        
+        // Remove user from online tracking
+        const userSockets = onlineUsers.get(userId)
+        if (userSockets) {
+          userSockets.delete(socket.id)
+          if (userSockets.size === 0) {
+            onlineUsers.delete(userId)
+            // Notify admin that user is offline
+            io!.to('admin-notifications').emit('user-offline', { userId })
+            console.log(`🔴 User ${userId} is now offline`)
+          }
+        }
       })
 
       socket.on('disconnect', () => {
         console.log('❌ Client disconnected:', socket.id)
+        
+        // Remove socket from all users
+        for (const [userId, sockets] of onlineUsers.entries()) {
+          if (sockets.has(socket.id)) {
+            sockets.delete(socket.id)
+            if (sockets.size === 0) {
+              onlineUsers.delete(userId)
+              // Notify admin that user is offline
+              io!.to('admin-notifications').emit('user-offline', { userId })
+              console.log(`🔴 User ${userId} is now offline`)
+            }
+          }
+        }
       })
     })
 
@@ -45,6 +82,16 @@ export const initSocketIO = (httpServer: HTTPServer) => {
   }
 
   return io
+}
+
+// Get list of online user IDs
+export const getOnlineUsers = (): string[] => {
+  return Array.from(onlineUsers.keys())
+}
+
+// Check if a user is online
+export const isUserOnline = (userId: string): boolean => {
+  return onlineUsers.has(userId) && onlineUsers.get(userId)!.size > 0
 }
 
 export const getSocketIO = () => {

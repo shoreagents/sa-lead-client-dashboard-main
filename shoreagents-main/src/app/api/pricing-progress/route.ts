@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
 import { generateUserId } from '@/lib/userEngagementService';
+import { createNotification } from '@/lib/create-notification';
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,11 +66,13 @@ export async function POST(request: NextRequest) {
         console.log('🆕 Creating new pricing quote...');
         console.log('📊 Insert data:', { user_id, member_count: memberCount });
         
+        const memberCountInt = parseInt(memberCount);
+        
         const { data: newQuote, error: insertError } = await supabase
           .from('pricing_quotes')
           .insert({
             user_id,
-            member_count: parseInt(memberCount), // Ensure it's an integer
+            member_count: memberCountInt, // Ensure it's an integer
             industry: 'TBD', // Will be filled in step 2
             total_monthly_cost: 0 // Will be calculated in step 4
           })
@@ -84,6 +87,38 @@ export async function POST(request: NextRequest) {
           );
         }
         console.log('✅ New quote created successfully with ID:', newQuote.id);
+        
+        // Check for high-value lead (20+ employees)
+        if (memberCountInt >= 20) {
+          try {
+            // Get user info for notification
+            const { data: userData } = await supabase
+              .from('users')
+              .select('first_name, last_name, company, email')
+              .eq('user_id', user_id)
+              .single();
+            
+            const userName = userData 
+              ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'A visitor'
+              : 'A visitor';
+            const company = userData?.company || '';
+            
+            await createNotification({
+              title: 'High-Value Lead Detected',
+              message: `${userName}${company ? ` from ${company}` : ''} calculated pricing for ${memberCountInt}+ staff members`,
+              type: 'warning',
+              target_type: 'admin',
+              link: '/admin-dashboard/leads',
+              metadata: {
+                user_id,
+                member_count: memberCountInt,
+                quote_id: newQuote.id,
+              },
+            });
+          } catch (notificationError) {
+            console.error('Error creating high-value lead notification:', notificationError);
+          }
+        }
         
         // Return the quote ID so subsequent steps can use it
         return NextResponse.json({ 
@@ -391,6 +426,60 @@ export async function POST(request: NextRequest) {
             { error: 'Failed to save final quote data' },
             { status: 500 }
           );
+        }
+
+        // Create notification for new quotation generated
+        try {
+          // Get quote and user info
+          const { data: quoteData } = await supabase
+            .from('pricing_quotes')
+            .select('user_id, member_count, industry, total_monthly_cost')
+            .eq('id', quote_id)
+            .single();
+          
+          if (quoteData) {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('first_name, last_name, company, email')
+              .eq('user_id', quoteData.user_id)
+              .single();
+            
+            const userName = userData 
+              ? `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 'A lead'
+              : 'A lead';
+            const company = userData?.company || '';
+            
+            await createNotification({
+              title: 'New Quotation Generated',
+              message: `${userName}${company ? ` from ${company}` : ''} has created a new pricing quotation for ${quoteData.member_count} staff members`,
+              type: 'info',
+              target_type: 'admin',
+              link: '/admin-dashboard/leads/quotations',
+              metadata: {
+                user_id: quoteData.user_id,
+                quote_id: quote_id,
+                member_count: quoteData.member_count,
+                total_cost: quoteData.total_monthly_cost,
+              },
+            });
+            
+            // Also notify the user if they have an account
+            if (userData?.email && quoteData.user_id) {
+              await createNotification({
+                title: 'Your Quote is Ready',
+                message: `Your pricing quote for ${quoteData.member_count} staff members has been generated successfully`,
+                type: 'success',
+                target_type: 'user',
+                target_user_id: quoteData.user_id,
+                link: '/user-dashboard/quotation',
+                metadata: {
+                  quote_id: quote_id,
+                },
+              });
+            }
+          }
+        } catch (notificationError) {
+          console.error('Error creating quotation notification:', notificationError);
         }
 
         break;

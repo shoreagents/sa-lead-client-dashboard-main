@@ -16,10 +16,10 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             gcTime: 2 * 60 * 1000, // 2 minutes (was 10 minutes)
             // Disable refetchOnWindowFocus to prevent excessive requests
             refetchOnWindowFocus: false,
-            // Disable refetchOnMount to prevent redundant fetches
-            refetchOnMount: false,
+            // Allow refetchOnMount - individual queries can override this
+            refetchOnMount: true,
             // Reduce refetch on reconnect
-            refetchOnReconnect: false,
+            refetchOnReconnect: true,
             retry: (failureCount, error) => {
               // Don't retry on 4xx errors
               if (error instanceof Error && 'status' in error) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { Bell, Check, X, AlertCircle, Info, CheckCircle, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'sonner'
 import { useSocket } from '@/lib/socket-client'
+import { useUserAuth } from '@/lib/user-auth-context'
 import {
   Popover,
   PopoverContent,
@@ -30,14 +31,41 @@ export function NotificationDropdown() {
   const [loading, setLoading] = useState(true)
   const { socket, isConnected } = useSocket()
   const pathname = usePathname()
+  const deleteRefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
   const isEmployeePage = useMemo(() => pathname?.startsWith('/employee/'), [pathname])
   const isUserDashboard = useMemo(() => pathname?.startsWith('/user-dashboard'), [pathname])
   const isAdminDashboard = useMemo(() => pathname?.startsWith('/admin-dashboard'), [pathname])
 
+  // Get user ID for user dashboard
+  const { user } = useUserAuth()
+  const userId = useMemo(() => {
+    if (isUserDashboard) {
+      // First try authenticated user
+      if (user?.user_id) {
+        return user.user_id
+      }
+      // Fallback to localStorage
+      if (typeof window !== 'undefined') {
+        return localStorage.getItem('content_tracking_device_id') || 
+               localStorage.getItem('device_id') || 
+               localStorage.getItem('session_id') || 
+               null
+      }
+    }
+    return null
+  }, [isUserDashboard, user?.user_id])
+
   const fetchNotifications = async () => {
     try {
-      const response = await fetch('/api/admin/notifications?unread_only=false&limit=10')
+      let url = '/api/admin/notifications?unread_only=false&limit=10'
+      
+      // If in user dashboard, filter by user_id
+      if (isUserDashboard && userId) {
+        url += `&target_type=user&target_user_id=${userId}`
+      }
+      
+      const response = await fetch(url)
       const result = await response.json()
 
       if (result.success) {
@@ -63,10 +91,56 @@ export function NotificationDropdown() {
     fetchNotifications()
 
     if (socket) {
-      socket.emit('join-admin-room')
+      // Check socket connection status
+      console.log('🔌 NotificationDropdown: Socket connection status:', socket.connected ? 'connected' : 'disconnected')
+      console.log('🔌 NotificationDropdown: Socket ID:', socket.id)
+      
+      // Function to join rooms
+      const joinRoom = () => {
+        if (isUserDashboard && userId) {
+          socket.emit('join-user-room', userId)
+          console.log('📢 NotificationDropdown: Emitted join-user-room for userId:', userId)
+        } else if (isAdminDashboard) {
+          socket.emit('join-admin-room')
+          console.log('📢 NotificationDropdown: Emitted join-admin-room')
+        }
+      }
+      
+      // Join room immediately if connected, otherwise wait for connection
+      if (socket.connected) {
+        joinRoom()
+      } else {
+        console.log('⏳ NotificationDropdown: Socket not connected yet, waiting for connection...')
+        socket.once('connect', () => {
+          console.log('✅ NotificationDropdown: Socket connected, joining room now')
+          joinRoom()
+        })
+      }
+      
+      // Also join on reconnect
+      socket.on('connect', () => {
+        console.log('✅ NotificationDropdown: Socket (re)connected, rejoining room')
+        joinRoom()
+      })
 
       const handleNewNotification = (notification: Notification) => {
-        setNotifications((prev) => [notification, ...prev])
+        console.log('📬 NotificationDropdown: Received new-notification event:', {
+          id: notification.id,
+          title: notification.title,
+          target: isUserDashboard ? `user-${userId}` : 'admin',
+        })
+        
+        // For user dashboard, only show notifications targeted to this user
+        if (isUserDashboard && userId) {
+          // The server already filters by user_id, but double-check
+          console.log('✅ NotificationDropdown: Adding notification to user dashboard')
+          setNotifications((prev) => [notification, ...prev])
+        } else {
+          // For admin, show all notifications
+          console.log('✅ NotificationDropdown: Adding notification to admin dashboard')
+          setNotifications((prev) => [notification, ...prev])
+        }
+        
         if (!notification.read) {
           setUnreadCount((prev) => prev + 1)
           toast.info(notification.title, {
@@ -87,28 +161,69 @@ export function NotificationDropdown() {
       }
 
       const handleNotificationDelete = (notificationId: string) => {
+        console.log('🗑️ NotificationDropdown: Received notification-deleted event:', notificationId)
+        
+        // Remove from local state immediately
         setNotifications((prev) => {
           const deleted = prev.find((n) => n.id === notificationId)
           if (deleted && !deleted.read) {
-            setUnreadCount((prev) => Math.max(0, prev - 1))
+            setUnreadCount((prevCount) => Math.max(0, prevCount - 1))
           }
-          return prev.filter((n) => n.id !== notificationId)
+          const filtered = prev.filter((n) => n.id !== notificationId)
+          console.log('🗑️ NotificationDropdown: Removed notification from state, remaining:', filtered.length)
+          return filtered
         })
+        
+        // Clear any pending refetch timeout
+        if (deleteRefetchTimeoutRef.current) {
+          clearTimeout(deleteRefetchTimeoutRef.current)
+        }
+        
+        // Debounce refetch to handle multiple delete events
+        // This ensures we only refetch once after all delete events are processed
+        deleteRefetchTimeoutRef.current = setTimeout(() => {
+          console.log('🔄 NotificationDropdown: Refetching notifications after delete(s)')
+          fetchNotifications()
+          deleteRefetchTimeoutRef.current = null
+        }, 300)
       }
 
       socket.on('new-notification', handleNewNotification)
       socket.on('notification-updated', handleNotificationUpdate)
       socket.on('notification-deleted', handleNotificationDelete)
+      
+      // Debug: Log all socket events for troubleshooting
+      socket.onAny((eventName, ...args) => {
+        if (eventName === 'new-notification' || eventName === 'notification-updated' || eventName === 'notification-deleted') {
+          console.log('🔔 NotificationDropdown: Received socket event:', eventName, args)
+        }
+      })
 
       return () => {
+        // Clear any pending refetch timeout
+        if (deleteRefetchTimeoutRef.current) {
+          clearTimeout(deleteRefetchTimeoutRef.current)
+          deleteRefetchTimeoutRef.current = null
+        }
+        
         if (socket) {
+          console.log('🧹 NotificationDropdown: Cleaning up socket listeners')
           socket.off('new-notification', handleNewNotification)
           socket.off('notification-updated', handleNotificationUpdate)
           socket.off('notification-deleted', handleNotificationDelete)
+          socket.offAny()
+          
+          // Leave room on cleanup
+          if (isUserDashboard && userId) {
+            socket.emit('leave-user-room', userId)
+            console.log('📢 NotificationDropdown: Left user room:', userId)
+          }
         }
       }
+    } else {
+      console.warn('⚠️ NotificationDropdown: Socket not available')
     }
-  }, [socket, isConnected])
+  }, [socket, isConnected, isUserDashboard, userId, isAdminDashboard])
 
   const markAsRead = async (id: string) => {
     try {
@@ -252,9 +367,15 @@ export function NotificationDropdown() {
             variant="ghost"
             size="sm"
             className="w-full"
-            onClick={() => window.location.href = '/admin-dashboard'}
+            onClick={() => {
+              if (isUserDashboard) {
+                window.location.href = '/user-dashboard/call-invitations'
+              } else {
+                window.location.href = '/admin-dashboard'
+              }
+            }}
           >
-            View all notifications
+            {isUserDashboard ? 'View all invitations' : 'View all notifications'}
           </Button>
         </div>
       </PopoverContent>

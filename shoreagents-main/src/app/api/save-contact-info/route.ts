@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { createNotification } from '@/lib/create-notification';
 
 const prisma = new PrismaClient();
 
@@ -63,6 +64,25 @@ export async function POST(request: NextRequest) {
       });
 
       console.log('New user created successfully:', newUser);
+      
+      // Create notification for new user registration
+      try {
+        await createNotification({
+          title: 'New User Registered',
+          message: `${firstName || ''} ${surname || ''}${company ? ` from ${company}` : ''} has signed up for an account`,
+          type: 'success',
+          target_type: 'admin',
+          link: '/admin-dashboard/users',
+          metadata: {
+            user_id: newUser.user_id,
+            company: company || null,
+          },
+        })
+      } catch (notificationError) {
+        console.error('Error creating notification:', notificationError)
+        // Don't fail the request if notification creation fails
+      }
+      
       return NextResponse.json({ 
         success: true, 
         message: 'Contact information saved successfully',

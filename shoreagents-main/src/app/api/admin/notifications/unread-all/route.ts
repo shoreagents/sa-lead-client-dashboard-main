@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { emitNotificationUpdate } from '@/lib/emit-notification'
 
-// POST - Mark all notifications as read
+// POST - Mark all notifications as unread
 export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     // Build where clause
     const where: any = {
       deleted_at: null,
-      read: false,
+      read: true, // Only mark read notifications as unread
       target_type: targetType,
     }
 
@@ -22,12 +22,12 @@ export async function POST(request: NextRequest) {
       where.target_user_id = null
     }
 
-    // Update all unread notifications
+    // Update all read notifications to unread
     const result = await prisma.notification.updateMany({
       where,
       data: {
-        read: true,
-        read_at: new Date(),
+        read: false,
+        read_at: null,
         updated_at: new Date(),
       },
     })
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     const updatedNotifications = await prisma.notification.findMany({
       where: {
         ...where,
-        read: true,
+        read: false,
       },
       take: 50, // Limit to avoid too many emissions
       orderBy: {
@@ -61,15 +61,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'All notifications marked as read',
+      message: 'All notifications marked as unread',
       data: {
         count: result.count,
       },
     })
   } catch (error) {
-    console.error('Error marking all notifications as read:', error)
+    console.error('Error marking all notifications as unread:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to mark all notifications as read' },
+      { success: false, error: 'Failed to mark all notifications as unread' },
       { status: 500 }
     )
   }

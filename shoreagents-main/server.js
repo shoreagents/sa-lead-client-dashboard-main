@@ -1,6 +1,5 @@
 const express = require('express')
 const { createServer } = require('http')
-const { Server } = require('socket.io')
 const { parse } = require('url')
 const next = require('next')
 
@@ -15,45 +14,8 @@ app.prepare().then(() => {
   const expressApp = express()
   const httpServer = createServer(expressApp)
   
-  // Initialize Socket.io
-  const io = new Server(httpServer, {
-    cors: {
-      origin: process.env.NEXT_PUBLIC_APP_URL || '*',
-      methods: ['GET', 'POST'],
-      credentials: true,
-    },
-    path: '/api/socket',
-  })
-
-  // Socket.io connection handling
-  io.on('connection', (socket) => {
-    console.log('✅ Client connected:', socket.id)
-
-    // Join admin room for admin notifications
-    socket.on('join-admin-room', () => {
-      socket.join('admin-notifications')
-      console.log(`📢 Client ${socket.id} joined admin-notifications room`)
-    })
-
-    // Join user room for user-specific notifications
-    socket.on('join-user-room', (userId) => {
-      socket.join(`user-${userId}`)
-      console.log(`📢 Client ${socket.id} joined user-${userId} room`)
-    })
-
-    // Leave user room
-    socket.on('leave-user-room', (userId) => {
-      socket.leave(`user-${userId}`)
-      console.log(`📢 Client ${socket.id} left user-${userId} room`)
-    })
-
-    socket.on('disconnect', () => {
-      console.log('❌ Client disconnected:', socket.id)
-    })
-  })
-
-  // Make io available globally for emitting notifications
-  global.io = io
+  // Socket.io is now handled by a separate server on port 3001
+  // See socket-server.js for Socket.io implementation
 
   // Next.js request handling - use middleware instead of wildcard route
   expressApp.use((req, res) => {
@@ -64,7 +26,7 @@ app.prepare().then(() => {
   httpServer.listen(port, (err) => {
     if (err) throw err
     console.log(`> Ready on http://${hostname}:${port}`)
-    console.log('🚀 Socket.io server initialized on /api/socket')
+    console.log('💡 Note: Socket.io server runs separately on port 3001 (see socket-server.js)')
   })
 })
 

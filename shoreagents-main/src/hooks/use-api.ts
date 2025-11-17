@@ -807,28 +807,103 @@ interface LeadsResponse {
 }
 
 const fetchLeads = async (): Promise<LeadsResponse> => {
-  const response = await fetch('/api/admin/leads');
-  
-  if (!response.ok) {
-    // Try to get error message from response
-    let errorMessage = 'Failed to fetch leads';
-    try {
-      const errorData = await response.json();
-      errorMessage = errorData.message || errorData.error || errorMessage;
-    } catch {
-      // If response is not JSON, use default message
+  try {
+    const response = await fetch('/api/admin/leads');
+    
+    if (!response.ok) {
+      // Try to get error message from response
+      let errorMessage = 'Failed to fetch leads';
+      let errorDetails: any = null;
+      let errorData: any = null;
+      
+      try {
+        const responseText = await response.text();
+        if (responseText) {
+          errorData = JSON.parse(responseText);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          errorDetails = errorData.details;
+        }
+      } catch (parseError) {
+        // If response is not JSON, use status text
+        errorMessage = response.statusText || `HTTP ${response.status}`;
+      }
+      
+      // Only log if we have meaningful error information
+      if (response.status !== 200) {
+        const errorInfo: Record<string, any> = {
+          status: response.status,
+          statusText: response.statusText || 'Unknown',
+          errorMessage: errorMessage || 'Unknown error',
+          url: '/api/admin/leads',
+        };
+        
+        if (errorDetails && Object.keys(errorDetails).length > 0) {
+          errorInfo.errorDetails = errorDetails;
+        }
+        if (errorData && Object.keys(errorData).length > 0) {
+          errorInfo.errorData = errorData;
+        }
+        
+        // Only log if we have at least status and errorMessage
+        if (errorInfo.status && errorInfo.errorMessage) {
+          console.error('❌ Leads API error:', errorInfo);
+        }
+      }
+      
+      throw new Error(errorMessage || `Failed to fetch leads (${response.status})`);
     }
-    throw new Error(errorMessage);
+    
+    let result: LeadsResponse;
+    try {
+      result = await response.json();
+    } catch (jsonError) {
+      console.error('❌ Failed to parse leads API response as JSON:', jsonError);
+      throw new Error('Invalid response format from server');
+    }
+    
+    // Check if the response indicates an error
+    if (result && !result.success) {
+      // Only log if there's an actual error field
+      if (result.error) {
+        console.error('❌ Leads API returned error response:', {
+          success: result.success,
+          error: result.error,
+          message: result.message || 'No message provided',
+        });
+        throw new Error(result.message || result.error || 'Failed to fetch leads');
+      }
+      // If success is false but no error field, it might be a warning - log but don't throw
+      if (!result.error && result.message) {
+        console.warn('⚠️ Leads API warning:', result.message);
+      }
+    }
+    
+    // Validate response structure
+    if (!result || typeof result !== 'object') {
+      console.error('❌ Invalid leads API response structure:', result);
+      throw new Error('Invalid response from server');
+    }
+    
+    // Success - return the result
+    return result;
+  } catch (error) {
+    // Don't log if it's already a known Error that was thrown above
+    if (error instanceof Error) {
+      // Only log network errors or unexpected errors
+      if (error.message.includes('Network error') || error.message.includes('fetch')) {
+        console.error('❌ Network error fetching leads:', error.message);
+      }
+      throw error;
+    }
+    
+    // Handle unknown errors
+    console.error('❌ Unknown error fetching leads:', {
+      errorType: typeof error,
+      errorValue: error,
+      errorString: String(error),
+    });
+    throw new Error('An unexpected error occurred while fetching leads');
   }
-  
-  const result = await response.json();
-  
-  // Check if the response indicates an error
-  if (!result.success && result.error) {
-    throw new Error(result.message || result.error);
-  }
-  
-  return result;
 };
 
 const updateLeadStatus = async ({ 
@@ -861,9 +936,13 @@ export const useLeads = () => {
   return useQuery<LeadsResponse>({
     queryKey: ['leads'],
     queryFn: fetchLeads,
-    staleTime: 1 * 60 * 1000, // 1 minute (reduced from 2 minutes)
-    gcTime: 2 * 60 * 1000, // 2 minutes (reduced from 5 minutes)
-    refetchOnWindowFocus: false, // Don't refetch on window focus
+    enabled: true, // Explicitly enable the query
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 2 * 60 * 1000, // 2 minutes
+    refetchOnWindowFocus: true, // Refetch on window focus
+    refetchOnMount: true, // Always refetch on mount
+    retry: 3, // Retry 3 times on failure
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 };
 

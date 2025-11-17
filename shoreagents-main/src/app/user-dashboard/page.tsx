@@ -4,6 +4,7 @@ import { UserGuard } from '@/components/auth/UserGuard'
 import { UserDashboardSidebar } from '@/components/layout/UserDashboardSidebar'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { useUserAuth } from '@/lib/user-auth-context'
+import { NotificationDropdown } from '@/components/ui/notification-dropdown'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
@@ -136,7 +137,13 @@ export default function UserDashboardPage() {
       <SidebarProvider>
         <UserDashboardSidebar onChatOpen={handleChatOpen} />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-2 p-3 pt-20 w-full max-w-none">
+          {/* Header with notification dropdown */}
+          <div className="sticky top-0 z-10 bg-white border-b px-6 py-4 flex items-center justify-between">
+            <SidebarTrigger className="lg:hidden" />
+            <div className="flex-1" />
+            <NotificationDropdown />
+          </div>
+          <div className="flex flex-1 flex-col gap-2 p-3 pt-4 w-full max-w-none">
             {isLoading ? (
               <div className="space-y-4">
                 {/* Header Skeleton */}

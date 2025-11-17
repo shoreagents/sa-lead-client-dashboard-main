@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { createNotification } from '@/lib/create-notification';
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,6 +94,44 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Interview request created successfully:', interviewRequest);
+
+    // Create notifications
+    try {
+      // Admin notification
+      await createNotification({
+        title: 'New Interview Request',
+        message: `${requesterFirstName} ${requesterLastName} requested an interview for ${candidateName}${candidatePosition ? ` (${candidatePosition})` : ''}`,
+        type: 'warning',
+        target_type: 'admin',
+        link: '/admin-dashboard/leads',
+        metadata: {
+          interview_request_id: interviewRequest.id,
+          candidate_id: candidateId,
+          candidate_name: candidateName,
+          user_id: user_id,
+        },
+      });
+      
+      // User notification (if user_id exists)
+      if (user_id) {
+        await createNotification({
+          title: 'Interview Request Submitted',
+          message: `Your interview request for ${candidateName}${candidatePosition ? ` (${candidatePosition})` : ''} has been submitted successfully`,
+          type: 'info',
+          target_type: 'user',
+          target_user_id: user_id,
+          link: '/user-dashboard',
+          metadata: {
+            interview_request_id: interviewRequest.id,
+            candidate_id: candidateId,
+            candidate_name: candidateName,
+          },
+        });
+      }
+    } catch (notificationError) {
+      console.error('Error creating interview request notifications:', notificationError);
+      // Don't fail the request if notification creation fails
+    }
 
     // Return success response
     return NextResponse.json({
