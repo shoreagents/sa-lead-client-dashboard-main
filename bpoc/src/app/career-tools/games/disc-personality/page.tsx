@@ -767,6 +767,43 @@ export default function FilipinoDiscGame() {
     }
   }, [user, gameState.gameStarted, gameState.userProfile]);
 
+  // Update meta tags when results are shown (for OG image) - MUST be before any early returns
+  useEffect(() => {
+    if (showResults && discResult && user) {
+      const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
+      const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&title=${encodeURIComponent(userTitle)}&v=1`;
+      const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
+      
+      // Update or create meta tags
+      const updateMetaTag = (property: string, content: string) => {
+        let meta = document.querySelector(`meta[property="${property}"]`) || 
+                   document.querySelector(`meta[name="${property}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('property', property);
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      updateMetaTag('og:title', `${personalityType.title} - ${animalName} Personality`);
+      updateMetaTag('og:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}. Take the BPOC DISC Personality Assessment to find your perfect BPO role.`);
+      updateMetaTag('og:image', ogImageUrl);
+      updateMetaTag('og:url', pageUrl);
+      updateMetaTag('og:type', 'website');
+      updateMetaTag('og:site_name', 'BPOC.IO');
+      
+      // Twitter meta tags
+      updateMetaTag('twitter:card', 'summary_large_image');
+      updateMetaTag('twitter:title', `${personalityType.title} - ${animalName} Personality`);
+      updateMetaTag('twitter:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}.`);
+      updateMetaTag('twitter:image', ogImageUrl);
+    }
+  }, [showResults, discResult, user]);
+
   const startGame = () => {
     // Stop any preview that's playing
     stopPreview();
@@ -793,7 +830,9 @@ export default function FilipinoDiscGame() {
   const generatePersonalizedQuestions = async (responses?: any[], scores?: any) => {
     if (!user) {
       console.error('❌ No user found for personalized questions');
-      completeGame();
+      // Use passed scores or current state scores
+      const finalScores = scores || gameState.scores;
+      completeGame(finalScores);
       return;
     }
 
@@ -850,28 +889,30 @@ export default function FilipinoDiscGame() {
           setShowAchievement(null);
         } else {
           console.error('❌ No personalized questions in response:', data);
-          completeGame();
+          completeGame(currentScores);
         }
       } else {
         const errorText = await response.text();
         console.error('❌ API call failed:', response.status, errorText);
         // Complete game without personalized questions
-        completeGame();
+        completeGame(currentScores);
       }
     } catch (error) {
       console.error('❌ Error generating personalized questions:', error);
       // Complete game without personalized questions
-      completeGame();
+      completeGame(currentScores);
     }
   };
 
-  const completeGame = () => {
+  const completeGame = (scores?: { D: number; I: number; S: number; C: number }) => {
     setGameState(prev => ({
       ...prev,
       gameCompleted: true,
       isGeneratingPersonalized: false
     }));
-    calculateResults(gameState.scores);
+    // Use provided scores or fallback to current state scores
+    const finalScores = scores || gameState.scores;
+    calculateResults(finalScores);
   };
 
 	// Safety check after functions are defined
@@ -1464,12 +1505,12 @@ Make it deeply personal and actionable based on their actual choices.`;
 							totalResponses: gameState.responses.length,
 							completionTime: Math.floor((Date.now() - (gameState.sessionStartTime?.getTime() || Date.now())) / 1000),
 							culturalContexts: ['FAMILY', 'WORK', 'SOCIAL', 'TRAFFIC', 'MONEY', 'CRISIS'],
-							personalizedQuestionsUsed: gameState.personalizedQuestions.length
+							personalizedQuestionsUsed: gameState.personalizedQuestions?.length || 0
             },
             coreResponses: gameState.responses.slice(0, 30),
             coreScores: gameState.scores,
             personalizedResponses: gameState.responses.slice(30),
-            personalizedQuestions: gameState.personalizedQuestions,
+            personalizedQuestions: gameState.personalizedQuestions || [],
 						finalResults: results,
 						aiAssessment: generatedAssessment,
 						aiBpoRoles: generatedBpoRoles,
@@ -1649,43 +1690,6 @@ Make it deeply personal and actionable based on their actual choices.`;
       </div>
     );
   }
-
-  // Update meta tags when results are shown (for OG image)
-  useEffect(() => {
-    if (showResults && discResult && user) {
-      const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
-      const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&title=${encodeURIComponent(userTitle)}&v=1`;
-      const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
-      
-      // Update or create meta tags
-      const updateMetaTag = (property: string, content: string) => {
-        let meta = document.querySelector(`meta[property="${property}"]`) || 
-                   document.querySelector(`meta[name="${property}"]`);
-        if (!meta) {
-          meta = document.createElement('meta');
-          meta.setAttribute('property', property);
-          document.head.appendChild(meta);
-        }
-        meta.setAttribute('content', content);
-      };
-
-      updateMetaTag('og:title', `${personalityType.title} - ${animalName} Personality`);
-      updateMetaTag('og:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}. Take the BPOC DISC Personality Assessment to find your perfect BPO role.`);
-      updateMetaTag('og:image', ogImageUrl);
-      updateMetaTag('og:url', pageUrl);
-      updateMetaTag('og:type', 'website');
-      updateMetaTag('og:site_name', 'BPOC.IO');
-      
-      // Twitter meta tags
-      updateMetaTag('twitter:card', 'summary_large_image');
-      updateMetaTag('twitter:title', `${personalityType.title} - ${animalName} Personality`);
-      updateMetaTag('twitter:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}.`);
-      updateMetaTag('twitter:image', ogImageUrl);
-    }
-  }, [showResults, discResult, user]);
 
   // Results screen
   if (showResults && discResult) {
