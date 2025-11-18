@@ -134,21 +134,35 @@ USER CURRENCY: ${currency}
 
 CRITICAL INSTRUCTIONS:
 1. **ONLY use terminology from the ${currency} market context above**
-2. **NEVER mix American terms into non-US markets**
-3. If user types "Real Estate" or similar:
-   - AUD/NZD: Suggest "Real Estate Agency", "Property Management"
-   - GBP: Suggest "Estate Agency", "Lettings Agency"  
-   - USD: Suggest "Real Estate Brokerage"
-   - NEVER suggest "Brokerage" to AU/UK/NZ users!
+2. **NEVER use "Brokerage" for AUD/GBP/NZD users - NOT in title, NOT in description!**
+3. **NEVER mix American terms into non-US markets**
 
-4. Match the user's likely industry based on their input
-5. Use professional, commonly-used business terms for that region
-6. Suggest ${MAX_SUGGESTIONS} specific, relevant industries
+4. If user types "Real Estate" or similar:
+   - AUD/NZD users:
+     * Title: "Real Estate Agency" or "Property Management"
+     * Description: Use "facilitating", "managing", "sales", "leasing" - NEVER "brokerage"
+   - GBP users:
+     * Title: "Estate Agency" or "Lettings Agency"
+     * Description: Use "facilitating", "managing", "letting" - NEVER "brokerage"
+   - USD users:
+     * Title: "Real Estate Brokerage" (OK for US only!)
+     * Description: Can use "brokerage" for US users
 
-Format your response as a JSON array of objects with "title", "description", and "level" fields:
+5. Check BOTH title AND description - remove ALL "Brokerage" references for non-US markets
+6. Match the user's likely industry based on their input
+7. Use professional, commonly-used business terms for that region
+8. Suggest ${MAX_SUGGESTIONS} specific, relevant industries
+
+FORMAT EXAMPLES:
+AUD/NZD users:
 [
   {"title": "Real Estate Agency", "description": "Facilitating property sales, leasing, and management", "level": "Industry"},
-  {"title": "Property Management", "description": "Managing residential and commercial properties", "level": "Industry"}
+  {"title": "Commercial Property", "description": "Managing office, retail, and industrial properties", "level": "Industry"}
+]
+
+USD users:
+[
+  {"title": "Real Estate Brokerage", "description": "Brokerage and management of residential and commercial properties", "level": "Industry"}
 ]
 
 Only return the JSON array, no other text.`;
