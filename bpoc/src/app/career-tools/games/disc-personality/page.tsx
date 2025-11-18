@@ -455,19 +455,21 @@ export default function FilipinoDiscGame() {
           await navigator.clipboard.writeText(facebookShareText);
           setShareModalData({ platform: 'Facebook', text: facebookShareText, url: shareUrl });
           setShowShareModal(true);
+          // Wait for modal to render before opening Facebook
           setTimeout(() => {
             const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
             window.open(facebookUrl, '_blank', 'width=600,height=400');
-          }, 1500);
+          }, 2000);
         } catch (err) {
           console.error('Failed to copy to clipboard:', err);
           // Still show modal even if clipboard fails
           setShareModalData({ platform: 'Facebook', text: facebookShareText, url: shareUrl });
           setShowShareModal(true);
+          // Wait for modal to render before opening Facebook
           setTimeout(() => {
             const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
             window.open(facebookUrl, '_blank', 'width=600,height=400');
-          }, 1500);
+          }, 2000);
         }
         break;
 
@@ -478,32 +480,34 @@ export default function FilipinoDiscGame() {
           await navigator.clipboard.writeText(linkedinShareText);
           setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: shareUrl });
           setShowShareModal(true);
+          // Wait for modal to render before opening LinkedIn
           setTimeout(() => {
             const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
             window.open(linkedinUrl, '_blank', 'width=600,height=400');
-          }, 1500);
+          }, 2000);
         } catch (err) {
           console.error('Failed to copy to clipboard:', err);
           // Still show modal even if clipboard fails
           setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: shareUrl });
           setShowShareModal(true);
+          // Wait for modal to render before opening LinkedIn
           setTimeout(() => {
             const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
             window.open(linkedinUrl, '_blank', 'width=600,height=400');
-          }, 1500);
+          }, 2000);
         }
         break;
 
       case 'copy':
-        const copyShareText = `🎯 I'm a ${personalityType.animal}! ${personalityType.title}\n\n${personalityType.description}\n\nPerfect for ${personalityType.bpoRoles[0]} roles in the BPO industry!\n\nDiscover your BPO animal spirit: ${shareUrl}\n\n#BPOC #BPOCareers #DISC #PersonalityAssessment`;
+        // For "Copy Link", only copy the URL, not the full share text
         try {
-          await navigator.clipboard.writeText(copyShareText);
-          setShareModalData({ platform: 'Clipboard', text: copyShareText, url: shareUrl });
+          await navigator.clipboard.writeText(shareUrl);
+          setShareModalData({ platform: 'Clipboard', text: shareUrl, url: shareUrl });
           setShowShareModal(true);
         } catch (err) {
           console.error('Failed to copy link:', err);
           // Still show modal even if clipboard fails
-          setShareModalData({ platform: 'Clipboard', text: copyShareText, url: shareUrl });
+          setShareModalData({ platform: 'Clipboard', text: shareUrl, url: shareUrl });
           setShowShareModal(true);
         }
         break;
@@ -3395,8 +3399,12 @@ Make it deeply personal and actionable based on their actual choices.`;
                       <span className="text-3xl">✓</span>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white">Text Copied Successfully!</h3>
-                      <p className="text-cyan-100 text-sm">Ready to share on {shareModalData.platform}</p>
+                      <h3 className="text-2xl font-bold text-white">
+                        {shareModalData.platform === 'Clipboard' ? 'Link Copied Successfully!' : 'Text Copied Successfully!'}
+                      </h3>
+                      <p className="text-cyan-100 text-sm">
+                        {shareModalData.platform === 'Clipboard' ? 'The link is ready to share!' : `Ready to share on ${shareModalData.platform}`}
+                      </p>
                     </div>
                   </div>
                   <button
@@ -3418,20 +3426,37 @@ Make it deeply personal and actionable based on their actual choices.`;
                     </div>
                     <div>
                       <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
-                      <ol className="space-y-2 text-gray-300">
-                        <li className="flex items-start gap-2">
-                          <span className="text-cyan-400 font-bold mt-0.5">1.</span>
-                          <span>The {shareModalData.platform} share dialog will open in 1.5 seconds</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-cyan-400 font-bold mt-0.5">2.</span>
-                          <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-cyan-400 font-bold mt-0.5">3.</span>
-                          <span>Your DISC results image will appear automatically - just hit Share!</span>
-                        </li>
-                      </ol>
+                      {shareModalData.platform === 'Clipboard' ? (
+                        <ol className="space-y-2 text-gray-300">
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                            <span>The link has been copied to your clipboard</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                            <span>Paste the link (Ctrl+V or Cmd+V) wherever you want to share it</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                            <span>The DISC results image will appear automatically when the link is shared!</span>
+                          </li>
+                        </ol>
+                      ) : (
+                        <ol className="space-y-2 text-gray-300">
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                            <span>The {shareModalData.platform} share dialog will open in 2 seconds</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                            <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                            <span>Your DISC results image will appear automatically - just hit Share!</span>
+                          </li>
+                        </ol>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -3439,7 +3464,9 @@ Make it deeply personal and actionable based on their actual choices.`;
                 {/* Text Preview */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Post Text Preview</label>
+                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                      {shareModalData.platform === 'Clipboard' ? 'Copied Link' : 'Post Text Preview'}
+                    </label>
                     <button
                       onClick={async () => {
                         try {
