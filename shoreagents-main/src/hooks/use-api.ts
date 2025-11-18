@@ -10,6 +10,7 @@ interface UserFormStatus {
   firstName: string | null;
   lastName: string | null;
   email: string | null;
+  desiredTeamSize: number | null;
 }
 
 interface ContactFormData {
@@ -33,6 +34,7 @@ interface AutocompleteData {
   roleTitle?: string;
   generateAnother?: boolean;
   generationCount?: number;
+  currency?: string;
 }
 
 export interface AISuggestion {
@@ -131,7 +133,8 @@ const fetchAutocompleteSuggestions = async (data: AutocompleteData): Promise<AIS
       industry: data.industry,
       roleTitle: data.roleTitle,
       generateAnother: data.generateAnother,
-      generationCount: data.generationCount
+      generationCount: data.generationCount,
+      currency: data.currency // Pass currency for language localization
     }),
   });
   
@@ -284,10 +287,11 @@ export const useAutocompleteSuggestions = (
   industry?: string,
   roleTitle?: string,
   generateAnother?: boolean,
-  generationCount?: number
+  generationCount?: number,
+  currency?: string
 ) => {
   return useQuery<AISuggestion[] | string>({
-    queryKey: ['autocomplete', query, userId, type, industry, roleTitle, generateAnother, generationCount],
+    queryKey: ['autocomplete', query, userId, type, industry, roleTitle, generateAnother, generationCount, currency],
     queryFn: () => fetchAutocompleteSuggestions({ 
       query, 
       user_id: userId,
@@ -295,7 +299,8 @@ export const useAutocompleteSuggestions = (
       industry,
       roleTitle,
       generateAnother,
-      generationCount
+      generationCount,
+      currency
     }),
     enabled: enabled && query.length >= 2, // Only fetch if query is 2 or more characters
     staleTime: 30 * 1000, // 30 seconds (reduced from 5 minutes)

@@ -34,6 +34,14 @@ export function AIIndustryAutocomplete({
 
   const userId = generateUserId();
   
+  // Sync searchQuery with incoming value prop (for pre-filling)
+  useEffect(() => {
+    if (value && value !== searchQuery) {
+      setSearchQuery(value);
+      console.log('🏭 AIIndustryAutocomplete: Syncing with parent value:', value);
+    }
+  }, [value]);
+  
   // Debounce the search query - only update after 1 second of no typing
   useEffect(() => {
     const timer = setTimeout(() => {

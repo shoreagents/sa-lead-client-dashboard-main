@@ -14,7 +14,7 @@ export interface PricingQuoteData {
   member_count: number
   industry: string
   total_monthly_cost: number
-  currency_code?: string
+  currency_code: string // Required, not optional!
   candidate_recommendations?: QuoteCandidateRoleRecommendations[]
   roles: Array<{
     role_title: string
@@ -71,6 +71,12 @@ export class PricingQuoteServiceClient {
         roles_count: quoteData.roles.length
       })
 
+      // Log the currency code being saved
+      console.log('💰 PricingQuoteServiceClient: Saving quote with currency:', {
+        currency_code: quoteData.currency_code,
+        total_monthly_cost: quoteData.total_monthly_cost
+      });
+
       // Start a transaction by saving the main quote first
       const { data: quote, error: quoteError } = await supabase
         .from('pricing_quotes')
@@ -80,7 +86,7 @@ export class PricingQuoteServiceClient {
           member_count: quoteData.member_count,
           industry: quoteData.industry,
           total_monthly_cost: quoteData.total_monthly_cost,
-          currency_code: quoteData.currency_code || 'PHP',
+          currency_code: quoteData.currency_code, // Now required in interface!
           candidate_recommendations: quoteData.candidate_recommendations || []
         })
         .select()

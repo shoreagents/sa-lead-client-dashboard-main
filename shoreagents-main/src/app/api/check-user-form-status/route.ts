@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     // Check if user exists and has filled out the form
     const { data: user, error } = await supabase
       .from('users')
-      .select('company, industry_name, first_name, last_name, email')
+      .select('company, industry_name, first_name, last_name, email, desired_team_size')
       .eq('user_id', userId)
       .single();
 
@@ -37,7 +37,8 @@ export async function GET(request: NextRequest) {
       industry: user?.industry_name || null,
       firstName: user?.first_name || null,
       lastName: user?.last_name || null,
-      email: user?.email || null
+      email: user?.email || null,
+      desiredTeamSize: user?.desired_team_size || null
     };
     
     console.log('📊 check-user-form-status API response:', response);

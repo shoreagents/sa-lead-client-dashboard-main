@@ -4,7 +4,14 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { user_id, industry, company } = body;
+    const { user_id, industry, company, employeeCount } = body;
+
+    console.log('📋 Anonymous user inquiry - Received data:', { 
+      user_id, 
+      industry, 
+      company, 
+      employeeCount 
+    });
 
     if (!user_id) {
       return NextResponse.json(
@@ -39,15 +46,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update the user record with the provided information
+    // Update the user record with the provided information including employee count
+    const updateData: any = {
+      industry_name: industry,
+      company: company || null,
+      first_lead_capture: true, // Set first lead capture flag (Stage 1)
+      updated_at: new Date().toISOString()
+    };
+
+    // Add employee count if provided (save as desired_team_size for pricing calculator)
+    if (employeeCount) {
+      updateData.desired_team_size = parseInt(employeeCount, 10);
+      console.log('💾 Saving employee count as desired_team_size:', updateData.desired_team_size);
+    }
+
     const { data, error } = await supabase
       .from('users')
-      .update({
-        industry_name: industry,
-        company: company || null,
-        first_lead_capture: true, // Set first lead capture flag
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('user_id', user_id)
       .select();
 

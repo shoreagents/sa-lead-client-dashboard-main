@@ -21,6 +21,11 @@ export function Navbar() {
   const isEmployeePage = pathname?.startsWith('/employee/')
   const isUserDashboard = pathname?.startsWith('/user-dashboard')
   const isAdminDashboard = pathname?.startsWith('/admin-dashboard')
+  
+  // Hide navbar completely on dashboard pages
+  if (isUserDashboard || isAdminDashboard) {
+    return null
+  }
 
   // Country name mapping for currencies
   const currencyCountryNames: Record<string, string> = {

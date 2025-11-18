@@ -2,7 +2,7 @@
 
 import { UserGuard } from '@/components/auth/UserGuard'
 import { UserDashboardSidebar } from '@/components/layout/UserDashboardSidebar'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { useUserAuth } from '@/lib/user-auth-context'
 import { useDeleteQuotationMutation } from '@/hooks/use-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,7 +34,7 @@ import { RefreshCw } from 'lucide-react'
 
 export default function QuotationPage() {
   const { user } = useUserAuth()
-  const { formatPrice, convertPrice } = useCurrency()
+  const { formatPrice, convertPrice, selectedCurrency } = useCurrency()
   const queryClient = useQueryClient()
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false)
@@ -42,6 +42,32 @@ export default function QuotationPage() {
   const [selectedQuote, setSelectedQuote] = useState<UserQuoteSummary | null>(null)
   const [isDownloading, setIsDownloading] = useState<string | null>(null)
   const [isSending, setIsSending] = useState<string | null>(null)
+
+  // Currency conversion helper - Convert from quote's saved currency to selected currency
+  const convertQuoteCurrency = (amount: number, fromCurrency: string): number => {
+    if (fromCurrency === selectedCurrency.code) {
+      return amount // No conversion needed
+    }
+    
+    // Currency rates relative to PHP (from fixedPricingService.ts)
+    const CURRENCY_RATES: Record<string, number> = {
+      USD: 0.018,  // 1 PHP = $0.018
+      AUD: 0.027,  // 1 PHP = A$0.027
+      CAD: 0.024,  // 1 PHP = C$0.024
+      GBP: 0.014,  // 1 PHP = £0.014
+      NZD: 0.029,  // 1 PHP = NZ$0.029
+      EUR: 0.016,  // 1 PHP = €0.016
+      PHP: 1.0     // 1 PHP = ₱1.0
+    }
+    
+    // Step 1: Convert from original currency to USD
+    const amountInUsd = amount / (CURRENCY_RATES[fromCurrency] || 1)
+    
+    // Step 2: Convert from USD to target currency
+    const amountInTargetCurrency = amountInUsd * (CURRENCY_RATES[selectedCurrency.code] || 1)
+    
+    return amountInTargetCurrency
+  }
 
   // TanStack Query for fetching quotations
   const {
@@ -227,7 +253,7 @@ export default function QuotationPage() {
       id: quote.id,
       clientName: "Your Company",
       projectName: `${quote.industry} Team - ${quote.member_count} Members`,
-      amount: convertPrice(quote.total_monthly_cost), // Convert to current currency
+      amount: convertQuoteCurrency(quote.total_monthly_cost, quote.currency_code), // Convert from quote's currency to selected currency
       status: status,
       createdDate: quote.created_at,
       validUntil: new Date(new Date(quote.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from creation
@@ -245,11 +271,12 @@ export default function QuotationPage() {
           }
         });
 
+        const convertedTotal = convertQuoteCurrency(quote.total_monthly_cost, quote.currency_code);
         return Object.values(groupedRoles).map((groupedRole) => ({
           name: groupedRole.count > 1 ? `${groupedRole.role.role_title} x${groupedRole.count}` : groupedRole.role.role_title,
           quantity: groupedRole.count,
-          rate: Math.round(convertPrice(quote.total_monthly_cost / quote.roles_count)),
-          total: Math.round(convertPrice(quote.total_monthly_cost / quote.roles_count)) * groupedRole.count
+          rate: Math.round(convertedTotal / quote.roles_count),
+          total: Math.round(convertedTotal / quote.roles_count) * groupedRole.count
         }));
       })()
     }
@@ -311,50 +338,43 @@ export default function QuotationPage() {
       <SidebarProvider>
         <UserDashboardSidebar />
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">Quotations</h1>
-              <Badge variant="secondary" className="text-xs">
-                {filteredQuotations.length} quotations
-              </Badge>
-              {isStale && (
-                <Badge variant="outline" className="text-xs text-orange-600">
-                  Data may be outdated
-                </Badge>
-              )}
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
-          </header>
-          
           <div className="flex flex-1 flex-col gap-4 p-4">
             {/* Header */}
             <div className="grid gap-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold tracking-tight">Quotation Management</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-2xl font-bold tracking-tight">Quotation Management</h2>
+                    <Badge variant="secondary" className="text-xs">
+                      {filteredQuotations.length} quotations
+                    </Badge>
+                    {isStale && (
+                      <Badge variant="outline" className="text-xs text-orange-600">
+                        Data may be outdated
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-muted-foreground">
                     Create, manage, and track your quotations
                   </p>
                 </div>
-                <Button 
-                  className="bg-lime-600 hover:bg-lime-700"
-                  onClick={handleCreateQuotation}
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Quotation
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => refetch()}
+                    disabled={isFetching}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  <Button 
+                    className="bg-lime-600 hover:bg-lime-700"
+                    onClick={handleCreateQuotation}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Quotation
+                  </Button>
+                </div>
               </div>
             </div>
 

@@ -9,6 +9,8 @@ import {
   Users 
 } from 'lucide-react'
 import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
+import { useCurrency } from '@/lib/currencyContext'
+import { convertSalaryToCurrency, formatCurrency } from '@/lib/fixedPricingService'
 
 // Next Step Card Component
 interface NextStepCardProps {
@@ -171,6 +173,50 @@ export const RecentQuoteCard = ({
 }: RecentQuoteCardProps) => {
   const latestQuote = recentQuotes.length > 0 ? recentQuotes[0] : null;
   const otherQuotes = recentQuotes.slice(1, 3); // Show up to 2 additional quotes
+  
+  // Get user's current currency preference
+  const { selectedCurrency } = useCurrency();
+  
+  // Helper function to convert quote cost to user's current currency
+  const convertQuoteCurrency = (cost: number, quoteCurrency: string) => {
+    if (quoteCurrency === selectedCurrency.code) {
+      // Already in correct currency
+      return cost;
+    }
+    
+    // Currency rates relative to USD
+    const CURRENCY_RATES: Record<string, number> = {
+      USD: 1.0,
+      AUD: 1.5,    // 1 USD = 1.5 AUD
+      GBP: 0.77,   // 1 USD = 0.77 GBP
+      CAD: 1.32,   // 1 USD = 1.32 CAD
+      NZD: 1.59,   // 1 USD = 1.59 NZD
+      EUR: 0.95,   // 1 USD = 0.95 EUR
+      PHP: 55.5    // 1 USD = 55.5 PHP
+    };
+    
+    // Get the exchange rates
+    const quoteRate = CURRENCY_RATES[quoteCurrency] || 1.0;
+    const targetRate = CURRENCY_RATES[selectedCurrency.code] || 1.0;
+    
+    // Convert: Quote currency -> USD -> Target currency
+    // If quote is in USD and we want AUD: USD * (AUD_rate / USD_rate) = USD * 1.5
+    // If quote is in PHP and we want USD: PHP * (USD_rate / PHP_rate) = PHP / 55.5
+    const costInUsd = cost / quoteRate;  // Convert quote to USD
+    const convertedCost = costInUsd * targetRate;  // Convert USD to target
+    
+    console.log('💱 Converting quote currency:', {
+      originalCost: cost,
+      quoteCurrency,
+      quoteRate,
+      costInUsd: Math.round(costInUsd),
+      targetCurrency: selectedCurrency.code,
+      targetRate,
+      convertedCost: Math.round(convertedCost)
+    });
+    
+    return convertedCost;
+  };
 
   return (
     <Card 
@@ -224,7 +270,10 @@ export const RecentQuoteCard = ({
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-bold text-lime-600">
-                    {UserQuoteService.formatCurrency(latestQuote.total_monthly_cost, latestQuote.currency_code)}
+                    {(() => {
+                      const convertedCost = convertQuoteCurrency(latestQuote.total_monthly_cost, latestQuote.currency_code);
+                      return formatCurrency(convertedCost, selectedCurrency.code);
+                    })()}
                   </div>
                   <div className="text-xs text-gray-500">per month</div>
                 </div>
@@ -243,7 +292,10 @@ export const RecentQuoteCard = ({
                     <div key={quote.id} className="bg-gray-50 rounded-lg p-2 border border-gray-200">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-700">
-                          {UserQuoteService.formatCurrency(quote.total_monthly_cost, quote.currency_code)}
+                          {(() => {
+                            const convertedCost = convertQuoteCurrency(quote.total_monthly_cost, quote.currency_code);
+                            return formatCurrency(convertedCost, selectedCurrency.code);
+                          })()}
                         </span>
                         <span className="text-xs text-gray-500">
                           {UserQuoteService.getQuoteAge(quote.created_at)}

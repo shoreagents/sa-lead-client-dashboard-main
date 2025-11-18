@@ -30,11 +30,14 @@ import {
   Clock,
   Trash2,
   Plus,
+  DollarSign,
+  ChevronDown,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
 import { useChatContext } from '@/lib/chat-context'
+import { useCurrency } from '@/lib/currencyContext'
 
 const userNavItems = [
   {
@@ -87,6 +90,21 @@ export function UserDashboardSidebar({ onChatOpen }: UserDashboardSidebarProps) 
   const { toggleSidebar, state } = useSidebar()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
+  const [showCurrencyDropdown, setShowCurrencyDropdown] = useState(false)
+  
+  // Currency context
+  const { selectedCurrency, currencies, setSelectedCurrency, setHasUserSelectedCurrency, setIsAutoDetected } = useCurrency()
+  
+  // Country name mapping for currencies
+  const currencyCountryNames: Record<string, string> = {
+    USD: 'United States',
+    AUD: 'Australia',
+    CAD: 'Canada',
+    GBP: 'United Kingdom',
+    NZD: 'New Zealand',
+    EUR: 'Europe',
+    PHP: 'Philippines'
+  }
   
   // Chat context for creating new conversations
   const { clearMessages, setCurrentConversationId } = useChatContext()
@@ -298,7 +316,59 @@ export function UserDashboardSidebar({ onChatOpen }: UserDashboardSidebarProps) 
 
 
       <SidebarFooter>
-        <div className="flex items-center gap-3 px-3 py-3">
+        {/* Currency Selector */}
+        <div className="border-t border-gray-200 pt-3 pb-2 px-3">
+          <div className="relative">
+            <button
+              onClick={() => setShowCurrencyDropdown(!showCurrencyDropdown)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors group"
+            >
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-lime-600" />
+                <span className="text-sm font-medium text-gray-700 group-data-[collapsible=icon]:hidden">
+                  Currency
+                </span>
+              </div>
+              <div className="flex items-center gap-1 group-data-[collapsible=icon]:hidden">
+                <span className="text-sm font-semibold text-gray-900">{selectedCurrency.code}</span>
+                <ChevronDown className={`w-3 h-3 text-gray-500 transition-transform ${showCurrencyDropdown ? 'rotate-180' : ''}`} />
+              </div>
+            </button>
+            
+            {/* Currency Dropdown */}
+            {showCurrencyDropdown && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50 group-data-[collapsible=icon]:hidden">
+                <div className="max-h-64 overflow-y-auto py-1">
+                  {currencies.map((currency) => (
+                    <button
+                      key={currency.code}
+                      onClick={() => {
+                        setSelectedCurrency(currency)
+                        setHasUserSelectedCurrency(true)
+                        setIsAutoDetected(false)
+                        setShowCurrencyDropdown(false)
+                      }}
+                      className={`w-full flex items-center justify-between px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                        selectedCurrency.code === currency.code ? 'bg-lime-50' : ''
+                      }`}
+                    >
+                      <div className="flex flex-col items-start">
+                        <span className="font-semibold text-gray-900">{currency.code}</span>
+                        <span className="text-xs text-gray-500">{currencyCountryNames[currency.code]}</span>
+                      </div>
+                      {selectedCurrency.code === currency.code && (
+                        <div className="w-2 h-2 bg-lime-600 rounded-full" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* User Profile */}
+        <div className="flex items-center gap-3 px-3 py-3 border-t border-gray-200">
           <Avatar className="h-10 w-10">
             <AvatarImage src="" alt={appUser?.first_name ?? undefined} />
             <AvatarFallback className="bg-lime-600 text-white text-sm font-semibold">

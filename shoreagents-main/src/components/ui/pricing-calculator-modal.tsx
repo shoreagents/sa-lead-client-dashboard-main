@@ -387,6 +387,12 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
 
       console.log('💾 Saving candidate recommendations:', candidateRecommendations);
 
+      console.log('💰 SAVING QUOTE WITH CURRENCY:', {
+        selectedCurrency: selectedCurrency.code,
+        totalMonthlyCost: quoteData.totalMonthlyCost,
+        userId: userId
+      });
+
       const pricingQuoteData: PricingQuoteData = {
         user_id: userId, // Use device fingerprint, not Supabase Auth UUID
         session_id: `session_${Date.now()}`, // Generate a session ID
@@ -735,10 +741,20 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
       console.log('🏢 Pricing modal - Company data check:', userFormStatus);
       setHasCompanyData(!!userFormStatus.company);
       
-      // For anonymous users, set company from database if available
-      if (!isAuthenticated && userFormStatus.company) {
-        setCompany(userFormStatus.company);
-        console.log('🏢 Setting company from database:', userFormStatus.company);
+      // For anonymous users, set company, industry, and team size from database if available (Stage 1 lead capture)
+      if (!isAuthenticated) {
+        if (userFormStatus.company) {
+          setCompany(userFormStatus.company);
+          console.log('🏢 Setting company from database:', userFormStatus.company);
+        }
+        if (userFormStatus.industry) {
+          setIndustry(userFormStatus.industry);
+          console.log('🏭 Setting industry from database:', userFormStatus.industry);
+        }
+        if (userFormStatus.desiredTeamSize) {
+          setMemberCount(userFormStatus.desiredTeamSize);
+          console.log('👥 Setting team size from database:', userFormStatus.desiredTeamSize);
+        }
       }
       
       // If user already has contact form data, mark as submitted
@@ -765,19 +781,32 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
     if (isOpen && isFirstRender.current) {
       isFirstRender.current = false;
       setCurrentStep(1);
-      setMemberCount(null);
       // For authenticated users, use their company from profile; for anonymous users, check database
       if (isAuthenticated) {
         setCompany(user?.company || '');
+        setIndustry(''); // Authenticated users re-enter industry
+        setMemberCount(null); // Authenticated users re-enter team size
       } else {
-        // For anonymous users, check if they already have company data in database
+        // For anonymous users, check if they already have company, industry, and team size data in database (Stage 1)
         if (userFormStatus?.company) {
           setCompany(userFormStatus.company);
         } else {
           setCompany('');
         }
+        if (userFormStatus?.industry) {
+          setIndustry(userFormStatus.industry);
+          console.log('🏭 Pre-filling industry on modal open:', userFormStatus.industry);
+        } else {
+          setIndustry('');
+        }
+        if (userFormStatus?.desiredTeamSize) {
+          setMemberCount(userFormStatus.desiredTeamSize);
+          console.log('👥 Pre-filling team size on modal open:', userFormStatus.desiredTeamSize);
+        } else {
+          setMemberCount(null);
+        }
       }
-      setIndustry('');
+      // Don't reset industry/team size here - they're set above based on user data
       setSameRoles(false);
       setRoles([{ id: '1', title: '', description: '', level: 'entry', count: 1, workspace: 'wfh', isCompleted: false }]);
       setQuoteData(null);
@@ -786,7 +815,7 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
       setSaveSuccess(false);
       setIsSaving(false);
     }
-  }, [isOpen, isAuthenticated, user]);
+  }, [isOpen, isAuthenticated, user, userFormStatus]);
 
   // This useEffect is now handled by the main role creation logic below
   // Keeping this for reference but it's no longer needed
@@ -1306,6 +1335,7 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
                                industry={industry}
                                placeholder="Enter role..."
                                id={`title-${role.id}`}
+                               currency={selectedCurrency.code}
                              />
                              
                              {/* Experience Level Selector */}
@@ -1346,6 +1376,7 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
                                onSave={() => handleRoleSave(role.id)}
                                onEditingChange={(isEditing) => handleRoleEditingChange(role.id, isEditing)}
                                 className="min-h-[200px]"
+                               currency={selectedCurrency.code}
                              />
                              
                              {/* Dynamic Button - positioned below role description */}

@@ -13,6 +13,8 @@ import { useFavorites } from '@/lib/favorites-context'
 import { getEmployeeCardData } from '@/lib/api'
 import { EmployeeCardData } from '@/types/api'
 import { useEmployeeCardData } from '@/hooks/use-api'
+import { useCurrency } from '@/lib/currencyContext'
+import { calculateCandidateMonthlyCost, formatCurrency } from '@/lib/fixedPricingService'
 
 // Top Candidate Section Component
 interface TopCandidateSectionProps {
@@ -30,6 +32,9 @@ const TopCandidateSection = ({
 }: TopCandidateSectionProps) => {
   // Use TanStack Query for data fetching - preserves all custom logic
   const { data: allProfiles = [], isLoading: isLoadingProfiles } = useEmployeeCardData();
+  
+  // Get user's currency preference
+  const { selectedCurrency } = useCurrency();
   
   // Find the profile that matches the current candidate - preserves custom logic
   const employeeProfile = React.useMemo(() => {
@@ -98,7 +103,17 @@ const TopCandidateSection = ({
                 {displayData.expectedSalary > 0 && (
                   <div className="mb-3">
                     <div className="text-xs font-medium text-lime-600">
-                      Expected: ${displayData.expectedSalary.toLocaleString()}/month
+                      {(() => {
+                        // Calculate actual monthly cost using SAME formula as pricing calculator
+                        // expectedSalary is in PHP, default to 'mid' level and 'wfh' workspace
+                        const monthlyCost = calculateCandidateMonthlyCost(
+                          displayData.expectedSalary,
+                          'mid', // Default to mid-level (can be enhanced to get from candidate profile)
+                          'wfh', // Default to work from home
+                          selectedCurrency.code
+                        );
+                        return `${formatCurrency(monthlyCost, selectedCurrency.code)}/month`;
+                      })()}
                     </div>
                   </div>
                 )}
@@ -185,6 +200,9 @@ const BestMatchedCandidates = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const [employeeProfiles, setEmployeeProfiles] = useState<EmployeeCardData[]>([]);
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(false);
+  
+  // Get user's currency preference
+  const { selectedCurrency } = useCurrency();
   
   // Debug logging
   console.log('🎯 BestMatchedCandidates received:', {
@@ -355,7 +373,17 @@ const BestMatchedCandidates = ({
         {displayData.expectedSalary > 0 && (
           <div className="mb-3">
             <div className="text-xs font-medium text-lime-600">
-              Expected: ${displayData.expectedSalary.toLocaleString()}/month
+              {(() => {
+                // Calculate actual monthly cost using SAME formula as pricing calculator
+                // expectedSalary is in PHP, default to 'mid' level and 'wfh' workspace
+                const monthlyCost = calculateCandidateMonthlyCost(
+                  displayData.expectedSalary,
+                  'mid', // Default to mid-level (can be enhanced to get from candidate profile)
+                  'wfh', // Default to work from home
+                  selectedCurrency.code
+                );
+                return `${formatCurrency(monthlyCost, selectedCurrency.code)}/month`;
+              })()}
             </div>
           </div>
         )}
