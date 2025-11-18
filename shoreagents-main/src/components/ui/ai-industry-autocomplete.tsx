@@ -58,7 +58,11 @@ export function AIIndustryAutocomplete({
     userId, 
     isOpen && debouncedQuery.length >= 2, // Only fetch when debounced query is ready (changed from > 2 to >= 2)
     'industry',
-    currency // Pass user's currency for location-aware suggestions
+    undefined, // industry (not needed for industry type suggestions)
+    undefined, // roleTitle
+    undefined, // generateAnother
+    undefined, // generationCount
+    currency   // Pass user's currency for location-aware suggestions (THIS IS PARAM #9!)
   );
 
   // Fallback suggestions for common industry terms - INDUSTRIES ONLY, NOT JOB ROLES
