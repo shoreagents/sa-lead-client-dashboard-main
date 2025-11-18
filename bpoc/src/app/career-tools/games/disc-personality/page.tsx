@@ -1784,7 +1784,8 @@ Make it deeply personal and actionable based on their actual choices.`;
                               .replace(/Actionoriented/g, 'Action-oriented')
                               .replace(/Relationshipconscious/g, 'Relationship-conscious')
                               .replace(/Strategicrelationship/g, 'Strategic relationship')
-                              .replace(/Adaptablecommunicator/g, 'Adaptable communicator');
+                              .replace(/Adaptablecommunicator/g, 'Adaptable communicator')
+                              .replace(/\*\*/g, ''); // Remove markdown bold markers
                             
                             return (
                               <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm">
@@ -1818,6 +1819,7 @@ Make it deeply personal and actionable based on their actual choices.`;
                             // Clean up the content and display as bullet points
                             const cleanCultural = culturalSection
                               .replace(/^[^:]*:\s*/, '') // Remove everything before the first colon
+                              .replace(/\*\*/g, '') // Remove markdown bold markers
                               .trim();
                             
                             // Split by numbered items or bullet points and display each as a separate line
@@ -3343,15 +3345,24 @@ Make it deeply personal and actionable based on their actual choices.`;
       </AlertDialog>
 
       {/* Share Modal */}
-      {showShareModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.3 }}
-            className="relative w-full max-w-2xl"
+      <AnimatePresence>
+        {showShareModal && (
+          <div 
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowShareModal(false);
+              }
+            }}
           >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.3 }}
+              className="relative w-full max-w-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Glow Effects */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
             
@@ -3462,9 +3473,10 @@ Make it deeply personal and actionable based on their actual choices.`;
                 </div>
               </div>
             </div>
-          </motion.div>
-        </div>
-      )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
