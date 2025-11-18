@@ -20,11 +20,24 @@ export const useAppUserQuery = (authUser: User | null) => {
         .from('users')
         .select('*')
         .eq('auth_user_id', authUser.id)
-        .single()
+        .maybeSingle() // Use maybeSingle() instead of single() - returns null if no record
 
       if (error) {
         console.error('Error fetching app user:', error)
+        // If user doesn't exist in users table, sign them out
+        if (error.code === 'PGRST116' || error.details?.includes('0 rows')) {
+          console.warn('⚠️ No user record found for auth user, signing out...')
+          await supabase.auth.signOut()
+          return null
+        }
         throw error
+      }
+
+      // If no user record exists, sign out
+      if (!userData) {
+        console.warn('⚠️ No user record found, signing out...')
+        await supabase.auth.signOut()
+        return null
       }
 
       return userData

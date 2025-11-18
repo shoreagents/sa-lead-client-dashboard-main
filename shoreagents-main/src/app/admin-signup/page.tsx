@@ -64,12 +64,12 @@ export default function AdminSignupPage() {
         return
       }
 
-      // Verify invite code
-      if (formData.inviteCode !== ADMIN_INVITE_CODE) {
-        setError('Invalid admin invite code. Contact your system administrator.')
-        setLoading(false)
-        return
-      }
+      // Verify invite code (DISABLED FOR TESTING - ENABLE IN PRODUCTION!)
+      // if (formData.inviteCode !== ADMIN_INVITE_CODE) {
+      //   setError('Invalid admin invite code. Contact your system administrator.')
+      //   setLoading(false)
+      //   return
+      // }
 
       console.log('📝 Creating admin account...')
 
@@ -309,8 +309,8 @@ export default function AdminSignupPage() {
               />
             </div>
 
-            {/* Admin Invite Code */}
-            <div className="space-y-2">
+            {/* Admin Invite Code - HIDDEN FOR TESTING */}
+            {/* <div className="space-y-2">
               <Label htmlFor="inviteCode">Admin Invite Code</Label>
               <Input
                 id="inviteCode"
@@ -325,7 +325,7 @@ export default function AdminSignupPage() {
               <p className="text-xs text-gray-500">
                 Contact your system administrator for the admin invite code
               </p>
-            </div>
+            </div> */}
 
             {/* Submit Button */}
             <Button

@@ -62,10 +62,23 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
         .from('users')
         .select('*')
         .eq('auth_user_id', authUser.id)
-        .single()
+        .maybeSingle() // Use maybeSingle() - returns null if no record found
 
       if (error) {
         console.error('Error fetching user data:', error)
+        // If user doesn't exist in users table, sign them out
+        if (error.code === 'PGRST116' || error.details?.includes('0 rows')) {
+          console.warn('⚠️ No user record found for auth user, signing out...')
+          await supabase.auth.signOut()
+          return null
+        }
+        return null
+      }
+
+      // If no user record exists, sign out
+      if (!data) {
+        console.warn('⚠️ No user record found, signing out...')
+        await supabase.auth.signOut()
         return null
       }
 
@@ -169,7 +182,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
           .from('users')
           .select('*')
           .eq('user_id', deviceFingerprintId)
-          .single()
+          .maybeSingle() // Use maybeSingle() - returns null if no record
 
         console.log('🔍 Existing user check:', { existingUser, checkError })
 
