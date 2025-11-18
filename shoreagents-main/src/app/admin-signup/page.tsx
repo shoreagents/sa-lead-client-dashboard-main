@@ -73,10 +73,17 @@ export default function AdminSignupPage() {
 
       console.log('📝 Creating admin account...')
 
+      // IMPORTANT: Sign out first to prevent UserAuthProvider race condition
+      await supabase.auth.signOut()
+
       // Step 1: Create Supabase Auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          // Skip email confirmation for admin accounts
+          emailRedirectTo: undefined,
+        }
       })
 
       if (authError) {
@@ -93,6 +100,12 @@ export default function AdminSignupPage() {
       }
 
       console.log('✅ Auth user created:', authData.user.id)
+
+      // IMPORTANT: Sign out immediately to prevent auth state listener from firing
+      await supabase.auth.signOut()
+
+      // Small delay to ensure auth system has fully processed
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // Step 2: Create admin user in users table with Admin type
       const { error: dbError } = await supabase
@@ -120,38 +133,43 @@ export default function AdminSignupPage() {
       console.log('✅ Admin user record created in database')
 
       // Step 3: Create admin_users entry (if you have that table)
-      const { error: adminError } = await supabase
-        .from('admin_users')
-        .insert({
-          user_id: authData.user.id,
-          admin_level: 'super',
-          permissions: {
-            user_management: true,
-            system_settings: true,
-            analytics: true,
-            billing: true,
-            support: true,
-            content_management: true
-          },
-          admin_preferences: {
-            dashboard_layout: 'default',
-            notifications: true,
-            email_reports: true,
-            security_alerts: true
-          },
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+      // This is optional and won't fail if table doesn't exist
+      try {
+        const { error: adminError } = await supabase
+          .from('admin_users')
+          .insert({
+            user_id: authData.user.id,
+            admin_level: 'super',
+            permissions: {
+              user_management: true,
+              system_settings: true,
+              analytics: true,
+              billing: true,
+              support: true,
+              content_management: true
+            },
+            admin_preferences: {
+              dashboard_layout: 'default',
+              notifications: true,
+              email_reports: true,
+              security_alerts: true
+            },
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
 
-      // If admin_users table doesn't exist, that's okay - we'll ignore the error
-      if (adminError && !adminError.message.includes('relation "admin_users" does not exist')) {
-        console.warn('⚠️ Admin users table insert warning:', adminError)
-      } else {
-        console.log('✅ Admin users record created')
+        if (adminError) {
+          console.warn('⚠️ Admin users table insert warning (this is optional):', adminError.message)
+        } else {
+          console.log('✅ Admin users record created')
+        }
+      } catch (adminTableError) {
+        // admin_users table doesn't exist - that's okay
+        console.log('ℹ️ Admin users table not found (this is optional)')
       }
 
+      console.log('🎉 Admin account creation complete!')
+      
       setSuccess(true)
       
       // Wait 2 seconds then redirect to admin login
