@@ -92,17 +92,77 @@ export async function GET(request: NextRequest) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'center',
               padding: '80px',
               width: '60%',
+              position: 'relative',
             }}
           >
-            {/* Animal Emoji & Personality Type */}
+            {/* Top Right - Nickname, Location, Position */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-end',
+                marginBottom: 40,
+              }}
+            >
+              {avatarUrl && (
+                <img
+                  src={avatarUrl}
+                  width="80"
+                  height="80"
+                  style={{
+                    borderRadius: '50%',
+                    border: '3px solid #06B6D4',
+                    objectFit: 'cover',
+                    marginBottom: 15,
+                  }}
+                />
+              )}
+              <div
+                style={{
+                  fontSize: 32,
+                  fontWeight: 'bold',
+                  color: 'white',
+                  display: 'flex',
+                  marginBottom: 8,
+                }}
+              >
+                @{displayName}
+              </div>
+              {location && (
+                <div
+                  style={{
+                    fontSize: 20,
+                    color: '#67E8F9',
+                    display: 'flex',
+                    marginBottom: 8,
+                  }}
+                >
+                  {location}
+                </div>
+              )}
+              {userTitle && (
+                <div
+                  style={{
+                    fontSize: 22,
+                    color: 'white',
+                    display: 'flex',
+                    fontWeight: '600',
+                  }}
+                >
+                  {userTitle}
+                </div>
+              )}
+            </div>
+
+            {/* Animal Emoji & Personality Type - Below user info */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
+                marginTop: 'auto',
                 marginBottom: 40,
               }}
             >
@@ -143,74 +203,6 @@ export async function GET(request: NextRequest) {
                 </div>
               </div>
             </div>
-
-            {/* Profile Photo & Username */}
-            {avatarUrl && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 30,
-                }}
-              >
-                <img
-                  src={avatarUrl}
-                  width="120"
-                  height="120"
-                  style={{
-                    borderRadius: '50%',
-                    border: '4px solid #06B6D4',
-                    objectFit: 'cover',
-                    marginRight: 20,
-                  }}
-                />
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 36,
-                      fontWeight: 'bold',
-                      color: 'white',
-                      display: 'flex',
-                    }}
-                  >
-                    @{displayName}
-                  </div>
-                  {location && (
-                    <div
-                      style={{
-                        fontSize: 20,
-                        color: '#67E8F9',
-                        marginTop: 5,
-                        display: 'flex',
-                      }}
-                    >
-                      {location}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Job Title */}
-            {userTitle && (
-              <div
-                style={{
-                  fontSize: 28,
-                  color: 'white',
-                  marginBottom: 40,
-                  display: 'flex',
-                  fontWeight: '600',
-                }}
-              >
-                {userTitle}
-              </div>
-            )}
 
             {/* BPOC Logo/Text */}
             <div
@@ -307,7 +299,7 @@ export async function GET(request: NextRequest) {
                     display: 'flex',
                   }}
                 >
-                  Take Assessment Now
+                  Sign Up Now
                 </div>
               </div>
 
