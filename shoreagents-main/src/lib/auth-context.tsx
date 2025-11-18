@@ -24,6 +24,11 @@ export const useAppUserQuery = (authUser: User | null) => {
         .single()
 
       if (error) {
+        // Don't log or throw "no rows found" errors - they're expected for new/deleted users
+        if (error.code === 'PGRST116' || error.message?.includes('0 rows')) {
+          return null
+        }
+        // Only log and throw for unexpected errors
         console.error('Error fetching app user:', error)
         throw error
       }

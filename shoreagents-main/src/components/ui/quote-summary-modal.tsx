@@ -380,7 +380,7 @@ export function QuoteSummaryModal({ isOpen, onClose, quote }: QuoteSummaryModalP
                         <Button 
                           size="sm" 
                           className="flex-1 bg-lime-600 hover:bg-lime-700 text-white"
-                          onClick={() => window.open(`/employee/${candidate.id}`, '_blank')}
+                          onClick={() => window.open(`/candidates/${candidate.id}`, '_blank')}
                         >
                           <Eye className="w-4 h-4 mr-2" />
                           View Profile

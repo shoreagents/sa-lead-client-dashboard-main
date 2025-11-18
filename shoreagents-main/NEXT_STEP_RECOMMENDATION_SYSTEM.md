@@ -106,7 +106,7 @@ Conditions:
 - Specific candidate identified
 
 Action: "Schedule Interview"
-URL: /employee/{candidate_id}?action=interview
+URL: /candidates/{candidate_id}?action=interview
 ```
 
 #### 2. **Book Consultation** (Priority: 92)
@@ -180,7 +180,7 @@ x-user-id: string (required)
     "title": "Request Interview",
     "description": "You've shown interest in John Doe. Ready to meet them?",
     "action": "Schedule Interview",
-    "actionUrl": "/employee/abc123?action=interview",
+    "actionUrl": "/candidates/abc123?action=interview",
     "icon": "Video",
     "priority": 95,
     "reason": "Frequently viewed candidate"

@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Video, Mail, Calendar, Clock, Trash2, CheckSquare, Square } from 'lucide-react'
-import { NotificationDropdown } from '@/components/ui/notification-dropdown'
 import { useState, useEffect, useMemo } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
@@ -288,7 +287,7 @@ export default function CallInvitationsPage() {
         <UserDashboardSidebar />
         <SidebarInset>
           <div className="flex flex-1 flex-col gap-4 p-6 pt-20">
-            {/* Header with notification dropdown */}
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-3xl font-bold tracking-tight">Call Invitations</h1>
@@ -298,7 +297,6 @@ export default function CallInvitationsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <SidebarTrigger className="lg:hidden" />
-                <NotificationDropdown />
               </div>
             </div>
 

@@ -30,7 +30,7 @@ export function Navbar() {
   const pathname = usePathname()
   
   // Memoize route checks to prevent unnecessary recalculations
-  const isEmployeePage = useMemo(() => pathname?.startsWith('/employee/'), [pathname])
+  const isEmployeePage = useMemo(() => pathname?.startsWith('/candidates/'), [pathname])
   const isUserDashboard = useMemo(() => pathname?.startsWith('/user-dashboard'), [pathname])
   const isAdminDashboard = useMemo(() => pathname?.startsWith('/admin-dashboard'), [pathname])
 

@@ -582,7 +582,7 @@ export function BottomNav() {
     console.log('View matched profile clicked for candidate:', candidateName, candidateId)
       setIsDrawerOpen(false)
     if (candidateId) {
-      router.push(`/employee/${candidateId}`)
+      router.push(`/candidates/${candidateId}`)
     }
   }, [router])
 
@@ -626,7 +626,7 @@ export function BottomNav() {
   const hiddenPaths = ['/auth/signup', '/auth/login', '/auth/forgot-password']
   const isDashboardPage = pathname?.startsWith('/user-dashboard') || 
                          pathname?.startsWith('/admin-dashboard') ||
-                         pathname?.startsWith('/employee/')
+                         pathname?.startsWith('/candidates/')
   
   if (hiddenPaths.includes(pathname) || isDashboardPage) {
     return null

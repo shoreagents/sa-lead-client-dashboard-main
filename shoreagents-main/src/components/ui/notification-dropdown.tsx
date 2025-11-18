@@ -33,7 +33,7 @@ export function NotificationDropdown() {
   const pathname = usePathname()
   const deleteRefetchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   
-  const isEmployeePage = useMemo(() => pathname?.startsWith('/employee/'), [pathname])
+  const isEmployeePage = useMemo(() => pathname?.startsWith('/candidates/'), [pathname])
   const isUserDashboard = useMemo(() => pathname?.startsWith('/user-dashboard'), [pathname])
   const isAdminDashboard = useMemo(() => pathname?.startsWith('/admin-dashboard'), [pathname])
 

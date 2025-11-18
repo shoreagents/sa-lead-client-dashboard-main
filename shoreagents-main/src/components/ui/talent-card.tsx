@@ -216,11 +216,11 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
                 await new Promise(resolve => setTimeout(resolve, 150));
                 
                 // Use full page refresh to ensure clean state
-                window.location.href = `/employee/${data.user.id}`;
+                window.location.href = `/candidates/${data.user.id}`;
               } catch (error) {
                 console.error('❌ Error ending tracking before navigation:', error);
                 // Still navigate even if tracking fails
-                window.location.href = `/employee/${data.user.id}`;
+                window.location.href = `/candidates/${data.user.id}`;
               }
             }}
             className="w-full bg-gradient-to-r from-lime-600 to-lime-700 hover:from-lime-700 hover:to-lime-800 text-white flex items-center justify-center space-x-2"

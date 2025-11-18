@@ -1,14 +1,26 @@
 const express = require('express')
 const { createServer } = require('http')
 const { Server } = require('socket.io')
+const { parse } = require('url')
+const next = require('next')
 const cors = require('cors')
+
+// Initialize Next.js
+const dev = process.env.NODE_ENV !== 'production'
+const hostname = process.env.HOSTNAME || 'localhost'
+const PORT = parseInt(process.env.SOCKET_PORT || '3001', 10)
+const HOST = process.env.SOCKET_HOST || 'localhost'
+
+const nextApp = next({ dev, hostname, port: PORT })
+const handle = nextApp.getRequestHandler()
 
 const app = express()
 const httpServer = createServer(app)
 
 // Enable CORS for Express routes
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${PORT}`
 app.use(cors({
-  origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  origin: appUrl,
   credentials: true,
 }))
 
@@ -17,7 +29,7 @@ app.use(express.json())
 // Initialize Socket.io server
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    origin: appUrl,
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -29,10 +41,6 @@ const onlineUsers = new Map()
 
 // Expose io instance globally for HTTP endpoints
 global.io = io
-
-// Define port and host
-const PORT = process.env.SOCKET_PORT || 3001
-const HOST = process.env.SOCKET_HOST || 'localhost'
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
@@ -192,16 +200,17 @@ app.post('/emit/incoming-call', (req, res) => {
   }
 })
 
-// GET / - Root endpoint
-app.get('/', (req, res) => {
+// API endpoints (before Next.js handler)
+// GET /api/socket/status - Socket.io status endpoint
+app.get('/api/socket/status', (req, res) => {
   res.json({ 
     success: true,
     message: 'Socket.io Server is running',
     status: 'running',
     port: PORT,
     endpoints: {
-      health: '/health',
-      onlineUsers: '/online-users',
+      health: '/api/socket/health',
+      onlineUsers: '/api/socket/online-users',
       emitNotification: 'POST /emit/notification',
       emitNotificationUpdate: 'POST /emit/notification-update',
       emitNotificationDelete: 'POST /emit/notification-delete',
@@ -214,8 +223,8 @@ app.get('/', (req, res) => {
   })
 })
 
-// GET /health - Health check endpoint
-app.get('/health', (req, res) => {
+// GET /api/socket/health - Health check endpoint
+app.get('/api/socket/health', (req, res) => {
   res.json({ 
     success: true, 
     status: 'running',
@@ -224,8 +233,8 @@ app.get('/health', (req, res) => {
   })
 })
 
-// GET /online-users - Get list of online users
-app.get('/online-users', (req, res) => {
+// GET /api/socket/online-users - Get list of online users
+app.get('/api/socket/online-users', (req, res) => {
   const onlineUserIds = Array.from(onlineUsers.keys())
   res.json({ 
     success: true, 
@@ -234,9 +243,20 @@ app.get('/online-users', (req, res) => {
   })
 })
 
-httpServer.listen(PORT, HOST, () => {
-  console.log(`🚀 Socket.io server running on http://${HOST}:${PORT}`)
-  console.log(`📡 Socket.io path: /socket.io`)
-  console.log(`🔌 CORS enabled for: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}`)
+// All other routes go to Next.js
+app.use((req, res) => {
+  const parsedUrl = parse(req.url, true)
+  handle(req, res, parsedUrl)
+})
+
+// Start server after Next.js is ready
+nextApp.prepare().then(() => {
+  httpServer.listen(PORT, HOST, (err) => {
+    if (err) throw err
+    console.log(`🚀 Next.js + Socket.io server running on http://${HOST}:${PORT}`)
+    console.log(`📡 Socket.io path: /socket.io`)
+    console.log(`🌐 Next.js app available at: http://${HOST}:${PORT}`)
+    console.log(`🔌 CORS enabled for: ${appUrl}`)
+  })
 })
 

@@ -77,25 +77,28 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        console.error('Error fetching admin data:', error)
+        // Don't log "no rows found" errors - they're expected for new/deleted users
+        if (error.code !== 'PGRST116' && !error.message?.includes('0 rows')) {
+          console.error('Error fetching admin data:', error)
+        }
+        return null
+      }
+
+      if (!data) {
+        // No user data found - expected for new/deleted users
         return null
       }
 
       // Verify this is actually an admin user
-      console.log('Admin auth - User data:', data)
-      console.log('Admin auth - user_type:', data.user_type)
-      
       if (data.user_type !== 'Admin') {
         // User is not an admin - this is expected for regular users
-        console.log('Admin auth - User is not an admin')
         return null
       }
-      
-      console.log('Admin auth - User is confirmed as admin')
 
       return data as AdminAppUser
     } catch (error) {
-      console.error('Error in fetchAdminData:', error)
+      // Only log unexpected errors
+      console.warn('Unexpected error in fetchAdminData:', error)
       return null
     }
   }, [])

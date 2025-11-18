@@ -213,10 +213,10 @@ export const TopCandidateSection = ({
               onClick={(e) => {
                 e.stopPropagation()
                 if (currentCandidate) {
-                  // Navigate to the current candidate's profile
-                  if (typeof window !== 'undefined') {
-                    window.location.href = `/employee/${currentCandidate.id}`
-                  }
+                // Navigate to the current candidate's profile
+                if (typeof window !== 'undefined') {
+                  window.location.href = `/candidates/${currentCandidate.id}`
+                }
                 } else if (onViewProfile) {
                   onViewProfile()
                 }

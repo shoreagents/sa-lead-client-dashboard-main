@@ -120,8 +120,8 @@ function ChatPageContent() {
       return
     }
     
-    // Navigate to individual employee profile page
-    const candidateUrl = `/employee/${candidateId}`
+    // Navigate to individual candidate profile page
+    const candidateUrl = `/candidates/${candidateId}`
     console.log('Navigating to:', candidateUrl)
     
     try {

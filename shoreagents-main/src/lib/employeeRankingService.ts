@@ -29,7 +29,7 @@ export function rankEmployeesByScore(candidates: CandidateRecommendation[]): Ran
     overallScore: candidate.overallScore,
     matchScore: candidate.matchScore,
     rank: index + 1,
-    url: `/employee/${candidate.id}`
+    url: `/candidates/${candidate.id}`
   }));
 }
 

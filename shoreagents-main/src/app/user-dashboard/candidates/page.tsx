@@ -199,7 +199,7 @@ export default function CandidatesPage() {
                         <Button 
                           size="sm" 
                           className="flex-1 bg-lime-600 hover:bg-lime-700 text-white"
-                          onClick={() => window.open(`/employee/${candidate.user.id}`, '_blank')}
+                          onClick={() => window.open(`/candidates/${candidate.user.id}`, '_blank')}
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           View

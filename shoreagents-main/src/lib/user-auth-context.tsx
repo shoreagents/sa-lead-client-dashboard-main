@@ -65,13 +65,22 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
         .single()
 
       if (error) {
-        console.error('Error fetching user data:', error)
+        // Don't log "no rows found" errors - they're expected for new/deleted users
+        if (error.code !== 'PGRST116' && !error.message?.includes('0 rows')) {
+          console.error('Error fetching user data:', error)
+        }
+        return null
+      }
+
+      if (!data) {
+        // No user data found - expected for new/deleted users
         return null
       }
 
       return data as UserAppUser
     } catch (error) {
-      console.error('Error in fetchUserData:', error)
+      // Only log unexpected errors
+      console.warn('Unexpected error in fetchUserData:', error)
       return null
     }
   }, [])

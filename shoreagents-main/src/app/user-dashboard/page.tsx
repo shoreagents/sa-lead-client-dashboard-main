@@ -76,7 +76,7 @@ export default function UserDashboardPage() {
       // recordInteraction('navigation')
       console.log('Viewing candidate profile:', (topCandidate as Record<string, unknown>).user)
       const userId = ((topCandidate as Record<string, unknown>).user as Record<string, unknown>)?.id
-      router.push(`/employee/${userId}`)
+      router.push(`/candidates/${userId}`)
     } else {
       handleBrowseTalent()
     }
@@ -110,7 +110,7 @@ export default function UserDashboardPage() {
   const handleViewMatchedProfile = useCallback((candidateId: string, candidateName: string) => {
     // recordInteraction('navigation')
     console.log('View profile clicked for candidate:', candidateName, candidateId)
-    router.push(`/employee/${candidateId}`)
+    router.push(`/candidates/${candidateId}`)
   }, [router]);
 
   const handleSeePricing = useCallback(() => {

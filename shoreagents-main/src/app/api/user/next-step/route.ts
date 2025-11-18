@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
         title: 'Request Interview',
         description: `You've shown interest in ${frequentlyViewedCandidate.candidate_name || 'this candidate'}. Ready to meet them?`,
         action: 'Schedule Interview',
-        actionUrl: `/employee/${frequentlyViewedCandidate.candidate_id}?action=interview`,
+        actionUrl: `/candidates/${frequentlyViewedCandidate.candidate_id}?action=interview`,
         icon: 'Video',
         priority: 95,
         reason: 'Frequently viewed candidate'

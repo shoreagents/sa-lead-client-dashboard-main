@@ -126,12 +126,12 @@ Format your response as a JSON array of objects with "title", "description", and
 Only return the JSON array, no other text.`;
     }
 
-    console.log('🤖 Calling Anthropic API with model: claude-sonnet-4-20250514');
+    console.log('🤖 Calling Anthropic API with model: claude-3-5-sonnet-20241022');
     
     let response;
     try {
       response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
       max_tokens: type === 'description' ? 1000 : 500,
       temperature: 0.3,
       messages: [

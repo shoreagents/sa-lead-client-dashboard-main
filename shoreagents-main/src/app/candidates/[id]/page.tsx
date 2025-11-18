@@ -54,7 +54,7 @@ interface EmployeeProfile {
   strengthsAnalysis: Record<string, unknown> | null;
 }
 
-export default function EmployeeProfilePage() {
+export default function CandidateProfilePage() {
   const params = useParams();
   const router = useRouter();
   const [showAIAnalysis, setShowAIAnalysis] = useState(false);
@@ -438,7 +438,7 @@ export default function EmployeeProfilePage() {
         <FullPageLoader 
           isLoading={true} 
           progress={50}
-          message="Loading employee profile..."
+          message="Loading candidate profile..."
         />
         {/* Render empty div to prevent layout shift */}
         <div className="min-h-screen bg-gray-50">
@@ -456,7 +456,7 @@ export default function EmployeeProfilePage() {
         <div className="flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Profile</h1>
-            <p className="text-gray-600 mb-2">Unable to fetch employee data.</p>
+            <p className="text-gray-600 mb-2">Unable to fetch candidate data.</p>
             <p className="text-sm text-gray-500 mb-6">Please try again later.</p>
             <div className="space-x-4">
               <Button onClick={() => router.back()}>
@@ -480,9 +480,9 @@ export default function EmployeeProfilePage() {
         <SideNav />
         <div className="flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Employee Not Found</h1>
-            <p className="text-gray-600 mb-2">The employee profile with ID "{params.id}" doesn't exist.</p>
-            <p className="text-sm text-gray-500 mb-6">This could be because the employee ID is invalid or the data hasn't been loaded yet.</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Candidate Not Found</h1>
+            <p className="text-gray-600 mb-2">The candidate profile with ID "{params.id}" doesn't exist.</p>
+            <p className="text-sm text-gray-500 mb-6">This could be because the candidate ID is invalid or the data hasn't been loaded yet.</p>
             <div className="space-x-4">
               <Button onClick={() => router.back()}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -537,7 +537,7 @@ export default function EmployeeProfilePage() {
                   Back
                 </Button>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">Employee Profile</h1>
+                  <h1 className="text-xl font-bold text-gray-900">Candidate Profile</h1>
                   <p className="text-sm text-lime-600 font-medium">Detailed candidate information</p>
                 </div>
               </div>
@@ -941,3 +941,4 @@ export default function EmployeeProfilePage() {
     </div>
   );
 }
+

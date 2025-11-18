@@ -9,7 +9,7 @@ export function ConditionalFooter() {
   // Hide footer on dashboard pages
   const isDashboardPage = pathname?.startsWith('/user-dashboard') || 
                          pathname?.startsWith('/admin-dashboard') ||
-                         pathname?.startsWith('/employee/')
+                         pathname?.startsWith('/candidates/')
   
   if (isDashboardPage) {
     return null
