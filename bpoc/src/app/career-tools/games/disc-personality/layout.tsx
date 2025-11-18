@@ -71,7 +71,9 @@ export async function generateMetadata(): Promise<Metadata> {
     };
     const personalityTitle = personalityTitles[type] || 'BPO Professional';
     
-    const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${userId}&type=${type}&animal=${animalName}&v=1`;
+    // Use version parameter for cache busting (increment when needed)
+    // LinkedIn caches aggressively, so users may need to use LinkedIn Post Inspector
+    const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${userId}&type=${type}&animal=${animalName}&v=2`;
     const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${userId}&type=${type}&animal=${animalName}`;
     const description = `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityTitle}. Take the BPOC DISC Personality Assessment to find your perfect BPO role.`;
 
