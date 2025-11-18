@@ -419,10 +419,10 @@ export function Navbar() {
                 className={`flex items-center space-x-1 ${isEmployeePage || isUserDashboard || isAdminDashboard ? 'text-white hover:bg-lime-700' : 'text-gray-600 hover:bg-gray-50'} rounded-lg px-2 py-1.5 cursor-pointer transition-all duration-200 min-w-0 flex-shrink-0`}
                 title={!isMounted ? "Loading currency..." : isDetectingLocation ? "Detecting your location..." : `Current currency: ${selectedCurrency.code}${isAutoDetected ? ' (Auto-detected)' : hasUserSelectedCurrency ? ' (Manually selected)' : ''}`}
               >
-                {isAutoDetected && (
+                {isMounted && isAutoDetected && (
                   <div className="w-2 h-2 bg-lime-500 rounded-full animate-pulse flex-shrink-0"></div>
                 )}
-                {hasUserSelectedCurrency && !isAutoDetected && (
+                {isMounted && hasUserSelectedCurrency && !isAutoDetected && (
                   <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                 )}
                 {!isMounted ? (
@@ -500,10 +500,10 @@ export function Navbar() {
                   }
                 }}
               >
-                {isAutoDetected && (
+                {isMounted && isAutoDetected && (
                   <div className="w-2 h-2 bg-lime-500 rounded-full animate-pulse"></div>
                 )}
-                {hasUserSelectedCurrency && !isAutoDetected && (
+                {isMounted && hasUserSelectedCurrency && !isAutoDetected && (
                   <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 )}
                 {!isMounted ? (
