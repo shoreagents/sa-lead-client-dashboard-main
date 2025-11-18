@@ -116,9 +116,7 @@ export default function AdminSignupPage() {
           first_name: formData.firstName,
           last_name: formData.lastName,
           email: formData.email,
-          user_type: 'Admin', // Set as Admin type
-          is_admin: true,
-          is_verified: true, // Auto-verify admin accounts
+          user_type: 'Admin', // Set as Admin type (this is the ONLY admin flag!)
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
@@ -131,43 +129,6 @@ export default function AdminSignupPage() {
       }
 
       console.log('✅ Admin user record created in database')
-
-      // Step 3: Create admin_users entry (if you have that table)
-      // This is optional and won't fail if table doesn't exist
-      try {
-        const { error: adminError } = await supabase
-          .from('admin_users')
-          .insert({
-            user_id: authData.user.id,
-            admin_level: 'super',
-            permissions: {
-              user_management: true,
-              system_settings: true,
-              analytics: true,
-              billing: true,
-              support: true,
-              content_management: true
-            },
-            admin_preferences: {
-              dashboard_layout: 'default',
-              notifications: true,
-              email_reports: true,
-              security_alerts: true
-            },
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-
-        if (adminError) {
-          console.warn('⚠️ Admin users table insert warning (this is optional):', adminError.message)
-        } else {
-          console.log('✅ Admin users record created')
-        }
-      } catch (adminTableError) {
-        // admin_users table doesn't exist - that's okay
-        console.log('ℹ️ Admin users table not found (this is optional)')
-      }
-
       console.log('🎉 Admin account creation complete!')
       
       setSuccess(true)
