@@ -14,10 +14,7 @@ export async function GET(_request: NextRequest) {
         }
       },
       include: {
-        leadProgress: {
-          orderBy: { created_at: 'desc' },
-          take: 1 // Get only the latest progress record
-        },
+        leadProgress: true, // One-to-one relation, not array
         pricingQuotes: {
           orderBy: { created_at: 'desc' },
           take: 3 // Get latest 3 quotes
@@ -28,7 +25,7 @@ export async function GET(_request: NextRequest) {
 
     // Transform data to match the expected format
     const leads = usersWithProgress.map(user => {
-      const currentProgress = user.leadProgress[0]
+      const currentProgress = user.leadProgress // One-to-one relation, not array
       const currentStatus = currentProgress?.status || 'new_lead'
       
       // Determine status display name
