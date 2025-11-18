@@ -11,90 +11,92 @@ export async function GET(request: NextRequest) {
     
     // Optional: Compare with Supabase Auth count for debugging
     // This helps identify if there's a user in Supabase Auth without a database row
-    let supabaseAuthCount = null
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-      
-      if (supabaseUrl && supabaseServiceKey) {
-        const supabase = createClient(supabaseUrl, supabaseServiceKey)
-        const { data: { users }, error } = await supabase.auth.admin.listUsers()
-        
-        if (!error && users) {
-          supabaseAuthCount = users.length
+    // NOTE: This runs asynchronously and non-blocking to not affect API response time
+    // or impact other projects using this API
+    if (process.env.ENABLE_USER_SYNC === 'true') {
+      // Run sync asynchronously without blocking the API response
+      setImmediate(async () => {
+        try {
+          const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+          const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
           
-          // Log discrepancy if found
-          if (supabaseAuthCount !== totalUsers) {
-            console.log(`⚠️ User count discrepancy detected: Database=${totalUsers}, Supabase Auth=${supabaseAuthCount}`)
+          if (supabaseUrl && supabaseServiceKey) {
+            const supabase = createClient(supabaseUrl, supabaseServiceKey)
+            const { data: { users }, error } = await supabase.auth.admin.listUsers()
             
-            // Find users in Supabase Auth that don't have database rows
-            const dbUserIds = await pool.query('SELECT id FROM users')
-            const dbIds = new Set(dbUserIds.rows.map(row => row.id))
-            const missingUsers = users.filter(authUser => !dbIds.has(authUser.id))
-            
-            if (missingUsers.length > 0) {
-              console.log(`⚠️ Found ${missingUsers.length} user(s) in Supabase Auth without database rows:`, 
-                missingUsers.map(u => ({ id: u.id, email: u.email }))
-              )
+            if (!error && users) {
+              const supabaseAuthCount = users.length
               
-              // Auto-sync missing users to fix the discrepancy
-              let syncedCount = 0
-              for (const missingUser of missingUsers) {
-                try {
-                  const firstName = missingUser.user_metadata?.first_name || 
-                                   missingUser.user_metadata?.given_name || 
-                                   missingUser.user_metadata?.name?.split(' ')[0] || 
-                                   ''
-                  const lastName = missingUser.user_metadata?.last_name || 
-                                 missingUser.user_metadata?.family_name || 
-                                 missingUser.user_metadata?.name?.split(' ').slice(1).join(' ') || 
-                                 ''
-                  const fullName = missingUser.user_metadata?.full_name || 
-                                 missingUser.user_metadata?.name || 
-                                 `${firstName} ${lastName}`.trim() || 
-                                 missingUser.email || ''
+              // Only proceed if there's a discrepancy (more than 1 user difference)
+              if (Math.abs(supabaseAuthCount - totalUsers) > 1) {
+                console.log(`⚠️ User count discrepancy detected: Database=${totalUsers}, Supabase Auth=${supabaseAuthCount}`)
+                
+                // Find users in Supabase Auth that don't have database rows
+                const dbUserIds = await pool.query('SELECT id FROM users')
+                const dbIds = new Set(dbUserIds.rows.map(row => row.id))
+                const missingUsers = users.filter(authUser => !dbIds.has(authUser.id))
+                
+                // Limit sync to prevent overwhelming the database
+                const usersToSync = missingUsers.slice(0, 10)
+                
+                if (usersToSync.length > 0) {
+                  console.log(`⚠️ Found ${missingUsers.length} user(s) in Supabase Auth without database rows. Syncing ${usersToSync.length} now.`)
                   
-                  await syncUserToDatabaseServer({
-                    id: missingUser.id,
-                    email: missingUser.email || '',
-                    first_name: firstName,
-                    last_name: lastName,
-                    full_name: fullName,
-                    location: missingUser.user_metadata?.location || '',
-                    avatar_url: missingUser.user_metadata?.avatar_url || 
-                               missingUser.user_metadata?.picture || 
-                               null,
-                    phone: missingUser.user_metadata?.phone || '',
-                    bio: missingUser.user_metadata?.bio || '',
-                    position: missingUser.user_metadata?.position || '',
-                    company: missingUser.user_metadata?.company || '',
-                    completed_data: missingUser.user_metadata?.completed_data ?? false,
-                    birthday: missingUser.user_metadata?.birthday || null,
-                    gender: missingUser.user_metadata?.gender || null,
-                    admin_level: missingUser.user_metadata?.admin_level || 'user'
-                  })
+                  let syncedCount = 0
+                  for (const missingUser of usersToSync) {
+                    try {
+                      const firstName = missingUser.user_metadata?.first_name || 
+                                       missingUser.user_metadata?.given_name || 
+                                       missingUser.user_metadata?.name?.split(' ')[0] || 
+                                       ''
+                      const lastName = missingUser.user_metadata?.last_name || 
+                                     missingUser.user_metadata?.family_name || 
+                                     missingUser.user_metadata?.name?.split(' ').slice(1).join(' ') || 
+                                     ''
+                      const fullName = missingUser.user_metadata?.full_name || 
+                                     missingUser.user_metadata?.name || 
+                                     `${firstName} ${lastName}`.trim() || 
+                                     missingUser.email || ''
+                      
+                      await syncUserToDatabaseServer({
+                        id: missingUser.id,
+                        email: missingUser.email || '',
+                        first_name: firstName,
+                        last_name: lastName,
+                        full_name: fullName,
+                        location: missingUser.user_metadata?.location || '',
+                        avatar_url: missingUser.user_metadata?.avatar_url || 
+                                   missingUser.user_metadata?.picture || 
+                                   null,
+                        phone: missingUser.user_metadata?.phone || '',
+                        bio: missingUser.user_metadata?.bio || '',
+                        position: missingUser.user_metadata?.position || '',
+                        company: missingUser.user_metadata?.company || '',
+                        completed_data: missingUser.user_metadata?.completed_data ?? false,
+                        birthday: missingUser.user_metadata?.birthday || null,
+                        gender: missingUser.user_metadata?.gender || null,
+                        admin_level: missingUser.user_metadata?.admin_level || 'user'
+                      })
+                      
+                      syncedCount++
+                      console.log(`✅ Auto-synced missing user: ${missingUser.email}`)
+                    } catch (syncError) {
+                      console.error(`❌ Failed to auto-sync user ${missingUser.email}:`, syncError)
+                    }
+                  }
                   
-                  syncedCount++
-                  console.log(`✅ Auto-synced missing user: ${missingUser.email}`)
-                } catch (syncError) {
-                  console.error(`❌ Failed to auto-sync user ${missingUser.email}:`, syncError)
+                  if (syncedCount > 0) {
+                    console.log(`✅ Auto-synced ${syncedCount} user(s)`)
+                  }
                 }
-              }
-              
-              // Re-fetch user count after syncing
-              if (syncedCount > 0) {
-                const updatedUsersResult = await pool.query('SELECT COUNT(*) as count FROM users')
-                const updatedTotalUsers = parseInt(updatedUsersResult.rows[0]?.count || '0')
-                console.log(`✅ Updated user count after auto-sync: ${totalUsers} → ${updatedTotalUsers}`)
-                totalUsers = updatedTotalUsers
               }
             }
           }
+        } catch (error) {
+          // Silently fail - this is just for debugging and shouldn't break the API
+          console.log('Could not compare with Supabase Auth count:', error)
         }
-      }
-    } catch (error) {
-      // Silently fail - this is just for debugging
-      console.log('Could not compare with Supabase Auth count:', error)
+      })
     }
 
     // Fetch active resumes count (saved_resumes table)
