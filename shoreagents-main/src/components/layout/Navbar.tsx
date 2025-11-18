@@ -417,7 +417,7 @@ export function Navbar() {
             <div className="relative group">
               <div 
                 className={`flex items-center space-x-1 ${isEmployeePage || isUserDashboard || isAdminDashboard ? 'text-white hover:bg-lime-700' : 'text-gray-600 hover:bg-gray-50'} rounded-lg px-2 py-1.5 cursor-pointer transition-all duration-200 min-w-0 flex-shrink-0`}
-                title={isDetectingLocation ? "Detecting your location..." : `Current currency: ${selectedCurrency.code}${isAutoDetected ? ' (Auto-detected)' : hasUserSelectedCurrency ? ' (Manually selected)' : ''}`}
+                title={!isMounted ? "Loading currency..." : isDetectingLocation ? "Detecting your location..." : `Current currency: ${selectedCurrency.code}${isAutoDetected ? ' (Auto-detected)' : hasUserSelectedCurrency ? ' (Manually selected)' : ''}`}
               >
                 {isAutoDetected && (
                   <div className="w-2 h-2 bg-lime-500 rounded-full animate-pulse flex-shrink-0"></div>
@@ -490,7 +490,7 @@ export function Navbar() {
             <div className="relative group">
               <button 
                 className={`flex items-center space-x-1 ${isEmployeePage || isUserDashboard || isAdminDashboard ? 'text-white hover:bg-lime-700' : 'text-gray-600 hover:bg-gray-50'} rounded-lg px-2 py-2 transition-all duration-200 focus:outline-none min-w-0 flex-shrink-0`}
-                title={isDetectingLocation ? "Detecting your location..." : `Current currency: ${selectedCurrency.code}${isAutoDetected ? ' (Auto-detected)' : hasUserSelectedCurrency ? ' (Manually selected)' : ''}`}
+                title={!isMounted ? "Loading currency..." : isDetectingLocation ? "Detecting your location..." : `Current currency: ${selectedCurrency.code}${isAutoDetected ? ' (Auto-detected)' : hasUserSelectedCurrency ? ' (Manually selected)' : ''}`}
                 onClick={() => {
                   // Toggle dropdown visibility
                   const dropdown = document.querySelector('.currency-dropdown');
