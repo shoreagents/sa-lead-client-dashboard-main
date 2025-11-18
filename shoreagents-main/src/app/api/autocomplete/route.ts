@@ -42,43 +42,113 @@ export async function POST(request: NextRequest) {
     if (type === 'industry') {
       // Determine location-specific context and terminology based on currency
       const locationContext = currency === 'AUD'
-        ? `Australian market context: Use Australian terminology (e.g., "Property Management", "Building & Construction", "Retail & Hospitality", "Mining & Resources", "Agriculture & Farming"). Consider industries relevant to the Australian economy.`
-        : currency === 'GBP'
-        ? `British/UK market context: Use British terminology (e.g., "Property Management", "Building Services", "Retail & High Street", "Financial Services", "Manufacturing & Engineering"). Consider industries relevant to the UK economy.`
-        : currency === 'NZD'
-        ? `New Zealand market context: Use NZ terminology (e.g., "Property Management", "Agriculture & Primary Industries", "Tourism & Hospitality", "Technology & Innovation"). Consider industries relevant to the New Zealand economy.`
-        : currency === 'PHP'
-        ? `Philippines market context: Use Philippine terminology (e.g., "Business Process Outsourcing (BPO)", "Real Estate Development", "Retail & Shopping Centres", "Banking & Finance"). Consider industries relevant to the Philippine economy.`
-        : `International/US market context: Use standard international business terminology. Consider globally recognized industries.`;
+        ? `🇦🇺 AUSTRALIAN MARKET - USE AUSTRALIAN TERMINOLOGY ONLY:
 
-      prompt = `You are an AI assistant helping users specify their business industry. Based on the user's input "${query}", suggest ${MAX_SUGGESTIONS} relevant industries.
+CRITICAL: Use Australian business terms, NOT American terms!
+
+Real Estate:
+- ✅ "Real Estate Agency" (NOT "Real Estate Brokerage")
+- ✅ "Property Management"
+- ✅ "Strata Management"
+- ✅ "Commercial Property"
+
+Construction:
+- ✅ "Building & Construction"
+- ✅ "Trades & Services"
+- ✅ "Project Management"
+
+Other AU-specific industries:
+- Mining & Resources
+- Agriculture & Farming
+- Hospitality & Tourism
+- Retail & Shopping Centres
+- Manufacturing & Warehousing
+- Financial Services & Superannuation
+- Healthcare & Aged Care`
+        : currency === 'GBP'
+        ? `🇬🇧 BRITISH/UK MARKET - USE BRITISH TERMINOLOGY ONLY:
+
+CRITICAL: Use British business terms, NOT American terms!
+
+Real Estate:
+- ✅ "Estate Agency" (NOT "Real Estate Brokerage")
+- ✅ "Property Management"
+- ✅ "Lettings Agency"
+- ✅ "Commercial Property"
+
+Construction:
+- ✅ "Building Services"
+- ✅ "Construction & Engineering"
+
+Other UK-specific industries:
+- Financial Services (Banking, Insurance)
+- Retail & High Street
+- Manufacturing & Engineering
+- Healthcare & NHS Services
+- Hospitality & Tourism
+- Legal Services & Solicitors`
+        : currency === 'NZD'
+        ? `🇳🇿 NEW ZEALAND MARKET - USE NZ TERMINOLOGY:
+
+Real Estate:
+- ✅ "Real Estate Agency"
+- ✅ "Property Management"
+
+Other NZ-specific industries:
+- Agriculture & Primary Industries
+- Tourism & Hospitality
+- Technology & Innovation
+- Dairy & Farming
+- Forestry & Horticulture`
+        : currency === 'PHP'
+        ? `🇵🇭 PHILIPPINES MARKET - USE FILIPINO BUSINESS TERMS:
+
+Industries:
+- Business Process Outsourcing (BPO)
+- Call Centers & Customer Service
+- Real Estate Development
+- Retail & Shopping Malls
+- Banking & Finance
+- Information Technology
+- Manufacturing & Export`
+        : `🌍 INTERNATIONAL/US MARKET - USE STANDARD TERMINOLOGY:
+
+Real Estate:
+- ✅ "Real Estate Brokerage"
+- ✅ "Property Management"
+- ✅ "Commercial Real Estate"
+
+Other industries:
+- Technology & Software
+- Healthcare & Medical
+- Finance & Banking
+- Marketing & Advertising
+- Manufacturing & Logistics`;
+
+      prompt = `You are an AI assistant helping users specify their business industry for OFFSHORE STAFFING.
 
 ${locationContext}
 
-Context: The user is looking for offshore team members for their business. They might be specifying industries like:
-- Technology, Software Development, IT Services
-- Healthcare, Medical Services, Wellness
-- Finance, Banking, Accounting
-- Real Estate, Property Management
-- Marketing, Advertising, Digital Marketing
-- E-commerce, Online Retail
-- Education, Training, E-learning
-- Legal, Law Firms, Compliance
-- Manufacturing, Production
-- Construction, Building
-- And many more...
+USER INPUT: "${query}"
+USER CURRENCY: ${currency}
 
-Based on the input "${query}", suggest ${MAX_SUGGESTIONS} specific, relevant industries that would be appropriate for offshore staffing. Make the suggestions:
-1. Specific and professional
-2. Use terminology appropriate for the user's location (Currency: ${currency})
-3. Commonly used in business contexts for that region
-4. Relevant to the input provided
-5. Different from each other but related
+CRITICAL INSTRUCTIONS:
+1. **ONLY use terminology from the ${currency} market context above**
+2. **NEVER mix American terms into non-US markets**
+3. If user types "Real Estate" or similar:
+   - AUD/NZD: Suggest "Real Estate Agency", "Property Management"
+   - GBP: Suggest "Estate Agency", "Lettings Agency"  
+   - USD: Suggest "Real Estate Brokerage"
+   - NEVER suggest "Brokerage" to AU/UK/NZ users!
+
+4. Match the user's likely industry based on their input
+5. Use professional, commonly-used business terms for that region
+6. Suggest ${MAX_SUGGESTIONS} specific, relevant industries
 
 Format your response as a JSON array of objects with "title", "description", and "level" fields:
 [
-  {"title": "Technology", "description": "Software development, IT services, and technology solutions", "level": "Industry"},
-  {"title": "Healthcare", "description": "Healthcare services, medical practices, and wellness", "level": "Industry"}
+  {"title": "Real Estate Agency", "description": "Facilitating property sales, leasing, and management", "level": "Industry"},
+  {"title": "Property Management", "description": "Managing residential and commercial properties", "level": "Industry"}
 ]
 
 Only return the JSON array, no other text.`;
