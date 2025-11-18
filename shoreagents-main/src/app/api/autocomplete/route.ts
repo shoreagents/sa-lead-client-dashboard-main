@@ -40,7 +40,20 @@ export async function POST(request: NextRequest) {
     let prompt = '';
     
     if (type === 'industry') {
+      // Determine location-specific context and terminology based on currency
+      const locationContext = currency === 'AUD'
+        ? `Australian market context: Use Australian terminology (e.g., "Property Management", "Building & Construction", "Retail & Hospitality", "Mining & Resources", "Agriculture & Farming"). Consider industries relevant to the Australian economy.`
+        : currency === 'GBP'
+        ? `British/UK market context: Use British terminology (e.g., "Property Management", "Building Services", "Retail & High Street", "Financial Services", "Manufacturing & Engineering"). Consider industries relevant to the UK economy.`
+        : currency === 'NZD'
+        ? `New Zealand market context: Use NZ terminology (e.g., "Property Management", "Agriculture & Primary Industries", "Tourism & Hospitality", "Technology & Innovation"). Consider industries relevant to the New Zealand economy.`
+        : currency === 'PHP'
+        ? `Philippines market context: Use Philippine terminology (e.g., "Business Process Outsourcing (BPO)", "Real Estate Development", "Retail & Shopping Centres", "Banking & Finance"). Consider industries relevant to the Philippine economy.`
+        : `International/US market context: Use standard international business terminology. Consider globally recognized industries.`;
+
       prompt = `You are an AI assistant helping users specify their business industry. Based on the user's input "${query}", suggest ${MAX_SUGGESTIONS} relevant industries.
+
+${locationContext}
 
 Context: The user is looking for offshore team members for their business. They might be specifying industries like:
 - Technology, Software Development, IT Services
@@ -57,9 +70,10 @@ Context: The user is looking for offshore team members for their business. They 
 
 Based on the input "${query}", suggest ${MAX_SUGGESTIONS} specific, relevant industries that would be appropriate for offshore staffing. Make the suggestions:
 1. Specific and professional
-2. Commonly used in business contexts
-3. Relevant to the input provided
-4. Different from each other but related
+2. Use terminology appropriate for the user's location (Currency: ${currency})
+3. Commonly used in business contexts for that region
+4. Relevant to the input provided
+5. Different from each other but related
 
 Format your response as a JSON array of objects with "title", "description", and "level" fields:
 [

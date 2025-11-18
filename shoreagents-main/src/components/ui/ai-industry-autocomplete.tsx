@@ -15,6 +15,7 @@ interface AIIndustryAutocompleteProps {
   label?: string;
   className?: string;
   id?: string;
+  currency?: string;
 }
 
 export function AIIndustryAutocomplete({
@@ -23,7 +24,8 @@ export function AIIndustryAutocomplete({
   placeholder = "Start typing your industry...",
   label,
   className = "",
-  id
+  id,
+  currency = 'USD'
 }: AIIndustryAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,7 +57,8 @@ export function AIIndustryAutocomplete({
     debouncedQuery, // Use debounced query instead of immediate searchQuery
     userId, 
     isOpen && debouncedQuery.length >= 2, // Only fetch when debounced query is ready (changed from > 2 to >= 2)
-    'industry'
+    'industry',
+    currency // Pass user's currency for location-aware suggestions
   );
 
   // Fallback suggestions for common industry terms - INDUSTRIES ONLY, NOT JOB ROLES
