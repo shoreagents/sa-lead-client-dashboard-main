@@ -91,34 +91,35 @@ export async function GET(request: NextRequest) {
           <div
             style={{
               position: 'absolute',
-              top: '60px',
-              left: '60px',
+              top: '40px',
+              left: '40px',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'flex-start',
               zIndex: 10,
+              maxWidth: '300px',
             }}
           >
               {avatarUrl && (
                 <img
                   src={avatarUrl}
-                  width="100"
-                  height="100"
+                  width="80"
+                  height="80"
                   style={{
                     borderRadius: '50%',
-                    border: '4px solid #06B6D4',
+                    border: '3px solid #06B6D4',
                     objectFit: 'cover',
-                    marginBottom: 20,
+                    marginBottom: 12,
                   }}
                 />
               )}
               <div
                 style={{
-                  fontSize: 36,
+                  fontSize: 28,
                   fontWeight: 'bold',
                   color: 'white',
                   display: 'flex',
-                  marginBottom: 10,
+                  marginBottom: 8,
                 }}
               >
                 @{displayName}
@@ -126,10 +127,10 @@ export async function GET(request: NextRequest) {
               {location && (
                 <div
                   style={{
-                    fontSize: 22,
+                    fontSize: 18,
                     color: '#67E8F9',
                     display: 'flex',
-                    marginBottom: 10,
+                    marginBottom: 8,
                   }}
                 >
                   {location}
@@ -138,7 +139,7 @@ export async function GET(request: NextRequest) {
               {userTitle && (
                 <div
                   style={{
-                    fontSize: 24,
+                    fontSize: 20,
                     color: 'white',
                     display: 'flex',
                     fontWeight: '600',
@@ -155,7 +156,7 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              padding: '80px',
+              padding: '80px 80px 80px 360px',
               width: '60%',
               position: 'relative',
             }}
