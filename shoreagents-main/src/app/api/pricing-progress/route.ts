@@ -285,6 +285,7 @@ export async function POST(request: NextRequest) {
           } else {
             console.log('✅ Second lead capture tracked');
           }
+
         } catch (leadError) {
           console.error('❌ Error tracking second lead capture:', leadError);
         }
@@ -408,6 +409,28 @@ export async function POST(request: NextRequest) {
             { error: 'Failed to save final quote data' },
             { status: 500 }
           );
+        }
+
+        // ✅ UPDATE LEAD PROGRESS TO STAGE 2 (Quote completed)
+        console.log('📊 Updating lead progress to stage_2 for user:', user_id);
+        try {
+          const { error: progressError } = await supabase
+            .from('lead_progress')
+            .upsert({
+              user_id: user_id,
+              status: 'stage_2',
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id'
+            });
+          
+          if (progressError) {
+            console.error('❌ Error updating lead progress to stage_2:', progressError);
+          } else {
+            console.log('✅ Lead progress updated to stage_2 (quote completed)');
+          }
+        } catch (progressError) {
+          console.error('❌ Error updating lead progress:', progressError);
         }
 
         break;

@@ -263,6 +263,29 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ User record created/updated successfully:', userData)
 
+    // ✅ UPDATE LEAD PROGRESS TO SIGNED UP
+    const finalUserId = existingAnonymousUser?.user_id || deviceFingerprintId
+    console.log('📊 Updating lead progress to signed_up for user:', finalUserId);
+    try {
+      const { error: progressError } = await supabase
+        .from('lead_progress')
+        .upsert({
+          user_id: finalUserId,
+          status: 'signed_up',
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
+        });
+      
+      if (progressError) {
+        console.error('❌ Error updating lead progress to signed_up:', progressError);
+      } else {
+        console.log('✅ Lead progress updated to signed_up');
+      }
+    } catch (progressError) {
+      console.error('❌ Error updating lead progress:', progressError);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Account created successfully - your anonymous tracking data has been preserved!',

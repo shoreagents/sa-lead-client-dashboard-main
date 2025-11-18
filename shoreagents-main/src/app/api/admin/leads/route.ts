@@ -33,7 +33,6 @@ export async function GET(_request: NextRequest) {
         'new_lead': 'New Lead',
         'stage_1': 'Stage 1',
         'stage_2': 'Stage 2',
-        'pending': 'Pending',
         'meeting_booked': 'Meeting Booked',
         'signed_up': 'Signed Up',
         'closed_won': 'Closed Won'
@@ -82,7 +81,6 @@ export async function GET(_request: NextRequest) {
       new: leads.filter(lead => lead.column === 'new_lead').length,
       stage1: leads.filter(lead => lead.column === 'stage_1').length,
       stage2: leads.filter(lead => lead.column === 'stage_2').length,
-      pending: leads.filter(lead => lead.column === 'pending').length,
       meeting_booked: leads.filter(lead => lead.column === 'meeting_booked').length,
       signed_up: leads.filter(lead => lead.column === 'signed_up').length,
       closed_won: leads.filter(lead => lead.column === 'closed_won').length

@@ -74,6 +74,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ✅ UPDATE LEAD PROGRESS TO STAGE 1
+    console.log('📊 Updating lead progress to stage_1 for user:', user_id);
+    const { error: progressError } = await supabase
+      .from('lead_progress')
+      .upsert({
+        user_id: user_id,
+        status: 'stage_1',
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id' // Update if exists, insert if not
+      });
+
+    if (progressError) {
+      console.error('❌ Error updating lead progress:', progressError);
+      // Don't fail the request if progress update fails
+    } else {
+      console.log('✅ Lead progress updated to stage_1');
+    }
+
     return NextResponse.json({
       success: true,
       message: 'User information updated successfully',
