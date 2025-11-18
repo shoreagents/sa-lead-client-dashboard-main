@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     currency = requestData.currency || 'USD';
 
     console.log('🔍 Autocomplete API called:', { query, type, industry, roleTitle, currency });
+    console.log('💵 CURRENCY DETECTED:', currency, '- Should use', currency === 'AUD' ? 'AUSTRALIAN' : currency === 'GBP' ? 'BRITISH' : currency === 'USD' ? 'AMERICAN' : 'DEFAULT', 'terminology');
 
     if (!query || query.length < 2) {
       console.log('📝 Query too short, returning empty array');
@@ -273,6 +274,10 @@ Format your response as a JSON array of objects with "title", "description", and
 
 Only return the JSON array, no other text.`;
     }
+
+    // Log the FULL prompt being sent to AI for debugging
+    console.log('🤖 SENDING PROMPT TO AI (first 500 chars):', prompt.substring(0, 500));
+    console.log('🎯 Type:', type, '| Currency:', currency, '| Query:', query);
 
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
