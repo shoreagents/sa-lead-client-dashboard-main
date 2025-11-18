@@ -92,31 +92,101 @@ export async function GET(request: NextRequest) {
               display: 'flex',
               flexDirection: 'column',
               width: '60%',
-              padding: '50px',
+              padding: '40px',
+              justifyContent: 'space-between',
             }}
           >
-            {/* User Info Section - Top Left */}
+            {/* Top Section - User Info */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',
-                marginBottom: '40px',
+                marginBottom: '35px',
+                minHeight: '100px',
               }}
             >
               {avatarUrl && (
                 <img
                   src={avatarUrl}
-                  width="100"
-                  height="100"
+                  width="80"
+                  height="80"
                   style={{
                     borderRadius: '50%',
-                    border: '4px solid #06B6D4',
+                    border: '3px solid #06B6D4',
                     objectFit: 'cover',
-                    marginRight: '20px',
+                    marginRight: '16px',
+                    flexShrink: 0,
                   }}
                 />
               )}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-start',
+                  flex: 1,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 'bold',
+                    color: 'white',
+                    marginBottom: 6,
+                    lineHeight: 1.2,
+                  }}
+                >
+                  @{displayName}
+                </div>
+                {location && (
+                  <div
+                    style={{
+                      fontSize: 18,
+                      color: '#67E8F9',
+                      marginBottom: 6,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {location}
+                  </div>
+                )}
+                {userTitle && (
+                  <div
+                    style={{
+                      fontSize: 20,
+                      color: 'white',
+                      fontWeight: '600',
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {userTitle}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Middle Section - Animal & Personality Info */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                marginTop: '10px',
+                marginBottom: '30px',
+                minHeight: '140px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '100px',
+                  marginRight: '24px',
+                  lineHeight: 1,
+                }}
+              >
+                {animalEmojiDisplay}
+              </div>
               <div
                 style={{
                   display: 'flex',
@@ -126,76 +196,20 @@ export async function GET(request: NextRequest) {
               >
                 <div
                   style={{
-                    fontSize: 32,
+                    fontSize: 42,
                     fontWeight: 'bold',
                     color: 'white',
-                    marginBottom: 8,
-                  }}
-                >
-                  @{displayName}
-                </div>
-                {location && (
-                  <div
-                    style={{
-                      fontSize: 20,
-                      color: '#67E8F9',
-                      marginBottom: 8,
-                    }}
-                  >
-                    {location}
-                  </div>
-                )}
-                {userTitle && (
-                  <div
-                    style={{
-                      fontSize: 22,
-                      color: 'white',
-                      fontWeight: '600',
-                    }}
-                  >
-                    {userTitle}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Animal & Personality Info - Below User Info */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: '20px',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: '120px',
-                  marginRight: '30px',
-                }}
-              >
-                {animalEmojiDisplay}
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 48,
-                    fontWeight: 'bold',
-                    color: 'white',
-                    marginBottom: 8,
+                    marginBottom: 6,
+                    lineHeight: 1.2,
                   }}
                 >
                   {personalityTitle}
                 </div>
                 <div
                   style={{
-                    fontSize: 32,
+                    fontSize: 28,
                     color: '#67E8F9',
+                    lineHeight: 1.2,
                   }}
                 >
                   {animalName} Personality
@@ -203,14 +217,14 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
 
-            {/* BPOC Logo - Bottom Left */}
+            {/* Bottom Section - BPOC Logo */}
             <div
               style={{
-                marginTop: 'auto',
-                fontSize: 40,
+                fontSize: 36,
                 fontWeight: 'bold',
                 letterSpacing: '2px',
                 color: '#06B6D4',
+                marginTop: 'auto',
               }}
             >
               BPOC.IO

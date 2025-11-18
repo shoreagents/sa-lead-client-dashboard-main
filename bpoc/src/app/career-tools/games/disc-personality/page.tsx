@@ -455,21 +455,13 @@ export default function FilipinoDiscGame() {
           await navigator.clipboard.writeText(facebookShareText);
           setShareModalData({ platform: 'Facebook', text: facebookShareText, url: shareUrl });
           setShowShareModal(true);
-          // Wait for modal to render before opening Facebook
           setTimeout(() => {
             const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
             window.open(facebookUrl, '_blank', 'width=600,height=400');
-          }, 2000);
+          }, 1500);
         } catch (err) {
-          console.error('Failed to copy to clipboard:', err);
-          // Still show modal even if clipboard fails
-          setShareModalData({ platform: 'Facebook', text: facebookShareText, url: shareUrl });
-          setShowShareModal(true);
-          // Wait for modal to render before opening Facebook
-          setTimeout(() => {
-            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-            window.open(facebookUrl, '_blank', 'width=600,height=400');
-          }, 2000);
+          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+          window.open(facebookUrl, '_blank', 'width=600,height=400');
         }
         break;
 
@@ -480,35 +472,25 @@ export default function FilipinoDiscGame() {
           await navigator.clipboard.writeText(linkedinShareText);
           setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: shareUrl });
           setShowShareModal(true);
-          // Wait for modal to render before opening LinkedIn
           setTimeout(() => {
             const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
             window.open(linkedinUrl, '_blank', 'width=600,height=400');
-          }, 2000);
+          }, 1500);
         } catch (err) {
-          console.error('Failed to copy to clipboard:', err);
-          // Still show modal even if clipboard fails
-          setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: shareUrl });
-          setShowShareModal(true);
-          // Wait for modal to render before opening LinkedIn
-          setTimeout(() => {
-            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-            window.open(linkedinUrl, '_blank', 'width=600,height=400');
-          }, 2000);
+          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+          window.open(linkedinUrl, '_blank', 'width=600,height=400');
         }
         break;
 
       case 'copy':
         // For "Copy Link", only copy the URL, not the full share text
+        // Match profile/resume behavior - just show alert, no modal
         try {
           await navigator.clipboard.writeText(shareUrl);
-          setShareModalData({ platform: 'Clipboard', text: shareUrl, url: shareUrl });
-          setShowShareModal(true);
+          alert('DISC results link copied to clipboard!');
         } catch (err) {
           console.error('Failed to copy link:', err);
-          // Still show modal even if clipboard fails
-          setShareModalData({ platform: 'Clipboard', text: shareUrl, url: shareUrl });
-          setShowShareModal(true);
+          alert('Failed to copy link. Please copy manually: ' + shareUrl);
         }
         break;
 
@@ -798,7 +780,9 @@ export default function FilipinoDiscGame() {
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
       const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
       const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&title=${encodeURIComponent(userTitle)}&v=1`;
+      // Use timestamp for better cache busting (LinkedIn caches aggressively)
+      const cacheBuster = Date.now();
+      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&title=${encodeURIComponent(userTitle)}&v=${cacheBuster}`;
       const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
       
       // Update or create meta tags
