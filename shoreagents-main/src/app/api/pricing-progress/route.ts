@@ -414,20 +414,23 @@ export async function POST(request: NextRequest) {
         // ✅ UPDATE LEAD PROGRESS TO STAGE 2 (Quote completed)
         console.log('📊 Updating lead progress to stage_2 for user:', user_id);
         try {
-          const { error: progressError } = await supabase
+          const { data: progressData, error: progressError } = await supabase
             .from('lead_progress')
             .upsert({
               user_id: user_id,
-              status: 'stage_2',
-              updated_at: new Date().toISOString()
+              status: 'stage_2'
             }, {
               onConflict: 'user_id'
-            });
+            })
+            .select(); // ADD SELECT TO GET RESULT
           
           if (progressError) {
             console.error('❌ Error updating lead progress to stage_2:', progressError);
+            console.error('❌ Full error details:', JSON.stringify(progressError, null, 2));
+            console.error('❌ Attempted to insert user_id:', user_id);
           } else {
             console.log('✅ Lead progress updated to stage_2 (quote completed)');
+            console.log('✅ Progress data:', progressData);
           }
         } catch (progressError) {
           console.error('❌ Error updating lead progress:', progressError);

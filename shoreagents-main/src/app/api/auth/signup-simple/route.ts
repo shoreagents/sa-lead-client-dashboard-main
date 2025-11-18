@@ -267,20 +267,23 @@ export async function POST(request: NextRequest) {
     const finalUserId = existingAnonymousUser?.user_id || deviceFingerprintId
     console.log('📊 Updating lead progress to signed_up for user:', finalUserId);
     try {
-      const { error: progressError } = await supabase
+      const { data: progressData, error: progressError } = await supabase
         .from('lead_progress')
         .upsert({
           user_id: finalUserId,
-          status: 'signed_up',
-          updated_at: new Date().toISOString()
+          status: 'signed_up'
         }, {
           onConflict: 'user_id'
-        });
+        })
+        .select(); // ADD SELECT TO GET RESULT
       
       if (progressError) {
         console.error('❌ Error updating lead progress to signed_up:', progressError);
+        console.error('❌ Full error details:', JSON.stringify(progressError, null, 2));
+        console.error('❌ Attempted to insert user_id:', finalUserId);
       } else {
         console.log('✅ Lead progress updated to signed_up');
+        console.log('✅ Progress data:', progressData);
       }
     } catch (progressError) {
       console.error('❌ Error updating lead progress:', progressError);
