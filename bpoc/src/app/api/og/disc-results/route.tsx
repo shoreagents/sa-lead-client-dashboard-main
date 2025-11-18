@@ -62,14 +62,17 @@ export async function GET(request: NextRequest) {
       'C': 'The Wise Analyst'
     };
 
-    const displayName = user?.username || user?.user_slug || user?.full_name || 'Professional';
-    const firstName = user?.full_name?.split(' ')[0] || displayName?.split(' ')[0] || 'Professional';
-    const userTitle = user?.position || title;
-    const location = user?.location || 
+    // Handle default userId case (for fallback OG images)
+    const isDefaultUser = userId === 'default';
+    
+    const displayName = isDefaultUser ? 'BPOC User' : (user?.username || user?.user_slug || user?.full_name || 'Professional');
+    const firstName = isDefaultUser ? 'BPOC' : (user?.full_name?.split(' ')[0] || displayName?.split(' ')[0] || 'Professional');
+    const userTitle = isDefaultUser ? 'BPO Professional' : (user?.position || title);
+    const location = isDefaultUser ? 'Philippines' : (user?.location || 
       (user?.location_city 
         ? `${user.location_city}${user?.location_country ? ', ' + user.location_country : ''}`
-        : null);
-    const avatarUrl = user?.avatar_url || null;
+        : null));
+    const avatarUrl = isDefaultUser ? null : (user?.avatar_url || null);
     const animalName = animal || (personalityType === 'D' ? 'Eagle' : personalityType === 'I' ? 'Peacock' : personalityType === 'S' ? 'Turtle' : 'Owl');
     const animalEmojiDisplay = animalEmoji[animalName] || animalEmoji[personalityType] || '🎯';
     const personalityTitle = personalityTitles[personalityType] || 'BPO Professional';
