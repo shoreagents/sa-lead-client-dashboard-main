@@ -87,45 +87,38 @@ export async function GET(request: NextRequest) {
             position: 'relative',
           }}
         >
-          {/* Left Side - Profile Info */}
+          {/* Top Left - Nickname, Location, Position (absolute positioned at top left) */}
           <div
             style={{
+              position: 'absolute',
+              top: '60px',
+              left: '60px',
               display: 'flex',
               flexDirection: 'column',
-              padding: '80px',
-              width: '60%',
-              position: 'relative',
+              alignItems: 'flex-start',
+              zIndex: 10,
             }}
           >
-            {/* Top Right - Nickname, Location, Position */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-                marginBottom: 40,
-              }}
-            >
               {avatarUrl && (
                 <img
                   src={avatarUrl}
-                  width="80"
-                  height="80"
+                  width="100"
+                  height="100"
                   style={{
                     borderRadius: '50%',
-                    border: '3px solid #06B6D4',
+                    border: '4px solid #06B6D4',
                     objectFit: 'cover',
-                    marginBottom: 15,
+                    marginBottom: 20,
                   }}
                 />
               )}
               <div
                 style={{
-                  fontSize: 32,
+                  fontSize: 36,
                   fontWeight: 'bold',
                   color: 'white',
                   display: 'flex',
-                  marginBottom: 8,
+                  marginBottom: 10,
                 }}
               >
                 @{displayName}
@@ -133,10 +126,10 @@ export async function GET(request: NextRequest) {
               {location && (
                 <div
                   style={{
-                    fontSize: 20,
+                    fontSize: 22,
                     color: '#67E8F9',
                     display: 'flex',
-                    marginBottom: 8,
+                    marginBottom: 10,
                   }}
                 >
                   {location}
@@ -145,7 +138,7 @@ export async function GET(request: NextRequest) {
               {userTitle && (
                 <div
                   style={{
-                    fontSize: 22,
+                    fontSize: 24,
                     color: 'white',
                     display: 'flex',
                     fontWeight: '600',
@@ -154,21 +147,32 @@ export async function GET(request: NextRequest) {
                   {userTitle}
                 </div>
               )}
-            </div>
+          </div>
 
-            {/* Animal Emoji & Personality Type - Below user info */}
+          {/* Left Side - Animal & Personality Info */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              padding: '80px',
+              width: '60%',
+              position: 'relative',
+            }}
+          >
+            {/* Animal Emoji & Personality Type - Centered */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                marginTop: 'auto',
+                justifyContent: 'center',
                 marginBottom: 40,
               }}
             >
               <div
                 style={{
-                  fontSize: '120px',
+                  fontSize: '140px',
                   display: 'flex',
                   marginRight: 30,
                 }}
@@ -183,7 +187,7 @@ export async function GET(request: NextRequest) {
               >
                 <div
                   style={{
-                    fontSize: 48,
+                    fontSize: 52,
                     fontWeight: 'bold',
                     color: 'white',
                     display: 'flex',
@@ -193,7 +197,7 @@ export async function GET(request: NextRequest) {
                 </div>
                 <div
                   style={{
-                    fontSize: 32,
+                    fontSize: 36,
                     color: '#67E8F9',
                     marginTop: 10,
                     display: 'flex',
