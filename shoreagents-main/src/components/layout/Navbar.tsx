@@ -467,10 +467,10 @@ export function Navbar() {
                         <span className="text-sm font-semibold text-gray-900">{currency.code}</span>
                         <span className="text-xs text-gray-500">{currencyCountryNames[currency.code]}</span>
                       </div>
-                      {selectedCurrency.code === currency.code && isAutoDetected && (
+                      {isMounted && selectedCurrency.code === currency.code && isAutoDetected && (
                         <span className="ml-auto text-xs text-lime-600">Auto</span>
                       )}
-                      {selectedCurrency.code === currency.code && hasUserSelectedCurrency && !isAutoDetected && (
+                      {isMounted && selectedCurrency.code === currency.code && hasUserSelectedCurrency && !isAutoDetected && (
                         <span className="ml-auto text-xs text-blue-600">Manual</span>
                       )}
                     </div>
@@ -554,10 +554,10 @@ export function Navbar() {
                       >
                         <span className="text-lg font-bold text-gray-600 w-8">{currency.symbol}</span>
                         <span className="text-sm text-gray-700 font-medium">{currency.code}</span>
-                        {selectedCurrency.code === currency.code && isAutoDetected && (
+                        {isMounted && selectedCurrency.code === currency.code && isAutoDetected && (
                           <span className="ml-auto text-xs text-lime-600">Auto</span>
                         )}
-                        {selectedCurrency.code === currency.code && hasUserSelectedCurrency && !isAutoDetected && (
+                        {isMounted && selectedCurrency.code === currency.code && hasUserSelectedCurrency && !isAutoDetected && (
                           <span className="ml-auto text-xs text-blue-600">Manual</span>
                         )}
                       </button>
