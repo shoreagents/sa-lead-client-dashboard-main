@@ -42,51 +42,64 @@ export async function POST(request: NextRequest) {
     if (type === 'industry') {
       // Determine location-specific context and terminology based on currency
       const locationContext = currency === 'AUD'
-        ? `🇦🇺 AUSTRALIAN MARKET - USE AUSTRALIAN TERMINOLOGY ONLY:
+        ? `🇦🇺 AUSTRALIAN MARKET - USE AUSTRALIAN ENGLISH ONLY:
 
-CRITICAL: Use Australian business terms, NOT American terms!
+NEVER USE THESE AMERICAN TERMS:
+❌ Brokerage → ✅ Agency
+❌ Realtor → ✅ Real Estate Agent
+❌ Truck → ✅ Lorry/Vehicle
+❌ Freight → ✅ Logistics/Transport
+❌ Attorney → ✅ Solicitor/Lawyer
+❌ Store → ✅ Shop/Retail Store
+❌ Mall → ✅ Shopping Centre
+❌ Warehouse → ✅ Warehouse (OK)
+❌ License → ✅ Licence
+❌ Labor → ✅ Labour
+❌ Favor → ✅ Favour
+❌ Center → ✅ Centre
+❌ Organization → ✅ Organisation
+❌ Analyze → ✅ Analyse
 
-Real Estate:
-- ✅ "Real Estate Agency" (NOT "Real Estate Brokerage")
-- ✅ "Property Management"
-- ✅ "Strata Management"
-- ✅ "Commercial Property"
+AUSTRALIAN INDUSTRY TERMS:
+Real Estate: "Real Estate Agency", "Property Management", "Strata Management"
+Construction: "Building & Construction", "Trades & Services"
+Retail: "Retail & Shopping Centres", "E-commerce"
+Transport: "Logistics & Transport", "Freight Services"
+Legal: "Legal Services", "Solicitors", "Law Firms"
+Finance: "Financial Services", "Superannuation", "Banking"
+Healthcare: "Healthcare & Aged Care", "Medical Services"
+Mining: "Mining & Resources"
+Agriculture: "Agriculture & Farming"
+Hospitality: "Hospitality & Tourism"
 
-Construction:
-- ✅ "Building & Construction"
-- ✅ "Trades & Services"
-- ✅ "Project Management"
-
-Other AU-specific industries:
-- Mining & Resources
-- Agriculture & Farming
-- Hospitality & Tourism
-- Retail & Shopping Centres
-- Manufacturing & Warehousing
-- Financial Services & Superannuation
-- Healthcare & Aged Care`
+USE AUSTRALIAN SPELLING in descriptions (centre, organisation, labour, etc.)`
         : currency === 'GBP'
-        ? `🇬🇧 BRITISH/UK MARKET - USE BRITISH TERMINOLOGY ONLY:
+        ? `🇬🇧 BRITISH/UK MARKET - USE BRITISH ENGLISH ONLY:
 
-CRITICAL: Use British business terms, NOT American terms!
+NEVER USE THESE AMERICAN TERMS:
+❌ Brokerage → ✅ Agency
+❌ Realtor → ✅ Estate Agent
+❌ Truck → ✅ Lorry
+❌ Attorney → ✅ Solicitor/Barrister
+❌ Store → ✅ Shop
+❌ Mall → ✅ Shopping Centre/High Street
+❌ Apartment → ✅ Flat
+❌ License → ✅ Licence
+❌ Labor → ✅ Labour
+❌ Center → ✅ Centre
+❌ Organization → ✅ Organisation
 
-Real Estate:
-- ✅ "Estate Agency" (NOT "Real Estate Brokerage")
-- ✅ "Property Management"
-- ✅ "Lettings Agency"
-- ✅ "Commercial Property"
+BRITISH INDUSTRY TERMS:
+Property: "Estate Agency", "Lettings Agency", "Property Management"
+Construction: "Building Services", "Construction & Engineering"
+Retail: "Retail & High Street", "E-commerce"
+Legal: "Legal Services", "Solicitors", "Barristers"
+Finance: "Financial Services", "Banking", "Insurance"
+Healthcare: "Healthcare", "NHS Services", "Private Healthcare"
+Manufacturing: "Manufacturing & Engineering"
+Hospitality: "Hospitality & Tourism"
 
-Construction:
-- ✅ "Building Services"
-- ✅ "Construction & Engineering"
-
-Other UK-specific industries:
-- Financial Services (Banking, Insurance)
-- Retail & High Street
-- Manufacturing & Engineering
-- Healthcare & NHS Services
-- Hospitality & Tourism
-- Legal Services & Solicitors`
+USE BRITISH SPELLING in descriptions (centre, organisation, licence, etc.)`
         : currency === 'NZD'
         ? `🇳🇿 NEW ZEALAND MARKET - USE NZ TERMINOLOGY:
 
@@ -132,26 +145,27 @@ ${locationContext}
 USER INPUT: "${query}"
 USER CURRENCY: ${currency}
 
-CRITICAL INSTRUCTIONS:
-1. **ONLY use terminology from the ${currency} market context above**
-2. **NEVER use "Brokerage" for AUD/GBP/NZD users - NOT in title, NOT in description!**
-3. **NEVER mix American terms into non-US markets**
+CRITICAL INSTRUCTIONS FOR ${currency} MARKET:
 
-4. If user types "Real Estate" or similar:
-   - AUD/NZD users:
-     * Title: "Real Estate Agency" or "Property Management"
-     * Description: Use "facilitating", "managing", "sales", "leasing" - NEVER "brokerage"
-   - GBP users:
-     * Title: "Estate Agency" or "Lettings Agency"
-     * Description: Use "facilitating", "managing", "letting" - NEVER "brokerage"
-   - USD users:
-     * Title: "Real Estate Brokerage" (OK for US only!)
-     * Description: Can use "brokerage" for US users
+1. **USE ONLY ${currency} terminology - check the list above for correct terms**
+2. **NEVER use American English spelling/terms for non-US markets:**
+   - AUD/GBP/NZD: Use "centre" NOT "center", "organisation" NOT "organization"
+   - AUD/GBP/NZD: Use "Agency" NOT "Brokerage", "Solicitor" NOT "Attorney"
+   - AUD/GBP: Use "Shopping Centre" NOT "Mall", "Licence" NOT "License"
 
-5. Check BOTH title AND description - remove ALL "Brokerage" references for non-US markets
-6. Match the user's likely industry based on their input
-7. Use professional, commonly-used business terms for that region
-8. Suggest ${MAX_SUGGESTIONS} specific, relevant industries
+3. **Apply regional language to EVERY WORD in title AND description:**
+   - Check titles for American terms
+   - Check descriptions for American terms
+   - Check spelling (center→centre, labor→labour, etc.)
+
+4. **Industry-specific terminology:**
+   - Real Estate: AUD/NZD="Agency", GBP="Estate Agency", USD="Brokerage"
+   - Legal: AUD/GBP="Solicitor", USD="Attorney"
+   - Retail: AUD/GBP="Shopping Centre", USD="Mall"
+   - Apply this logic to ALL industries
+
+5. Match the user's likely industry based on their input
+6. Suggest ${MAX_SUGGESTIONS} specific, relevant industries for ${currency} region
 
 FORMAT EXAMPLES:
 AUD/NZD users:
