@@ -22,11 +22,6 @@ export function Navbar() {
   const isUserDashboard = pathname?.startsWith('/user-dashboard')
   const isAdminDashboard = pathname?.startsWith('/admin-dashboard')
   
-  // Hide navbar completely on dashboard pages
-  if (isUserDashboard || isAdminDashboard) {
-    return null
-  }
-
   // Country name mapping for currencies
   const currencyCountryNames: Record<string, string> = {
     USD: 'UNITED STATES',
@@ -53,6 +48,11 @@ export function Navbar() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Hide navbar completely on dashboard pages (AFTER all hooks are called)
+  if (isUserDashboard || isAdminDashboard) {
+    return null
+  }
 
   // Helper function to check if a link is active
   const isActive = (href: string) => {
