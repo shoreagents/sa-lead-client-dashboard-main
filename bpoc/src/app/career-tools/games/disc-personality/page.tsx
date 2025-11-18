@@ -433,13 +433,19 @@ export default function FilipinoDiscGame() {
 
   // Share DISC results function
   const shareDiscResults = async (platform?: string) => {
-    if (!discResult || !user) return;
+    if (!discResult || !user) {
+      console.error('Cannot share: discResult or user is missing', { discResult, user });
+      return;
+    }
 
     const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
     const shareUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim()}`;
     const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim()}&title=${encodeURIComponent(userTitle)}`;
+
+    // Close dropdown first
+    setIsShareOpen(false);
 
     switch (platform) {
       case 'facebook':
@@ -454,10 +460,15 @@ export default function FilipinoDiscGame() {
             window.open(facebookUrl, '_blank', 'width=600,height=400');
           }, 1500);
         } catch (err) {
-          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-          window.open(facebookUrl, '_blank', 'width=600,height=400');
+          console.error('Failed to copy to clipboard:', err);
+          // Still show modal even if clipboard fails
+          setShareModalData({ platform: 'Facebook', text: facebookShareText, url: shareUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+            window.open(facebookUrl, '_blank', 'width=600,height=400');
+          }, 1500);
         }
-        setIsShareOpen(false);
         break;
 
       case 'linkedin':
@@ -472,10 +483,15 @@ export default function FilipinoDiscGame() {
             window.open(linkedinUrl, '_blank', 'width=600,height=400');
           }, 1500);
         } catch (err) {
-          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-          window.open(linkedinUrl, '_blank', 'width=600,height=400');
+          console.error('Failed to copy to clipboard:', err);
+          // Still show modal even if clipboard fails
+          setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: shareUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+          }, 1500);
         }
-        setIsShareOpen(false);
         break;
 
       case 'copy':
@@ -486,13 +502,14 @@ export default function FilipinoDiscGame() {
           setShowShareModal(true);
         } catch (err) {
           console.error('Failed to copy link:', err);
-          alert('Failed to copy link. Please try again.');
+          // Still show modal even if clipboard fails
+          setShareModalData({ platform: 'Clipboard', text: copyShareText, url: shareUrl });
+          setShowShareModal(true);
         }
-        setIsShareOpen(false);
         break;
 
       default:
-        setIsShareOpen(false);
+        break;
     }
   };
 
@@ -3344,25 +3361,26 @@ Make it deeply personal and actionable based on their actual choices.`;
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Share Modal */}
-      <AnimatePresence>
-        {showShareModal && (
-          <div 
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) {
-                setShowShareModal(false);
-              }
-            }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.3 }}
-              className="relative w-full max-w-2xl"
-              onClick={(e) => e.stopPropagation()}
+      {/* Share Modal - Rendered via Portal */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showShareModal && (
+            <div 
+              className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setShowShareModal(false);
+                }
+              }}
             >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="relative w-full max-w-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
             {/* Glow Effects */}
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
             
@@ -3475,8 +3493,10 @@ Make it deeply personal and actionable based on their actual choices.`;
             </div>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
     </div>
   );

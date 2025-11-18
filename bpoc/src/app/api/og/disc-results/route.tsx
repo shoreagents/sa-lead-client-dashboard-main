@@ -84,98 +84,94 @@ export async function GET(request: NextRequest) {
             flexDirection: 'row',
             backgroundColor: '#0f172a',
             backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(6, 182, 212, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)',
-            position: 'relative',
           }}
         >
-          {/* Top Left - Nickname, Location, Position (absolute positioned at top left) */}
+          {/* Left Column - User Info & Animal/Personality */}
           <div
             style={{
-              position: 'absolute',
-              top: '40px',
-              left: '40px',
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'flex-start',
-              zIndex: 10,
-              maxWidth: '300px',
+              width: '60%',
+              padding: '50px',
             }}
           >
+            {/* User Info Section - Top Left */}
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                marginBottom: '40px',
+              }}
+            >
               {avatarUrl && (
                 <img
                   src={avatarUrl}
-                  width="80"
-                  height="80"
+                  width="100"
+                  height="100"
                   style={{
                     borderRadius: '50%',
-                    border: '3px solid #06B6D4',
+                    border: '4px solid #06B6D4',
                     objectFit: 'cover',
-                    marginBottom: 12,
+                    marginRight: '20px',
                   }}
                 />
               )}
               <div
                 style={{
-                  fontSize: 28,
-                  fontWeight: 'bold',
-                  color: 'white',
                   display: 'flex',
-                  marginBottom: 8,
+                  flexDirection: 'column',
+                  justifyContent: 'center',
                 }}
               >
-                @{displayName}
-              </div>
-              {location && (
                 <div
                   style={{
-                    fontSize: 18,
-                    color: '#67E8F9',
-                    display: 'flex',
+                    fontSize: 32,
+                    fontWeight: 'bold',
+                    color: 'white',
                     marginBottom: 8,
                   }}
                 >
-                  {location}
+                  @{displayName}
                 </div>
-              )}
-              {userTitle && (
-                <div
-                  style={{
-                    fontSize: 20,
-                    color: 'white',
-                    display: 'flex',
-                    fontWeight: '600',
-                  }}
-                >
-                  {userTitle}
-                </div>
-              )}
-          </div>
+                {location && (
+                  <div
+                    style={{
+                      fontSize: 20,
+                      color: '#67E8F9',
+                      marginBottom: 8,
+                    }}
+                  >
+                    {location}
+                  </div>
+                )}
+                {userTitle && (
+                  <div
+                    style={{
+                      fontSize: 22,
+                      color: 'white',
+                      fontWeight: '600',
+                    }}
+                  >
+                    {userTitle}
+                  </div>
+                )}
+              </div>
+            </div>
 
-          {/* Left Side - Animal & Personality Info */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              padding: '80px 80px 80px 360px',
-              width: '60%',
-              position: 'relative',
-            }}
-          >
-            {/* Animal Emoji & Personality Type - Centered */}
+            {/* Animal & Personality Info - Below User Info */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 40,
+                marginTop: '20px',
               }}
             >
               <div
                 style={{
-                  fontSize: '140px',
-                  display: 'flex',
-                  marginRight: 30,
+                  fontSize: '120px',
+                  marginRight: '30px',
                 }}
               >
                 {animalEmojiDisplay}
@@ -188,20 +184,18 @@ export async function GET(request: NextRequest) {
               >
                 <div
                   style={{
-                    fontSize: 52,
+                    fontSize: 48,
                     fontWeight: 'bold',
                     color: 'white',
-                    display: 'flex',
+                    marginBottom: 8,
                   }}
                 >
                   {personalityTitle}
                 </div>
                 <div
                   style={{
-                    fontSize: 36,
+                    fontSize: 32,
                     color: '#67E8F9',
-                    marginTop: 10,
-                    display: 'flex',
                   }}
                 >
                   {animalName} Personality
@@ -209,12 +203,12 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
 
-            {/* BPOC Logo/Text */}
+            {/* BPOC Logo - Bottom Left */}
             <div
               style={{
-                fontSize: 48,
+                marginTop: 'auto',
+                fontSize: 40,
                 fontWeight: 'bold',
-                display: 'flex',
                 letterSpacing: '2px',
                 color: '#06B6D4',
               }}
@@ -223,7 +217,15 @@ export async function GET(request: NextRequest) {
             </div>
           </div>
 
-          {/* Right Side - CTA */}
+          {/* Vertical Separator */}
+          <div
+            style={{
+              width: '2px',
+              backgroundColor: 'rgba(6, 182, 212, 0.4)',
+            }}
+          />
+
+          {/* Right Column - CTA */}
           <div
             style={{
               display: 'flex',
@@ -232,7 +234,6 @@ export async function GET(request: NextRequest) {
               alignItems: 'center',
               width: '40%',
               background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
-              borderLeft: '2px solid rgba(6, 182, 212, 0.4)',
               padding: '60px',
             }}
           >
@@ -250,7 +251,6 @@ export async function GET(request: NextRequest) {
                   fontWeight: 'bold',
                   color: 'white',
                   lineHeight: 1.2,
-                  display: 'flex',
                   marginBottom: 10,
                 }}
               >
@@ -262,7 +262,6 @@ export async function GET(request: NextRequest) {
                   fontWeight: 'bold',
                   color: 'white',
                   lineHeight: 1.2,
-                  display: 'flex',
                   marginBottom: 20,
                 }}
               >
@@ -275,23 +274,19 @@ export async function GET(request: NextRequest) {
                   color: '#67E8F9',
                   marginTop: 20,
                   lineHeight: 1.5,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
+                  marginBottom: 20,
                 }}
               >
-                <div style={{ display: 'flex' }}>Take the BPOC DISC</div>
-                <div style={{ display: 'flex', marginTop: 10 }}>Personality Assessment</div>
+                Take the BPOC DISC Personality Assessment
               </div>
 
               {/* CTA Button */}
               <div
                 style={{
-                  marginTop: 40,
+                  marginTop: 30,
                   background: 'linear-gradient(135deg, #06B6D4 0%, #A855F7 100%)',
                   borderRadius: '12px',
                   padding: '20px 50px',
-                  display: 'flex',
                   border: '2px solid rgba(255, 255, 255, 0.2)',
                   boxShadow: '0 10px 30px rgba(6, 182, 212, 0.5)',
                 }}
@@ -301,7 +296,6 @@ export async function GET(request: NextRequest) {
                     fontSize: 32,
                     fontWeight: 'bold',
                     color: 'white',
-                    display: 'flex',
                   }}
                 >
                   Sign Up Now
@@ -313,7 +307,6 @@ export async function GET(request: NextRequest) {
                   fontSize: 20,
                   color: '#94A3B8',
                   marginTop: 30,
-                  display: 'flex',
                 }}
               >
                 Where BPO Careers Begin
