@@ -64,11 +64,6 @@ const REALISTIC_SALARY_RANGES: Record<string, Record<string, { min: number; max:
     mid: { min: 25000, max: 40000, average: 32500 },
     senior: { min: 35000, max: 55000, average: 45000 }
   },
-  'graphic designer': {
-    entry: { min: 18000, max: 30000, average: 24000 },
-    mid: { min: 28000, max: 45000, average: 36500 },
-    senior: { min: 40000, max: 65000, average: 52500 }
-  },
   'customer service': {
     entry: { min: 15000, max: 25000, average: 20000 },
     mid: { min: 22000, max: 35000, average: 28500 },

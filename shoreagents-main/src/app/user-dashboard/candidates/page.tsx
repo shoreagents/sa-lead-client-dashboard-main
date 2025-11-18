@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { UserGuard } from '@/components/auth/UserGuard'
 import { UserDashboardSidebar } from '@/components/layout/UserDashboardSidebar'
@@ -8,17 +8,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Users, 
   Search, 
-  Heart,
-  Eye,
+  Filter,
   Star,
+  Heart,
+  MessageCircle,
+  Eye,
+  Download,
   MapPin,
+  Calendar,
   Briefcase
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getEmployeeCardData } from '@/lib/api'
+import { EmployeeCardData } from '@/types/api'
 import { useEmployeeCardData } from '@/hooks/use-api'
 
 export default function CandidatesPage() {
@@ -27,9 +32,10 @@ export default function CandidatesPage() {
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [favorites, setFavorites] = useState<string[]>([])
   
-  const { data: candidates = [], loading } = useEmployeeCardData()
+  // Use TanStack Query for data fetching - preserves all custom logic
+  const { data: candidates = [], isLoading: loading, error } = useEmployeeCardData()
 
-  const toggleFavorite = (candidateId: string) => {
+  const handleFavorite = (candidateId: string) => {
     setFavorites(prev => 
       prev.includes(candidateId) 
         ? prev.filter(id => id !== candidateId)
@@ -51,7 +57,25 @@ export default function CandidatesPage() {
       <SidebarProvider>
         <UserDashboardSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold">Candidates</h1>
+              <Badge variant="secondary" className="text-xs">
+                {filteredCandidates.length} candidates found
+              </Badge>
+            </div>
+          </header>
+          
+          <div className="flex flex-1 flex-col gap-4 p-4">
+            {/* Header */}
+            <div className="grid gap-4">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">Browse Candidates</h2>
+                <p className="text-muted-foreground">
+                  Find the perfect talent for your business needs
+                </p>
+              </div>
+            </div>
 
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row gap-4">
@@ -68,62 +92,55 @@ export default function CandidatesPage() {
                 <Button
                   variant={selectedFilter === 'all' ? 'default' : 'outline'}
                   onClick={() => setSelectedFilter('all')}
-                  size="sm"
+                  className={selectedFilter === 'all' ? 'bg-lime-600 hover:bg-lime-700' : ''}
                 >
                   All
                 </Button>
                 <Button
                   variant={selectedFilter === 'available' ? 'default' : 'outline'}
                   onClick={() => setSelectedFilter('available')}
-                  size="sm"
+                  className={selectedFilter === 'available' ? 'bg-lime-600 hover:bg-lime-700' : ''}
                 >
                   Available
                 </Button>
                 <Button
                   variant={selectedFilter === 'favorites' ? 'default' : 'outline'}
                   onClick={() => setSelectedFilter('favorites')}
-                  size="sm"
+                  className={selectedFilter === 'favorites' ? 'bg-lime-600 hover:bg-lime-700' : ''}
                 >
-                  <Heart className="w-4 h-4 mr-1" />
+                  <Heart className="w-4 h-4 mr-2" />
                   Favorites
                 </Button>
               </div>
             </div>
 
-            {/* Loading State */}
-            {loading && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-16 w-16 rounded-full" />
-                        <div className="space-y-2 flex-1">
-                          <Skeleton className="h-4 w-3/4" />
-                          <Skeleton className="h-3 w-1/2" />
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-2/3" />
-                      <div className="flex gap-2">
-                        <Skeleton className="h-6 w-16" />
-                        <Skeleton className="h-6 w-16" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+            {/* Error State */}
+            {error && (
+              <div className="text-center py-12">
+                <p className="text-red-600 mb-4">Failed to load candidates. Please try again.</p>
+                <Button onClick={() => window.location.reload()} variant="outline">
+                  Retry
+                </Button>
               </div>
             )}
 
-            {/* Candidates Grid */}
+            {/* Loading State */}
+            {loading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-8 h-8" />
+                <span className="ml-3 text-gray-600">Loading candidates...</span>
+              </div>
+            )}
+
+            {/* Candidates Grid - 4 Column Portrait Layout */}
             {!loading && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredCandidates.map((candidate) => (
                   <Card key={candidate.user.id} className="hover:shadow-lg transition-all duration-300 flex flex-col h-full overflow-hidden">
+                    {/* Portrait Header with Avatar */}
                     <CardHeader className="pb-3 text-center relative">
                       <div className="flex flex-col items-center space-y-2">
+                        {/* Large Avatar */}
                         <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center shadow-sm">
                           {candidate.user.avatar ? (
                             <img 
@@ -136,73 +153,98 @@ export default function CandidatesPage() {
                           )}
                         </div>
                         
-                        <div className="text-center">
-                          <h3 className="font-semibold text-gray-900 text-sm">{candidate.user.name}</h3>
-                          <p className="text-xs text-gray-600 truncate w-full">{candidate.user.position}</p>
+                        {/* Name and Position */}
+                        <div className="text-center min-h-0">
+                          <CardTitle className="text-base font-semibold leading-tight truncate">{candidate.user.name}</CardTitle>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{candidate.user.position}</p>
                         </div>
                         
+                        {/* Favorite Button */}
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => toggleFavorite(candidate.user.id)}
-                          className={`absolute top-2 right-2 p-1 h-8 w-8 ${
-                            favorites.includes(candidate.user.id) 
-                              ? 'text-red-500 hover:text-red-600' 
-                              : 'text-gray-400 hover:text-red-500'
-                          }`}
+                          onClick={() => handleFavorite(candidate.user.id)}
+                          className="absolute top-2 right-2 p-1 h-6 w-6"
                         >
-                          <Heart className={`w-4 h-4 ${favorites.includes(candidate.user.id) ? 'fill-current' : ''}`} />
+                          <Heart 
+                            className={`w-3 h-3 ${
+                              favorites.includes(candidate.user.id) 
+                                ? 'text-red-500 fill-current' 
+                                : 'text-gray-400'
+                            }`} 
+                          />
                         </Button>
                       </div>
                     </CardHeader>
                     
+                    {/* Content */}
                     <CardContent className="flex-1 flex flex-col space-y-2 px-3 pb-3 min-h-0">
+                      {/* AI Analysis Score */}
                       {candidate.aiAnalysis && (
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-gray-600">AI Score:</span>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                            <span className="font-medium text-gray-900">{candidate.aiAnalysis.overallScore}/10</span>
-                          </div>
+                        <div className="flex items-center justify-center gap-1">
+                          <Star className="w-3 h-3 text-yellow-500 fill-current" />
+                          <span className="text-xs font-medium">{candidate.aiAnalysis.overall_score.toFixed(1)}</span>
+                          <span className="text-xs text-muted-foreground">AI</span>
                         </div>
                       )}
-                      
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <MapPin className="w-3 h-3" />
-                        <span className="truncate">{candidate.user.location || 'Location not specified'}</span>
+
+                      {/* Location */}
+                      <div className="flex items-center justify-center gap-1">
+                        <MapPin className="w-3 h-3 text-gray-500" />
+                        <span className="text-xs text-muted-foreground text-center truncate">{candidate.user.location}</span>
                       </div>
-                      
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <Briefcase className="w-3 h-3" />
-                        <span>{candidate.user.experience || 'Experience not specified'}</span>
+
+                      {/* Work Status */}
+                      <div className="flex items-center justify-center gap-1">
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          candidate.user.work_status === 'Available' ? 'bg-green-500' : 
+                          candidate.user.work_status === 'Busy' ? 'bg-yellow-500' : 'bg-gray-500'
+                        }`} />
+                        <span className="text-xs text-muted-foreground truncate">
+                          {candidate.user.work_status || 'Unknown'}
+                        </span>
                       </div>
-                      
-                      {candidate.user.skills && candidate.user.skills.length > 0 && (
-                        <div className="space-y-1">
-                          <div className="text-xs text-gray-600">Skills:</div>
-                          <div className="flex flex-wrap gap-1">
-                            {candidate.user.skills.slice(0, 3).map((skill, index) => (
-                              <Badge key={index} variant="secondary" className="text-xs px-2 py-0.5">
-                                {skill}
-                              </Badge>
-                            ))}
-                            {candidate.user.skills.length > 3 && (
-                              <Badge variant="outline" className="text-xs px-2 py-0.5">
-                                +{candidate.user.skills.length - 3} more
-                              </Badge>
-                            )}
-                          </div>
+
+                      {/* Skills from AI Analysis */}
+                      {candidate.aiAnalysis?.key_strengths && candidate.aiAnalysis.key_strengths.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1">
+                          {candidate.aiAnalysis.key_strengths.slice(0, 1).map((skill, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs px-1 py-0">
+                              {skill.length > 15 ? skill.substring(0, 15) + '...' : skill}
+                            </Badge>
+                          ))}
+                          {candidate.aiAnalysis.key_strengths.length > 1 && (
+                            <Badge variant="secondary" className="text-xs px-1 py-0">
+                              +{candidate.aiAnalysis.key_strengths.length - 1}
+                            </Badge>
+                          )}
                         </div>
                       )}
-                      
-                      <div className="flex gap-2 mt-auto pt-2">
+
+                      {/* Bio Preview */}
+                      {candidate.user.bio && (
+                        <p className="text-xs text-muted-foreground text-center line-clamp-2 flex-1 min-h-0">
+                          {candidate.user.bio}
+                        </p>
+                      )}
+
+                      {/* Actions - Fixed at bottom */}
+                      <div className="flex flex-col gap-1.5 pt-2 mt-auto">
                         <Button 
                           size="sm" 
-                          className="flex-1 bg-lime-600 hover:bg-lime-700 text-white"
+                          className="w-full bg-lime-600 hover:bg-lime-700 text-white text-xs h-8"
                           onClick={() => window.open(`/employee/${candidate.user.id}`, '_blank')}
                         >
                           <Eye className="w-3 h-3 mr-1" />
-                          View
+                          View Profile
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="w-full text-xs h-8"
+                        >
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          Contact
                         </Button>
                       </div>
                     </CardContent>
@@ -224,7 +266,7 @@ export default function CandidatesPage() {
                     setSearchTerm('')
                     setSelectedFilter('all')
                   }}
-                  variant="outline"
+                  className="bg-lime-600 hover:bg-lime-700"
                 >
                   Clear Filters
                 </Button>

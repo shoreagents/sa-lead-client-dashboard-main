@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
+    void _request
     // Just return a simple response - we don't need to create users here
     // Other functions handle user creation properly
     console.log('🔍 ensure-anonymous-user: API called - no user creation needed');

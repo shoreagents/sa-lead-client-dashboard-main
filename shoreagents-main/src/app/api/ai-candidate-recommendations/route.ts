@@ -105,7 +105,7 @@ IMPORTANT: Every candidate must have a position that is directly related to ${ro
     let response;
     try {
       response = await anthropic.messages.create({
-        model: 'claude-3-5-sonnet-20240620',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 2000,
         temperature: 0.7,
         system: systemPrompt,
@@ -127,6 +127,17 @@ IMPORTANT: Every candidate must have a position that is directly related to ${ro
     console.log('🤖 AI Response received, parsing candidates...');
 
     // Parse the AI response
+    type AIStructuredCandidate = {
+      name?: string
+      position?: string
+      expectedSalary?: number
+      experience?: string
+      skills?: unknown
+      overallScore?: number
+      matchScore?: number
+      isRecommended?: boolean
+    }
+
     let candidates: CandidateRecommendation[];
     try {
       // Extract JSON from response
@@ -135,10 +146,11 @@ IMPORTANT: Every candidate must have a position that is directly related to ${ro
         throw new Error('No JSON array found in AI response');
       }
 
-      const rawCandidates = JSON.parse(jsonMatch[0]);
+      const rawCandidates = JSON.parse(jsonMatch[0]) as AIStructuredCandidate[];
       
       // Validate and process candidates
-      candidates = rawCandidates.map((candidate: any, index: number) => {
+      const normalizedIndustry = industry || 'General Business';
+      candidates = rawCandidates.map((candidate, index) => {
         // Ensure position is relevant to the role
         let position = candidate.position || role;
         if (!position.toLowerCase().includes(role.toLowerCase()) && 
@@ -152,8 +164,8 @@ IMPORTANT: Every candidate must have a position that is directly related to ${ro
           name: candidate.name || `AI Generated Candidate ${index + 1}`,
           position: position,
           expectedSalary: Math.max(15000, Math.min(200000, candidate.expectedSalary || 30000)),
-          experience: candidate.experience || `${level} level experience`,
-          skills: Array.isArray(candidate.skills) ? candidate.skills : [],
+          experience: candidate.experience || `${level} level ${normalizedIndustry.toLowerCase()} experience`,
+          skills: Array.isArray(candidate.skills) ? candidate.skills.map(skill => String(skill)) : [],
           overallScore: Math.max(60, Math.min(100, candidate.overallScore || 75)),
           matchScore: Math.max(70, Math.min(100, candidate.matchScore || 80)),
           isRecommended: candidate.isRecommended !== false
@@ -206,6 +218,7 @@ IMPORTANT: Every candidate must have a position that is directly related to ${ro
 // Fallback candidate generation if AI parsing fails
 function generateFallbackCandidates(role: string, level: string, industry?: string): CandidateRecommendation[] {
   const baseSalary = level === 'entry' ? 25000 : level === 'mid' ? 45000 : 75000;
+  const industryLabel = industry || 'general business';
   
   return [
     {
@@ -213,8 +226,8 @@ function generateFallbackCandidates(role: string, level: string, industry?: stri
       name: 'Maria Santos',
       position: `${role} Specialist`,
       expectedSalary: baseSalary,
-      experience: `${level} level with 3+ years experience`,
-      skills: ['Problem Solving', 'Communication', 'Technical Skills'],
+      experience: `${level} level with 3+ years experience in ${industryLabel}`,
+      skills: ['Problem Solving', 'Communication', `${industryLabel} fundamentals`],
       overallScore: 75,
       matchScore: 80,
       isRecommended: true
@@ -224,8 +237,8 @@ function generateFallbackCandidates(role: string, level: string, industry?: stri
       name: 'John Dela Cruz',
       position: `Senior ${role}`,
       expectedSalary: baseSalary + 10000,
-      experience: `${level} level with 5+ years experience`,
-      skills: ['Leadership', 'Project Management', 'Industry Knowledge'],
+      experience: `${level} level with 5+ years experience in ${industryLabel}`,
+      skills: ['Leadership', 'Project Management', `${industryLabel} expertise`],
       overallScore: 80,
       matchScore: 85,
       isRecommended: true
@@ -235,7 +248,7 @@ function generateFallbackCandidates(role: string, level: string, industry?: stri
       name: 'Ana Rodriguez',
       position: `${role} Coordinator`,
       expectedSalary: baseSalary - 5000,
-      experience: `${level} level with 2+ years experience`,
+      experience: `${level} level with 2+ years experience in ${industryLabel}`,
       skills: ['Organization', 'Attention to Detail', 'Team Collaboration'],
       overallScore: 70,
       matchScore: 75,

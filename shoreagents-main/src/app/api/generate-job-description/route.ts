@@ -1,8 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'mixed'
+
+type GenerateJobDescriptionRequest = {
+  teamSize?: string
+  roleType?: string
+  roles?: string
+  experience?: ExperienceLevel
+  industry?: string
+  budget?: string
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { teamSize, roleType, roles, experience, industry, budget } = await request.json()
+    const {
+      teamSize = '1',
+      roleType = 'same',
+      roles,
+      experience = 'mid',
+      industry,
+      budget
+    } = (await request.json()) as GenerateJobDescriptionRequest
 
     console.log('🔍 Generating job description for:', { teamSize, roleType, roles, experience, industry, budget })
 
@@ -13,51 +31,56 @@ export async function POST(request: NextRequest) {
     
     // Experience level descriptions
     const experienceDescriptions = {
-      'entry': {
+      entry: {
         title: 'Entry Level',
         years: '0-2 years',
         skills: 'basic knowledge and eagerness to learn',
         responsibilities: 'supporting senior team members and learning industry best practices'
       },
-      'mid': {
+      mid: {
         title: 'Mid Level',
         years: '3-5 years',
         skills: 'solid experience and proven track record',
         responsibilities: 'leading projects and mentoring junior team members'
       },
-      'senior': {
+      senior: {
         title: 'Senior Level',
         years: '6+ years',
         skills: 'extensive expertise and leadership capabilities',
         responsibilities: 'strategic planning and driving innovation'
       },
-      'mixed': {
+      mixed: {
         title: 'Mixed Experience',
         years: 'various levels',
         skills: 'diverse skill sets and experience levels',
         responsibilities: 'collaborative team environment with growth opportunities'
       }
-    }
+    } as const
 
-    const expInfo = experienceDescriptions[experience] || experienceDescriptions['mid']
+    const experienceKey = (experience ?? 'mid') as ExperienceLevel
+    const expInfo = experienceDescriptions[experienceKey] ?? experienceDescriptions.mid
     
     // Clean and validate industry
     const cleanIndustry = industry && industry !== 'undefined' ? industry : 'professional services'
     
     // Industry-specific requirements
     const industryRequirements = {
-      'Technology': 'proficiency in modern development tools and agile methodologies',
-      'Healthcare': 'understanding of healthcare regulations and patient data privacy',
-      'Finance': 'knowledge of financial regulations and risk management',
+      Technology: 'proficiency in modern development tools and agile methodologies',
+      Healthcare: 'understanding of healthcare regulations and patient data privacy',
+      Finance: 'knowledge of financial regulations and risk management',
       'Real Estate': 'experience with property management and client relations',
-      'Construction': 'understanding of project management and safety protocols',
-      'Engineering': 'technical expertise and problem-solving abilities',
-      'Marketing': 'digital marketing expertise and brand management skills',
+      Construction: 'understanding of project management and safety protocols',
+      Engineering: 'technical expertise and problem-solving abilities',
+      Marketing: 'digital marketing expertise and brand management skills',
       'Customer Service': 'excellent communication and problem-solving abilities',
-      'Sales': 'proven track record in client acquisition and relationship management'
-    }
+      Sales: 'proven track record in client acquisition and relationship management'
+    } as const
 
-    const industryReq = industryRequirements[cleanIndustry] || `relevant experience in the ${cleanIndustry} industry`
+    type IndustryKey = keyof typeof industryRequirements
+
+    const industryReq = (cleanIndustry in industryRequirements
+      ? industryRequirements[cleanIndustry as IndustryKey]
+      : undefined) ?? `relevant experience in the ${cleanIndustry} industry`
 
     // Generate dynamic job description
     let description = `We are looking for ${teamSizeText} to join our dynamic offshore team, ${roleText}. 

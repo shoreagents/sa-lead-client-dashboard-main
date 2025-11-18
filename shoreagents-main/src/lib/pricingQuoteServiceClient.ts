@@ -1,4 +1,12 @@
 import { createClient } from './supabase/client'
+import type { CandidateRecommendation } from './bpocPricingService'
+
+export interface QuoteCandidateRoleRecommendations {
+  roleTitle: string
+  roleLevel: 'entry' | 'mid' | 'senior'
+  totalCandidates: number
+  recommendedCandidates: CandidateRecommendation[]
+}
 
 export interface PricingQuoteData {
   user_id: string
@@ -7,14 +15,7 @@ export interface PricingQuoteData {
   industry: string
   total_monthly_cost: number
   currency_code?: string
-  candidate_recommendations?: Array<{
-    id: string
-    name: string
-    position: string
-    avatar?: string
-    score: number
-    isFavorite?: boolean
-  }>
+  candidate_recommendations?: QuoteCandidateRoleRecommendations[]
   roles: Array<{
     role_title: string
     role_description?: string
@@ -36,14 +37,7 @@ export interface SavedPricingQuote {
   industry: string
   total_monthly_cost: number
   currency_code: string
-  candidate_recommendations?: Array<{
-    id: string
-    name: string
-    position: string
-    avatar?: string
-    score: number
-    isFavorite?: boolean
-  }>
+  candidate_recommendations?: QuoteCandidateRoleRecommendations[]
   created_at: string
   updated_at: string
   roles: Array<{

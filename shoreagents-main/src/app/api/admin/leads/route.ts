@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { UserType } from '@/types/user'
+import { PrismaClient } from '@prisma/client'
 
-// Cache constants outside the handler for better performance
-const STATUS_HIERARCHY = ['new_lead', 'stage_1', 'stage_2', 'pending', 'meeting_booked', 'signed_up', 'closed_won']
-const STATUS_MAP: { [key: string]: string } = {
-  'new_lead': 'New Lead',
-  'stage_1': 'Stage 1',
-  'stage_2': 'Stage 2',
-  'pending': 'Pending',
-  'meeting_booked': 'Meeting Booked',
-  'signed_up': 'Signed Up',
-  'closed_won': 'Closed Won'
-}
+const prisma = new PrismaClient()
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    void _request
     // Get all users with their latest lead progress using Prisma
     const usersWithProgress = await prisma.user.findMany({
       where: {
@@ -24,36 +14,32 @@ export async function GET(request: NextRequest) {
         }
       },
       include: {
-        leadProgress: true, // One-to-one relationship, so no need for orderBy/take
+        leadProgress: {
+          orderBy: { created_at: 'desc' },
+          take: 1 // Get only the latest progress record
+        },
         pricingQuotes: {
           orderBy: { created_at: 'desc' },
           take: 3 // Get latest 3 quotes
-        },
-        interviewRequests: {
-          orderBy: { created_at: 'desc' },
-          take: 5 // Limit to 5 most recent interview requests
         }
       },
-      orderBy: { created_at: 'desc' },
-      take: 1000 // Limit to 1000 most recent users for performance
+      orderBy: { created_at: 'desc' }
     })
 
     // Transform data to match the expected format
     const leads = usersWithProgress.map(user => {
-      const currentProgress = user.leadProgress // Since it's one-to-one, access directly
-      const hasInterviewRequest = user.interviewRequests.length > 0
+      const currentProgress = user.leadProgress[0]
+      const currentStatus = currentProgress?.status || 'new_lead'
       
-      // If user has an interview request, automatically set status to 'pending'
-      // unless they're already in a more advanced stage
-      let currentStatus = currentProgress?.status || 'new_lead'
-      if (hasInterviewRequest) {
-        const currentIndex = STATUS_HIERARCHY.indexOf(currentStatus)
-        const pendingIndex = STATUS_HIERARCHY.indexOf('pending')
-        
-        // Only move to pending if current status is not more advanced than pending
-        if (currentIndex < pendingIndex) {
-          currentStatus = 'pending'
-        }
+      // Determine status display name
+      const statusMap: { [key: string]: string } = {
+        'new_lead': 'New Lead',
+        'stage_1': 'Stage 1',
+        'stage_2': 'Stage 2',
+        'pending': 'Pending',
+        'meeting_booked': 'Meeting Booked',
+        'signed_up': 'Signed Up',
+        'closed_won': 'Closed Won'
       }
 
       // Calculate priority based on user type and activity
@@ -77,7 +63,7 @@ export async function GET(request: NextRequest) {
         name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Anonymous User',
         company: user.company || 'Not specified',
         email: user.email || 'No email provided',
-        status: STATUS_MAP[currentStatus] || 'New Lead',
+        status: statusMap[currentStatus] || 'New Lead',
         priority,
         source,
         created: user.created_at?.toISOString() || new Date().toISOString(),
@@ -90,14 +76,7 @@ export async function GET(request: NextRequest) {
         industry: user.industry_name || 'Not specified',
         firstLeadCapture: user.first_lead_capture || false,
         secondLeadCapture: user.second_lead_capture || false,
-        thirdLeadCapture: user.third_lead_capture || false,
-        hasInterviewRequest: hasInterviewRequest,
-        interviewRequestCount: user.interviewRequests.length,
-        allInterviewRequests: user.interviewRequests || [],
-        changedBy: currentProgress?.changed_by || null,
-        changeReason: currentProgress?.change_reason || null,
-        previousStatus: currentProgress?.previous_status || null,
-        progressCreatedAt: currentProgress?.created_at?.toISOString() || null
+        thirdLeadCapture: user.third_lead_capture || false
       }
     })
 
@@ -121,14 +100,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Error in leads API:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    const errorStack = error instanceof Error ? error.stack : undefined
-    console.error('Error details:', { errorMessage, errorStack })
-    return NextResponse.json({ 
-      error: 'Failed to load leads', 
-      message: errorMessage,
-      details: process.env.NODE_ENV === 'development' ? errorStack : undefined
-    }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -159,8 +131,8 @@ export async function PUT(request: NextRequest) {
           previous_status: existingProgress.status, // Store old status as previous
           status: column, // Update to new status
           changed_by: changedBy || null,
-          change_reason: changeReason || null
-          // Note: created_at should not be updated as it represents when the record was first created
+          change_reason: changeReason || null,
+          created_at: new Date() // Update timestamp
         }
       })
       console.log('✅ API: Updated existing lead status:', updatedProgress)

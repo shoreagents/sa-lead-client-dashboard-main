@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    void _request
     // Test if environment variables are loaded
     const hasApiKey = !!process.env.ANTHROPIC_API_KEY
     const apiKeyLength = process.env.ANTHROPIC_API_KEY?.length || 0

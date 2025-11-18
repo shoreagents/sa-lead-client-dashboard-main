@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -8,18 +8,6 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, Menu, X, Star, ArrowRight } from 'lucide-react'
 import { useCurrency, currencies, Currency } from '@/lib/currencyContext'
 import { AuthButtons } from '@/components/ui/auth-buttons'
-import { NotificationDropdown } from '@/components/ui/notification-dropdown'
-
-// Country name mapping for currencies - moved outside component to prevent recreation
-const CURRENCY_COUNTRY_NAMES: Record<string, string> = {
-  USD: 'UNITED STATES',
-  AUD: 'AUSTRALIA',
-  CAD: 'CANADA',
-  GBP: 'UNITED KINGDOM',
-  NZD: 'NEW ZEALAND',
-  EUR: 'EUROPE',
-  PHP: 'PHILIPPINES'
-}
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -29,208 +17,68 @@ export function Navbar() {
   const { selectedCurrency, setSelectedCurrency, isDetectingLocation, detectUserLocation, isAutoDetected, setIsAutoDetected, hasUserSelectedCurrency, setHasUserSelectedCurrency } = useCurrency()
   const pathname = usePathname()
   
-  // Memoize route checks to prevent unnecessary recalculations
-  const isEmployeePage = useMemo(() => pathname?.startsWith('/employee/'), [pathname])
-  const isUserDashboard = useMemo(() => pathname?.startsWith('/user-dashboard'), [pathname])
-  const isAdminDashboard = useMemo(() => pathname?.startsWith('/admin-dashboard'), [pathname])
+  // Check if we're on an employee profile page, user dashboard, or admin dashboard
+  const isEmployeePage = pathname?.startsWith('/employee/')
+  const isUserDashboard = pathname?.startsWith('/user-dashboard')
+  const isAdminDashboard = pathname?.startsWith('/admin-dashboard')
+
+  // Country name mapping for currencies
+  const currencyCountryNames: Record<string, string> = {
+    USD: 'UNITED STATES',
+    AUD: 'AUSTRALIA',
+    CAD: 'CANADA',
+    GBP: 'UNITED KINGDOM',
+    NZD: 'NEW ZEALAND',
+    EUR: 'EUROPE',
+    PHP: 'PHILIPPINES'
+  }
 
   // Handle mounting to prevent hydration mismatches
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Optimized scroll event listener with throttling
+  // Scroll event listener to track scroll state
   useEffect(() => {
-    let ticking = false
     const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 0)
-          ticking = false
-        })
-        ticking = true
-      }
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 0)
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Memoized helper function to check if a link is active
-  const isActive = useCallback((href: string) => {
+  // Helper function to check if a link is active
+  const isActive = (href: string) => {
     if (href === '/') {
       return pathname === '/'
     }
     return pathname.startsWith(href)
-  }, [pathname])
+  }
 
-  const toggleMobileMenu = useCallback(() => setIsMobileMenuOpen(!isMobileMenuOpen), [isMobileMenuOpen])
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
   
-  const handleCurrencySelect = useCallback((currency: Currency) => {
+  const handleCurrencySelect = (currency: Currency) => {
     setSelectedCurrency(currency)
-    setHasUserSelectedCurrency(true)
-    setIsAutoDetected(false)
-  }, [setSelectedCurrency, setHasUserSelectedCurrency, setIsAutoDetected])
+    setHasUserSelectedCurrency(true) // Mark that user has manually selected a currency
+    setIsAutoDetected(false) // Clear auto-detection flag when manually selecting
+  }
 
-  const handleDetectLocation = useCallback(async () => {
+  const handleDetectLocation = async () => {
     await detectUserLocation()
-  }, [detectUserLocation])
+  }
 
-  const toggleSection = useCallback((section: string) => {
+  const toggleSection = (section: string) => {
     setExpandedSections(prev => 
       prev.includes(section) 
         ? prev.filter(s => s !== section)
         : [...prev, section]
     )
-  }, [])
-
-  // Show custom dashboard navbar for admin and user dashboards
-  if (isAdminDashboard || isUserDashboard) {
-  return (
-      <nav className="bg-lime-600 fixed top-0 left-0 right-0 z-50 transition-all duration-300 shadow-sm">
-        <div className="w-full relative">
-          <div className="flex items-center h-16">
-            {/* Logo - Left side */}
-            <div className="flex-shrink-0 absolute left-10 z-10">
-              <Link href="/" className="flex items-center">
-                <Image
-                  src="/ShoreAgents-Logo-Copy.png"
-                  alt="ShoreAgents Logo"
-                  width={180}
-                  height={40}
-                  className="h-10 w-auto lg:hidden brightness-0 invert"
-                />
-                <Image
-                  src="/ShoreAgents-Logo.png"
-                  alt="ShoreAgents Logo"
-                  width={180}
-                  height={40}
-                  className="h-10 w-auto hidden lg:block brightness-0 invert"
-                />
-              </Link>
-            </div>
-
-            {/* Dashboard Navigation - Centered */}
-            <div className="hidden lg:flex items-center space-x-4 xl:space-x-6 flex-1 justify-center ml-[180px]">
-              {/* Navigation items removed - keeping only logo, currency, and auth */}
-            </div>
-
-            {/* Right side - Currency, Notifications, and Auth */}
-            <div className="hidden md:flex items-center space-x-2 absolute right-4 top-0 h-16">
-              {/* Currency Selector */}
-              <div className="relative group">
-                <div 
-                  className="flex items-center space-x-1 text-white hover:bg-lime-700 rounded-lg px-2 py-1.5 cursor-pointer transition-all duration-200 min-w-0 flex-shrink-0"
-                  title={isDetectingLocation ? "Detecting your location..." : `Current currency: ${selectedCurrency.code}${isAutoDetected ? ' (Auto-detected)' : hasUserSelectedCurrency ? ' (Manually selected)' : ''}`}
-                >
-                  {isAutoDetected && (
-                    <div className="w-2 h-2 bg-lime-300 rounded-full animate-pulse flex-shrink-0"></div>
-                  )}
-                  {hasUserSelectedCurrency && !isAutoDetected && (
-                    <div className="w-2 h-2 bg-blue-300 rounded-full flex-shrink-0"></div>
-                  )}
-                  {!isMounted ? (
-                    <>
-                      <span className="text-sm font-medium whitespace-nowrap text-white">USD</span>
-                    </>
-                  ) : isDetectingLocation ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white flex-shrink-0"></div>
-                      <span className="text-sm font-medium text-white">...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-sm font-medium whitespace-nowrap text-white">{selectedCurrency.code}</span>
-                    </>
-                  )}
-                  <ChevronDown className="h-3 w-3 flex-shrink-0 text-white transition-transform duration-200 group-hover:rotate-180" />
-                </div>
-                
-                {/* Currency Dropdown */}
-                <div className="absolute top-full right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg transition-all duration-300 ease-in-out z-50 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible">
-                  <div className="py-2">
-                    {/* Auto-detect option */}
-                    <div 
-                      className="flex items-center px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100"
-                      onClick={handleDetectLocation}
-                    >
-                      <div className="w-8 h-4 flex items-center justify-center">
-                        <div className="w-3 h-3 bg-lime-500 rounded-full animate-pulse"></div>
-                      </div>
-                      <span className="text-sm text-gray-700 font-medium">Auto-detect</span>
-                    </div>
-                    
-                    {/* Currency options */}
-                    {currencies.map((currency) => (
-                      <div 
-                        key={currency.code}
-                        className="flex items-center px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                        onClick={() => handleCurrencySelect(currency)}
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-gray-900">{currency.code}</span>
-                          <span className="text-xs text-gray-500">{CURRENCY_COUNTRY_NAMES[currency.code]}</span>
-                        </div>
-                        {selectedCurrency.code === currency.code && isAutoDetected && (
-                          <span className="ml-auto text-xs text-lime-600">Auto</span>
-                        )}
-                        {selectedCurrency.code === currency.code && hasUserSelectedCurrency && !isAutoDetected && (
-                          <span className="ml-auto text-xs text-blue-600">Manual</span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Notification Button */}
-              <NotificationDropdown />
-
-              {/* Auth Buttons */}
-              <AuthButtons />
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="lg:hidden absolute right-0 top-0 h-16 flex items-center space-x-1 pr-2">
-              {/* Mobile Notification Button */}
-              <NotificationDropdown />
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleMobileMenu}
-                className="flex-shrink-0 text-white hover:bg-lime-700 transition-colors duration-200"
-              >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </Button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          {isMobileMenuOpen && (
-            <div className="lg:hidden">
-              <div className="max-h-[80vh] overflow-y-auto bg-white border-t border-gray-200">
-                <div className="px-2 pt-2 pb-3 space-y-1">
-                  {/* Dashboard Navigation Items */}
-                  {/* Navigation items removed - keeping only logo, currency, and auth */}
-
-                  {/* Auth Buttons - Mobile */}
-                  <div className="px-2 py-3 border-t border-gray-200">
-                    <div className="flex flex-col space-y-2">
-                      <AuthButtons />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
-    )
   }
 
   return (
-    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isMounted && isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
+    <nav className={`${isEmployeePage || isUserDashboard || isAdminDashboard ? 'bg-lime-600' : 'bg-white'} sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'shadow-sm' : 'shadow-none'}`}>
       <div className="w-full relative">
         <div className="flex items-center h-16">
           {/* Logo - Absolute left edge */}
@@ -296,7 +144,7 @@ export function Navbar() {
                           {/* Top Cards Section */}
                         <div className="grid grid-cols-3 gap-4 mb-6">
                             {/* Hire One Agent Card */}
-                            <Link href="/services/our-services/hire-one-agent" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            <Link href="/hire-one-agent" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <h4 className="font-bold text-lime-700 mb-2">Hire One Agent</h4>
@@ -310,7 +158,7 @@ export function Navbar() {
                           </Link>
                           
                             {/* Build a Team Card */}
-                            <Link href="/services/our-services/build-a-team" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            <Link href="/build-a-team" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <h4 className="font-bold text-lime-700 mb-2">Build a Team</h4>
@@ -324,7 +172,7 @@ export function Navbar() {
                           </Link>
                           
                             {/* Create a Workforce Card */}
-                            <Link href="/services/our-services/create-workforce" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            <Link href="/create-workforce" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
                                   <h4 className="font-bold text-lime-700 mb-2">Create a Workforce</h4>
@@ -337,116 +185,65 @@ export function Navbar() {
                             </div>
                           </Link>
                         </div>
-
-                          {/* Bottom Links Section */}
-                          <div className="grid grid-cols-3 gap-8">
-                            {/* Column 1 */}
-                          <div className="space-y-0">
-                              <Link href="/services/our-services/real-estate-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Real Estate Virtual Assistant
-                            </Link>
-                              <Link href="/services/our-services/property-management-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Property Management Assistant
-                            </Link>
-                              <Link href="/services/our-services/administrative-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Administrative Assistant
-                            </Link>
-                              <Link href="/services/our-services/customer-service-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Customer Service Assistant
-                            </Link>
-                          </div>
-
-                            {/* Column 2 */}
-                          <div className="space-y-0">
-                              <Link href="/services/our-services/construction-team" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Construction Team
-                            </Link>
-                              <Link href="/services/our-services/insurance-support" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Insurance Support
-                            </Link>
-                              <Link href="/services/our-services/marketing-team" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Marketing Team
-                            </Link>
-                              <Link href="/services/our-services/finance-accounting" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Finance & Accounting
-                            </Link>
-                          </div>
-
-                            {/* Column 3 */}
-                          <div className="space-y-0">
-                              <Link href="/services/our-services/architecture-teams" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                                Architecture Teams
-                            </Link>
-                              <Link href="/services/our-services/engineering-support" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Engineering Support
-                            </Link>
-                              <Link href="/services/our-services/legal-teams" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Legal Teams
-                            </Link>
-                              <Link href="/services/our-services/complete-departments" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Complete Departments
-                            </Link>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
 
-                    {/* Pillars Card */}
-                  <div className="relative group/pillars">
+                    {/* Resources Card */}
+                  <div className="relative group/resources">
                       <div className="px-2 py-2 hover:bg-lime-50 transition-all duration-200 cursor-pointer rounded-lg">
                         <div className="flex items-center gap-1">
-                          <h4 className="font-bold text-lime-700 text-base">Pillars</h4>
-                          <ChevronDown className="w-4 h-4 text-lime-600 -rotate-90 transition-transform duration-200 group-hover/pillars:rotate-0" />
+                          <h4 className="font-bold text-lime-700 text-base">Resources</h4>
+                          <ChevronDown className="w-4 h-4 text-lime-600 -rotate-90 transition-transform duration-200 group-hover/resources:rotate-0" />
                         </div>
                     </div>
                     
-                      {/* Pillars Sub-dropdown */}
-                      <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-[600px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 opacity-0 invisible group-hover/pillars:opacity-100 group-hover/pillars:visible transition-all duration-300">
+                      {/* Resources Sub-dropdown */}
+                      <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-[600px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 opacity-0 invisible group-hover/resources:opacity-100 group-hover/resources:visible transition-all duration-300">
                       <div className="p-6">
                           <div className="mb-4">
-                            <h4 className="text-lg font-bold text-gray-900 mb-1">Pillars</h4>
-                            <p className="text-sm text-gray-600">37 topical pillars covering all industries and services</p>
+                            <h4 className="text-lg font-bold text-gray-900 mb-1">Resources</h4>
+                            <p className="text-sm text-gray-600">Industry guides for Real Estate & Property professionals</p>
                           </div>
                           
-                          {/* Top Cards Section */}
+                          {/* Top Cards Section - Real Estate Focus */}
                         <div className="grid grid-cols-3 gap-4 mb-6">
-                            {/* Outsourcing Services Card */}
-                            <Link href="/outsourcing" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            {/* Real Estate Outsourcing Card */}
+                            <Link href="/real-estate-outsourcing" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                  <h4 className="font-bold text-lime-700 mb-2">Outsourcing Services</h4>
-                                  <p className="text-sm text-gray-600 mb-3">Complete business process outsourcing</p>
+                                  <h4 className="font-bold text-lime-700 mb-2">Real Estate</h4>
+                                  <p className="text-sm text-gray-600 mb-3">Complete guide for agents & brokers</p>
                                   <div className="inline-flex items-center px-2 py-1 bg-lime-100 rounded text-xs font-medium text-lime-700">
-                                    Main Pillar
+                                    Most Popular
                               </div>
                               </div>
                                 <ArrowRight className="w-4 h-4 text-lime-600 group-hover:translate-x-1 transition-transform duration-200" />
                             </div>
                           </Link>
                           
-                            {/* Virtual Assistants Card */}
-                            <Link href="/virtual-assistant" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            {/* Property Management Card */}
+                            <Link href="/property-management-outsourcing" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                  <h4 className="font-bold text-lime-700 mb-2">Virtual Assistants</h4>
-                                  <p className="text-sm text-gray-600 mb-3">Specialized virtual assistant services</p>
+                                  <h4 className="font-bold text-lime-700 mb-2">Property Mgmt</h4>
+                                  <p className="text-sm text-gray-600 mb-3">Solutions for landlords & managers</p>
                                   <div className="inline-flex items-center px-2 py-1 bg-lime-100 rounded text-xs font-medium text-lime-700">
-                                    Specialized
+                                    Top Pick
                               </div>
                               </div>
                                 <ArrowRight className="w-4 h-4 text-lime-600 group-hover:translate-x-1 transition-transform duration-200" />
                             </div>
                           </Link>
                           
-                            {/* Technical & Digital Card */}
-                            <Link href="/services/pillars/technical-digital" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                            {/* Mortgage Outsourcing Card */}
+                            <Link href="/mortgage-outsourcing" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
-                                  <h4 className="font-bold text-lime-700 mb-2">Technical & Digital</h4>
-                                  <p className="text-sm text-gray-600 mb-3">Technical and digital services</p>
+                                  <h4 className="font-bold text-lime-700 mb-2">Mortgage</h4>
+                                  <p className="text-sm text-gray-600 mb-3">Lenders & brokers guide</p>
                                   <div className="inline-flex items-center px-2 py-1 bg-lime-100 rounded text-xs font-medium text-lime-700">
-                                    Technical
+                                    Featured
                               </div>
                               </div>
                                 <ArrowRight className="w-4 h-4 text-lime-600 group-hover:translate-x-1 transition-transform duration-200" />
@@ -454,128 +251,59 @@ export function Navbar() {
                           </Link>
                         </div>
 
-                        {/* Bottom Links Section - All 37 Pillars */}
-                        <div className="grid grid-cols-3 gap-6">
-                          {/* Column 1 - Outsourcing Services (Part 1) */}
-                        <div className="space-y-0">
-                            <div className="text-xs font-bold text-lime-700 mb-1 uppercase">Outsourcing</div>
-                            <Link href="/real-estate-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Real Estate Outsourcing
-                          </Link>
-                            <Link href="/property-management-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Property Management
-                          </Link>
-                            <Link href="/construction-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Construction Outsourcing
-                          </Link>
-                            <Link href="/insurance-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Insurance Outsourcing
-                          </Link>
-                            <Link href="/mortgage-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Mortgage Outsourcing
-                          </Link>
-                            <Link href="/legal-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Legal Outsourcing
-                          </Link>
-                            <Link href="/architectural-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Architectural Outsourcing
-                          </Link>
-                            <Link href="/drafting-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Drafting Outsourcing
-                          </Link>
-                            <Link href="/engineering-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Engineering Outsourcing
-                          </Link>
-                            <Link href="/estimating-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Estimating Outsourcing
-                          </Link>
-                            <Link href="/seo-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            SEO Outsourcing
-                          </Link>
-                            <Link href="/graphic-design-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Graphic Design
-                          </Link>
-                            <Link href="/accounting-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Accounting Outsourcing
-                          </Link>
-                            <Link href="/bookkeeping-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Bookkeeping Outsourcing
-                          </Link>
-                            <Link href="/website-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Website Outsourcing
-                          </Link>
-                            <Link href="/content-writing-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Content Writing
-                          </Link>
-                        </div>
+                          {/* Bottom Links Section - Real Estate Priority */}
+                          <div className="grid grid-cols-3 gap-8">
+                            {/* Column 1 - Real Estate Core */}
+                          <div className="space-y-2">
+                            <h5 className="font-semibold text-gray-900 text-xs mb-2">REAL ESTATE</h5>
+                              <Link href="/real-estate-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Real Estate
+                            </Link>
+                              <Link href="/property-management-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Property Management
+                            </Link>
+                              <Link href="/insurance-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Insurance
+                            </Link>
+                              <Link href="/construction-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Construction
+                            </Link>
+                          </div>
 
-                          {/* Column 2 - Virtual Assistants (Part 1) */}
-                        <div className="space-y-0">
-                            <div className="text-xs font-bold text-lime-700 mb-1 uppercase">Virtual Assistants</div>
-                            <Link href="/real-estate-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Real Estate VA
-                          </Link>
-                            <Link href="/property-management-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Property Management VA
-                          </Link>
-                            <Link href="/architect-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Architect VA
-                          </Link>
-                            <Link href="/construction-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Construction VA
-                          </Link>
-                            <Link href="/engineering-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Engineering VA
-                          </Link>
-                            <Link href="/mortgage-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Mortgage VA
-                          </Link>
-                            <Link href="/insurance-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Insurance VA
-                          </Link>
-                            <Link href="/legal-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Legal VA
-                          </Link>
-                            <Link href="/drafting-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Drafting VA
-                          </Link>
-                            <Link href="/estimating-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Estimating VA
-                          </Link>
-                            <Link href="/ai-virtual-assistants" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            AI Virtual Assistants
-                          </Link>
-                            <Link href="/seo-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            SEO VA
-                          </Link>
-                        </div>
+                            {/* Column 2 - Property Adjacent */}
+                          <div className="space-y-2">
+                            <h5 className="font-semibold text-gray-900 text-xs mb-2">PROPERTY SERVICES</h5>
+                              <Link href="/mortgage-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Mortgage
+                            </Link>
+                              <Link href="/legal-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Legal
+                            </Link>
+                              <Link href="/architectural-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Architectural
+                            </Link>
+                              <Link href="/drafting-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Drafting
+                            </Link>
+                          </div>
 
-                          {/* Column 3 - Virtual Assistants (Part 2) */}
-                        <div className="space-y-0">
-                            <div className="text-xs font-bold text-lime-700 mb-1 uppercase">More VA Services</div>
-                            <Link href="/marketing-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Marketing VA
-                          </Link>
-                            <Link href="/bookkeeping-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Bookkeeping VA
-                          </Link>
-                            <Link href="/graphic-design-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Graphic Design VA
-                          </Link>
-                            <Link href="/social-media-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Social Media VA
-                          </Link>
-                            <Link href="/content-writing-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Content Writing VA
-                          </Link>
-                            <Link href="/administrative-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Administrative VA
-                          </Link>
-                            <Link href="/accounting-virtual-assistant" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                            Accounting VA
-                          </Link>
-                        </div>
-                        </div>
+                            {/* Column 3 - Business Support */}
+                          <div className="space-y-2">
+                            <h5 className="font-semibold text-gray-900 text-xs mb-2">BUSINESS SUPPORT</h5>
+                              <Link href="/accounting-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Accounting
+                            </Link>
+                              <Link href="/bookkeeping-outsourcing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Bookkeeping
+                            </Link>
+                              <Link href="/virtual-assistants" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              Virtual Assistants
+                            </Link>
+                              <Link href="/outsourcing-services" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
+                              All Resources →
+                            </Link>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -584,47 +312,13 @@ export function Navbar() {
               </div>
             </div>
 
-            {/* How It Works Dropdown */}
-            <div className="relative group">
-              <div className="flex items-center space-x-0.5">
-                <Link href="/how-it-works" className={`px-3 py-2 whitespace-nowrap font-semibold transition-colors duration-200 relative ${isEmployeePage || isAdminDashboard ? (isActive('/how-it-works') ? 'text-white' : 'text-white hover:text-gray-200') : (isActive('/how-it-works') ? 'text-lime-600' : 'text-gray-700 hover:text-lime-600')}`}>
-                  <span className="relative inline-block">
-                    How it works
-                    <span className={`absolute -bottom-1 left-1/2 h-0.5 ${isEmployeePage || isAdminDashboard ? 'bg-white' : 'bg-lime-600'} transition-all duration-300 ease-out transform -translate-x-1/2 ${isActive('/how-it-works') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
-                  </span>
-                </Link>
-                <div className={`px-1 py-2 cursor-pointer ${isEmployeePage || isAdminDashboard ? 'text-white' : 'text-gray-700'}`}>
-                  <ChevronDown className="h-4 w-4 -rotate-90 transition-transform duration-200 group-hover:rotate-0" />
-                </div>
-              </div>
-              
-              {/* How It Works Dropdown Content */}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-[280px] bg-white rounded-lg shadow-lg border border-gray-200 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                <div className="p-4">
-                  {/* Header - Now Clickable */}
-                  <Link href="/how-it-works" className="block px-4 py-3 bg-lime-50 rounded-lg hover:bg-lime-100 transition-all duration-200 group/item mb-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-lime-700 text-base">How It Works</h4>
-                        <p className="text-xs text-gray-600 mt-0.5">Complete process guide</p>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-lime-600 group-hover/item:translate-x-1 transition-transform duration-200" />
-                    </div>
-                  </Link>
-                  
-                  {/* Management Software Link */}
-                  <Link href="/management-software" className="block px-4 py-3 bg-lime-50 rounded-lg hover:bg-lime-100 transition-all duration-200 group/item">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-lime-700 text-sm">Management Software</h4>
-                        <p className="text-xs text-gray-600 mt-0.5">Coming soon</p>
-                      </div>
-                      <ArrowRight className="w-4 h-4 text-lime-600 group-hover/item:translate-x-1 transition-transform duration-200" />
-                    </div>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            {/* Other Navigation Items */}
+            <Link href="/how-it-works" className={`px-3 py-2 whitespace-nowrap font-semibold transition-colors duration-200 relative group ${isEmployeePage || isAdminDashboard ? (isActive('/how-it-works') ? 'text-white' : 'text-white hover:text-gray-200') : (isActive('/how-it-works') ? 'text-lime-600' : 'text-gray-700 hover:text-lime-600')}`}>
+              <span className="relative inline-block">
+              How it works
+                <span className={`absolute -bottom-1 left-1/2 h-0.5 ${isEmployeePage || isAdminDashboard ? 'bg-white' : 'bg-lime-600'} transition-all duration-300 ease-out transform -translate-x-1/2 ${isActive('/how-it-works') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+              </span>
+            </Link>
             <Link href="/pricing" className={`px-3 py-2 whitespace-nowrap font-semibold transition-colors duration-200 relative group ${isEmployeePage || isAdminDashboard ? (isActive('/pricing') ? 'text-white' : 'text-white hover:text-gray-200') : (isActive('/pricing') ? 'text-lime-600' : 'text-gray-700 hover:text-lime-600')}`}>
               <span className="relative inline-block">
               Pricing
@@ -665,7 +359,7 @@ export function Navbar() {
                   {/* Top Cards Section */}
                         <div className="grid grid-cols-3 gap-4 mb-6">
                     {/* Our Story Card */}
-                    <Link href="/about/our-story" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                    <Link href="/our-story" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h4 className="font-bold text-lime-700 mb-2">Our Story</h4>
@@ -678,7 +372,7 @@ export function Navbar() {
                           </Link>
                           
                     {/* Proven Results Card */}
-                    <Link href="/about/proven-results" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                    <Link href="/proven-results" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h4 className="font-bold text-lime-700 mb-2">Proven Results</h4>
@@ -690,13 +384,13 @@ export function Navbar() {
                             </div>
                           </Link>
                           
-                    {/* Resources Card */}
-                    <Link href="/about/resources" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
+                    {/* Blogs Card */}
+                    <Link href="/blogs" className="bg-lime-50 rounded-lg p-4 hover:bg-lime-100 transition-all duration-200 group">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h4 className="font-bold text-lime-700 mb-2">Resources</h4>
+                          <h4 className="font-bold text-lime-700 mb-2">Blog</h4>
                           <div className="inline-flex items-center px-2 py-1 bg-lime-100 rounded text-xs font-medium text-lime-700">
-                            Resources
+                            Articles
                               </div>
                               </div>
                         <ArrowRight className="w-4 h-4 text-lime-600 group-hover:translate-x-1 transition-transform duration-200" />
@@ -704,53 +398,6 @@ export function Navbar() {
                           </Link>
                         </div>
 
-                  {/* Bottom Links Section */}
-                  <div className="grid grid-cols-3 gap-8">
-                    {/* First Column */}
-                          <div className="space-y-0">
-                      <Link href="/about/team" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Our Team
-                          </Link>
-                      <Link href="/about/stephen-atcheler" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Stephen Atcheler - CEO
-                          </Link>
-                      <Link href="/about/find-us-clark" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Find Us in Clark
-                          </Link>
-                        </div>
-
-                    {/* Second Column */}
-                          <div className="space-y-0">
-                      <Link href="/case-studies/ballast-4-46-team" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Ballast: 4-46 Team
-                            </Link>
-                      <Link href="/case-studies/gallery-group-partnership" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Gallery Group Partnership
-                          </Link>
-                      <Link href="/case-studies/jack-miller-40k-savings" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Jack Miller: $40K Savings
-                          </Link>
-                      <Link href="/case-studies" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        All Case Studies
-                          </Link>
-                        </div>
-
-                    {/* Third Column */}
-                          <div className="space-y-0">
-                      <Link href="/about/complete-service-guide" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Complete Service Guide
-                      </Link>
-                      <Link href="/blogs" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Blog & Articles
-                      </Link>
-                      <Link href="/pricing" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                        Pricing Calculator
-                      </Link>
-                      <Link href="/about/our-agents-demos" className="block text-sm text-gray-700 hover:text-lime-600 transition-colors duration-200">
-                              Our Agents Demos
-                            </Link>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -813,7 +460,7 @@ export function Navbar() {
                     >
                       <div className="flex flex-col">
                         <span className="text-sm font-semibold text-gray-900">{currency.code}</span>
-                        <span className="text-xs text-gray-500">{CURRENCY_COUNTRY_NAMES[currency.code]}</span>
+                        <span className="text-xs text-gray-500">{currencyCountryNames[currency.code]}</span>
                       </div>
                       {selectedCurrency.code === currency.code && isAutoDetected && (
                         <span className="ml-auto text-xs text-lime-600">Auto</span>
@@ -826,9 +473,6 @@ export function Navbar() {
                 </div>
               </div>
             </div>
-
-            {/* Notification Button */}
-            <NotificationDropdown />
 
             {/* Auth Buttons */}
             <AuthButtons />
@@ -918,9 +562,6 @@ export function Navbar() {
               </div>
             </div>
 
-            {/* Mobile Notification Button */}
-            <NotificationDropdown />
-
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -940,27 +581,12 @@ export function Navbar() {
               <div className="px-2 pt-2 pb-3 space-y-1">
                 
                 {/* Main Navigation Items */}
-                {/* How It Works Section with Dropdown */}
-                <div className="border-b border-gray-100">
-                  <button 
-                    onClick={() => toggleSection('howitworks')}
-                    className="w-full flex items-center justify-between px-3 py-3 font-semibold text-gray-700 hover:text-lime-600 hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <span>How It Works</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${expandedSections.includes('howitworks') ? 'rotate-180' : ''}`} />
-                  </button>
-                  
-                  {expandedSections.includes('howitworks') && (
-                    <div className="pl-4 space-y-1 pb-3">
-                      <Link href="/how-it-works" className="block text-gray-600 hover:text-lime-600 py-2 text-sm font-medium px-3 rounded hover:bg-lime-50">
-                        How It Works Overview
-                      </Link>
-                      <Link href="/management-software" className="block text-gray-600 hover:text-lime-600 py-2 text-sm font-medium px-3 rounded hover:bg-lime-50">
-                        Management Software
-                      </Link>
-                    </div>
-                  )}
-                </div>
+                <Link href="/how-it-works" className={`block px-3 py-3 font-semibold relative group border-b border-gray-100 ${isActive('/how-it-works') ? 'text-lime-600 bg-lime-50' : 'text-gray-700 hover:text-lime-600 hover:bg-gray-50'}`}>
+              <span className="relative inline-block">
+              How it works
+                <span className={`absolute -bottom-1 left-1/2 h-0.5 bg-lime-600 transition-all duration-300 ease-out transform -translate-x-1/2 ${isActive('/how-it-works') ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+              </span>
+            </Link>
                 
                 <Link href="/pricing" className={`block px-3 py-3 font-semibold relative group border-b border-gray-100 ${isActive('/pricing') ? 'text-lime-600 bg-lime-50' : 'text-gray-700 hover:text-lime-600 hover:bg-gray-50'}`}>
               <span className="relative inline-block">
@@ -1052,122 +678,48 @@ export function Navbar() {
                      </div>
                    </div>
                       
-                     {/* Pillars - All 37 */}
-                  <div>
-                       <div className="text-sm font-semibold text-gray-800 mb-2 px-3 py-1">Pillars (37 Services)</div>
-                       <div className="pl-3 space-y-1">
-                         {/* Outsourcing Services */}
-                         <div className="text-xs font-bold text-lime-700 mt-3 mb-1 px-3 uppercase">Outsourcing Services</div>
-                         <Link href="/real-estate-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Real Estate Outsourcing
-                      </Link>
-                         <Link href="/property-management-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Property Management Outsourcing
-                      </Link>
-                         <Link href="/construction-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Construction Outsourcing
-                      </Link>
-                         <Link href="/insurance-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Insurance Outsourcing
-                      </Link>
-                         <Link href="/mortgage-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Mortgage Outsourcing
-                      </Link>
-                         <Link href="/legal-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Legal Outsourcing
-                      </Link>
-                         <Link href="/architectural-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Architectural Outsourcing
-                      </Link>
-                         <Link href="/drafting-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Drafting Outsourcing
-                      </Link>
-                         <Link href="/engineering-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Engineering Outsourcing
-                      </Link>
-                         <Link href="/estimating-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Estimating Outsourcing
-                      </Link>
-                         <Link href="/seo-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        SEO Outsourcing
-                      </Link>
-                         <Link href="/graphic-design-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Graphic Design Outsourcing
-                      </Link>
-                         <Link href="/accounting-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Accounting Outsourcing
-                      </Link>
-                         <Link href="/bookkeeping-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Bookkeeping Outsourcing
-                      </Link>
-                         <Link href="/website-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Website Outsourcing
-                      </Link>
-                         <Link href="/content-writing-outsourcing" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Content Writing Outsourcing
-                      </Link>
-                         
-                         {/* Virtual Assistants */}
-                         <div className="text-xs font-bold text-lime-700 mt-3 mb-1 px-3 uppercase">Virtual Assistants</div>
-                         <Link href="/real-estate-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Real Estate Virtual Assistant
-                      </Link>
-                         <Link href="/property-management-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Property Management VA
-                      </Link>
-                         <Link href="/architect-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Architect Virtual Assistant
-                      </Link>
-                         <Link href="/construction-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Construction Virtual Assistant
-                      </Link>
-                         <Link href="/engineering-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Engineering Virtual Assistant
-                      </Link>
-                         <Link href="/mortgage-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Mortgage Virtual Assistant
-                      </Link>
-                         <Link href="/insurance-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Insurance Virtual Assistant
-                      </Link>
-                         <Link href="/legal-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Legal Virtual Assistant
-                      </Link>
-                         <Link href="/drafting-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Drafting Virtual Assistant
-                      </Link>
-                         <Link href="/estimating-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Estimating Virtual Assistant
-                      </Link>
-                         <Link href="/ai-virtual-assistants" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        AI Virtual Assistants
-                      </Link>
-                         <Link href="/seo-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        SEO Virtual Assistant
-                      </Link>
-                         <Link href="/marketing-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Marketing Virtual Assistant
-                      </Link>
-                         <Link href="/bookkeeping-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Bookkeeping Virtual Assistant
-                      </Link>
-                         <Link href="/graphic-design-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Graphic Design Virtual Assistant
-                      </Link>
-                         <Link href="/social-media-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Social Media Virtual Assistant
-                      </Link>
-                         <Link href="/content-writing-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Content Writing VA
-                      </Link>
-                         <Link href="/administrative-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Administrative Virtual Assistant
-                      </Link>
-                         <Link href="/accounting-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-1.5 text-sm px-3 rounded hover:bg-lime-50">
-                        Accounting Virtual Assistant
-                      </Link>
-                    </div>
-                  </div>
+                      {/* Pillars */}
+                   <div>
+                        <div className="text-sm font-semibold text-gray-800 mb-2 px-3 py-1">Pillars</div>
+                        <div className="pl-3 space-y-1">
+                          <Link href="/real-estate-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Real Estate Outsourcing
+                       </Link>
+                          <Link href="/property-management-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Property Management Outsourcing
+                       </Link>
+                          <Link href="/construction-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Construction Outsourcing
+                       </Link>
+                          <Link href="/accounting-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Accounting Outsourcing
+                       </Link>
+                          <Link href="/real-estate-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Real Estate Virtual Assistant
+                       </Link>
+                          <Link href="/seo-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         SEO Virtual Assistant
+                       </Link>
+                          <Link href="/ai-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         AI Virtual Assistant
+                       </Link>
+                          <Link href="/social-media-virtual-assistant" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Social Media Virtual Assistant
+                       </Link>
+                          <Link href="/architectural-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Architectural Outsourcing
+                       </Link>
+                          <Link href="/engineering-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Engineering Outsourcing
+                       </Link>
+                          <Link href="/seo-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         SEO Outsourcing
+                   </Link>
+                          <Link href="/graphic-design-outsourcing" className="block text-gray-600 hover:text-lime-600 py-2 text-sm px-3 rounded hover:bg-lime-50">
+                         Graphic Design Outsourcing
+                   </Link>
+                     </div>
+                   </div>
                  </div>
                   )}
                </div>

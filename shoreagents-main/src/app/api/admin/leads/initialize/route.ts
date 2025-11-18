@@ -4,8 +4,9 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 // POST /api/admin/leads/initialize - Initialize lead progress for existing users
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
+    void _request
     // Get all users who don't have any lead progress records
     const usersWithoutProgress = await prisma.user.findMany({
       where: {
@@ -51,9 +52,3 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
-
-
-
-
-
-

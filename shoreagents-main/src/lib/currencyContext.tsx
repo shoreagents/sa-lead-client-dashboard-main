@@ -264,8 +264,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     return () => {
       isMounted = false;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, [detectUserLocation]);
 
   // Clear price cache when currency changes
   useEffect(() => {

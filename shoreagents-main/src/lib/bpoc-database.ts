@@ -120,7 +120,7 @@ export async function fetchBPOCUsersFromDatabase(): Promise<BPOCDatabaseUser[]> 
       ORDER BY COALESCE(ar.overall_score, 0) DESC, u.created_at DESC
     `;
     
-    const result = await client.query(query);
+    const result = await client.query<BPOCDatabaseUser>(query);
     return result.rows;
   } finally {
     client.release();
@@ -163,55 +163,7 @@ export async function fetchBPOCUserById(userId: string): Promise<BPOCDatabaseUse
       WHERE u.id = $1
     `;
     
-    const result = await client.query(query, [userId]);
-    return result.rows[0] || null;
-  } finally {
-    client.release();
-  }
-}
-
-// Fetch user by name from BPOC database
-export async function fetchBPOCUserByName(name: string): Promise<BPOCDatabaseUser | null> {
-  const pool = getBPOCDatabasePool();
-  const client = await pool.connect();
-  
-  try {
-    const searchName = name.toLowerCase().trim();
-    const query = `
-      SELECT 
-        u.id as user_id,
-        u.first_name,
-        u.last_name,
-        u.full_name,
-        u.location,
-        u.avatar_url,
-        u.bio,
-        u.position,
-        u.created_at as user_created_at,
-        COALESCE(ws.current_position, u.position) as current_position,
-        COALESCE(ws.expected_salary, '0') as expected_salary,
-        COALESCE(ws.work_status::text, 'Not specified') as work_status,
-        COALESCE(ws.completed_data, false) as work_status_completed,
-        COALESCE(ar.overall_score, 0) as overall_score,
-        COALESCE(ar.skills_snapshot, '[]'::jsonb) as skills_snapshot,
-        COALESCE(ar.experience_snapshot, '[]'::jsonb) as experience_snapshot,
-        COALESCE(ar.key_strengths, '[]'::jsonb) as key_strengths,
-        COALESCE(ar.improvements, '[]'::jsonb) as improvements,
-        COALESCE(ar.recommendations, '[]'::jsonb) as recommendations,
-        COALESCE(ar.improved_summary, '') as improved_summary,
-        COALESCE(ar.strengths_analysis, '{}'::jsonb) as strengths_analysis,
-        COALESCE(ar.candidate_profile, '{}'::jsonb) as candidate_profile
-      FROM users u
-      LEFT JOIN user_work_status ws ON u.id = ws.user_id
-      LEFT JOIN ai_analysis_results ar ON u.id = ar.user_id
-      WHERE LOWER(u.full_name) LIKE $1 
-         OR LOWER(u.first_name || ' ' || u.last_name) LIKE $1
-         OR LOWER(u.first_name) LIKE $1
-         OR LOWER(u.last_name) LIKE $1
-      LIMIT 1
-    `;
-    
-    const result = await client.query(query, [`%${searchName}%`]);
+    const result = await client.query<BPOCDatabaseUser>(query, [userId]);
     return result.rows[0] || null;
   } finally {
     client.release();

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdminAuth } from '@/lib/admin-auth-context'
 import { AdminGuard } from '@/components/auth/AdminGuard'
@@ -9,7 +9,6 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { 
   KanbanBoard, 
   KanbanCard, 
@@ -28,14 +27,28 @@ import {
   CheckCircle,
   AlertCircle,
   Target,
-  RefreshCw,
-  Eye
+  RefreshCw
 } from 'lucide-react'
 import { useLeads, useUpdateLeadStatus } from '@/hooks/use-api'
+import type { Lead } from '@/hooks/use-api'
 import { LeadDetailsModal } from '@/components/ui/lead-details-modal'
 import { ChangeReasonModal } from '@/components/ui/change-reason-modal'
 
-const columns = [
+type ColumnId = 
+  | 'new_lead'
+  | 'stage_1'
+  | 'stage_2'
+  | 'pending'
+  | 'meeting_booked'
+  | 'signed_up'
+  | 'closed_won'
+
+type ColumnDefinition = {
+  id: ColumnId
+  name: string
+}
+
+const columns: ColumnDefinition[] = [
   { id: 'new_lead', name: 'New Lead' },
   { id: 'stage_1', name: 'Stage 1' },
   { id: 'stage_2', name: 'Stage 2' },
@@ -45,12 +58,22 @@ const columns = [
   { id: 'closed_won', name: 'Closed Won' }
 ]
 
+type LeadStats = {
+  new: number
+  stage1: number
+  stage2: number
+  pending: number
+  meeting_booked: number
+  signed_up: number
+  closed_won: number
+}
+
 export default function LeadManagement() {
   const router = useRouter()
-  const { admin, loading, signOut, isAdmin } = useAdminAuth()
+  const { admin, signOut, isAdmin } = useAdminAuth()
   const { data: leadsData, isLoading, error, refetch } = useLeads()
   const updateLeadStatusMutation = useUpdateLeadStatus()
-  const [selectedLead, setSelectedLead] = useState(null)
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isChangeReasonModalOpen, setIsChangeReasonModalOpen] = useState(false)
   const [pendingChange, setPendingChange] = useState<{
@@ -59,7 +82,7 @@ export default function LeadManagement() {
     fromColumn: string
     toColumn: string
   } | null>(null)
-  const [originalLeadsSnapshot, setOriginalLeadsSnapshot] = useState<typeof leads>([])
+  const [originalLeadsSnapshot, setOriginalLeadsSnapshot] = useState<Lead[]>([])
   
   // Add error handling for the mutation
   useEffect(() => {
@@ -76,16 +99,9 @@ export default function LeadManagement() {
     console.log('🔍 Modal state changed:', { isChangeReasonModalOpen, pendingChange })
   }, [isChangeReasonModalOpen, pendingChange])
 
-  // Store a snapshot of leads when they load
-  useEffect(() => {
-    if (leads && leads.length > 0) {
-      setOriginalLeadsSnapshot(JSON.parse(JSON.stringify(leads)))
-      console.log('📸 Snapshot taken of leads:', leads.length, 'leads')
-    }
-  }, [leadsData])
-  
-  const leads = leadsData?.data || []
-  const stats = leadsData?.stats || {
+  // Memoize leads and stats from API data
+  const leads: Lead[] = useMemo(() => leadsData?.data || [], [leadsData?.data])
+  const stats: LeadStats = leadsData?.stats || {
     new: 0,
     stage1: 0,
     stage2: 0,
@@ -95,33 +111,15 @@ export default function LeadManagement() {
     closed_won: 0
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High':
-        return 'bg-lime-200 text-lime-900 border-lime-400'
-      case 'Medium':
-        return 'bg-lime-100 text-lime-800 border-lime-300'
-      case 'Low':
-        return 'bg-lime-50 text-lime-700 border-lime-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-300'
+  // Store a snapshot of leads when they load
+  useEffect(() => {
+    if (leads && leads.length > 0) {
+      setOriginalLeadsSnapshot(JSON.parse(JSON.stringify(leads)))
+      console.log('📸 Snapshot taken of leads:', leads.length, 'leads')
     }
-  }
+  }, [leads])
 
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case 'High':
-        return <AlertCircle className="w-3 h-3" />
-      case 'Medium':
-        return <Clock className="w-3 h-3" />
-      case 'Low':
-        return <CheckCircle className="w-3 h-3" />
-      default:
-        return <Target className="w-3 h-3" />
-    }
-  }
-
-  const handleDataChange = (newData: typeof leads) => {
+  const handleDataChange = (newData: Lead[]) => {
     console.log('🔄 handleDataChange called!')
     console.log('🔄 New data:', newData)
     console.log('🔄 Original snapshot:', originalLeadsSnapshot)
@@ -205,7 +203,7 @@ export default function LeadManagement() {
     refetch()
   }
 
-  const handleLeadClick = (lead: any) => {
+  const handleLeadClick = (lead: Lead) => {
     console.log('Lead clicked:', lead)
     setSelectedLead(lead)
     setIsModalOpen(true)
@@ -221,20 +219,6 @@ export default function LeadManagement() {
     router.push('/')
   }
 
-  // Function to truncate email addresses
-  const truncateEmail = (email: string, maxLength: number = 20) => {
-    if (!email || email.length <= maxLength) return email
-    
-    const [localPart, domain] = email.split('@')
-    if (!domain) return email
-    
-    const maxLocalLength = Math.max(8, maxLength - domain.length - 3) // Reserve space for domain and "..."
-    if (localPart.length <= maxLocalLength) return email
-    
-    const truncatedLocal = localPart.substring(0, maxLocalLength - 3) + '...'
-    return `${truncatedLocal}@${domain}`
-  }
-
   // Redirect to home if not admin
   if (!isAdmin) {
     return null
@@ -245,125 +229,147 @@ export default function LeadManagement() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex items-center justify-center h-screen w-full p-4 pt-6 overflow-hidden">
-            <div className="grid h-full w-full grid-cols-4 grid-rows-[auto_1fr] gap-4">
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+            <SidebarTrigger className="-ml-1" />
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold">Lead Management</h1>
+              <Badge variant="secondary" className="text-xs">
+                Welcome back, {admin?.first_name}!
+              </Badge>
+            </div>
+          </header>
+          
+          <div className="flex flex-1 flex-col gap-4 p-4">
+            <div className="w-full">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900">Lead Management</h1>
+                  <p className="text-gray-600 mt-2">Track and manage your sales pipeline</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <Button 
+                    onClick={() => refetch()}
+                    disabled={isLoading}
+                    variant="outline"
+                    className="border-lime-200 text-lime-700 hover:bg-lime-50"
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      console.log('🧪 Test modal button clicked')
+                      setPendingChange({
+                        leadId: 'test',
+                        leadName: 'Test Lead',
+                        fromColumn: 'new_lead',
+                        toColumn: 'stage_1'
+                      })
+                      setIsChangeReasonModalOpen(true)
+                    }}
+                    variant="outline"
+                    className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                  >
+                    Test Modal
+                  </Button>
+                  <Button 
+                    onClick={handleLogout}
+                    variant="outline"
+                    className="border-lime-200 text-lime-700 hover:bg-lime-50"
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </div>
 
               {/* Stats Cards */}
-                {isLoading ? (
-                  <>
-                    {[...Array(4)].map((_, i) => (
-                      <Card key={i} className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
-                          <Skeleton className="h-3 w-20" />
-                          <Skeleton className="h-3.5 w-3.5 rounded" />
-                        </CardHeader>
-                        <CardContent className="px-2.5 pb-1 !pt-0">
-                          <Skeleton className="h-7 w-12 mb-1" />
-                          <Skeleton className="h-2.5 w-28" />
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    <Card className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
-                        <CardTitle className="text-sm font-medium !mb-0">Total Leads</CardTitle>
-                        <Users className="h-3.5 w-3.5 text-lime-600" />
-                      </CardHeader>
-                      <CardContent className="px-2.5 pb-1 !pt-0">
-                        <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
-                          {leadsData?.total || 0}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-                          All pipeline stages
-                        </p>
-                      </CardContent>
-                    </Card>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
+                    <Users className="h-4 w-4 text-lime-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-lime-600">
+                      {isLoading ? '...' : leadsData?.total || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      All pipeline stages
+                    </p>
+                  </CardContent>
+                </Card>
 
-                    <Card className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
-                        <CardTitle className="text-sm font-medium !mb-0">New Leads</CardTitle>
-                        <UserPlus className="h-3.5 w-3.5 text-lime-600" />
-                      </CardHeader>
-                      <CardContent className="px-2.5 pb-1 !pt-0">
-                        <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
-                          {stats.new}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-                          Fresh opportunities
-                        </p>
-                      </CardContent>
-                    </Card>
+                <Card className="border-l-4 border-l-blue-500 bg-gradient-to-t from-blue-50/50 to-white shadow-sm">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">New Leads</CardTitle>
+                    <UserPlus className="h-4 w-4 text-blue-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {isLoading ? '...' : stats.new}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Fresh opportunities
+                    </p>
+                  </CardContent>
+                </Card>
 
-                    <Card className="col-span-1 border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm py-2 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
-                        <CardTitle className="text-sm font-medium !mb-0">In Progress</CardTitle>
-                        <Clock className="h-3.5 w-3.5 text-lime-600" />
-                      </CardHeader>
-                      <CardContent className="px-2.5 pb-1 !pt-0">
-                        <div className="text-2xl font-bold text-lime-600 leading-none -mt-0.5">
-                          {stats.stage1 + stats.stage2 + stats.pending + stats.meeting_booked + stats.signed_up}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-                          Active deals
-                        </p>
-                      </CardContent>
-                    </Card>
+                <Card className="border-l-4 border-l-yellow-500 bg-gradient-to-t from-yellow-50/50 to-white shadow-sm">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">In Progress</CardTitle>
+                    <Clock className="h-4 w-4 text-yellow-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {isLoading ? '...' : stats.stage1 + stats.stage2 + stats.pending + stats.meeting_booked + stats.signed_up}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Active deals
+                    </p>
+                  </CardContent>
+                </Card>
 
-                    <Card className="col-span-1 border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm py-2 !gap-0">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 !pb-0 pt-1 px-2.5">
-                        <CardTitle className="text-sm font-medium !mb-0">Closed Won</CardTitle>
-                        <CheckCircle className="h-3.5 w-3.5 text-green-600" />
-                      </CardHeader>
-                      <CardContent className="px-2.5 pb-1 !pt-0">
-                        <div className="text-2xl font-bold text-green-600 leading-none -mt-0.5">
-                          {stats.closed_won}
-                        </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-                          Successful deals
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </>
-                )}
+                <Card className="border-l-4 border-l-green-500 bg-gradient-to-t from-green-50/50 to-white shadow-sm">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Closed Won</CardTitle>
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-green-600">
+                      {isLoading ? '...' : stats.closed_won}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Successful deals
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Kanban Board */}
-              <Card className="col-span-4 row-span-1 flex flex-col min-h-0 overflow-hidden">
-                <CardHeader className="flex-shrink-0 pt-4 pb-2">
-                  <CardTitle className="flex items-center gap-2 text-base">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-lime-600" />
                     Lead Tracking
                   </CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription>
                     Drag and drop leads between stages to update their status
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 min-h-0 overflow-hidden p-0 pt-0">
+                <CardContent>
                   {isLoading ? (
-                    <div className="grid grid-cols-7 gap-2 p-4 h-full">
-                      {[...Array(7)].map((_, colIndex) => (
-                        <div key={colIndex} className="flex flex-col gap-2 border rounded-md bg-secondary p-2">
-                          <div className="bg-lime-50 p-2 rounded-md border-b border-lime-200">
-                            <Skeleton className="h-4 w-20" />
-                          </div>
-                          <div className="space-y-2 flex-1">
-                            {[...Array(2)].map((_, cardIndex) => (
-                              <div key={cardIndex} className="p-3 bg-white rounded-md border space-y-2">
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-3 w-3/4" />
-                                <Skeleton className="h-3 w-1/2" />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+                    <div className="flex items-center justify-center h-[600px]">
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="w-6 h-6 animate-spin text-lime-600" />
+                        <span className="text-lime-600">Loading leads...</span>
+                      </div>
                     </div>
                   ) : error ? (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center justify-center h-[600px]">
                       <div className="text-center">
-                        <AlertCircle className="w-12 h-12 text-lime-500 mx-auto mb-4" />
-                        <p className="text-lime-600 font-medium">Failed to load leads</p>
+                        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                        <p className="text-red-600 font-medium">Failed to load leads</p>
                         <p className="text-sm text-gray-600 mt-2">Please try refreshing the page</p>
                         <Button 
                           onClick={() => refetch()} 
@@ -375,7 +381,7 @@ export default function LeadManagement() {
                       </div>
                     </div>
                   ) : leads.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center justify-center h-[600px]">
                       <div className="text-center">
                         <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                         <p className="text-gray-600 font-medium">No leads found</p>
@@ -383,19 +389,17 @@ export default function LeadManagement() {
                       </div>
                     </div>
                   ) : (
-                    <div className="h-full overflow-hidden flex flex-col">
+                    <div className="h-[600px]">
                       {updateLeadStatusMutation.isPending && (
                         <div className="absolute top-4 right-4 bg-lime-100 text-lime-800 px-3 py-2 rounded-md text-sm font-medium z-10">
                           Updating lead status...
                         </div>
                       )}
-                      <div className="flex-1 min-h-0 overflow-hidden">
-                        <KanbanProvider
-                          columns={columns}
-                          data={leads}
-                          onDataChange={handleDataChange}
-                          className="h-full"
-                        >
+                      <KanbanProvider<Lead, ColumnDefinition>
+                        columns={columns}
+                        data={leads}
+                        onDataChange={handleDataChange}
+                      >
                         {(column) => (
                           <KanbanBoard key={column.id} id={column.id}>
                             <KanbanHeader className="bg-lime-50 border-b border-lime-200">
@@ -406,45 +410,42 @@ export default function LeadManagement() {
                                 </Badge>
                               </div>
                             </KanbanHeader>
-                            <KanbanCards id={column.id}>
+                            <KanbanCards<Lead> id={column.id}>
                               {(lead) => (
-                                <KanbanCard 
-                                  key={lead.id} 
-                                  id={lead.id} 
-                                  name={lead.name}
+                                <KanbanCard<Lead>
+                                  key={lead.id}
+                                  {...lead}
                                   onClick={() => handleLeadClick(lead)}
                                   showClickButton={true}
                                   clickButtonText="View Details"
-                                  className="hover:shadow-md transition-shadow duration-200 w-full max-w-sm"
+                                  className="hover:shadow-md transition-shadow duration-200"
                                 >
-                                  <div className="space-y-3 w-full">
+                                  <div className="space-y-3">
                                      {/* Lead Header */}
                                      <div className="flex items-start justify-between">
-                                       <div className="min-w-0 flex-1">
-                                         <h4 className="font-semibold text-sm text-gray-900 truncate">{lead.name}</h4>
-                                         <p className="text-xs text-gray-600 truncate">{lead.company || 'Not specified'}</p>
+                                       <div>
+                                         <h4 className="font-semibold text-sm text-gray-900">{lead.name}</h4>
+                                         <p className="text-xs text-gray-600">{lead.company}</p>
                                        </div>
                                      </div>
 
                                      {/* Contact Info */}
                                      <div className="space-y-1">
                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                         <Mail className="w-3 h-3 flex-shrink-0" />
-                                         <span className="truncate min-w-0" title={lead.email || 'No email provided'}>
-                                           {truncateEmail(lead.email || 'No email provided', 18)}
-                                         </span>
+                                         <Mail className="w-3 h-3" />
+                                         <span className="truncate">{lead.email}</span>
                                        </div>
                                        <div className="flex items-center gap-2 text-xs text-gray-600">
-                                         <Building className="w-3 h-3 flex-shrink-0" />
-                                         <span className="truncate min-w-0">{lead.source || 'Website'}</span>
+                                         <Building className="w-3 h-3" />
+                                         <span>{lead.source}</span>
                                        </div>
-                                       <div className="flex items-start gap-2 text-xs text-gray-600">
-                                         <Target className="w-3 h-3 flex-shrink-0 mt-0.5" />
-                                         <span className="line-clamp-2 min-w-0 leading-tight">{lead.industry || 'Not specified'}</span>
+                                       <div className="flex items-center gap-2 text-xs text-gray-600">
+                                         <Target className="w-3 h-3" />
+                                         <span>{lead.industry}</span>
                                        </div>
                                        {lead.quoteCount > 0 && (
                                          <div className="flex items-center gap-2 text-xs text-lime-600">
-                                           <Star className="w-3 h-3 flex-shrink-0" />
+                                           <Star className="w-3 h-3" />
                                            <span>{lead.quoteCount} quote{lead.quoteCount > 1 ? 's' : ''}</span>
                                          </div>
                                        )}
@@ -453,19 +454,19 @@ export default function LeadManagement() {
                                     {/* Notes */}
                                     {lead.notes && (
                                       <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                                        <p className="truncate">{lead.notes}</p>
+                                        {lead.notes}
                                       </div>
                                     )}
 
                                     {/* Footer */}
                                     <div className="flex items-center justify-between text-xs text-gray-500">
-                                      <div className="flex items-center gap-1 min-w-0">
-                                        <Calendar className="w-3 h-3 flex-shrink-0" />
-                                        <span className="truncate">{new Date(lead.created).toLocaleDateString()}</span>
+                                      <div className="flex items-center gap-1">
+                                        <Calendar className="w-3 h-3" />
+                                        <span>{new Date(lead.created).toLocaleDateString()}</span>
                                       </div>
-                                      <div className="flex items-center gap-1 min-w-0">
-                                        <Clock className="w-3 h-3 flex-shrink-0" />
-                                        <span className="truncate">{new Date(lead.lastContact).toLocaleDateString()}</span>
+                                      <div className="flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        <span>{new Date(lead.lastContact).toLocaleDateString()}</span>
                                       </div>
                                     </div>
                                   </div>
@@ -474,8 +475,7 @@ export default function LeadManagement() {
                             </KanbanCards>
                           </KanbanBoard>
                         )}
-                        </KanbanProvider>
-                      </div>
+                      </KanbanProvider>
                     </div>
                   )}
                 </CardContent>

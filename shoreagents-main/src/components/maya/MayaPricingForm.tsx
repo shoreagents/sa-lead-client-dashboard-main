@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { useFetchBPOCCandidates } from '@/hooks/useBPOCCandidates'
+import { useCurrency } from '@/lib/currencyContext'
 
 // Real BPOC candidate recommendation function (same as pricing calculator)
 async function fetchBPOCCandidateRecommendations(
@@ -1164,6 +1165,8 @@ const JobDescriptionStep = ({ onComplete, setMessages, generateMessageId, formDa
 
 // Component to render candidates as a message in the chat
 export function MayaCandidatesMessage({ candidates }: { candidates: CandidateRecommendation[] }) {
+  const { formatPrice, convertPrice } = useCurrency()
+  
   const capitalizeName = (name: string) => {
     return name.split(' ').map(word => 
       word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
@@ -1231,7 +1234,7 @@ export function MayaCandidatesMessage({ candidates }: { candidates: CandidateRec
                               {candidate.isRecommended ? 'Recommended' : 'Available'}
                             </span>
                             <span className="text-xs text-gray-500 whitespace-nowrap">
-                              ₱{candidate.expectedSalary.toLocaleString()}/month
+                              {formatPrice(convertPrice(candidate.expectedSalary))}/month
                             </span>
                             {candidate.matchScore > 0 && (
                               <span className="text-xs text-gray-500 whitespace-nowrap">

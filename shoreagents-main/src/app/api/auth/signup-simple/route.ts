@@ -68,16 +68,24 @@ export async function POST(request: NextRequest) {
 
     // Also check if there's a Supabase Auth user with this email (even if not in our users table)
     try {
-      const { data: authUser, error: authUserError } = await supabase.auth.admin.getUserByEmail(email);
-      if (!authUserError && authUser.user) {
-        console.log('❌ Supabase Auth user already exists:', authUser.user.id);
+      const { data: authUsers, error: authUserError } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 100
+      })
+
+      const existingSupabaseUser = authUsers?.users?.find(
+        (user) => user.email?.toLowerCase() === email.toLowerCase()
+      )
+
+      if (!authUserError && existingSupabaseUser) {
+        console.log('❌ Supabase Auth user already exists:', existingSupabaseUser.id)
         return NextResponse.json(
           { error: 'An account with this email already exists. Please sign in instead.' },
           { status: 400 }
-        );
+        )
       }
     } catch (adminError) {
-      console.log('🔍 Could not check Supabase Auth directly (admin function not available)');
+      console.log('🔍 Could not check Supabase Auth directly (admin function not available)', adminError)
     }
 
     // Create user in Supabase Auth

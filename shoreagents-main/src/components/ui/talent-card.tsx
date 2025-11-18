@@ -29,6 +29,7 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
   const hasWorkStatus = data.workStatus;
   const hasResume = data.resume;
   const [hotnessScore, setHotnessScore] = useState<number>(0);
+  const [isLoadingHotness, setIsLoadingHotness] = useState(true);
   const { toggleFavorite, isFavorite } = useFavorites();
   
   // Function to calculate gradual popularity score (0-100)
@@ -72,10 +73,12 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
   useEffect(() => {
     const fetchHotnessScore = async () => {
       try {
+        setIsLoadingHotness(true);
         console.log('🔍 Fetching hotness score for candidate:', data.user?.id);
         
         if (!data.user?.id) {
           console.warn('No user ID available for hotness score calculation');
+          setIsLoadingHotness(false);
           return;
         }
         
@@ -92,6 +95,8 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
       } catch (error) {
         console.error('❌ Error fetching hotness score:', error);
         setHotnessScore(0);
+      } finally {
+        setIsLoadingHotness(false);
       }
     };
 
@@ -121,7 +126,7 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
       </div>
 
       {/* Hotness indicator in top left */}
-      {hotnessScore > 0 && (
+      {!isLoadingHotness && hotnessScore > 0 && (
         <div className="absolute -top-2 -left-2 bg-white border border-gray-200 rounded-full px-2 py-1 flex items-center justify-center text-xs font-semibold shadow-lg">
           <Flame className={`w-3 h-3 mr-1 ${hotness.textColor}`} />
           <span className={hotness.textColor}>{hotness.level}</span>
@@ -187,7 +192,14 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
         <div className="flex-1"></div>
 
         {/* Hotness Bar */}
-        {hotnessScore > 0 && (
+        {isLoadingHotness ? (
+          <div className="mb-4 flex items-center justify-center">
+            <div className="flex items-center space-x-2">
+              <div className="animate-spin rounded-full border-2 border-current border-t-transparent w-5 h-5" />
+              <span className="text-sm text-gray-600"></span>
+            </div>
+          </div>
+        ) : hotnessScore > 0 && (
           <div className="mb-4">
             <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
               <span>Popularity</span>
@@ -205,23 +217,9 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
         {/* Action Buttons */}
         <div className="space-y-2">
           <Button
-            onClick={async () => {
-              try {
-                // End any existing tracking before navigating to new candidate
-                console.log('🔙 Navigating to candidate profile, ending any existing tracking...');
-                await candidateTracker.endTracking();
-                console.log('✅ Tracking ended, navigating to profile...');
-                
-                // Small delay to ensure tracking is saved
-                await new Promise(resolve => setTimeout(resolve, 150));
-                
-                // Use full page refresh to ensure clean state
-                window.location.href = `/employee/${data.user.id}`;
-              } catch (error) {
-                console.error('❌ Error ending tracking before navigation:', error);
-                // Still navigate even if tracking fails
-                window.location.href = `/employee/${data.user.id}`;
-              }
+            onClick={() => {
+              // Navigate to employee profile page
+              router.push(`/employee/${data.user.id}`);
             }}
             className="w-full bg-gradient-to-r from-lime-600 to-lime-700 hover:from-lime-700 hover:to-lime-800 text-white flex items-center justify-center space-x-2"
           >

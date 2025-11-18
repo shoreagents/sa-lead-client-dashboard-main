@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { AnonymousUserModal } from './anonymous-user-modal';
 import { useAuth } from '@/lib/auth-context';
 import { generateUserId } from '@/lib/userEngagementService';
@@ -9,99 +9,105 @@ import { useUserFormStatus } from '@/hooks/use-api';
 export function AnonymousUserButton() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { isAuthenticated } = useAuth();
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // Only generate userId once, not on every render
   const userId = useMemo(() => generateUserId(), []);
   const { data: userFormStatus, isLoading, error } = useUserFormStatus(userId);
 
-  // Start timer immediately for anonymous users
+  console.log('🎯 AnonymousUserButton component rendered:', {
+    isAuthenticated,
+    userId,
+    isLoading,
+    userFormStatus,
+    error
+  });
+
+  // Auto-open modal after 45 seconds
   useEffect(() => {
+    console.log('🔍 AnonymousUserButton useEffect triggered:', {
+      isAuthenticated,
+      isLoading,
+      userFormStatus,
+      error
+    });
+
     // Only start timer for anonymous users
     if (isAuthenticated) {
-      console.log('🚫 User is authenticated, clearing timer');
-      // Clear timer if user becomes authenticated
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
+      console.log('🔐 User is authenticated, skipping anonymous user modal');
       return;
     }
 
-    // Start the timer immediately for anonymous users
-    // Only start if timer isn't already running
-    if (!timerRef.current) {
-      console.log('⏱️ Starting 45-second timer for anonymous user modal');
-      timerRef.current = setTimeout(() => {
-        console.log('⏱️ 45 seconds elapsed, opening anonymous user modal');
-        setIsModalOpen(true);
-        timerRef.current = null;
-      }, 45000); // 45 seconds
-    }
+    // Database check is the primary source of truth - no localStorage needed
 
-    // Cleanup function - clear timer on unmount
-    return () => {
-      if (timerRef.current) {
-        console.log('🧹 Cleaning up timer (component unmounting)');
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [isAuthenticated]); // Only depend on isAuthenticated for starting timer
+    let timer: NodeJS.Timeout;
+    let countdownInterval: NodeJS.Timeout;
 
-  // Cancel timer if user has filled form OR has an account
-  useEffect(() => {
-    // Check if user form status is loaded and user already filled form or has an account
-    if (!isLoading && userFormStatus) {
-      console.log('📊 User form status loaded:', userFormStatus);
+    const startCountdown = () => {
+      console.log('🚀 Anonymous user modal timer started - 45 seconds countdown');
       
-      // Prevent modal if user has an account (Regular/Admin user type)
-      if (userFormStatus.hasAccount) {
-        console.log('✅ User has an account, canceling timer', {
-          hasAccount: userFormStatus.hasAccount,
-          userType: userFormStatus.userType
-        });
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
+      // Countdown timer for logging
+      let countdown = 45;
+      countdownInterval = setInterval(() => {
+        countdown--;
+        console.log(`⏰ Modal will open in ${countdown} seconds...`);
+        
+        if (countdown <= 0) {
+          clearInterval(countdownInterval);
         }
+      }, 1000);
+
+      timer = setTimeout(() => {
+        console.log('🎉 Opening anonymous user modal after 45 seconds!');
+        setIsModalOpen(true);
+      }, 45000); // 45 seconds
+    };
+
+    // Check if user form status is loaded and handle accordingly
+    if (!isLoading && userFormStatus) {
+      console.log('📊 Database check result:', userFormStatus);
+
+      if (userFormStatus.hasFilledForm) {
+        console.log('🚫 User has already filled out the form (database check):', {
+          company: userFormStatus.company,
+          industry: userFormStatus.industry,
+          hasFilledForm: userFormStatus.hasFilledForm
+        });
+        console.log('✅ Modal will NOT be shown - user already filled out the form');
         return;
       }
-      
-      // Only prevent modal if user has actually filled the form (has meaningful data)
-      if (userFormStatus.hasFilledForm) {
-        // User already filled form, cancel the timer
-        console.log('✅ User already filled form, canceling timer', userFormStatus);
-        if (timerRef.current) {
-          clearTimeout(timerRef.current);
-          timerRef.current = null;
-        }
-      }
+
+      console.log('✅ User has not filled out the form, starting countdown in 2 seconds...');
+      // Add a small delay to make sure the database check is complete
+      setTimeout(() => {
+        startCountdown();
+      }, 2000);
+    } else if (error) {
+      console.error('❌ Error checking user form status:', error);
+      console.log('⚠️ Database check failed, starting countdown anyway');
+      startCountdown();
+    } else if (isLoading) {
+      console.log('⏳ Still loading user form status...');
     }
-  }, [isLoading, userFormStatus]); // Only depend on form status for canceling
+
+    // Cleanup function
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (countdownInterval) clearInterval(countdownInterval);
+      console.log('🧹 Anonymous user modal timer cleaned up');
+    };
+  }, [isAuthenticated, isLoading, userFormStatus, error]);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
 
-  // Debug logging
-  useEffect(() => {
-    console.log('🎭 AnonymousUserButton render state:', {
-      isAuthenticated,
-      isModalOpen,
-      isLoading,
-      hasAccount: userFormStatus?.hasAccount,
-      userType: userFormStatus?.userType,
-      hasFilledForm: userFormStatus?.hasFilledForm,
-      userFormStatus,
-      hasTimer: !!timerRef.current
-    });
-  }, [isAuthenticated, isModalOpen, isLoading, userFormStatus]);
-
   // Only show for anonymous users
   if (isAuthenticated) {
+    console.log('🔐 User is authenticated, AnonymousUserButton returning null');
     return null;
   }
+
+  console.log('👤 AnonymousUserButton rendering for anonymous user');
 
   return (
     <>

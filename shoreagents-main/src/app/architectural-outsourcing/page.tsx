@@ -1,749 +1,478 @@
-'use client';
+"use client";
 
-import { SideNav } from "@/components/layout/SideNav";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { 
-  Building2,
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
-  ArrowRight,
-  DollarSign,
-  Target,
-  Zap,
-  Award,
-  Phone,
-  FileText,
-  AlertCircle,
-  Calculator,
-  Globe,
-  Server,
-  BarChart,
-  Box,
-  Layers,
-  PenTool,
-  Settings
-} from 'lucide-react';
-import Image from 'next/image';
+import { SideNav } from "@/components/layout/SideNav";
 
 export default function ArchitecturalOutsourcingPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-lime-50 to-ocean-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <div className="mb-6">
-            <Badge className="bg-red-600 text-white px-4 py-2 text-lg hover:bg-red-700">
-              🚨 CRITICAL: 68% of Architecture Firms Are Drowning in Administrative Overload
-            </Badge>
-          </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Architectural Outsourcing: Complete 2025 Guide
-          </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-            While smart firms embrace systematic architectural outsourcing, others are burning out their expensive architects on CAD cleanup, permit applications, and project documentation. Don't become another statistic losing $85K+ annually on misallocated talent.
-          </p>
-          
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&h=600&fit=crop"
-              alt="Architectural outsourcing with blueprints and drafting tools representing CAD and BIM services"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="container mx-auto px-4 py-16 lg:py-24">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Side - Hero Content */}
+            <div className="space-y-8 text-center lg:text-left">
+              <div className="space-y-6">
+                {/* Badge */}
+                <div className="inline-flex items-center px-4 py-2 bg-lime-100 border border-lime-300 rounded-full text-sm font-medium text-gray-700 mb-6">
+                  <svg className="w-4 h-4 mr-2 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  ARCHITECTURAL OUTSOURCING
+                </div>
+                
+                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
+                  <span className="text-lime-600">Professional Architectural Support</span>
+                  <br />
+                  <span className="text-gray-900">Without the Overhead</span>
+                </h1>
+                
+                <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                  Scale your architectural practice with dedicated Filipino professionals who understand complex building projects, design standards, and professional workflows - at <span className="font-bold">$616/month</span> all-inclusive.
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Button 
+                  variant="default" 
+                  size="lg"
+                  className="text-lg px-8 py-4 font-semibold"
+                >
+                  Get Architectural Support →
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="text-lg px-8 py-4 font-semibold border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  View Case Studies
+                </Button>
+              </div>
+            </div>
 
-          <h2 className="text-2xl font-semibold text-gray-700 mb-8">
-            Professional Architecture Support That Actually Works – From CAD Drafting to Project Coordination
-          </h2>
+            {/* Right Side - Trust Content */}
+            <div className="bg-white rounded-xl p-6 lg:p-8 shadow-md border border-gray-100">
+              <div className="space-y-6">
+                {/* Main Content */}
+                <div className="space-y-4">
+                  <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                    Why Architectural Firms Trust Shore Agents
+                  </h2>
+                  
+                  <p className="text-gray-700 leading-relaxed text-sm lg:text-base">
+                    From CAD drafting to project coordination, our architectural professionals integrate seamlessly with your practice while maintaining the highest standards.
+                  </p>
+                </div>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg font-semibold">
-              <Phone className="w-5 h-5 mr-2" />
-              Book a Strategy Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              How It Works
-            </Button>
-            <Button size="lg" variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              <Calculator className="w-5 h-5 mr-2" />
-              See Pricing
-            </Button>
+                {/* Key Benefits */}
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-lime-100 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Professional Standards</h3>
+                      <p className="text-sm text-gray-700">University-qualified architects and drafters who understand building codes, design principles, and professional workflows.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-lime-100 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">CAD Proficiency</h3>
+                      <p className="text-sm text-gray-700">Expertise in AutoCAD, Revit, SketchUp, and other essential architectural software for seamless project integration.</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-lime-100 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">Quality Assurance</h3>
+                      <p className="text-sm text-gray-700">Multi-level review processes ensuring drawings meet your standards and regulatory requirements.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Testimonial */}
+                <div className="bg-lime-50 rounded-lg p-4 border border-lime-100">
+                  <h3 className="font-semibold text-gray-900 mb-3">Stephen's Architectural Journey</h3>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <blockquote className="italic">
+                      "The thing is, architectural work demands precision that you just can't compromise on. When we started working with construction firms, I realized they needed more than just basic admin support."
+                    </blockquote>
+                    <blockquote className="italic">
+                      "So basically, we developed a training program specifically for architectural professionals. These aren't just VAs who can use CAD - they're university-qualified architects who understand the entire design process."
+                    </blockquote>
+                    <blockquote className="italic">
+                      "Gallery Group saw their project turnaround time improve by 40% while maintaining the same quality standards. That's when I knew we had something special."
+                    </blockquote>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Key Stats Grid */}
-        <div className="bg-gradient-to-br from-lime-50 to-lime-100 rounded-2xl shadow-lg p-8 mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Users className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">500+</span>
-              </div>
-              <p className="text-gray-700 font-medium">Placements</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <TrendingUp className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">78%</span>
-              </div>
-              <p className="text-gray-700 font-medium">Cost Savings</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Award className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">12+</span>
-              </div>
-              <p className="text-gray-700 font-medium">Years Experience</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Clock className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">24/7</span>
-              </div>
-              <p className="text-gray-700 font-medium">Support</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Stephen's Introduction */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-lg p-8 mb-16">
-          <div className="flex items-start space-x-4 mb-6">
-            <div className="w-16 h-16 bg-lime-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl font-bold text-white">S</span>
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Stephen Atcheler, CEO of ShoreAgents</h3>
-              <p className="text-sm text-gray-600">500+ Successful Placements | 12+ Years Industry Experience</p>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-gray-900">
-              The Architecture Industry's Biggest Talent Allocation Problem
+      {/* Comprehensive Services Section */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
+              Comprehensive Architectural Support Services
             </h2>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              After 12 years in the Philippines BPO industry and 500+ successful placements, I've seen how architecture firms waste their most expensive talent on tasks that don't require their expertise.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Here's the brutal reality: Your $85,000 architect shouldn't be spending 40% of their time on CAD cleanup, permit applications, and project documentation. Yet that's exactly what's happening in 68% of architecture firms across Australia, New Zealand, and the USA.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold">
-              The firms that understand systematic architectural outsourcing are scaling faster, winning more projects, and keeping their architects focused on actual architecture. The ones that don't? They're burning out their best talent while competitors eat their market share.
-            </p>
-          </div>
-        </div>
-
-        {/* 2025 Market Reality */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            2025 Architecture Market Reality Check
-          </h2>
-          <p className="text-xl text-gray-700 mb-8">
-            The global architecture services market hit $394.6 billion in 2024, but here's what industry reports won't tell you about the talent allocation crisis:
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-3">
-                  <AlertCircle className="w-8 h-8 text-red-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">68% Administrative Overload</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Architecture firms report their licensed professionals spend 40%+ time on non-design tasks
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-3">
-                  <DollarSign className="w-8 h-8 text-red-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">$85K+ Talent Waste</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Average annual cost of misallocating senior architectural talent to routine tasks
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-3">
-                  <Clock className="w-8 h-8 text-red-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">47% Project Delays</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Firms report delays due to internal resource allocation bottlenecks
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-3">
-                  <AlertCircle className="w-8 h-8 text-red-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">73% Burnout Risk</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Licensed architects report feeling overwhelmed by administrative workload
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8 bg-lime-50 border-l-4 border-lime-600 p-6 rounded-lg">
-            <p className="text-lg text-gray-900 font-semibold">
-              Meanwhile, smart architecture firms using systematic outsourcing are experiencing 30% faster project completion, 78% cost reduction on support tasks, and significantly higher architect satisfaction rates.
-            </p>
-          </div>
-        </div>
-
-        {/* What Is Architectural Outsourcing */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            What is Architectural Outsourcing?
-          </h2>
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <p className="text-xl text-gray-700 leading-relaxed mb-6">
-              Architectural outsourcing is the systematic delegation of non-core architectural tasks to qualified professionals, allowing your licensed architects to focus on design, client relationships, and high-value decision-making.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold">
-              This isn't about replacing your architects—it's about amplifying their impact. When your $85,000 architect spends their day on CAD cleanup and permit applications, you're essentially paying premium rates for administrative work.
+            <p className="text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto">
+              From concept development to construction documentation, we provide full-spectrum architectural support.
             </p>
           </div>
 
-          {/* Core Services */}
-          <h3 className="text-3xl font-bold text-gray-900 mb-6">Core Architectural Outsourcing Services</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <PenTool className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">CAD Drafting & Documentation</h3>
+          {/* Services Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* CAD Drafting & Design */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
                 </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Technical drawing production, detail development, construction documentation, and drawing set coordination
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Box className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">3D Modeling & Visualization</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Building information modeling (BIM), 3D rendering, walkthrough animations, and presentation materials
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <FileText className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">Permit & Regulatory Support</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Permit application preparation, code compliance checking, regulatory research, and submission coordination
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Users className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">Project Administration</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Project tracking, document management, client communication, and administrative coordination
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Types of Support */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Types of Architectural Support We Provide
-          </h2>
-          <p className="text-lg text-gray-700 mb-6">
-            Whether you need an architectural assistant for general support, a specialized CAD operator for technical drawings, or a project coordinator for administrative management, our Philippines-based professionals can fill any architectural support role your firm requires.
-          </p>
-
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
-            Architectural Assistant vs CAD Operator vs Project Coordinator
-          </h3>
-
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-lime-50">
-                  <th className="border border-lime-200 px-4 py-3 text-left text-gray-900 font-bold">Role Type</th>
-                  <th className="border border-lime-200 px-4 py-3 text-left text-gray-900 font-bold">Primary Focus</th>
-                  <th className="border border-lime-200 px-4 py-3 text-left text-gray-900 font-bold">Key Responsibilities</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-gray-200 px-4 py-3 font-semibold text-gray-900">Architectural Assistant</td>
-                  <td className="border border-gray-200 px-4 py-3 text-gray-700">General Support</td>
-                  <td className="border border-gray-200 px-4 py-3 text-gray-700">Project coordination, client communication, document management, administrative tasks</td>
-                </tr>
-                <tr className="bg-gray-50">
-                  <td className="border border-gray-200 px-4 py-3 font-semibold text-gray-900">CAD Operator</td>
-                  <td className="border border-gray-200 px-4 py-3 text-gray-700">Technical Drawing</td>
-                  <td className="border border-gray-200 px-4 py-3 text-gray-700">AutoCAD drafting, Revit modeling, technical documentation, drawing set production</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-200 px-4 py-3 font-semibold text-gray-900">Project Coordinator</td>
-                  <td className="border border-gray-200 px-4 py-3 text-gray-700">Project Management</td>
-                  <td className="border border-gray-200 px-4 py-3 text-gray-700">Timeline tracking, permit coordination, regulatory compliance, stakeholder communication</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p className="text-gray-700 mt-6 italic">
-            Our architectural support specialists are skilled in industry-standard software including AutoCAD, Revit, SketchUp, 3ds Max, and various BIM platforms. However, we don't provide software training or licenses—we find candidates who already possess the technical skills your specific projects require.
-          </p>
-        </div>
-
-        {/* Why Choose ShoreAgents */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            Why Choose ShoreAgents for Your Architectural Outsourcing Needs
-          </h2>
-          <p className="text-xl text-gray-700 mb-8">
-            After 500+ successful placements and 12 years in the Philippines BPO industry, we've perfected the process of matching architecture firms with skilled professionals who understand both technical requirements and Western business practices.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Building2 className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">🏢 Professional Office Environment</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Clark-based facility with security, biometric access, and enterprise-grade technology infrastructure
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Target className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">🎯 Skilled Candidate Matching</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  We find candidates with existing CAD, BIM, and architectural software proficiency based on your specific requirements
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Clock className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">⚡ Time Zone Advantage</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Perfect alignment with Australia, New Zealand, and USA business hours for seamless collaboration
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Shield className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">🛡️ Data Security & Compliance</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Enterprise-grade security protocols, endpoint protection, and confidentiality agreements
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Honest Approach */}
-        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Our Honest Approach to Architectural Outsourcing
-          </h2>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            We don't provide architectural training or software licenses—that's not our business model. Instead, we focus on finding candidates who already have the specific technical skills your projects require, whether that's advanced Revit modeling, AutoCAD proficiency, or specialized BIM experience.
-          </p>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            What we DO provide is professional infrastructure, ongoing management, and skilled professionals who understand Western business practices and architectural workflows. You get the technical expertise you need without the overhead of training or managing remote staff.
-          </p>
-          <div className="bg-white rounded-lg p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">Cost Reality Check</h3>
-            <p className="text-lg text-gray-700 mb-4">
-              A CAD operator in Australia costs $65,000+ annually. Our architectural support specialists deliver the same quality work for approximately $14,300 annually, representing a 78% cost reduction while maintaining professional standards.
-            </p>
-            <p className="text-xl font-bold text-lime-600">
-              That's an annual savings of $50,700 per position—money you can reinvest in business growth, technology upgrades, or additional architectural talent.
-            </p>
-          </div>
-        </div>
-
-        {/* Implementation Process */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-            How Our Architectural Outsourcing Process Works
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-12">
-            Our proven methodology ensures successful integration of architectural support professionals into your existing workflows.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-lime-600">1</span>
+                <h3 className="text-xl font-bold text-gray-900">CAD Drafting & Design</h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Requirements Analysis</h3>
-              <p className="text-gray-700">
-                Detailed assessment of your software requirements, project types, and specific technical skills needed
-              </p>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  AutoCAD technical drawings
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Revit 3D modeling
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Construction documentation
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Design development
+                </li>
+              </ul>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-lime-600">2</span>
+            {/* Project Coordination */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Project Coordination</h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Candidate Matching</h3>
-              <p className="text-gray-700">
-                Skilled professionals identified based on your exact technical requirements and project needs
-              </p>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Client communication
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Consultant coordination
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Project scheduling
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Progress reporting
+                </li>
+              </ul>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-lime-600">3</span>
+            {/* Code & Compliance */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Code & Compliance</h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Integration & Setup</h3>
-              <p className="text-gray-700">
-                Professional onboarding, system access setup, and workflow integration coordination
-              </p>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Building code research
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Zoning compliance
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Permit documentation
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Regulatory coordination
+                </li>
+              </ul>
             </div>
 
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-lime-600">4</span>
+            {/* 3D Visualization */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-10 0a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">3D Visualization</h3>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Ongoing Management</h3>
-              <p className="text-gray-700">
-                Continuous performance monitoring, quality assurance, and professional development support
-              </p>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  SketchUp modeling
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Rendering services
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Virtual walkthroughs
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Presentation materials
+                </li>
+              </ul>
+            </div>
+
+            {/* Design Development */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Design Development</h3>
+              </div>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Schematic design support
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Design development docs
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Specification writing
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Material research
+                </li>
+              </ul>
+            </div>
+
+            {/* Quality Control */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Quality Control</h3>
+              </div>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Drawing review & checking
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Coordination between trades
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Red-line incorporation
+                </li>
+                <li className="flex items-start">
+                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                  Final documentation
+                </li>
+              </ul>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Service Options */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-            Choose Your Architectural Support Solution
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-12">
-            Every architecture firm has different needs and growth stages. Our scalable approach lets you start small and expand as your requirements evolve.
-          </p>
+      {/* Investment Section */}
+      <section className="py-16 lg:py-24 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
+              Professional Architectural Support Investment
+            </h2>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Start Small – One Agent</h3>
-                  <p className="text-gray-600 mb-4">
-                    Perfect for smaller firms or those new to architectural outsourcing. Test our quality and cultural fit with a single CAD operator or architectural assistant.
-                  </p>
-                  <div className="space-y-2 text-sm text-gray-700 text-left mb-4">
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>$14,300 annually vs $65,000+ local cost</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Single specialist focused on your needs</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Ideal for testing workflows and integration</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Easy to scale up after proving success</span>
-                    </div>
-                  </div>
+          {/* Investment Card */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-xl p-8 lg:p-12 shadow-md border border-gray-100">
+              {/* Metrics */}
+              <div className="grid md:grid-cols-3 gap-8 mb-8">
+                <div className="text-center">
+                  <div className="text-4xl lg:text-5xl font-bold text-gray-900 mb-2">$616</div>
+                  <div className="text-gray-600">Per architect/month</div>
                 </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Learn about starting with one agent →
+                <div className="text-center">
+                  <div className="text-4xl lg:text-5xl font-bold text-lime-600 mb-2">40%</div>
+                  <div className="text-gray-600">Faster project delivery</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl lg:text-5xl font-bold text-lime-600 mb-2">100%</div>
+                  <div className="text-gray-600">Professional standards</div>
+                </div>
+              </div>
+
+              {/* All-inclusive text */}
+              <div className="text-center mb-8">
+                <p className="text-lg text-gray-700">
+                  All-inclusive: Salary, benefits, workspace, management, and replacement guarantee.
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <div className="text-center">
+                <Button 
+                  variant="default" 
+                  size="lg"
+                  className="text-lg px-8 py-4 font-semibold"
+                >
+                  Calculate Your Investment →
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow bg-lime-50 h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <Badge className="bg-lime-600 text-white mb-4">MOST POPULAR</Badge>
-                  <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Building2 className="w-8 h-8 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Scale Smart – Build Your Team</h3>
-                  <p className="text-gray-600 mb-4">
-                    Ideal for growing firms needing specialized support across multiple functions. Combine CAD operators, project coordinators, and admin assistants.
-                  </p>
-                  <div className="space-y-2 text-sm text-gray-700 text-left mb-4">
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Multiple specialists working together</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Coordinated project management approach</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Covers CAD, BIM, admin, and coordination</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Scalable from 2-8 team members</span>
-                    </div>
-                  </div>
+      {/* Related Services Section */}
+      <section className="py-16 lg:py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
+              Related Outsourcing Services
+            </h2>
+          </div>
+
+          {/* Services Grid */}
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+            {/* Engineering Outsourcing */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-lime-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Explore team building solutions →
-                </Button>
-              </CardContent>
-            </Card>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Engineering Outsourcing</h3>
+                <p className="text-gray-700 mb-4">
+                  Professional engineering support for structural, civil, and mechanical projects.
+                </p>
+                <a href="/engineering-outsourcing" className="inline-flex items-center text-lime-600 font-semibold hover:text-lime-700 transition-colors">
+                  Learn More →
+                </a>
+              </div>
+            </div>
 
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Globe className="w-8 h-8 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Go Big – Enterprise Workforce</h3>
-                  <p className="text-gray-600 mb-4">
-                    For established firms with complex operations, multiple locations, or major projects requiring comprehensive architectural support across all functions.
-                  </p>
-                  <div className="space-y-2 text-sm text-gray-700 text-left mb-4">
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Complete department-level support</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Integrated workflow management</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Multi-project coordination capability</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Enterprise-level quality assurance</span>
-                    </div>
-                  </div>
+            {/* Drafting Outsourcing */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-lime-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                 </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Discover enterprise workforce solutions →
-                </Button>
-              </CardContent>
-            </Card>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Drafting Outsourcing</h3>
+                <p className="text-gray-700 mb-4">
+                  Technical drafting precision with latest CAD tools and professional accuracy.
+                </p>
+                <a href="/drafting-outsourcing" className="inline-flex items-center text-lime-600 font-semibold hover:text-lime-700 transition-colors">
+                  Learn More →
+                </a>
+              </div>
+            </div>
+
+            {/* Construction Outsourcing */}
+            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-lime-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Construction Outsourcing</h3>
+                <p className="text-gray-700 mb-4">
+                  Comprehensive construction support from project management to documentation.
+                </p>
+                <a href="/construction-outsourcing" className="inline-flex items-center text-lime-600 font-semibold hover:text-lime-700 transition-colors">
+                  Learn More →
+                </a>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Related Services */}
-        <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Complete Design & Construction Support Ecosystem
+      {/* Final CTA Section */}
+      <section className="py-16 lg:py-24 bg-lime-600">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-6">
+            Ready to Scale Your Architectural Practice?
           </h2>
-          <p className="text-xl text-gray-700 text-center mb-8">
-            Architecture firms don't operate in isolation. Our comprehensive outsourcing services connect seamlessly with related disciplines to support your entire project lifecycle.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <Settings className="w-6 h-6 text-lime-600 mr-2" />
-                  Engineering Support
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Structural, MEP, and civil engineering support for comprehensive project development
-                </p>
-                <a href="#" className="text-lime-600 hover:text-lime-700 font-semibold flex items-center">
-                  Learn about engineering outsourcing →
-                </a>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <Building2 className="w-6 h-6 text-lime-600 mr-2" />
-                  Construction Coordination
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Project management, contractor coordination, and construction administration support
-                </p>
-                <a href="#" className="text-lime-600 hover:text-lime-700 font-semibold flex items-center">
-                  Explore construction outsourcing →
-                </a>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <PenTool className="w-6 h-6 text-lime-600 mr-2" />
-                  Specialized Drafting
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Technical drafting, detail development, and production drawing creation
-                </p>
-                <a href="#" className="text-lime-600 hover:text-lime-700 font-semibold flex items-center">
-                  Discover drafting outsourcing →
-                </a>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <Calculator className="w-6 h-6 text-lime-600 mr-2" />
-                  Cost Estimation
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Quantity takeoffs, cost analysis, and budget preparation for project planning
-                </p>
-                <a href="#" className="text-lime-600 hover:text-lime-700 font-semibold flex items-center">
-                  View estimating outsourcing →
-                </a>
-              </CardContent>
-            </Card>
-          </div>
-
-          <p className="text-gray-700 text-center mt-8 italic">
-            This integrated approach means you can scale your entire design and construction support ecosystem through a single partner, ensuring consistent quality, communication, and project coordination across all disciplines.
-          </p>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-            Frequently Asked Questions
-          </h2>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How much does architectural outsourcing cost?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Our architectural support specialists start at $14,300 USD annually, compared to $65,000+ for local Australian staff. That's a 78% cost saving while maintaining professional quality and standards.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Do you provide training for architectural software?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  No, we don't provide training or software licenses. We specialize in finding candidates who already have the specific technical skills you need—whether that's AutoCAD, Revit, SketchUp, or other architectural software proficiency.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What types of architectural projects can be outsourced?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  CAD drafting, 3D modeling, BIM development, construction documentation, permit applications, project coordination, and administrative tasks. Essentially any architectural support work that doesn't require physical site presence.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do you ensure quality and project security?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Professional office environment with enterprise-grade security, confidentiality agreements, endpoint protection, and ongoing quality management. All staff work from our secure Clark facility, not from home.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What's the time zone advantage for architectural outsourcing?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Philippines time zones align perfectly with Australia, New Zealand, and USA business hours. Your architectural support team can work during your business day or provide overnight project completion for faster turnaround.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Can architectural outsourcing scale with my firm's growth?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Yes. Start with one architectural assistant, expand to a specialized team, or implement enterprise-level support. Our scalable approach grows with your business needs and project requirements.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </div>
-
-        {/* Final CTA */}
-        <div className="bg-gradient-to-br from-lime-600 to-green-600 rounded-2xl shadow-xl p-12 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">
-            Ready to Transform Your Architecture Firm?
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Stop wasting your $85,000 architects on $15,000 tasks. Discover how systematic architectural outsourcing can save you 78% on operational costs while freeing your team to focus on actual architecture.
+          <p className="text-xl text-lime-100 mb-8 max-w-2xl mx-auto">
+            Join architectural firms who've increased their capacity by 300% while maintaining professional standards.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-              <Phone className="w-5 h-5 mr-2" />
-              Book Your Consultation
+            <Button 
+              variant="secondary" 
+              size="lg"
+              className="text-lg px-8 py-4 font-semibold bg-white text-lime-600 hover:bg-gray-50"
+            >
+              Calculate Investment →
             </Button>
-            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-semibold">
-              <DollarSign className="w-5 h-5 mr-2" />
-              See Investment Options
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="text-lg px-8 py-4 font-semibold border-white text-white hover:bg-white hover:text-lime-600"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              View Success Stories
             </Button>
           </div>
-          <p className="mt-6 text-sm opacity-75">
-            Proven Results from Architecture Firms
-          </p>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { X, Users, Building, Briefcase, DollarSign, CheckCircle, ArrowRight, ArrowLeft, Loader2, Calculator, Brain, Sparkles, Zap } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './alert-dialog';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog-videocall';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './dialog';
 import { useCurrency } from '@/lib/currencyContext';
 import { Button } from './button';
 import { Input } from './input';
@@ -377,35 +377,15 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
       }
       
       // Extract candidate recommendations from all roles
-      const candidateRecommendations: Array<{
-        id: string
-        name: string
-        position: string
-        avatar?: string
-        score: number
-        isFavorite?: boolean
-      }> = [];
+      // Structure recommendations by role (dashboard expects nested structure)
+      const candidateRecommendations = quoteData.roles.map(role => ({
+        roleTitle: role.title,
+        roleLevel: role.level,
+        totalCandidates: role.candidateMatch?.totalCandidates || 0,
+        recommendedCandidates: (role.candidateMatch?.recommendedCandidates as CandidateRecommendation[]) || []
+      })).filter(role => role.totalCandidates > 0); // Only include roles with candidates
 
-      quoteData.roles.forEach(role => {
-        if (role.candidateMatch?.recommendedCandidates) {
-          const rankedCandidates = rankEmployeesByScore((role.candidateMatch.recommendedCandidates as CandidateRecommendation[]) || []);
-          const topCandidates = rankedCandidates.slice(0, 3); // Get top 3 per role
-          
-          topCandidates.forEach(rankedCandidate => {
-            const originalCandidate = (role.candidateMatch?.recommendedCandidates as CandidateRecommendation[])?.find((c: CandidateRecommendation) => c.id === rankedCandidate.id);
-            if (originalCandidate && !candidateRecommendations.find(c => c.id === originalCandidate.id)) {
-              candidateRecommendations.push({
-                id: originalCandidate.id,
-                name: originalCandidate.name,
-                position: originalCandidate.position,
-                avatar: undefined, // Avatar not available in CandidateRecommendation interface
-                score: rankedCandidate.overallScore,
-                isFavorite: false // Default to false, can be updated later
-              });
-            }
-          });
-        }
-      });
+      console.log('💾 Saving candidate recommendations:', candidateRecommendations);
 
       const pricingQuoteData: PricingQuoteData = {
         user_id: userId, // Use device fingerprint, not Supabase Auth UUID

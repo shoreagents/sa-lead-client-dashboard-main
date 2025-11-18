@@ -22,92 +22,81 @@ interface BlogPost {
 
 const blogPosts: BlogPost[] = [
   {
-    id: '8',
-    title: 'Real Estate Virtual Assistant: 90% Fail - Client Messes Up or Staff Messes Up',
-    description: 'Brutally honest truth about VA partnerships. 13 years experience reveals why 90% fail, what causes it, and how to be in the 10% that succeed.',
-    url: '/real-estate-virtual-assistant-90-fail',
-    category: 'Reality Check',
-    thumbnail: 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&h=250&fit=crop',
-    publishDate: '2025-01-28',
-    author: 'Stephen (Shore Agents)',
-    readTime: '15 min read'
+    id: '1',
+    title: 'What is Outsourcing?',
+    description: 'A comprehensive guide to understanding outsourcing and how it can benefit your business.',
+    url: '/what-is-outsourcing',
+    category: 'Outsourcing',
+    thumbnail: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=250&fit=crop',
+    publishDate: '2024-01-15',
+    author: 'ShoreAgents Team',
+    readTime: '8 min read'
   },
   {
-    id: '7',
-    title: 'What Does a Real Estate Virtual Assistant Do?',
-    description: 'Complete guide to real estate VA responsibilities. From administrative support to transaction coordination, discover how VAs transform real estate businesses.',
-    url: '/what-does-a-real-estate-virtual-assistant-do',
-    category: 'Real Estate VA',
-    thumbnail: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop',
-    publishDate: '2025-01-25',
+    id: '2',
+    title: 'Outsourcing vs Offshoring',
+    description: 'Understanding the key differences between outsourcing and offshoring for your business.',
+    url: '/outsourcing-vs-offshoring',
+    category: 'Outsourcing',
+    thumbnail: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=250&fit=crop',
+    publishDate: '2024-01-20',
+    author: 'ShoreAgents Team',
+    readTime: '7 min read'
+  },
+  {
+    id: '3',
+    title: 'Outsourcing to Vietnam',
+    description: 'Explore the benefits and opportunities of outsourcing to Vietnam for your business.',
+    url: '/outsourcing-to-vietnam',
+    category: 'Outsourcing',
+    thumbnail: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400&h=250&fit=crop',
+    publishDate: '2024-01-25',
+    author: 'ShoreAgents Team',
+    readTime: '6 min read'
+  },
+  {
+    id: '4',
+    title: 'Outsourcing to India',
+    description: 'Discover why India is a leading destination for outsourcing and how to leverage it.',
+    url: '/outsourcing-to-india',
+    category: 'Outsourcing',
+    thumbnail: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&h=250&fit=crop',
+    publishDate: '2024-02-01',
+    author: 'ShoreAgents Team',
+    readTime: '6 min read'
+  },
+  {
+    id: '5',
+    title: 'Outsourcing Philippines',
+    description: 'Why the Philippines is the premier destination for outsourcing your business operations.',
+    url: '/outsourcing-philippines',
+    category: 'Outsourcing',
+    thumbnail: 'https://images.unsplash.com/photo-1578663899664-27b62cd03a44?w=400&h=250&fit=crop',
+    publishDate: '2024-02-05',
     author: 'ShoreAgents Team',
     readTime: '10 min read'
   },
   {
     id: '6',
-    title: 'Outsourcing to the Philippines',
-    description: 'The Philippines: World\'s #1 English-speaking BPO destination. Learn why top companies choose Filipino talent for customer service and virtual assistance.',
-    url: '/outsourcing-philippines',
-    category: 'Country Guide',
-    thumbnail: 'https://images.unsplash.com/photo-1609137144813-7d9921338f24?w=400&h=250&fit=crop',
-    publishDate: '2025-01-22',
-    author: 'ShoreAgents Team',
-    readTime: '11 min read'
-  },
-  {
-    id: '5',
     title: 'Virtual Real Estate Assistant Pricing',
-    description: 'Complete 2025 pricing guide for virtual real estate assistants. Cost breakdown, ROI calculations, and how to save 60-78% compared to local hiring.',
+    description: 'Complete pricing guide for hiring virtual real estate assistants in 2024.',
     url: '/virtual-real-estate-assistant-pricing',
-    category: 'Pricing Guide',
-    thumbnail: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&h=250&fit=crop',
-    publishDate: '2025-01-20',
-    author: 'ShoreAgents Team',
-    readTime: '12 min read'
-  },
-  {
-    id: '4',
-    title: 'Outsourcing to India',
-    description: 'Why India remains the global IT outsourcing leader. Explore massive talent pool, technical excellence, and cost-effective solutions from the world\'s BPO capital.',
-    url: '/outsourcing-to-india',
-    category: 'Country Guide',
-    thumbnail: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&h=250&fit=crop',
-    publishDate: '2025-01-18',
-    author: 'ShoreAgents Team',
-    readTime: '10 min read'
-  },
-  {
-    id: '3',
-    title: 'Outsourcing to Vietnam',
-    description: 'Complete guide to outsourcing in Vietnam. Discover cost advantages, talent pool, and why Vietnam is becoming a top outsourcing destination in Southeast Asia.',
-    url: '/outsourcing-to-vietnam',
-    category: 'Country Guide',
-    thumbnail: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=400&h=250&fit=crop',
-    publishDate: '2025-01-15',
+    category: 'Real Estate VA',
+    thumbnail: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop',
+    publishDate: '2024-02-10',
     author: 'ShoreAgents Team',
     readTime: '9 min read'
   },
   {
-    id: '2',
-    title: 'Outsourcing vs Offshoring: What\'s the Difference?',
-    description: 'Comprehensive comparison guide explaining the key differences between outsourcing and offshoring, and which strategy is right for your business.',
-    url: '/outsourcing-vs-offshoring',
-    category: 'Comparison Guide',
-    thumbnail: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=400&h=250&fit=crop',
-    publishDate: '2025-01-12',
+    id: '7',
+    title: 'What Does a Real Estate Virtual Assistant Do?',
+    description: 'Everything you need to know about real estate virtual assistants and their role in your business.',
+    url: '/what-does-a-real-estate-virtual-assistant-do',
+    category: 'Real Estate VA',
+    thumbnail: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=400&h=250&fit=crop',
+    publishDate: '2024-02-15',
     author: 'ShoreAgents Team',
-    readTime: '7 min read'
-  },
-  {
-    id: '1',
-    title: 'What is Outsourcing?',
-    description: 'Complete guide to outsourcing in 2025. Learn what outsourcing is, its benefits, types, and how it can transform your business operations.',
-    url: '/what-is-outsourcing',
-    category: 'Outsourcing Guide',
-    thumbnail: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&h=250&fit=crop',
-    publishDate: '2025-01-10',
-    author: 'ShoreAgents Team',
-    readTime: '8 min read'
+    readTime: '11 min read'
   }
 ];
 
@@ -198,7 +187,7 @@ export default function BlogsPage() {
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-1">
                       <Calendar className="w-4 h-4" />
-                      <span>{new Date(blog.publishDate).toLocaleDateString()}</span>
+                      <span>{new Date(blog.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <User className="w-4 h-4" />

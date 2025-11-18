@@ -482,7 +482,7 @@ class ContentTrackingService {
 
   public async updateContentView(data: Partial<ContentViewData>): Promise<boolean> {
     if (!this.currentViewId || !this.supabase) {
-      // Silently fail if no view ID - this is expected if tracking hasn't started yet
+      console.log('❌ No current view ID or Supabase client for update');
       return false;
     }
 
@@ -514,61 +514,20 @@ class ContentTrackingService {
         .eq('id', this.currentViewId);
 
       if (error) {
-        // Handle different error object types
-        const errorInfo: any = {
+        console.error('❌ Error updating content view:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
           fullError: error
-        };
-        
-        // Safely extract error properties
-        if (error && typeof error === 'object') {
-          if ('message' in error) errorInfo.message = error.message;
-          if ('details' in error) errorInfo.details = error.details;
-          if ('hint' in error) errorInfo.hint = error.hint;
-          if ('code' in error) errorInfo.code = error.code;
-          
-          // If it's an Error instance, get standard properties
-          if (error instanceof Error) {
-            errorInfo.message = error.message;
-            errorInfo.stack = error.stack;
-            errorInfo.name = error.name;
-          }
-        }
-        
-        // If error is a string
-        if (typeof error === 'string') {
-          errorInfo.message = error;
-        }
-        
-        // Only log error in development, silently fail in production
-        if (process.env.NODE_ENV === 'development') {
-          try {
-            console.error('❌ Error updating content view:', JSON.stringify(errorInfo, null, 2));
-          } catch (e) {
-            // If JSON.stringify fails, log the raw error
-            console.error('❌ Error updating content view (raw):', error);
-            console.error('   ErrorInfo object:', errorInfo);
-          }
-          console.error('   Current view ID:', this.currentViewId);
-          console.error('   Update data:', updateData);
-        }
+        });
         return false;
       }
 
       console.log('✅ Content view updated successfully');
       return true;
     } catch (error) {
-      // Only log error in development, silently fail in production
-      if (process.env.NODE_ENV === 'development') {
-        console.error('❌ Exception in updateContentView:', error);
-        console.error('   Error type:', typeof error);
-        console.error('   Error is Error instance:', error instanceof Error);
-        if (error instanceof Error) {
-          console.error('   Error message:', error.message);
-          console.error('   Error stack:', error.stack);
-        }
-        console.error('   Current view ID:', this.currentViewId);
-        console.error('   Supabase client exists:', !!this.supabase);
-      }
+      console.error('❌ Exception in updateContentView:', error);
       return false;
     }
   }

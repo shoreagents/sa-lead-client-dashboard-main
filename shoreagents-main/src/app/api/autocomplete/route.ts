@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+})
+const MAX_SUGGESTIONS = 5;
+
 export async function POST(request: NextRequest) {
   let query = '';
   let type = 'role';
@@ -9,19 +14,12 @@ export async function POST(request: NextRequest) {
   
   try {
     // Check if API key is available
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      console.error('❌ ANTHROPIC_API_KEY is not set')
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('ANTHROPIC_API_KEY is not set')
       return NextResponse.json({ 
-        error: 'AI autocomplete requires ANTHROPIC_API_KEY to be configured',
-        details: 'Please check your .env.local file and ensure ANTHROPIC_API_KEY is set'
+        error: 'AI autocomplete requires ANTHROPIC_API_KEY to be configured'
       }, { status: 500 })
     }
-
-    // Initialize Anthropic client with API key (do this inside the function to ensure env var is loaded)
-    const anthropic = new Anthropic({
-      apiKey: apiKey,
-    })
 
     const requestData = await request.json()
     query = requestData.query || '';
@@ -38,10 +36,9 @@ export async function POST(request: NextRequest) {
 
     // Handle different types of autocomplete requests
     let prompt = '';
-    let maxSuggestions = 5;
     
     if (type === 'industry') {
-      prompt = `You are an AI assistant helping users specify their business industry. Based on the user's input "${query}", suggest ${maxSuggestions} relevant industries.
+      prompt = `You are an AI assistant helping users specify their business industry. Based on the user's input "${query}", suggest ${MAX_SUGGESTIONS} relevant industries.
 
 Context: The user is looking for offshore team members for their business. They might be specifying industries like:
 - Technology, Software Development, IT Services
@@ -56,7 +53,7 @@ Context: The user is looking for offshore team members for their business. They 
 - Construction, Building
 - And many more...
 
-Based on the input "${query}", suggest ${maxSuggestions} specific, relevant industries that would be appropriate for offshore staffing. Make the suggestions:
+Based on the input "${query}", suggest ${MAX_SUGGESTIONS} specific, relevant industries that would be appropriate for offshore staffing. Make the suggestions:
 1. Specific and professional
 2. Commonly used in business contexts
 3. Relevant to the input provided
@@ -70,7 +67,7 @@ Format your response as a JSON array of objects with "title", "description", and
 
 Only return the JSON array, no other text.`;
     } else if (type === 'role') {
-      prompt = `You are an AI assistant helping users specify job roles and positions. Based on the user's input "${query}"${industry ? ` in the ${industry} industry` : ''}, suggest ${maxSuggestions} relevant job roles or positions.
+      prompt = `You are an AI assistant helping users specify job roles and positions. Based on the user's input "${query}"${industry ? ` in the ${industry} industry` : ''}, suggest ${MAX_SUGGESTIONS} relevant job roles or positions.
 
 Context: The user is looking for team members for their business. They might be specifying roles like:
 - Software Developer, Frontend Developer, Backend Developer
@@ -84,7 +81,7 @@ Context: The user is looking for team members for their business. They might be 
 - HR Specialist, Recruiter, Talent Acquisition
 - And many more...
 
-Based on the input "${query}"${industry ? ` in the ${industry} industry` : ''}, suggest ${maxSuggestions} specific, relevant job roles that would be appropriate for offshore staffing. Make the suggestions:
+Based on the input "${query}"${industry ? ` in the ${industry} industry` : ''}, suggest ${MAX_SUGGESTIONS} specific, relevant job roles that would be appropriate for offshore staffing. Make the suggestions:
 1. Specific and professional
 2. Commonly used in business contexts
 3. Relevant to the input provided
@@ -116,7 +113,7 @@ Make the description:
 Return only the job description text, no other formatting.`;
     } else {
       // Default to role suggestions
-      prompt = `You are an AI assistant helping users specify job roles and positions. Based on the user's input "${query}", suggest ${maxSuggestions} relevant job roles or positions.
+      prompt = `You are an AI assistant helping users specify job roles and positions. Based on the user's input "${query}", suggest ${MAX_SUGGESTIONS} relevant job roles or positions.
 
 Format your response as a JSON array of objects with "title", "description", and "level" fields:
 [
@@ -126,12 +123,8 @@ Format your response as a JSON array of objects with "title", "description", and
 Only return the JSON array, no other text.`;
     }
 
-    console.log('🤖 Calling Anthropic API with model: claude-sonnet-4-20250514');
-    
-    let response;
-    try {
-      response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+    const response = await anthropic.messages.create({
+      model: 'claude-3-haiku-20240307',
       max_tokens: type === 'description' ? 1000 : 500,
       temperature: 0.3,
       messages: [
@@ -141,34 +134,8 @@ Only return the JSON array, no other text.`;
         }
       ]
     })
-    } catch (anthropicError: any) {
-      console.error('❌ Anthropic API call failed:', {
-        error: anthropicError,
-        message: anthropicError?.message,
-        status: anthropicError?.status,
-        statusText: anthropicError?.statusText
-      });
-      
-      // Handle specific Anthropic API errors
-      if (anthropicError?.status === 401) {
-        return NextResponse.json({ 
-          error: 'Invalid API key',
-          details: 'The ANTHROPIC_API_KEY is invalid or expired. Please check your API key.'
-        }, { status: 401 })
-      }
-      
-      if (anthropicError?.status === 429) {
-        return NextResponse.json({ 
-          error: 'Rate limit exceeded',
-          details: 'Too many requests. Please try again later.'
-        }, { status: 429 })
-      }
-      
-      throw anthropicError;
-    }
 
     if (!response || !response.content || response.content.length === 0) {
-      console.error('❌ Empty response from Anthropic API');
       throw new Error('Empty response from Anthropic API')
     }
 
@@ -225,27 +192,7 @@ Only return the JSON array, no other text.`;
     }
 
   } catch (error) {
-    // Log detailed error information
-    const errorInfo = {
-      message: error instanceof Error ? error.message : String(error),
-      name: error instanceof Error ? error.name : 'Unknown',
-      stack: error instanceof Error ? error.stack : undefined,
-      type: typeof error,
-      query,
-      requestType: type
-    };
-    console.error('❌ Autocomplete API error:', JSON.stringify(errorInfo, null, 2));
-    
-    // Also log the raw error for debugging
-    if (error instanceof Error) {
-      console.error('❌ Error details:', {
-        message: error.message,
-        name: error.name,
-        stack: error.stack
-      });
-    } else {
-      console.error('❌ Non-Error object:', error);
-    }
+    console.error('❌ Autocomplete API error:', error)
     
     return NextResponse.json({ 
       error: 'AI autocomplete failed',

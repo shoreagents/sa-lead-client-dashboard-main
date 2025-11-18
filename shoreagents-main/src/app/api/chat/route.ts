@@ -223,13 +223,6 @@ export async function POST(request: NextRequest) {
 
     const { message, conversationHistory, userId }: { message: string; conversationHistory: Array<{ role: string; content: string }>; userId?: string } = requestBody;
 
-    console.log('🚀 API /chat processing:', {
-      message: message ? message.substring(0, 50) + '...' : 'EMPTY_MESSAGE',
-      conversationHistoryLength: conversationHistory.length,
-      userId,
-      timestamp: new Date().toISOString()
-    });
-
     // Validate required fields - allow empty messages for initial greetings
     if (typeof message !== 'string') {
       return NextResponse.json(
@@ -280,29 +273,41 @@ export async function POST(request: NextRequest) {
       content: message || 'hello'
     });
 
-    // Fetch user data for personalization if userId is provided (OPTIMIZED - Parallel queries)
+    // Fetch user data for personalization if userId is provided
     let userData = null;
     if (userId) {
       try {
         const supabase = createClient();
         
-        // Fetch all data in parallel for better performance
-        const [
-          { data: user, error: userError },
-          { data: quotes, error: quotesError },
-          { data: pageVisits, error: visitsError }
-        ] = await Promise.all([
-          supabase.from('users').select('*').eq('user_id', userId).single(),
-          supabase.from('pricing_quotes').select('*').eq('user_id', userId).order('quote_timestamp', { ascending: false }).limit(3),
-          supabase.from('user_page_visits').select('*').eq('user_id', userId).order('visit_timestamp', { ascending: false }).limit(3)
-        ]);
+        // Fetch user data
+        const { data: user, error: userError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
 
         if (userError && userError.code !== 'PGRST116') {
           console.error('Error fetching user:', userError);
         } else if (user) {
+          // Fetch user's pricing quotes
+          const { data: quotes, error: quotesError } = await supabase
+            .from('pricing_quotes')
+            .select('*')
+            .eq('user_id', userId)
+            .order('quote_timestamp', { ascending: false });
+
           if (quotesError) {
             console.error('Error fetching quotes:', quotesError);
           }
+
+          // Fetch recent page visits for activity tracking
+          const { data: pageVisits, error: visitsError } = await supabase
+            .from('user_page_visits')
+            .select('*')
+            .eq('user_id', userId)
+            .order('visit_timestamp', { ascending: false })
+            .limit(5);
+
           if (visitsError) {
             console.error('Error fetching page visits:', visitsError);
           }
@@ -427,11 +432,9 @@ export async function POST(request: NextRequest) {
     topics: conversationAnalysis.topics
   });
   
-    // Create personalized context based on user data and conversation analysis
-    let personalizedContext = '';
-    const suggestedComponents = [];
-    
-    console.log('🔍 Creating personalized context with userData:', userData);
+  // Create personalized context based on user data and conversation analysis
+  let personalizedContext = '';
+  const suggestedComponents = [];
   
   // Enhanced AI analysis for anonymous users
   let shouldRequestContactInfo = false;
@@ -470,11 +473,8 @@ export async function POST(request: NextRequest) {
     // Don't ask for contact info immediately - only when user shows interest
     // This will be handled by the specific interest-based triggers below
     
-    // Check if this is an authenticated user (Regular/Admin)
-    const isAuthenticatedUser = user.user_type === 'Regular' || user.user_type === 'Admin';
-    
     // Don't ask for contact info from authenticated users (Regular/Admin)
-    if (isAuthenticatedUser) {
+    if (user.user_type === 'Regular' || user.user_type === 'Admin') {
       shouldRequestContactInfo = false;
       contactRequestReason = 'authenticated_user_has_contact_info';
     }
@@ -504,16 +504,15 @@ export async function POST(request: NextRequest) {
       )
     );
     
-    // Only ask for contact info if NOT an authenticated user and they don't have contact info
-    if (!isAuthenticatedUser && conversationHistory.length >= 3 && businessTopics && !userProfile.hasContactInfo && !hasProvidedContactInConversation) {
+    if (conversationHistory.length >= 3 && businessTopics && !userProfile.hasContactInfo && !hasProvidedContactInConversation) {
       shouldRequestContactInfo = true;
       contactRequestReason = 'engaged_user_missing_contact';
       console.log('🎯 Triggering contact request: engaged_user_missing_contact');
     }
     
     // Check if user is asking for quotes but hasn't provided contact info
-    // IMPORTANT: Never ask for contact info from authenticated users
-    if (!isAuthenticatedUser && (conversationAnalysis.intent === 'pricing_inquiry' || conversationAnalysis.intent === 'talent_inquiry') && 
+    // Now we check both database contact info AND conversation history
+    if ((conversationAnalysis.intent === 'pricing_inquiry' || conversationAnalysis.intent === 'talent_inquiry') && 
         !userProfile.hasContactInfo && !hasProvidedContactInConversation) {
       shouldRequestContactInfo = true;
       contactRequestReason = 'quote_request_missing_contact';
@@ -704,14 +703,6 @@ CONVERSATION ANALYSIS:
   let systemPrompt = userData && userData.user 
     ? SIMPLIFIED_AI_CONFIG.systemPrompts.withPersonalization(userData)
     : SIMPLIFIED_AI_CONFIG.systemPrompts.base;
-    
-  console.log('🔍 System Prompt Debug:', {
-    hasUserData: !!userData,
-    hasUser: !!userData?.user,
-    userName: userData?.user?.first_name,
-    systemPromptLength: systemPrompt.length,
-    usingPersonalizedPrompt: !!(userData && userData.user)
-  });
 
   // Add candidate analysis data to system prompt if available
   if (candidateAnalysis && candidateAnalysis.success) {
@@ -744,15 +735,13 @@ CRITICAL INSTRUCTIONS:
     console.log('Processing chat request...');
     console.log('Message length:', message.length);
     console.log('Conversation history length:', conversationHistory.length);
-    console.log('🔍 Final System Prompt (first 200 chars):', systemPrompt.substring(0, 200));
 
-    // Call Anthropic API (OPTIMIZED - Reduced max_tokens for faster responses)
+    // Call Anthropic API
     const anthropicResponse = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
-      max_tokens: 600, // Reduced from 1000 for faster responses
+      max_tokens: 1000,
       system: systemPrompt,
       messages: messages,
-      temperature: 0.7, // Add temperature for more focused responses
     });
 
     console.log('API response received successfully');
@@ -771,13 +760,6 @@ CRITICAL INSTRUCTIONS:
         content: item.content,
         url: item.url
       }));
-
-    console.log('✅ API /chat sending response:', {
-      contentLength: aiResponse.text.length,
-      contentPreview: aiResponse.text.substring(0, 100) + '...',
-      suggestedComponents,
-      timestamp: new Date().toISOString()
-    });
 
     const nextResponse = NextResponse.json({
       content: aiResponse.text,

@@ -27,8 +27,8 @@ model User {
   third_lead_capture  Boolean?           @default(false) @map("third_lead_capture")
   candidateViews      CandidateView[]    @relation("UserCandidateViews")
   interviewRequests   InterviewRequest[] @relation("UserInterviewRequests")
-  leadProgress        LeadProgress?      @relation("UserLeadProgress")
   pricingQuotes       PricingQuote[]     @relation("UserPricingQuotes")
+  leadProgress        LeadProgress[]     @relation("UserLeadProgress")
   enrichment          UserEnrichment?    @relation("UserEnrichmentData")
 
   @@index([company], map: "idx_users_company")
@@ -257,92 +257,88 @@ model content_views {
 }
 
 model LeadProgress {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id         String   @unique @map("user_id") @db.VarChar(255)
-  status          String   @map("status") @db.VarChar(50)
-  previous_status String?  @map("previous_status") @db.VarChar(50)
-  changed_by      String?  @map("changed_by") @db.VarChar(255)
-  change_reason   String?  @map("change_reason") @db.VarChar(500)
-  created_at      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  user            User     @relation("UserLeadProgress", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String    @unique @map("user_id") @db.VarChar(255) // Make user_id unique - one record per user
+  status          String    @map("status") @db.VarChar(50) // 'new_lead', 'stage_1', 'stage_2', 'pending', 'meeting_booked', 'signed_up', 'closed_won'
+  previous_status String?   @map("previous_status") @db.VarChar(50)
+  changed_by      String?   @map("changed_by") @db.VarChar(255) // admin user ID who made the change
+  change_reason   String?   @map("change_reason") @db.VarChar(500) // optional reason for change
+  created_at      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  user            User      @relation("UserLeadProgress", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  
   @@index([status], map: "idx_lead_progress_status")
   @@index([changed_by], map: "idx_lead_progress_changed_by")
   @@map("lead_progress")
   @@schema("public")
 }
 
-model UserEnrichment {
-  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id              String   @unique @map("user_id") @db.VarChar(255)
-  full_name            String?  @map("full_name") @db.VarChar(255)
-  job_title            String?  @map("job_title") @db.VarChar(255)
-  location             String?  @map("location") @db.VarChar(255)
-  bio                  String?  @map("bio")
-  company_name         String?  @map("company_name") @db.VarChar(255)
-  company_website      String?  @map("company_website") @db.VarChar(500)
-  company_domain       String?  @map("company_domain") @db.VarChar(255)
-  company_industry     String?  @map("company_industry") @db.VarChar(255)
-  company_size         String?  @map("company_size") @db.VarChar(100)
-  company_founded      String?  @map("company_founded") @db.VarChar(50)
-  company_description  String?  @map("company_description")
-  company_headquarters String?  @map("company_headquarters") @db.VarChar(255)
-  linkedin_url         String?  @map("linkedin_url") @db.VarChar(500)
-  twitter_url          String?  @map("twitter_url") @db.VarChar(500)
-  facebook_url         String?  @map("facebook_url") @db.VarChar(500)
-  phone_number         String?  @map("phone_number") @db.VarChar(50)
-  additional_emails    String?  @map("additional_emails")
-  search_results       String?  @map("search_results")
-  search_query         String?  @map("search_query") @db.VarChar(500)
-  enriched_by          String?  @map("enriched_by") @db.VarChar(255)
-  enrichment_source    String   @default("serper_api") @map("enrichment_source") @db.VarChar(50)
-  confidence_score     Int?     @map("confidence_score")
-  created_at           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at           DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
-  company_logo_url     String?  @map("company_logo_url") @db.VarChar(1000)
-  profile_picture_url  String?  @map("profile_picture_url") @db.VarChar(1000)
-  user                 User     @relation("UserEnrichmentData", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+model AdminUser {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  admin_id        String    @unique @map("admin_id") @db.VarChar(255)
+  first_name      String    @map("first_name") @db.VarChar(100)
+  last_name       String    @map("last_name") @db.VarChar(100)
+  email           String    @unique @db.VarChar(255)
+  role            String    @default("admin") @db.VarChar(50)
+  is_active       Boolean   @default(true) @map("is_active")
+  created_at      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at      DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  
+  @@index([admin_id], map: "idx_admin_users_admin_id")
+  @@index([email], map: "idx_admin_users_email")
+  @@index([is_active], map: "idx_admin_users_is_active")
+  @@map("admin_users")
+  @@schema("public")
+}
 
+model UserEnrichment {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id               String    @unique @map("user_id") @db.VarChar(255)
+  
+  // User Information
+  full_name             String?   @map("full_name") @db.VarChar(255)
+  job_title             String?   @map("job_title") @db.VarChar(255)
+  location              String?   @map("location") @db.VarChar(255)
+  bio                   String?   @map("bio") @db.Text
+  profile_picture_url   String?   @map("profile_picture_url") @db.VarChar(1000)
+  
+  // Company Information
+  company_name          String?   @map("company_name") @db.VarChar(255)
+  company_website       String?   @map("company_website") @db.VarChar(500)
+  company_domain        String?   @map("company_domain") @db.VarChar(255)
+  company_industry      String?   @map("company_industry") @db.VarChar(255)
+  company_size          String?   @map("company_size") @db.VarChar(100)
+  company_founded       String?   @map("company_founded") @db.VarChar(50)
+  company_description   String?   @map("company_description") @db.Text
+  company_headquarters  String?   @map("company_headquarters") @db.VarChar(255)
+  company_logo_url      String?   @map("company_logo_url") @db.VarChar(1000)
+  
+  // Social & Professional Links
+  linkedin_url          String?   @map("linkedin_url") @db.VarChar(500)
+  twitter_url           String?   @map("twitter_url") @db.VarChar(500)
+  facebook_url          String?   @map("facebook_url") @db.VarChar(500)
+  
+  // Contact Information
+  phone_number          String?   @map("phone_number") @db.VarChar(50)
+  additional_emails     String?   @map("additional_emails") @db.Text // JSON array
+  
+  // Search Results (raw data from Serper)
+  search_results        String?   @map("search_results") @db.Text // JSON
+  search_query          String?   @map("search_query") @db.VarChar(500)
+  
+  // Metadata
+  enriched_by           String?   @map("enriched_by") @db.VarChar(255) // Admin who triggered enrichment
+  enrichment_source     String    @default("serper_api") @map("enrichment_source") @db.VarChar(50)
+  confidence_score      Int?      @map("confidence_score") // 0-100
+  created_at            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at            DateTime  @default(now()) @map("updated_at") @db.Timestamptz(6)
+  
+  user                  User      @relation("UserEnrichmentData", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  
   @@index([user_id], map: "idx_user_enrichment_user_id")
   @@index([company_name], map: "idx_user_enrichment_company")
   @@index([enriched_by], map: "idx_user_enrichment_enriched_by")
   @@map("user_enrichment")
-  @@schema("public")
-}
-
-model Conversation {
-  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id           String           @map("user_id") @db.VarChar(255)
-  conversation_type ConversationType @default(Anonymous) @map("conversation_type")
-  title             String?          @db.VarChar(255)
-  context_data      Json?            @map("context_data")
-  created_at        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at        DateTime         @default(now()) @map("updated_at") @db.Timestamptz(6)
-  migrated_at       DateTime?        @map("migrated_at") @db.Timestamptz(6)
-  messages          Message[]
-
-  @@index([user_id], map: "idx_conversations_user_id")
-  @@index([conversation_type], map: "idx_conversations_type")
-  @@index([created_at], map: "idx_conversations_created_at")
-  @@index([migrated_at], map: "idx_conversations_migrated_at")
-  @@map("conversations")
-  @@schema("public")
-}
-
-model Message {
-  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  conversation_id  String       @map("conversation_id") @db.Uuid
-  user_id          String       @map("user_id") @db.VarChar(255)
-  role             MessageRole  @default(User)
-  content          String
-  context_snapshot Json?        @map("context_snapshot")
-  created_at       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
-  conversation     Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([conversation_id], map: "idx_messages_conversation_id")
-  @@index([user_id], map: "idx_messages_user_id")
-  @@index([created_at], map: "idx_messages_created_at")
-  @@map("messages")
   @@schema("public")
 }
 
@@ -352,21 +348,5 @@ enum UserType {
   Admin
 
   @@map("user_type_enum")
-  @@schema("public")
-}
-
-enum ConversationType {
-  Anonymous
-  Authenticated
-
-  @@map("conversation_type_enum")
-  @@schema("public")
-}
-
-enum MessageRole {
-  User
-  Assistant
-
-  @@map("message_role_enum")
   @@schema("public")
 }
