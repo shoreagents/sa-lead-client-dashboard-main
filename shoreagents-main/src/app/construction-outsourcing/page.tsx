@@ -1,477 +1,704 @@
 "use client";
 
-import { 
-  Star,
-  Building2,
-  Users,
-  TrendingUp,
-  ArrowRight,
-  FileText,
-  Phone,
-  Calculator,
-  CheckCircle2,
-  ClipboardList,
-  Wrench,
-  Square
-} from "lucide-react";
 import { SideNav } from "@/components/layout/SideNav";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  CheckCircle2,
+  XCircle,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
+  AlertCircle,
+  ArrowRight,
+  Building2
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ConstructionOutsourcingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-lime-50 to-ocean-50">
+    <div className="min-h-screen bg-gray-50">
       <SideNav />
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Container */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          {/* Two Column Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            
-            {/* Left Column - Main Content */}
-            <div className="space-y-6 lg:space-y-8">
-              {/* Title */}
-              <div className="space-y-4">
-                <h1 className="text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight">
-                  <span className="text-gray-900">Gallery Group Success:</span>
-                  <br />
-                  <span className="text-energy-600">Multi-Year Construction</span>
-                  <br />
-                  <span className="text-energy-600">Outsourcing Partnership</span>
-                </h1>
-              </div>
-
-              {/* Description */}
-              <p className="text-base lg:text-lg text-gray-700 leading-relaxed max-w-2xl">
-                So basically, Iain Neilson from Gallery Group says we're "head and shoulders above the rest." 
-                The thing is, construction outsourcing works when you understand both sides of the equation.
-              </p>
-
-              {/* Call to Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button className="btn-hover-effect bg-gradient-to-r from-lime-500 to-lime-600 text-white px-6 py-3 rounded-lg font-semibold text-base shadow-lg flex items-center justify-center group">
-                  Get Construction Quote 
-                  <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </button>
-                
-                <button className="btn-hover-effect bg-white border-2 border-gray-200 text-gray-800 px-6 py-3 rounded-lg font-semibold text-base hover:border-lime-300 hover:bg-lime-50 transition-all">
-                  Gallery Group Case Study
-                </button>
-              </div>
-            </div>
-
-            {/* Right Column - Case Study Card */}
-            <div className="relative">
-              <div className="bg-white rounded-2xl shadow-xl p-6 lg:p-8 border border-gray-100">
-                {/* Card Header */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-8 h-8 bg-energy-100 rounded-full flex items-center justify-center">
-                    <Star className="w-5 h-5 text-energy-600" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">
-                    Gallery Group Construction Partnership
-                  </h3>
-                </div>
-
-                {/* Card Content */}
-                <div className="space-y-4 mb-6">
-                  <p className="text-gray-700 leading-relaxed">
-                    Iain Neilson from Gallery Group has been working with us for multiple years. His exact words: "head and shoulders above the rest."
-                  </p>
-                  <p className="text-gray-700 leading-relaxed">
-                    However, I found that construction outsourcing requires a unique approach. It's not just about finding cheap labor - it's about guided expertise.
-                  </p>
-                  <p className="text-gray-700 leading-relaxed">
-                    The thing is, Filipino teams have incredible technical skills, but they need proper guidance on local building codes, standards, and client expectations.
-                  </p>
-                </div>
-
-                {/* Quote Box */}
-                <div className="bg-energy-50 border-l-4 border-energy-500 p-4 rounded-r-lg mb-6">
-                  <p className="text-energy-900 font-medium italic">
-                    "Shore Agents are head and shoulders above the rest"
-                  </p>
-                  <p className="text-energy-600 font-semibold mt-2">
-                    - Iain Neilson, Gallery Group Construction
-                  </p>
-                </div>
-
-                {/* Key Benefits Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {/* Multi-Year Metric */}
-                  <div className="bg-lime-50 rounded-lg p-4 text-center">
-                    <div className="w-8 h-8 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Building2 className="w-5 h-5 text-lime-600" />
-                    </div>
-                    <div className="text-xl font-bold text-gray-900">Multi-Year</div>
-                    <div className="text-sm text-gray-600">Partnership Duration</div>
-                  </div>
-
-                  {/* Specialized Teams Metric */}
-                  <div className="bg-ocean-50 rounded-lg p-4 text-center">
-                    <div className="w-8 h-8 bg-ocean-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Users className="w-5 h-5 text-ocean-600" />
-                    </div>
-                    <div className="text-xl font-bold text-gray-900">Specialized</div>
-                    <div className="text-sm text-gray-600">Construction Teams</div>
-                  </div>
-
-                  {/* Proven Results Metric */}
-                  <div className="bg-energy-50 rounded-lg p-4 text-center">
-                    <div className="w-8 h-8 bg-energy-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <TrendingUp className="w-5 h-5 text-energy-600" />
-                    </div>
-                    <div className="text-xl font-bold text-gray-900">Proven</div>
-                    <div className="text-sm text-gray-600">Results & Authority</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Construction Tasks Section */}
-      <section className="py-16 lg:py-24 bg-white">
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
-          <div className="text-center mb-12 lg:mb-16">
-            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
-              Construction Tasks Perfect for Outsourcing
-            </h2>
-            <p className="text-lg lg:text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-              From our multi-year partnership with Gallery Group, these are the construction tasks where Filipino teams excel with proper guidance and systems.
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For $2M+ Construction Companies
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Construction Outsourcing:<br />
+              <span className="text-lime-600">The Admin Trap Killing Your Profit Margins</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              You're probably spending 20-30 hours weekly on paperwork instead of managing projects or winning bids. 
+              That's <strong>$40,000-75,000 annually in lost opportunity cost</strong>.
             </p>
-          </div>
-
-          {/* Tasks Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            
-            {/* Card 1: Architectural Design Support */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-energy-100 rounded-full flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-energy-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Architectural Design Support</h3>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-energy-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">CAD drafting and 3D modeling</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-energy-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Technical drawing preparation</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-energy-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Design revision and documentation</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Card 2: Project Coordination */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center">
-                  <Users className="w-6 h-6 text-ocean-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Project Coordination</h3>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-ocean-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Subcontractor scheduling and tracking</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-ocean-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Progress reporting and documentation</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-ocean-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Timeline management and updates</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Card 3: Cost Estimation & Takeoffs */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center">
-                  <Calculator className="w-6 h-6 text-lime-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Cost Estimation & Takeoffs</h3>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Quantity takeoffs from plans</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Material cost calculations</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Bid preparation and comparison</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Card 4: Permit & Documentation */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-energy-100 rounded-full flex items-center justify-center">
-                  <ClipboardList className="w-6 h-6 text-energy-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Permit & Documentation</h3>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-energy-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Permit application preparation</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-energy-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Compliance documentation tracking</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-energy-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Regulatory submission management</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Card 5: Vendor & Supplier Coordination */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center">
-                  <Phone className="w-6 h-6 text-ocean-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Vendor & Supplier Coordination</h3>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-ocean-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Supplier sourcing and verification</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-ocean-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Purchase order processing</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-ocean-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Delivery scheduling and tracking</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Card 6: Quality Control Support */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center">
-                  <Wrench className="w-6 h-6 text-lime-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Quality Control Support</h3>
-              </div>
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Inspection checklist management</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Quality documentation and photos</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">Defect tracking and resolution</span>
-                </li>
-              </ul>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                Gallery Group Case Study
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Success Stories Section */}
-      <section className="py-16 lg:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
-          <div className="text-center mb-12 lg:mb-16">
-            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
-              Construction Outsourcing Success Stories
-            </h2>
-            <p className="text-lg lg:text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-              Real results from construction companies who've built successful outsourcing partnerships and transformed their operations.
-            </p>
-          </div>
-
-          {/* Gallery Group Success Story Card */}
-          <div className="bg-gradient-to-br from-energy-50 to-energy-100 rounded-xl shadow-lg p-6 lg:p-8 border border-energy-200 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Star className="w-6 h-6 text-energy-600" />
-              <h3 className="text-2xl font-bold text-gray-900">Gallery Group Construction</h3>
-            </div>
-            <div className="text-energy-600 font-semibold mb-4">Multi-Year Partnership Success</div>
-            <p className="text-gray-700 mb-6 leading-relaxed">
-              Our multi-year partnership with Gallery Group demonstrates the power of combining Filipino technical expertise with local construction knowledge. Iain Neilson's team has consistently delivered exceptional results through systematic outsourcing.
-            </p>
-            
-            {/* Quote Box */}
-            <div className="bg-energy-100 border-l-4 border-energy-500 p-4 rounded-r-lg mb-6">
-              <p className="text-energy-900 font-medium italic">
-                "Shore Agents are head and shoulders above the rest. The level of technical skill and attention to detail from their teams consistently exceeds our expectations."
-              </p>
-            </div>
-
-            {/* Key Attributes Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-energy-200 rounded-lg p-3 text-center">
-                <div className="text-lg font-bold text-energy-600">Multi-Year</div>
-                <div className="text-sm text-gray-600">Partnership</div>
-              </div>
-              <div className="bg-energy-200 rounded-lg p-3 text-center">
-                <div className="text-lg font-bold text-energy-600">Premium</div>
-                <div className="text-sm text-gray-600">Quality</div>
-              </div>
-              <div className="bg-energy-200 rounded-lg p-3 text-center">
-                <div className="text-lg font-bold text-energy-600">Technical</div>
-                <div className="text-sm text-gray-600">Excellence</div>
-              </div>
-              <div className="bg-energy-200 rounded-lg p-3 text-center">
-                <div className="text-lg font-bold text-energy-600">Trusted</div>
-                <div className="text-sm text-gray-600">Authority</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Additional Success Stories Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            
-            {/* Card 1: Construction Project Management */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Construction Project Management</h3>
-              <div className="text-ocean-600 font-semibold mb-2">Architectural Design Support</div>
-              <div className="text-right mb-4">
-                <div className="text-3xl font-bold text-ocean-600">50%</div>
-                <div className="text-sm text-gray-600">Time Savings</div>
-              </div>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Reduced architectural design turnaround times by implementing systematic CAD drafting and 3D modeling processes with dedicated Filipino teams.
-              </p>
-              <div className="text-sm text-gray-600">
-                <strong>Key Services:</strong> CAD drafting, 3D modeling, technical documentation
-              </div>
-            </div>
-
-            {/* Card 2: Commercial Building Contractor */}
-            <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Commercial Building Contractor</h3>
-              <div className="text-lime-600 font-semibold mb-2">Cost Estimation Excellence</div>
-              <div className="text-right mb-4">
-                <div className="text-3xl font-bold text-lime-600">30%</div>
-                <div className="text-sm text-gray-600">Cost Reduction</div>
-              </div>
-              <p className="text-gray-700 mb-4 leading-relaxed">
-                Achieved significant cost savings in estimation processes while improving accuracy through systematic quantity takeoffs and bid preparation.
-              </p>
-              <div className="text-sm text-gray-600">
-                <strong>Key Services:</strong> Quantity takeoffs, cost estimation, bid preparation
-              </div>
-            </div>
-          </div>
-
-          {/* Call to Action */}
-          <div className="text-center mt-12">
-            <a href="/case-studies" className="inline-flex items-center text-energy-600 hover:text-energy-700 font-semibold text-lg group">
-              Read the Complete Gallery Group Case Study 
-              <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Construction Outsourcing Actually Works Section */}
-      <section className="py-16 lg:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Section Header */}
-          <div className="text-center mb-12 lg:mb-16">
-            <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
-              Why Construction Outsourcing Actually Works
-            </h2>
-            <p className="text-lg lg:text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-              It's pretty cool how Filipino technical expertise combined with proper guidance creates results that are "head and shoulders above the rest."
-            </p>
-          </div>
-
-          {/* Three Feature Blocks */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-            
-            {/* Block 1: Technical Excellence */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-500 rounded-lg flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <Users className="w-8 h-8 text-white" strokeWidth={3} fill="currentColor" />
-              </div>
-              <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">
-                Technical Excellence
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Filipino engineers and architects bring world-class technical skills with attention to detail that exceeds local alternatives.
-              </p>
-            </div>
-
-            {/* Block 2: Cost Efficiency */}
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-6 shadow-lg" style={{backgroundColor: '#3B82F6'}}>
-                <Square className="w-8 h-8 text-white" strokeWidth={3} fill="currentColor" />
-              </div>
-              <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">
-                Cost Efficiency
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                Save 60-70% on technical staff costs while getting specialized construction expertise and dedicated project focus.
-              </p>
-            </div>
-
-            {/* Block 3: Guided Partnership */}
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-6 shadow-lg" style={{backgroundColor: '#F97316'}}>
-                <Building2 className="w-8 h-8 text-white" strokeWidth={3} fill="currentColor" />
-              </div>
-              <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4">
-                Guided Partnership
-              </h3>
-              <p className="text-gray-700 leading-relaxed">
-                The magic happens with proper guidance. Local knowledge combined with Filipino technical skills creates exceptional results.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-16 lg:py-24 bg-gradient-to-br from-lime-50 to-ocean-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl xl:text-5xl font-bold text-gray-900 mb-4">
-            Ready to Build Your Construction Outsourcing Partnership?
-          </h2>
-          <p className="text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Join Iain Neilson and other successful construction professionals who've discovered the power of strategic outsourcing.
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Intro */}
+        <div className="mb-16">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            RFI tracking. Submittal logs. Invoice processing. Project documentation. If your time is worth $100-150/hour 
+            but you're doing $15/hour admin work, that's $40,000-75,000 annually in lost opportunity cost.
           </p>
           
-          {/* Call to Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="btn-hover-effect bg-gradient-to-r from-lime-500 to-lime-600 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg flex items-center justify-center group hover:shadow-xl transition-all">
-              Get Your Construction Quote 
-              <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </button>
-            
-            <button className="btn-hover-effect bg-white text-gray-800 px-8 py-4 rounded-lg font-semibold text-lg border-2 border-gray-200 hover:border-lime-300 hover:bg-lime-50 transition-all shadow-lg">
-              Gallery Group Case Study
-            </button>
-          </div>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            I've been placing offshore construction staff for 15 years across the USA, Australia, and New Zealand. 
+            Some construction companies save $70,000+ annually per offshore hire with perfect quality. Others waste 
+            $40,000 in nine months because they delegated wrong tasks or weren't ready.
+          </p>
+          
+          <Card className="bg-amber-50 border-l-4 border-amber-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>This guide is for:</strong> Construction companies doing $2M+ annual revenue, running 15-20+ active 
+                projects simultaneously, and already using project management software. If you're tracking jobs in notebooks, 
+                bookmark this for later.
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </section>
+
+        <Separator className="my-12" />
+
+        {/* When You're NOT Ready Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When You're NOT Ready to Outsource</h2>
+              <p className="text-lg text-gray-600">Most construction companies shouldn't be outsourcing yet</p>
+            </div>
+          </div>
+          
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            If you're running $1M revenue with 8-10 projects yearly, the math doesn't work.
+          </p>
+
+          {/* Reality at $1M Card */}
+          <Card className="border-red-200 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Your Reality at $1M Revenue:</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>Gross margin: ~$200,000</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>First-year outsourcing costs: $41,400</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>That's <strong>21% of your margin consumed</strong></span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>You only have 15 hours/week of delegatable work</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>You're paying for 40 hours/week capacity</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-900 font-bold">
+                  <span className="text-red-600 mt-1">•</span>
+                  <span>Result: You're losing money</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* When NOT to Outsource Checklist */}
+          <Card className="border-gray-300 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">When NOT to Outsource:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  "Annual revenue under $2M",
+                  "Fewer than 15 active projects simultaneously",
+                  "No documented processes or SOPs",
+                  "Using spreadsheets instead of construction PM software",
+                  "Can't dedicate 5-10 hours weekly to VA management",
+                  "Haven't identified 25+ hours weekly of delegatable work",
+                  "Thinking outsourcing will \"fix\" disorganization"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-blue-50 border-l-4 border-blue-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                <strong>Better alternatives under $2M:</strong> Part-time local admin ($25K/year), project-based freelancers, 
+                automation software ($5K/year vs $41K for VA), or wait until you're bigger.
+              </p>
+              <p className="text-gray-800 leading-relaxed">
+                The construction companies succeeding? They're doing <strong>$3M-15M annually</strong>, running 20-50+ projects, using Procore 
+                or Buildertrend, and have documented systems BEFORE they hire.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 90-Day Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 90-Day Reality: You'll Get Slower First</h2>
+              <p className="text-lg text-gray-600">Every provider promises "immediate productivity." That's rubbish.</p>
+            </div>
+          </div>
+
+          {/* Timeline Cards */}
+          <div className="space-y-4">
+            {/* Days 1-30 */}
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-red-600 text-white">Days 1-30</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Productivity DROP</h3>
+                    <p className="text-gray-700 leading-relaxed mb-3">
+                      Your productivity decreases 20-30%. You're creating training materials, holding daily check-ins, fixing mistakes. 
+                      Work that took 3 hours now takes 5.
+                    </p>
+                    <p className="text-red-700 font-semibold">⚠️ Temptation to quit is highest. 40% quit here.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Days 30-60 */}
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-amber-600 text-white">Days 30-60</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Frustration Zone</h3>
+                    <p className="text-gray-700 leading-relaxed mb-3">
+                      Quality varies wildly. Still spending 5-10 hours weekly managing. Break-even point—not losing time, not gaining. 
+                      Cash flowing out, zero ROI yet.
+                    </p>
+                    <p className="text-amber-700 font-semibold">⚠️ Another 30% quit here.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Days 60-90 */}
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-blue-600 text-white">Days 60-90</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Turning Point</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      VA becoming independent. They've learned YOUR systems, terminology, standards. Quality improving. 
+                      Small positive ROI starting (5-8 hours saved weekly).
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Months 4-6 */}
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-green-600 text-white">Months 4-6</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Payoff Begins</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      VA handling 15-20 hours weekly independently. You've reclaimed 10-15 productive hours. Management down to 2-3 
+                      hours weekly. <strong>Real ROI visible: 3-5x return.</strong>
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Month 6+ */}
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-lime-600 text-white">Month 6+</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Scaling Phase</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      VA mastered core tasks. You can delegate complex work—actual project coordination, quality reviews. 
+                      Effective hourly cost drops from $29 (month 1) to $16 (month 12+).
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Success Story Callout */}
+          <Card className="border-lime-300 bg-gradient-to-br from-lime-50 to-green-50 mt-8">
+            <CardContent className="p-8">
+              <div className="flex items-start gap-4">
+                <div className="bg-lime-600 rounded-full p-3">
+                  <CheckCircle2 className="w-8 h-8 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-xl font-bold text-gray-900 mb-3">Gallery Group Success Story</h4>
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    Gallery Group (Queensland construction company) hired two offshore architectural specialists and pushed 
+                    through the tough 90 days. Years later: both earned 5/5 performance reviews, <strong>$73,000 annual 
+                    savings per specialist</strong>.
+                  </p>
+                  <p className="text-gray-800 font-semibold italic">
+                    "We can rely on this specialist for any task—the quality and dedication are outstanding."
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Tasks That Will Bankrupt You Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 7 Tasks That Will Bankrupt You If Outsourced</h2>
+              <p className="text-lg text-gray-600">Never delegate these construction-critical activities</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-red-900 mb-6">Never Outsource:</h3>
+              <div className="space-y-6">
+                {[
+                  {
+                    title: "Client Relationship Management",
+                    description: "In-person meetings, trust-building, complaint handling. Personal connection = repeat business worth millions."
+                  },
+                  {
+                    title: "Quality Control & Inspections",
+                    description: "Physical walkthroughs, punch lists, safety checks. Photos don't reveal what on-site presence does. You're personally liable."
+                  },
+                  {
+                    title: "Real-Time Problem-Solving",
+                    description: "Design conflicts during framing, structural issues, code questions. 12-hour delays cost $3,000+ in crew labor plus schedule cascade."
+                  },
+                  {
+                    title: "Crew & Sub Management",
+                    description: "Daily assignments, conflicts, on-site coordination. You can't manage trades from 8,000 miles away."
+                  },
+                  {
+                    title: "High-Stakes Negotiations",
+                    description: "Change order pricing, delay explanations, budget overruns. One bad conversation costs entire client relationships."
+                  },
+                  {
+                    title: "Strategic Business Decisions",
+                    description: "Which bids to pursue, equipment purchases, expansion plans. Your money, your risk, your license."
+                  },
+                  {
+                    title: "Legal & Compliance",
+                    description: "Permits (require your signature), insurance, licensing, OSHA compliance. Personal legal liability you can't delegate."
+                  }
+                ].map((task, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-1">{task.title}</h4>
+                      <p className="text-gray-700 leading-relaxed">{task.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Cautionary Tale */}
+          <Card className="bg-gray-100 border-l-4 border-gray-600">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-2">⚠️ Cautionary Tale:</p>
+              <p className="text-gray-700 leading-relaxed">
+                A Chicago contractor tried outsourcing permit applications. Forms filled incorrectly, permit rejected three times, 
+                six-week delay. Client sued. <strong>Total cost: $85,000 settlement plus $15,000 legal fees.</strong> All to 
+                save $600 in admin time.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What Actually Works Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Actually Works Offshore</h2>
+              <p className="text-lg text-gray-600">These tasks thrive with Filipino construction specialists</p>
+            </div>
+          </div>
+
+          {/* Perfect for Outsourcing */}
+          <Card className="border-green-300 bg-green-50 mb-8">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-green-900 mb-6">Perfect for Outsourcing:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    title: "CAD Drafting & BIM",
+                    items: ["2D AutoCAD, 3D Revit, shop drawings", "Philippines: $8-15/hour vs USA $25-45/hour", "Natural daytime collaboration for AUS/NZ"]
+                  },
+                  {
+                    title: "Quantity Takeoffs",
+                    items: ["Material takeoffs, lumber lists", "Concrete calculations", "They measure, you price"]
+                  },
+                  {
+                    title: "Project Documentation",
+                    items: ["Daily logs, RFI tracking", "Submittal logs, photo organization", "Perfect admin work"]
+                  },
+                  {
+                    title: "Bookkeeping",
+                    items: ["Invoice processing, QuickBooks", "Progress billing, retention tracking", "70% cost savings"]
+                  },
+                  {
+                    title: "Procurement Research",
+                    items: ["Vendor comparisons, price checking", "They research, you decide", "Based on your relationships"]
+                  },
+                  {
+                    title: "Marketing",
+                    items: ["Social media, website updates", "Project portfolio creation", "Video editing"]
+                  }
+                ].map((category, index) => (
+                  <Card key={index} className="bg-white border-green-200">
+                    <CardContent className="p-5">
+                      <div className="flex items-start gap-3 mb-3">
+                        <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                        <h4 className="text-lg font-bold text-gray-900">{category.title}</h4>
+                      </div>
+                      <ul className="space-y-2 ml-9">
+                        {category.items.map((item, i) => (
+                          <li key={i} className="text-gray-700 text-sm">{item}</li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Proceed with Caution */}
+          <Card className="border-amber-300 bg-amber-50">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-amber-900 mb-6">Proceed with Caution:</h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Estimating",
+                    description: "They can do takeoffs and material research. YOU do final pricing based on YOUR costs, crew capabilities, and project risks."
+                  },
+                  {
+                    title: "Client Communication",
+                    description: "VA drafts, you review and send. Never let unreviewed messages go to high-value clients."
+                  },
+                  {
+                    title: "Subcontractor Coordination",
+                    description: "VA handles scheduling logistics. You handle relationships, conflicts, payment timing."
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* True Costs Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">True Costs: What Nobody Tells You</h2>
+              <p className="text-lg text-gray-600">The real numbers behind "cheap offshore labor"</p>
+            </div>
+          </div>
+
+          {/* Cost Breakdown */}
+          <Card className="border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                {/* Advertised vs Actual */}
+                <div>
+                  <Card className="border-gray-300 bg-white mb-4">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-gray-600 mb-2">Advertised:</p>
+                      <p className="text-5xl font-bold text-gray-900">$12<span className="text-xl text-gray-600">/hour</span></p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-blue-400 bg-white">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-gray-600 mb-2">Actual Year One:</p>
+                      <p className="text-5xl font-bold text-blue-600">$23-25<span className="text-xl text-gray-600">/hour</span></p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Breakdown */}
+                <Card className="bg-white border-blue-300">
+                  <CardContent className="p-6">
+                    <h4 className="font-bold text-gray-900 mb-4">Year One Cost Breakdown:</h4>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">VA salary:</span>
+                        <span className="font-semibold">$21,600</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Software stack:</span>
+                        <span className="font-semibold">$7,800-10,800</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Your training time:</span>
+                        <span className="font-semibold">$4,000</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Management (2hrs/wk):</span>
+                        <span className="font-semibold">$10,400</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Mistakes/rework:</span>
+                        <span className="font-semibold">~$3,000</span>
+                      </div>
+                      <Separator className="my-3" />
+                      <div className="flex justify-between pt-2">
+                        <span className="font-bold text-gray-900">Total Year One:</span>
+                        <span className="font-bold text-blue-600">$47,800-50,800</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <p className="text-sm text-gray-700 text-center italic">
+                Year Two drops to $29,700 as training completes. Software stack alone: $650-900/month most contractors forget to budget.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Real Savings Examples */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <TrendingUp className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Real Savings Examples</h2>
+              <p className="text-lg text-gray-600">Actual numbers from USA and Australian contractors</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* USA Example */}
+            <Card className="border-green-300 bg-gradient-to-br from-green-50 to-green-100">
+              <CardContent className="p-6">
+                <Badge className="bg-green-600 text-white mb-4">USA Commercial Contractor</Badge>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Local admin:</span>
+                    <span className="font-semibold text-gray-900">$71,200/year</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Philippines Year 1:</span>
+                    <span className="font-semibold text-gray-900">$41,400</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="font-bold text-gray-900">Year 1 Savings:</span>
+                    <span className="font-bold text-green-600 text-xl">$29,800 (42%)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-gray-900">Year 2+ Savings:</span>
+                    <span className="font-bold text-green-700 text-xl">$41,500 (58%)</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Australian Example */}
+            <Card className="border-lime-300 bg-gradient-to-br from-lime-50 to-lime-100">
+              <CardContent className="p-6">
+                <Badge className="bg-lime-600 text-white mb-4">Australian Queensland Tradie</Badge>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Local specialist:</span>
+                    <span className="font-semibold text-gray-900">AUD $99,000</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-700">Philippines specialist:</span>
+                    <span className="font-semibold text-gray-900">AUD $22,000</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="font-bold text-gray-900">Annual Savings:</span>
+                    <span className="font-bold text-lime-600 text-xl">AUD $77,000 (77%)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-gray-900">5-Year Savings:</span>
+                    <span className="font-bold text-lime-700 text-xl">$385,000</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Gallery Group Callout */}
+          <Card className="border-lime-300 bg-gradient-to-r from-lime-100 to-green-100 mt-8">
+            <CardContent className="p-8 text-center">
+              <p className="text-gray-800 text-lg leading-relaxed">
+                <strong>This is Gallery Group's reality.</strong> As they described it: helped them "survive tough times, now 
+                thrive with their low cost, highly talented offshore team."
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Are You Ready Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Are You Ready?</h2>
+          
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            Most reading this aren't. Come back when you hit $2M+ revenue, documented processes, 20+ active projects.
+          </p>
+
+          <Card className="border-lime-300 bg-gradient-to-br from-lime-50 to-green-50 mb-8">
+            <CardContent className="p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">If you ARE ready:</h3>
+              <div className="space-y-4">
+                {[
+                  "Document top 10 recurring tasks",
+                  "Calculate your hourly value",
+                  "Commit 5-10 hours weekly (first 90 days)",
+                  "Budget $40,000-60,000 (Year 1)",
+                  "Accept 90-day timeline"
+                ].map((step, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-lime-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <span className="text-gray-800 text-lg pt-0.5">{step}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900 text-white">
+            <CardContent className="p-8">
+              <p className="text-lg leading-relaxed mb-6">
+                At ShoreAgents, construction VA pricing is <strong className="text-lime-400">$1,200-2,500/month full-time</strong> (all-inclusive: 
+                salary, benefits, management, infrastructure, backup, replacements).
+              </p>
+              <p className="text-gray-300 leading-relaxed">
+                We work with USA construction companies doing $2M-50M annually and Australian/NZ tradies drowning in admin. 
+                We're not the cheapest (Upwork is cheaper). We're not the biggest (MyOutDesk is bigger). But we'll tell you 
+                NOT to hire if you're not ready.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Final CTA */}
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready for an Honest Assessment?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Schedule a consultation. We'll tell you if you're ready or what to fix first—not a sales pitch.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                Gallery Group Case Study
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            Construction outsourcing works brilliantly when done by properly-sized companies, at the right stage, 
+            with realistic expectations. Don't waste $40,000 rushing in unprepared.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
