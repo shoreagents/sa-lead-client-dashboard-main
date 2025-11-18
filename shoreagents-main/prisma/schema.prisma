@@ -25,16 +25,12 @@ model User {
   first_lead_capture  Boolean?           @default(false) @map("first_lead_capture")
   second_lead_capture Boolean?           @default(false) @map("second_lead_capture")
   third_lead_capture  Boolean?           @default(false) @map("third_lead_capture")
-  video_call_link     String?            @map("video_call_link") @db.VarChar(500)
-  video_call_meeting_id String?          @map("video_call_meeting_id") @db.VarChar(255)
-  video_call_created_at DateTime?        @map("video_call_created_at") @db.Timestamptz(6)
-  video_call_invite_sent_at DateTime?    @map("video_call_invite_sent_at") @db.Timestamptz(6)
+  desired_team_size   Int?
   candidateViews      CandidateView[]    @relation("UserCandidateViews")
   interviewRequests   InterviewRequest[] @relation("UserInterviewRequests")
   leadProgress        LeadProgress?      @relation("UserLeadProgress")
   pricingQuotes       PricingQuote[]     @relation("UserPricingQuotes")
   enrichment          UserEnrichment?    @relation("UserEnrichmentData")
-  notifications       Notification[]     @relation("UserNotifications")
 
   @@index([company], map: "idx_users_company")
   @@index([country], map: "idx_users_country")
@@ -44,6 +40,7 @@ model User {
   @@index([second_lead_capture], map: "idx_users_second_lead_capture")
   @@index([third_lead_capture], map: "idx_users_third_lead_capture")
   @@index([user_id], map: "idx_users_user_id")
+  @@index([desired_team_size], map: "idx_users_desired_team_size")
   @@map("users")
   @@schema("public")
 }
@@ -269,6 +266,7 @@ model LeadProgress {
   changed_by      String?  @map("changed_by") @db.VarChar(255)
   change_reason   String?  @map("change_reason") @db.VarChar(500)
   created_at      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  notes           String?
   user            User     @relation("UserLeadProgress", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([status], map: "idx_lead_progress_status")
@@ -373,76 +371,5 @@ enum MessageRole {
   Assistant
 
   @@map("message_role_enum")
-  @@schema("public")
-}
-
-model Notification {
-  id                    String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title                 String                  @db.VarChar(255)
-  message               String                  @db.Text
-  type                  NotificationType         @default(info) @map("type")
-  read                  Boolean                  @default(false)
-  target_type           NotificationTargetType   @default(admin) @map("target_type")
-  target_user_id        String?                  @map("target_user_id") @db.VarChar(255)
-  link                  String?                  @db.VarChar(500)
-  metadata              Json?
-  send_email            Boolean                  @default(false) @map("send_email")
-  recipient_email       String?                  @map("recipient_email") @db.VarChar(255)
-  email_sent            Boolean                  @default(false) @map("email_sent")
-  email_sent_at         DateTime?                @map("email_sent_at") @db.Timestamptz(6)
-  email_delivery_status EmailDeliveryStatus?     @map("email_delivery_status")
-  email_provider_id     String?                  @map("email_provider_id") @db.VarChar(255)
-  email_error           String?                  @map("email_error") @db.Text
-  email_subject         String?                  @map("email_subject") @db.VarChar(255)
-  email_template        String?                  @map("email_template") @db.VarChar(100)
-  created_at            DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at            DateTime                 @default(now()) @map("updated_at") @db.Timestamptz(6)
-  read_at               DateTime?                @map("read_at") @db.Timestamptz(6)
-  deleted_at            DateTime?                @map("deleted_at") @db.Timestamptz(6)
-  user                  User?                    @relation("UserNotifications", fields: [target_user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([target_type, target_user_id, read], map: "idx_notifications_target_read")
-  @@index([target_type, target_user_id, created_at], map: "idx_notifications_target_created")
-  @@index([target_user_id], map: "idx_notifications_target_user_id")
-  @@index([read], map: "idx_notifications_read")
-  @@index([type], map: "idx_notifications_type")
-  @@index([created_at], map: "idx_notifications_created_at")
-  @@index([deleted_at], map: "idx_notifications_deleted_at")
-  @@index([email_sent], map: "idx_notifications_email_sent")
-  @@index([email_delivery_status], map: "idx_notifications_email_delivery_status")
-  @@index([recipient_email], map: "idx_notifications_recipient_email")
-  @@map("notifications")
-  @@schema("public")
-}
-
-enum NotificationType {
-  info
-  success
-  warning
-  error
-
-  @@map("notification_type_enum")
-  @@schema("public")
-}
-
-enum NotificationTargetType {
-  admin
-  user
-  broadcast
-
-  @@map("notification_target_type_enum")
-  @@schema("public")
-}
-
-enum EmailDeliveryStatus {
-  pending
-  sent
-  delivered
-  failed
-  bounced
-  opened
-  clicked
-
-  @@map("email_delivery_status_enum")
   @@schema("public")
 }
