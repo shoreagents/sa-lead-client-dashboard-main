@@ -52,15 +52,54 @@ const currencies: Currency[] = [
 ]
 
 export function CurrencyProvider({ children }: { children: ReactNode }) {
+  // Initialize from localStorage if available
+  const getInitialCurrency = (): Currency => {
+    if (typeof window === 'undefined') return currencies[0]; // Default for SSR
+    
+    const savedCurrencyCode = localStorage.getItem('shoreagents_selected_currency');
+    if (savedCurrencyCode) {
+      const savedCurrency = currencies.find(c => c.code === savedCurrencyCode);
+      if (savedCurrency) {
+        console.log('💾 Loaded saved currency from localStorage:', savedCurrencyCode);
+        return savedCurrency;
+      }
+    }
+    return currencies[0];
+  };
+
+  const getInitialUserSelectedFlag = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('shoreagents_user_selected_currency');
+    return saved === 'true';
+  };
+
   const [currenciesState, setCurrenciesState] = useState<Currency[]>(currencies)
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>(currencies[0])
+  const [selectedCurrency, setSelectedCurrencyState] = useState<Currency>(getInitialCurrency)
   const [isLoadingRates, setIsLoadingRates] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<string | null>(null)
   const [, setExchangeRates] = useState<Record<string, number>>({})
   const [userLocation, setUserLocation] = useState<LocationData | null>(null)
   const [isDetectingLocation, setIsDetectingLocation] = useState(false)
   const [isAutoDetected, setIsAutoDetected] = useState(false)
-  const [hasUserSelectedCurrency, setHasUserSelectedCurrency] = useState(false)
+  const [hasUserSelectedCurrency, setHasUserSelectedCurrencyState] = useState(getInitialUserSelectedFlag)
+  
+  // Wrapper to save to localStorage when currency is set
+  const setSelectedCurrency = useCallback((currency: Currency) => {
+    setSelectedCurrencyState(currency);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('shoreagents_selected_currency', currency.code);
+      console.log('💾 Saved currency to localStorage:', currency.code);
+    }
+  }, []);
+
+  // Wrapper to save user selection flag to localStorage
+  const setHasUserSelectedCurrency = useCallback((selected: boolean) => {
+    setHasUserSelectedCurrencyState(selected);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('shoreagents_user_selected_currency', selected.toString());
+      console.log('💾 Saved user selection flag to localStorage:', selected);
+    }
+  }, []);
   
   // Use ref to track current selected currency without causing re-renders
   const selectedCurrencyRef = useRef(selectedCurrency)
@@ -109,10 +148,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         // Update the currencies state
         setCurrenciesState(updatedCurrencies)
         
-        // Update selected currency with new rate
+        // Update selected currency with new rate (without triggering localStorage save)
         const currentSelected = updatedCurrencies.find(c => c.code === selectedCurrencyRef.current.code)
         if (currentSelected) {
-          setSelectedCurrency(currentSelected)
+          setSelectedCurrencyState(currentSelected) // Use state setter directly to avoid re-saving to localStorage
           // Clear price cache when exchange rates are updated
           clearPriceCache()
         }
@@ -139,10 +178,10 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         
         setCurrenciesState(fallbackCurrencies)
         
-        // Update selected currency with fallback rate
+        // Update selected currency with fallback rate (without triggering localStorage save)
         const currentSelected = fallbackCurrencies.find(c => c.code === selectedCurrencyRef.current.code)
         if (currentSelected) {
-          setSelectedCurrency(currentSelected)
+          setSelectedCurrencyState(currentSelected) // Use state setter directly to avoid re-saving to localStorage
           // Clear price cache when fallback rates are used
           clearPriceCache()
         }
@@ -165,13 +204,13 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       
       setCurrenciesState(fallbackCurrencies)
       
-              // Update selected currency with fallback rate
-        const currentSelected = fallbackCurrencies.find(c => c.code === selectedCurrencyRef.current.code)
-        if (currentSelected) {
-          setSelectedCurrency(currentSelected)
-          // Clear price cache when fallback rates are used
-          clearPriceCache()
-        }
+      // Update selected currency with fallback rate (without triggering localStorage save)
+      const currentSelected = fallbackCurrencies.find(c => c.code === selectedCurrencyRef.current.code)
+      if (currentSelected) {
+        setSelectedCurrencyState(currentSelected) // Use state setter directly to avoid re-saving to localStorage
+        // Clear price cache when fallback rates are used
+        clearPriceCache()
+      }
       
       console.log('✅ Using fallback exchange rates due to API error:', fallbackRates)
       console.log('Updated currencies with fallback rates:', fallbackCurrencies)
