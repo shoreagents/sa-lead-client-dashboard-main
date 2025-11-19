@@ -26,7 +26,7 @@ export async function generateMetadata({
     const headersList = await headers();
     
     // Get the full request URL from various headers
-    const host = headersList.get('host') || '';
+    const host = headersList.get('host') || headersList.get('x-forwarded-host') || '';
     const protocol = headersList.get('x-forwarded-proto') || headersList.get('x-forwarded-protocol') || 'https';
     const pathname = headersList.get('x-pathname') || '/career-tools/games/disc-personality';
     const queryString = headersList.get('x-query-string') || '';
@@ -45,9 +45,16 @@ export async function generateMetadata({
       fullUrl = `${protocol}://${host}${path}`;
       console.log('✅ DISC Layout: Constructed URL from headers:', fullUrl);
     } else if (host) {
-      // Fallback: construct from host and pathname
-      fullUrl = `${protocol}://${host}${pathname}`;
-      console.log('⚠️ DISC Layout: No query string found, using pathname only:', fullUrl);
+      // Try to get from referer header (for crawlers)
+      const referer = headersList.get('referer') || headersList.get('referrer');
+      if (referer && referer.includes('/career-tools/games/disc-personality')) {
+        fullUrl = referer;
+        console.log('✅ DISC Layout: Using referer header:', referer);
+      } else {
+        // Fallback: construct from host and pathname
+        fullUrl = `${protocol}://${host}${pathname}`;
+        console.log('⚠️ DISC Layout: No query string found, using pathname only:', fullUrl);
+      }
     }
     
     if (fullUrl) {
@@ -80,6 +87,7 @@ export async function generateMetadata({
         pathname,
         queryString,
         xUrl: headersList.get('x-url'),
+        referer: headersList.get('referer') || headersList.get('referrer'),
         allHeaders: Object.fromEntries(headersList.entries())
       });
     }
@@ -100,8 +108,8 @@ export async function generateMetadata({
     const personalityTitle = personalityTitles[type] || 'BPO Professional';
     
     // Construct OG image URL - ensure it's absolute and includes all parameters
-    // Use a static version number for consistency (crawlers cache aggressively)
-    const ogImageUrl = `${absoluteBaseUrl}/api/og/disc-results?userId=${encodeURIComponent(userId)}&type=${encodeURIComponent(type)}&animal=${encodeURIComponent(animalName)}&v=4`;
+    // Use version 5 for cache busting (increment when OG image design changes)
+    const ogImageUrl = `${absoluteBaseUrl}/api/og/disc-results?userId=${encodeURIComponent(userId)}&type=${encodeURIComponent(type)}&animal=${encodeURIComponent(animalName)}&v=5`;
     const pageUrl = `${absoluteBaseUrl}/career-tools/games/disc-personality?userId=${encodeURIComponent(userId)}&type=${encodeURIComponent(type)}&animal=${encodeURIComponent(animalName)}`;
     const description = `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityTitle}. Take the BPOC DISC Personality Assessment to find your perfect BPO role.`;
 
@@ -148,7 +156,7 @@ export async function generateMetadata({
 
   // Default metadata for the DISC personality game page
   // Always provide OG image even if query params are missing
-  const defaultOgImageUrl = `${absoluteBaseUrl}/api/og/disc-results?userId=default&type=D&animal=Eagle&v=4`;
+  const defaultOgImageUrl = `${absoluteBaseUrl}/api/og/disc-results?userId=default&type=D&animal=Eagle&v=5`;
   console.log('⚠️ DISC Layout: Using default OG image URL:', defaultOgImageUrl);
   
   return {
