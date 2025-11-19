@@ -87,57 +87,82 @@ export async function GET(request: NextRequest) {
             flexDirection: 'row',
             backgroundColor: '#0f172a',
             backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(6, 182, 212, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)',
+            position: 'relative',
           }}
         >
-          {/* Left Column - User Info & Animal/Personality */}
+          {/* Left Side - Profile Info & Animal */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
+              justifyContent: 'center',
+              padding: '80px',
               width: '60%',
-              padding: '40px',
-              justifyContent: 'space-between',
             }}
           >
-            {/* Top Section - User Info */}
+            {/* Profile Photo & Username */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
-                alignItems: 'flex-start',
-                marginBottom: '35px',
-                minHeight: '100px',
+                alignItems: 'center',
+                marginBottom: 40,
               }}
             >
-              {avatarUrl && (
+              {/* Avatar */}
+              {avatarUrl ? (
                 <img
                   src={avatarUrl}
-                  width="80"
-                  height="80"
+                  width="160"
+                  height="160"
                   style={{
                     borderRadius: '50%',
-                    border: '3px solid #06B6D4',
+                    border: '5px solid #06B6D4',
                     objectFit: 'cover',
-                    marginRight: '16px',
-                    flexShrink: 0,
+                    boxShadow: '0 10px 40px rgba(6, 182, 212, 0.5)',
                   }}
                 />
+              ) : (
+                <div
+                  style={{
+                    width: '160px',
+                    height: '160px',
+                    borderRadius: '50%',
+                    border: '5px solid #06B6D4',
+                    background: 'linear-gradient(135deg, #06B6D4 0%, #A855F7 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 10px 40px rgba(6, 182, 212, 0.5)',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '64px',
+                      color: 'white',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                    }}
+                  >
+                    {displayName.charAt(0).toUpperCase()}
+                  </div>
+                </div>
               )}
+
+              {/* Username & Location */}
               <div
                 style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  flex: 1,
+                  marginLeft: 30,
                 }}
               >
                 <div
                   style={{
-                    fontSize: 28,
+                    fontSize: 52,
                     fontWeight: 'bold',
                     color: 'white',
-                    marginBottom: 6,
-                    lineHeight: 1.2,
+                    display: 'flex',
                   }}
                 >
                   @{displayName}
@@ -145,46 +170,44 @@ export async function GET(request: NextRequest) {
                 {location && (
                   <div
                     style={{
-                      fontSize: 18,
+                      fontSize: 24,
                       color: '#67E8F9',
-                      marginBottom: 6,
-                      lineHeight: 1.2,
+                      marginTop: 10,
+                      display: 'flex',
                     }}
                   >
                     {location}
                   </div>
                 )}
-                {userTitle && (
-                  <div
-                    style={{
-                      fontSize: 20,
-                      color: 'white',
-                      fontWeight: '600',
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {userTitle}
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Middle Section - Animal & Personality Info */}
+            {/* Job Title */}
+            <div
+              style={{
+                fontSize: 36,
+                color: 'white',
+                marginBottom: 30,
+                display: 'flex',
+                fontWeight: '600',
+              }}
+            >
+              {userTitle}
+            </div>
+
+            {/* Animal & Personality Info */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'flex-start',
-                marginTop: '10px',
-                marginBottom: '30px',
-                minHeight: '140px',
+                marginBottom: 40,
               }}
             >
               <div
                 style={{
-                  fontSize: '100px',
-                  marginRight: '24px',
+                  fontSize: '80px',
+                  marginRight: 20,
                   lineHeight: 1,
                 }}
               >
@@ -199,7 +222,7 @@ export async function GET(request: NextRequest) {
               >
                 <div
                   style={{
-                    fontSize: 42,
+                    fontSize: 32,
                     fontWeight: 'bold',
                     color: 'white',
                     marginBottom: 6,
@@ -210,7 +233,7 @@ export async function GET(request: NextRequest) {
                 </div>
                 <div
                   style={{
-                    fontSize: 28,
+                    fontSize: 24,
                     color: '#67E8F9',
                     lineHeight: 1.2,
                   }}
@@ -220,29 +243,21 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
 
-            {/* Bottom Section - BPOC Logo */}
+            {/* BPOC Logo/Text */}
             <div
               style={{
-                fontSize: 36,
+                fontSize: 48,
                 fontWeight: 'bold',
+                display: 'flex',
                 letterSpacing: '2px',
                 color: '#06B6D4',
-                marginTop: 'auto',
               }}
             >
               BPOC.IO
             </div>
           </div>
 
-          {/* Vertical Separator */}
-          <div
-            style={{
-              width: '2px',
-              backgroundColor: 'rgba(6, 182, 212, 0.4)',
-            }}
-          />
-
-          {/* Right Column - CTA */}
+          {/* Right Side - CTA */}
           <div
             style={{
               display: 'flex',
@@ -251,6 +266,7 @@ export async function GET(request: NextRequest) {
               alignItems: 'center',
               width: '40%',
               background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
+              borderLeft: '2px solid rgba(6, 182, 212, 0.4)',
               padding: '60px',
             }}
           >
@@ -264,46 +280,50 @@ export async function GET(request: NextRequest) {
             >
               <div
                 style={{
-                  fontSize: 44,
+                  fontSize: 48,
                   fontWeight: 'bold',
                   color: 'white',
                   lineHeight: 1.2,
-                  marginBottom: 10,
+                  display: 'flex',
                 }}
               >
-                Discover Your
+                {displayName}'s BPO Animal
               </div>
               <div
                 style={{
-                  fontSize: 44,
+                  fontSize: 38,
                   fontWeight: 'bold',
                   color: 'white',
-                  lineHeight: 1.2,
-                  marginBottom: 20,
+                  marginTop: 10,
+                  display: 'flex',
                 }}
               >
-                BPO Animal Spirit!
+                {animalName} {animalEmojiDisplay}
               </div>
 
               <div
                 style={{
-                  fontSize: 22,
+                  fontSize: 24,
                   color: '#67E8F9',
-                  marginTop: 20,
+                  marginTop: 30,
                   lineHeight: 1.5,
-                  marginBottom: 20,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
                 }}
               >
-                Take the BPOC DISC Personality Assessment
+                <div style={{ display: 'flex' }}>Discover Your</div>
+                <div style={{ display: 'flex', marginTop: 10 }}>BPO Animal Spirit</div>
               </div>
 
               {/* CTA Button */}
               <div
                 style={{
-                  marginTop: 30,
+                  marginTop: 40,
                   background: 'linear-gradient(135deg, #06B6D4 0%, #A855F7 100%)',
                   borderRadius: '12px',
                   padding: '20px 50px',
+                  display: 'flex',
                   border: '2px solid rgba(255, 255, 255, 0.2)',
                   boxShadow: '0 10px 30px rgba(6, 182, 212, 0.5)',
                 }}
@@ -313,6 +333,7 @@ export async function GET(request: NextRequest) {
                     fontSize: 32,
                     fontWeight: 'bold',
                     color: 'white',
+                    display: 'flex',
                   }}
                 >
                   Sign Up Now
@@ -324,6 +345,7 @@ export async function GET(request: NextRequest) {
                   fontSize: 20,
                   color: '#94A3B8',
                   marginTop: 30,
+                  display: 'flex',
                 }}
               >
                 Where BPO Careers Begin
