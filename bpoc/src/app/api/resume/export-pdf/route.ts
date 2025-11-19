@@ -1,5 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Helper function to get Chromium executable path
+async function getChromiumPath(): Promise<string | null> {
+  try {
+    // Try to use Puppeteer's bundled Chromium first
+    const puppeteerChromiumPath = puppeteer.executablePath();
+    if (puppeteerChromiumPath && fs.existsSync(puppeteerChromiumPath)) {
+      console.log('✅ Using Puppeteer bundled Chromium:', puppeteerChromiumPath);
+      return puppeteerChromiumPath;
+    }
+  } catch (e) {
+    console.warn('⚠️ Puppeteer bundled Chromium not found, trying alternatives...');
+  }
+
+  // Try environment variable
+  if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) {
+    console.log('✅ Using CHROME_PATH:', process.env.CHROME_PATH);
+    return process.env.CHROME_PATH;
+  }
+
+  // Try common system locations
+  const commonPaths = [
+    // Windows
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    // Linux
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    // macOS
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  ];
+
+  for (const chromePath of commonPaths) {
+    if (fs.existsSync(chromePath)) {
+      console.log('✅ Using system Chrome:', chromePath);
+      return chromePath;
+    }
+  }
+
+  // For serverless environments, Chromium should be installed during build
+  // Check if we're in a serverless environment and provide helpful error
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY) {
+    console.warn('⚠️ Serverless environment detected. Chromium must be installed during build.');
+    console.warn('⚠️ Make sure your build script includes: npx puppeteer browsers install chrome');
+  }
+
+  return null;
+}
 
 export async function POST(request: NextRequest) {
   let browser;
@@ -30,22 +83,51 @@ export async function POST(request: NextRequest) {
           '--disable-gpu',
           '--disable-web-security',
           '--disable-features=IsolateOrigins,site-per-process',
+          '--single-process', // Important for serverless environments
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-background-networking',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-breakpad',
+          '--disable-client-side-phishing-detection',
+          '--disable-component-update',
+          '--disable-default-apps',
+          '--disable-domain-reliability',
+          '--disable-features=AudioServiceOutOfProcess',
+          '--disable-hang-monitor',
+          '--disable-ipc-flooding-protection',
+          '--disable-notifications',
+          '--disable-offer-store-unmasked-wallet-cards',
+          '--disable-popup-blocking',
+          '--disable-print-preview',
+          '--disable-prompt-on-repost',
+          '--disable-renderer-backgrounding',
+          '--disable-setuid-sandbox',
+          '--disable-speech-api',
+          '--disable-sync',
+          '--disable-translate',
+          '--disable-windows10-custom-titlebar',
+          '--metrics-recording-only',
+          '--mute-audio',
+          '--no-first-run',
+          '--no-default-browser-check',
+          '--no-pings',
+          '--no-zygote',
+          '--safebrowsing-disable-auto-update',
+          '--use-mock-keychain',
         ],
         timeout: 60000, // 60 second timeout for browser launch
       };
 
-      // On Windows, we might need to set executablePath if Chrome is installed separately
-      // Try to find Chrome in common locations
-      if (process.platform === 'win32') {
-        const possiblePaths = [
-          'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-          'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-          process.env.CHROME_PATH,
-        ].filter(Boolean);
-
-        // Try to use system Chrome if Puppeteer's bundled Chrome fails
-        // But first, try without executablePath (Puppeteer's bundled Chrome)
-        console.log('🪟 Windows detected, will try bundled Chrome first');
+      // Try to find Chromium executable
+      const chromiumPath = await getChromiumPath();
+      if (chromiumPath) {
+        launchOptions.executablePath = chromiumPath;
+        console.log('✅ Using Chromium at:', chromiumPath);
+      } else {
+        console.warn('⚠️ No Chromium found, trying default Puppeteer launch...');
+        // Will try to use Puppeteer's default (may fail in serverless)
       }
 
       browser = await puppeteer.launch(launchOptions);
@@ -57,8 +139,14 @@ export async function POST(request: NextRequest) {
       
       // Try to provide more helpful error message
       let hint = 'Puppeteer requires Chrome/Chromium. ';
-      if (errorMessage.includes('executable') || errorMessage.includes('chrome')) {
-        hint += 'Make sure Chrome/Chromium is installed. On Windows, you may need to install Chrome or set CHROME_PATH environment variable.';
+      if (errorMessage.includes('executable') || errorMessage.includes('chrome') || errorMessage.includes('Could not find Chrome')) {
+        if (process.env.VERCEL) {
+          hint += 'For Vercel deployments, add this to your package.json build script: "build": "npx puppeteer browsers install chrome && next build". Or set CHROME_PATH environment variable in Vercel dashboard.';
+        } else if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
+          hint += 'For AWS Lambda, you need to bundle Chromium with your deployment or use a Lambda layer with Chromium.';
+        } else {
+          hint += 'For serverless deployments, install Chromium during build: `npx puppeteer browsers install chrome`. For local development, install Chrome browser or set CHROME_PATH environment variable.';
+        }
       } else if (errorMessage.includes('timeout')) {
         hint += 'Browser launch timed out. This might be due to system resource constraints.';
       } else {
