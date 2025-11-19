@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
       }
     } catch (error) {
       console.error('Error fetching user data from database:', error);
-      return new Response('Error fetching user data', { status: 500 });
+      // Continue with default values instead of failing - this ensures image is always generated
     }
 
     // Handle default userId case (for fallback OG images)
