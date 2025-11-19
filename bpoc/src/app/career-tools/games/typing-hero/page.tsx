@@ -202,6 +202,14 @@ export default function TypingHeroPage() {
   const [sharedResults, setSharedResults] = useState<any>(null);
   const [showSharedResults, setShowSharedResults] = useState(false);
   
+  // NEW: Share dropdown state
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+  
+  // NEW: Share modal state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string } | null>(null);
+  
   // Check for shared results on page load
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -217,6 +225,23 @@ export default function TypingHeroPage() {
       }
     }
   }, []);
+  
+  // Handle clicks outside share dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+        setIsShareOpen(false);
+      }
+    }
+    
+    if (isShareOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isShareOpen]);
   
   // NEW: Music preference state
   const [musicGender, setMusicGender] = useState<'male' | 'female'>('male'); // Default to male
@@ -5433,59 +5458,102 @@ export default function TypingHeroPage() {
                 </Button>
                 </motion.div>
 
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="relative" ref={shareRef}>
                 <Button
-                  onClick={async () => {
-                    try {
-                      // Create a results-only shareable link
-                      const resultsData = {
-                        game: 'Typing Hero',
-                        score: gameStats.score,
-                        wpm: gameStats.wpm,
-                        accuracy: Math.round(gameStats.accuracy),
-                        longestStreak: gameStats.longestStreak,
-                        difficulty: currentDifficulty,
-                        timestamp: new Date().toISOString()
-                      };
-                      
-                      // Encode results in URL parameters
-                      const encodedResults = encodeURIComponent(JSON.stringify(resultsData));
-                      const shareableUrl = `${window.location.origin}/career-tools/games/typing-hero?results=${encodedResults}`;
-                      
-                      const shareText = `🎮 Just crushed Typing Hero!\n\n🏆 ${gameStats.score.toLocaleString()} points\n⚡ ${gameStats.wpm} WPM\n🎯 ${Math.round(gameStats.accuracy)}% accuracy\n🔥 ${gameStats.longestStreak} streak\n\nCan you beat my score? 🚀\n\nView my results: ${shareableUrl}`;
-                      
-                      if (navigator.share) {
-                        navigator.share({
-                          title: 'My Typing Hero Achievement!',
-                          text: shareText,
-                          url: shareableUrl
-                        });
-                      } else {
-                        // Fallback: copy to clipboard
-                        await navigator.clipboard.writeText(shareText);
-                        
-                        // Show success feedback
-                        const button = event?.target as HTMLButtonElement;
-                        if (button) {
-                          const originalText = button.innerHTML;
-                          button.innerHTML = '<div class="flex items-center"><span class="w-4 h-4 mr-2">✓</span>Results Copied!</div>';
-                          setTimeout(() => {
-                            button.innerHTML = originalText;
-                          }, 2000);
-                        }
-                      }
-                    } catch (error) {
-                      console.error('Failed to share results:', error);
-                    }
-                  }}
-                    className="w-full h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:shadow-blue-400/20 transition-all duration-300"
-                  >
-                    <Share className="w-5 h-5 mr-2" />
-                    <div className="text-left">
-                      <div className="font-semibold">Share Results</div>
-                      <div className="text-xs opacity-75">Show off your skills</div>
-                    </div>
+                  onClick={() => setIsShareOpen(!isShareOpen)}
+                  className="w-full h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:shadow-blue-400/20 transition-all duration-300"
+                >
+                  <Share className="w-5 h-5 mr-2" />
+                  <div className="text-left">
+                    <div className="font-semibold">Share Results</div>
+                    <div className="text-xs opacity-75">Show off your skills</div>
+                  </div>
                 </Button>
+                
+                {isShareOpen && user && (
+                  <div className="absolute bottom-full left-0 right-0 mb-2 bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[60]">
+                    <div className="py-2">
+                      {/* Facebook Share */}
+                      <button
+                        onClick={async () => {
+                          const currentUrl = new URL(window.location.href);
+                          const baseUrl = currentUrl.origin;
+                          const resultUrl = `${baseUrl}/results/typing-hero/${user.username || user.slug}`;
+                          const shareText = `⚡ Just crushed it on Typing Hero! 🎮\n\n🏆 Score: ${gameStats.score.toLocaleString()} points\n⚡ WPM: ${gameStats.wpm}\n🎯 Accuracy: ${Math.round(gameStats.accuracy)}%\n🔥 Longest Streak: ${gameStats.longestStreak}\n\n💪 Can you beat my speed?\n\n🎯 Test your typing skills on BPOC.IO and level up your BPO career!\n\n${resultUrl}`;
+                          
+                          try {
+                            await navigator.clipboard.writeText(shareText);
+                            setShareModalData({ platform: 'Facebook', text: shareText, url: resultUrl });
+                            setShowShareModal(true);
+                            setTimeout(() => {
+                              const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
+                              window.open(facebookUrl, '_blank', 'width=600,height=400');
+                            }, 1500);
+                          } catch (err) {
+                            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
+                            window.open(facebookUrl, '_blank', 'width=600,height=400');
+                          }
+                          setIsShareOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                      >
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
+                        <span className="font-medium">Share on Facebook</span>
+                      </button>
+                      
+                      {/* LinkedIn Share */}
+                      <button
+                        onClick={async () => {
+                          const currentUrl = new URL(window.location.href);
+                          const baseUrl = currentUrl.origin;
+                          const resultUrl = `${baseUrl}/results/typing-hero/${user.username || user.slug}`;
+                          const shareText = `⚡ Just crushed it on Typing Hero! 🎮\n\n🏆 Score: ${gameStats.score.toLocaleString()} points\n⚡ WPM: ${gameStats.wpm}\n🎯 Accuracy: ${Math.round(gameStats.accuracy)}%\n🔥 Longest Streak: ${gameStats.longestStreak}\n\n💪 Can you beat my speed?\n\n🎯 Test your typing skills on BPOC.IO and level up your BPO career!\n\n${resultUrl}`;
+                          
+                          try {
+                            await navigator.clipboard.writeText(shareText);
+                            setShareModalData({ platform: 'LinkedIn', text: shareText, url: resultUrl });
+                            setShowShareModal(true);
+                            setTimeout(() => {
+                              const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
+                              window.open(linkedInUrl, '_blank', 'width=600,height=400');
+                            }, 1500);
+                          } catch (err) {
+                            const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
+                            window.open(linkedInUrl, '_blank', 'width=600,height=400');
+                          }
+                          setIsShareOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                      >
+                        <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
+                        <span className="font-medium">Share on LinkedIn</span>
+                      </button>
+                      
+                      {/* Copy Link */}
+                      <button
+                        onClick={async () => {
+                          const currentUrl = new URL(window.location.href);
+                          const baseUrl = currentUrl.origin;
+                          const resultUrl = `${baseUrl}/results/typing-hero/${user.username || user.slug}`;
+                          const shareText = `⚡ Just crushed it on Typing Hero! 🎮\n\n🏆 Score: ${gameStats.score.toLocaleString()} points\n⚡ WPM: ${gameStats.wpm}\n🎯 Accuracy: ${Math.round(gameStats.accuracy)}%\n🔥 Longest Streak: ${gameStats.longestStreak}\n\n💪 Can you beat my speed?\n\n🎯 Test your typing skills on BPOC.IO and level up your BPO career!\n\n${resultUrl}`;
+                          
+                          try {
+                            await navigator.clipboard.writeText(shareText);
+                            setShareModalData({ platform: 'Copied', text: shareText, url: resultUrl });
+                            setShowShareModal(true);
+                          } catch (err) {
+                            console.error('Failed to copy:', err);
+                          }
+                          setIsShareOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                      >
+                        <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center text-sm font-bold">🔗</div>
+                        <span className="font-medium">Copy Link</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 </motion.div>
 
 
@@ -5778,6 +5846,55 @@ export default function TypingHeroPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      {/* Share Modal */}
+      <AnimatePresence>
+        {showShareModal && shareModalData && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
+            onClick={() => setShowShareModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 max-w-md w-full border border-green-500/30 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-4xl">✓</span>
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  {shareModalData.platform === 'Copied' ? 'Link Copied!' : `Opening ${shareModalData.platform}...`}
+                </h3>
+                <p className="text-gray-400 text-sm">
+                  {shareModalData.platform === 'Copied' 
+                    ? 'Share text has been copied to your clipboard! Paste it anywhere you like.'
+                    : 'We\'ve copied the share text to your clipboard. Paste it in your post!'}
+                </p>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-4 mb-6 max-h-48 overflow-y-auto">
+                <p className="text-gray-300 text-sm whitespace-pre-wrap font-mono">
+                  {shareModalData.text}
+                </p>
+              </div>
+
+              <Button
+                onClick={() => setShowShareModal(false)}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold"
+              >
+                Got it! ✨
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
    </div>
   );
 }

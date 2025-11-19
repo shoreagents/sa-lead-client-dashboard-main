@@ -167,6 +167,12 @@ export default function ProfilePage() {
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
   const shareRef = React.useRef<HTMLDivElement>(null);
+  
+  // Game share states
+  const [isTypingShareOpen, setIsTypingShareOpen] = useState<boolean>(false);
+  const [isDiscShareOpen, setIsDiscShareOpen] = useState<boolean>(false);
+  const typingShareRef = React.useRef<HTMLDivElement>(null);
+  const discShareRef = React.useRef<HTMLDivElement>(null);
 
   // Close share dropdown when clicking outside
   useEffect(() => {
@@ -184,6 +190,40 @@ export default function ProfilePage() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isShareOpen]);
+
+  // Close typing share dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (typingShareRef.current && !typingShareRef.current.contains(event.target as Node)) {
+        setIsTypingShareOpen(false);
+      }
+    };
+
+    if (isTypingShareOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isTypingShareOpen]);
+
+  // Close DISC share dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (discShareRef.current && !discShareRef.current.contains(event.target as Node)) {
+        setIsDiscShareOpen(false);
+      }
+    };
+
+    if (isDiscShareOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDiscShareOpen]);
 
   // Function to determine rank based on overall score (matching leaderboards and talent search system)
   const getRank = (score: number) => {
@@ -3022,11 +3062,110 @@ export default function ProfilePage() {
                       <div className="relative flex flex-col">
                         <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-teal-500/10 rounded-2xl blur-xl"></div>
                         <div className="relative bg-gradient-to-br from-gray-800/40 to-gray-900/60 rounded-2xl p-6 border border-gray-500/20 backdrop-blur-sm flex flex-col h-full">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-                              <Gamepad2 className="w-5 h-5 text-green-400" />
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                                <Gamepad2 className="w-5 h-5 text-green-400" />
+                              </div>
+                              <h3 className="text-xl font-bold text-white">Typing Hero</h3>
                             </div>
-                            <h3 className="text-xl font-bold text-white">Typing Hero</h3>
+                            
+                            {/* Share Button - Moved to top right */}
+                            {userProfile.game_stats?.typing_hero_stats && (
+                              <div className="relative" ref={typingShareRef}>
+                                <Button 
+                                  onClick={() => setIsTypingShareOpen(!isTypingShareOpen)}
+                                  size="sm"
+                                  className="bg-green-500/20 border border-green-400/30 text-green-300 hover:bg-green-500/40 hover:border-green-400/70 hover:text-green-200 transition-all duration-300"
+                                >
+                                  <Share className="w-4 h-4" />
+                                </Button>
+                                
+                                {isTypingShareOpen && (
+                                  <div className="absolute top-full right-0 mt-2 w-64 bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[60]">
+                                    <div className="py-2">
+                                      {/* Facebook Share */}
+                                      <button
+                                        onClick={async () => {
+                                          const currentUrl = new URL(window.location.href);
+                                          const baseUrl = currentUrl.origin;
+                                          const resultUrl = `${baseUrl}/results/typing-hero/${userProfile.username || userProfile.slug}`;
+                                          const shareText = `⚡ Just crushed it on Typing Hero! 🎮\n\n🏆 Best WPM: ${userProfile.game_stats?.typing_hero_stats?.best_wpm || 0}\n⚡ Latest WPM: ${userProfile.game_stats?.typing_hero_stats?.latest_wpm || 0}\n📊 Average WPM: ${Math.round(userProfile.game_stats?.typing_hero_stats?.avg_wpm || 0)}\n\n💪 Can you beat my speed?\n\n🎯 Test your typing skills on BPOC.IO and level up your BPO career!\n\n${resultUrl}`;
+                                          
+                                          try {
+                                            await navigator.clipboard.writeText(shareText);
+                                            setShareModalData({ platform: 'Facebook', text: shareText, url: resultUrl });
+                                            setShowShareModal(true);
+                                            setTimeout(() => {
+                                              const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
+                                              window.open(facebookUrl, '_blank', 'width=600,height=400');
+                                            }, 1500);
+                                          } catch (err) {
+                                            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
+                                            window.open(facebookUrl, '_blank', 'width=600,height=400');
+                                          }
+                                          setIsTypingShareOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                                      >
+                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
+                                        <span className="font-medium">Share on Facebook</span>
+                                      </button>
+
+                                      {/* LinkedIn Share */}
+                                      <button
+                                        onClick={async () => {
+                                          const currentUrl = new URL(window.location.href);
+                                          const baseUrl = currentUrl.origin;
+                                          const resultUrl = `${baseUrl}/results/typing-hero/${userProfile.username || userProfile.slug}`;
+                                          const shareText = `⌨️ Typing Hero Achievement Unlocked! 🎮\n\n📊 Performance Stats:\n• Best WPM: ${userProfile.game_stats?.typing_hero_stats?.best_wpm || 0} 🏆\n• Latest WPM: ${userProfile.game_stats?.typing_hero_stats?.latest_wpm || 0} ⚡\n• Average WPM: ${Math.round(userProfile.game_stats?.typing_hero_stats?.avg_wpm || 0)} 📈\n\n💼 Typing speed is crucial in the BPO industry! Join me on BPOC.IO to:\n✅ Test your skills with career games\n✅ Get AI-powered career insights\n✅ Connect with top BPO employers\n\n🚀 Ready to level up your career?\n\n${resultUrl}\n\n#BPO #CareerDevelopment #TypingSpeed #ProfessionalGrowth #BPOIO`;
+                                          
+                                          try {
+                                            await navigator.clipboard.writeText(shareText);
+                                            setShareModalData({ platform: 'LinkedIn', text: shareText, url: resultUrl });
+                                            setShowShareModal(true);
+                                            setTimeout(() => {
+                                              const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
+                                              window.open(linkedinUrl, '_blank', 'width=600,height=400');
+                                            }, 1500);
+                                          } catch (err) {
+                                            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
+                                            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+                                          }
+                                          setIsTypingShareOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                                      >
+                                        <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
+                                        <span className="font-medium">Share on LinkedIn</span>
+                                      </button>
+
+                                      <div className="border-t border-white/10 my-1"></div>
+
+                                      {/* Copy Link */}
+                                      <button
+                                        onClick={() => {
+                                          const currentUrl = new URL(window.location.href);
+                                          const baseUrl = currentUrl.origin;
+                                          const resultUrl = `${baseUrl}/results/typing-hero/${userProfile.username || userProfile.slug}`;
+                                          
+                                          navigator.clipboard.writeText(resultUrl).then(() => {
+                                            alert('Result link copied to clipboard!');
+                                            setIsTypingShareOpen(false);
+                                          }).catch(() => {
+                                            alert('Failed to copy link. Please copy manually: ' + resultUrl);
+                                          });
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                                      >
+                                        <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">📋</div>
+                                        <span className="font-medium">Copy Link</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                           
                           {userProfile.game_stats?.typing_hero_stats ? (
@@ -3260,11 +3399,126 @@ export default function ProfilePage() {
                       <div className="relative flex flex-col">
                         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-indigo-500/10 rounded-2xl blur-xl"></div>
                         <div className="relative bg-gradient-to-br from-gray-800/40 to-gray-900/60 rounded-2xl p-6 border border-gray-500/20 backdrop-blur-sm flex flex-col h-full">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                              <Brain className="w-5 h-5 text-blue-400" />
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                                <Brain className="w-5 h-5 text-blue-400" />
+                              </div>
+                              <h3 className="text-xl font-bold text-white">BPOC DISC</h3>
                             </div>
-                            <h3 className="text-xl font-bold text-white">BPOC DISC</h3>
+                            
+                            {/* Share Button - Moved to top right */}
+                            {userProfile.game_stats?.disc_personality_stats && (
+                              <div className="relative" ref={discShareRef}>
+                                <Button 
+                                  onClick={() => setIsDiscShareOpen(!isDiscShareOpen)}
+                                  size="sm"
+                                  className="bg-blue-500/20 border border-blue-400/30 text-blue-300 hover:bg-blue-500/40 hover:border-blue-400/70 hover:text-blue-200 transition-all duration-300"
+                                >
+                                  <Share className="w-4 h-4" />
+                                </Button>
+                                
+                                {isDiscShareOpen && (
+                                  <div className="absolute top-full right-0 mt-2 w-64 bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[60]">
+                                    <div className="py-2">
+                                      {/* Facebook Share */}
+                                      <button
+                                        onClick={async () => {
+                                          const currentUrl = new URL(window.location.href);
+                                          const baseUrl = currentUrl.origin;
+                                          const resultUrl = `${baseUrl}/results/bpoc-disc/${userProfile.username || userProfile.slug}`;
+                                          const animalMap: {[key: string]: {emoji: string, name: string}} = {
+                                            'D': { emoji: '🦅', name: 'EAGLE' },
+                                            'I': { emoji: '🦚', name: 'PEACOCK' },
+                                            'S': { emoji: '🐢', name: 'TURTLE' },
+                                            'C': { emoji: '🦉', name: 'OWL' }
+                                          };
+                                          const primaryType = userProfile.game_stats?.disc_personality_stats?.primary_type || 'D';
+                                          const animal = animalMap[primaryType] || animalMap['D'];
+                                          const shareText = `${animal.emoji} I'm a ${animal.name} on BPOC DISC! 🎯\n\n📊 My Personality Profile:\n🦅 Dominance: ${userProfile.game_stats?.disc_personality_stats?.d || 0}%\n🦚 Influence: ${userProfile.game_stats?.disc_personality_stats?.i || 0}%\n🐢 Steadiness: ${userProfile.game_stats?.disc_personality_stats?.s || 0}%\n🦉 Conscientiousness: ${userProfile.game_stats?.disc_personality_stats?.c || 0}%\n\n✨ What's your personality type?\n\n🎮 Discover your animal personality on BPOC.IO and unlock insights for your BPO career!\n\n${resultUrl}`;
+                                          
+                                          try {
+                                            await navigator.clipboard.writeText(shareText);
+                                            setShareModalData({ platform: 'Facebook', text: shareText, url: resultUrl });
+                                            setShowShareModal(true);
+                                            setTimeout(() => {
+                                              const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
+                                              window.open(facebookUrl, '_blank', 'width=600,height=400');
+                                            }, 1500);
+                                          } catch (err) {
+                                            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
+                                            window.open(facebookUrl, '_blank', 'width=600,height=400');
+                                          }
+                                          setIsDiscShareOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                                      >
+                                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
+                                        <span className="font-medium">Share on Facebook</span>
+                                      </button>
+
+                                      {/* LinkedIn Share */}
+                                      <button
+                                        onClick={async () => {
+                                          const currentUrl = new URL(window.location.href);
+                                          const baseUrl = currentUrl.origin;
+                                          const resultUrl = `${baseUrl}/results/bpoc-disc/${userProfile.username || userProfile.slug}`;
+                                          const animalMap: {[key: string]: {emoji: string, name: string}} = {
+                                            'D': { emoji: '🦅', name: 'EAGLE' },
+                                            'I': { emoji: '🦚', name: 'PEACOCK' },
+                                            'S': { emoji: '🐢', name: 'TURTLE' },
+                                            'C': { emoji: '🦉', name: 'OWL' }
+                                          };
+                                          const primaryType = userProfile.game_stats?.disc_personality_stats?.primary_type || 'D';
+                                          const animal = animalMap[primaryType] || animalMap['D'];
+                                          const shareText = `🧠 BPOC DISC Personality Assessment Results\n\n${animal.emoji} Primary Personality: ${animal.name}\n\n📊 Complete Profile Breakdown:\n• 🦅 Dominance (D): ${userProfile.game_stats?.disc_personality_stats?.d || 0}%\n• 🦚 Influence (I): ${userProfile.game_stats?.disc_personality_stats?.i || 0}%\n• 🐢 Steadiness (S): ${userProfile.game_stats?.disc_personality_stats?.s || 0}%\n• 🦉 Conscientiousness (C): ${userProfile.game_stats?.disc_personality_stats?.c || 0}%\n\n💡 Understanding your personality type helps you:\n✅ Communicate more effectively with colleagues\n✅ Identify your natural strengths in the workplace\n✅ Build stronger professional relationships\n✅ Excel in BPO roles that match your traits\n\n🎯 Discover your personality on BPOC.IO!\n\n${resultUrl}\n\n#PersonalityAssessment #DISC #ProfessionalDevelopment #BPO #CareerGrowth #BPOIO`;
+                                          
+                                          try {
+                                            await navigator.clipboard.writeText(shareText);
+                                            setShareModalData({ platform: 'LinkedIn', text: shareText, url: resultUrl });
+                                            setShowShareModal(true);
+                                            setTimeout(() => {
+                                              const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
+                                              window.open(linkedinUrl, '_blank', 'width=600,height=400');
+                                            }, 1500);
+                                          } catch (err) {
+                                            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
+                                            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+                                          }
+                                          setIsDiscShareOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                                      >
+                                        <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
+                                        <span className="font-medium">Share on LinkedIn</span>
+                                      </button>
+
+                                      <div className="border-t border-white/10 my-1"></div>
+
+                                      {/* Copy Link */}
+                                      <button
+                                        onClick={() => {
+                                          const currentUrl = new URL(window.location.href);
+                                          const baseUrl = currentUrl.origin;
+                                          const resultUrl = `${baseUrl}/results/bpoc-disc/${userProfile.username || userProfile.slug}`;
+                                          
+                                          navigator.clipboard.writeText(resultUrl).then(() => {
+                                            alert('Result link copied to clipboard!');
+                                            setIsDiscShareOpen(false);
+                                          }).catch(() => {
+                                            alert('Failed to copy link. Please copy manually: ' + resultUrl);
+                                          });
+                                        }}
+                                        className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
+                                      >
+                                        <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">📋</div>
+                                        <span className="font-medium">Copy Link</span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                           
                           {userProfile.game_stats?.disc_personality_stats ? (
@@ -3912,23 +4166,24 @@ export default function ProfilePage() {
                                       return 'Your Filipino cultural strengths are being analyzed.';
                                     })()}
                                     </div>
-                                  )}
-                                </div>
-                              )}
+                                )}
+                              </div>
+                            )}
 
-                            </div>
-                          ) : (
-                            <div className="text-center py-8 flex-1 flex flex-col justify-center">
-                              <div className="text-4xl mb-4">📊</div>
-                              <p className="text-gray-400 mb-4">No data found</p>
-                              <Button
-                                onClick={() => router.push('/career-tools/games/disc-personality')}
-                                className="bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
-                              >
-                                Take DISC Assessment
-                              </Button>
-                            </div>
-                          )}
+
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 flex-1 flex flex-col justify-center">
+                            <div className="text-4xl mb-4">📊</div>
+                            <p className="text-gray-400 mb-4">No data found</p>
+                            <Button
+                              onClick={() => router.push('/career-tools/games/disc-personality')}
+                              className="bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
+                            >
+              Take DISC Assessment
+                            </Button>
+                          </div>
+                        )}
                         </div>
                       </div>
                     </div>
