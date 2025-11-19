@@ -441,8 +441,10 @@ export default function FilipinoDiscGame() {
     const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
-    const shareUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim()}`;
-    const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim()}&title=${encodeURIComponent(userTitle)}`;
+    const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+    const shareUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
+    // Match the URL format used in layout.tsx (without title parameter, with v parameter for cache busting)
+    const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&v=5`;
 
     // Close dropdown first
     setIsShareOpen(false);
@@ -778,11 +780,9 @@ export default function FilipinoDiscGame() {
     if (showResults && discResult && user) {
       const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
       const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-      // Use timestamp for better cache busting (LinkedIn caches aggressively)
-      const cacheBuster = Date.now();
-      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&title=${encodeURIComponent(userTitle)}&v=${cacheBuster}`;
+      // Match the URL format used in layout.tsx (with v=5 for cache busting)
+      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&v=5`;
       const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
       
       // Update or create meta tags

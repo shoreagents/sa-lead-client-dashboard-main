@@ -13,6 +13,26 @@ export async function GET(request: NextRequest) {
     const animal = searchParams.get('animal'); // Eagle, Peacock, Turtle, or Owl
     const title = searchParams.get('title') || 'BPO Professional';
 
+    // Animal emoji mapping
+    const animalEmoji: { [key: string]: string } = {
+      'Eagle': '🦅',
+      'Peacock': '🦚',
+      'Turtle': '🐢',
+      'Owl': '🦉',
+      'D': '🦅',
+      'I': '🦚',
+      'S': '🐢',
+      'C': '🦉'
+    };
+
+    // Personality type titles
+    const personalityTitles: { [key: string]: string } = {
+      'D': 'The Sky Dominator',
+      'I': 'The Social Star',
+      'S': 'The Steady Guardian',
+      'C': 'The Wise Analyst'
+    };
+
     if (!userId || !personalityType) {
       return new Response('Missing required parameters', { status: 400 });
     }
@@ -40,27 +60,8 @@ export async function GET(request: NextRequest) {
       }
     } catch (error) {
       console.error('Error fetching user data from database:', error);
+      return new Response('Error fetching user data', { status: 500 });
     }
-
-    // Animal emoji mapping
-    const animalEmoji: { [key: string]: string } = {
-      'Eagle': '🦅',
-      'Peacock': '🦚',
-      'Turtle': '🐢',
-      'Owl': '🦉',
-      'D': '🦅',
-      'I': '🦚',
-      'S': '🐢',
-      'C': '🦉'
-    };
-
-    // Personality type titles
-    const personalityTitles: { [key: string]: string } = {
-      'D': 'The Sky Dominator',
-      'I': 'The Social Star',
-      'S': 'The Steady Guardian',
-      'C': 'The Wise Analyst'
-    };
 
     // Handle default userId case (for fallback OG images)
     const isDefaultUser = userId === 'default';
@@ -359,9 +360,10 @@ export async function GET(request: NextRequest) {
         height: 630,
         headers: {
           'Content-Type': 'image/png',
-          'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-          'Pragma': 'no-cache',
-          'Expires': '0',
+          'Cache-Control': 'public, max-age=3600, s-maxage=3600, must-revalidate',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET',
+          'X-Content-Type-Options': 'nosniff',
         },
       }
     );
