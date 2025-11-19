@@ -1,19 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 import * as fs from 'fs';
+import * as path from 'path';
+
+// Helper function to recursively find chrome executable in a directory
+function findChromeExecutable(dir: string, depth: number = 0): string | null {
+  if (depth > 4) return null; // Limit recursion depth
+  
+  try {
+    if (!fs.existsSync(dir)) return null;
+    
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      
+      // Check if this is the chrome executable
+      if (entry.isFile() && (entry.name === 'chrome' || entry.name === 'chrome.exe')) {
+        // On Unix systems, check if it's executable
+        try {
+          if (process.platform !== 'win32') {
+            fs.accessSync(fullPath, fs.constants.X_OK);
+          }
+          return fullPath;
+        } catch {
+          // Not executable or access check failed, continue searching
+          continue;
+        }
+      }
+      
+      // Recursively search in subdirectories (skip hidden and node_modules)
+      if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'node_modules') {
+        const found = findChromeExecutable(fullPath, depth + 1);
+        if (found) return found;
+      }
+    }
+  } catch (e) {
+    // Ignore errors and continue
+  }
+  
+  return null;
+}
 
 // Helper function to get Chromium executable path
 async function getChromiumPath(): Promise<string | null> {
-
   try {
     // Try to use Puppeteer's bundled Chromium
     const puppeteerChromiumPath = puppeteer.executablePath();
-    if (puppeteerChromiumPath && fs.existsSync(puppeteerChromiumPath)) {
-      console.log('✅ Using Puppeteer bundled Chromium:', puppeteerChromiumPath);
-      return puppeteerChromiumPath;
+    if (puppeteerChromiumPath) {
+      // Check if the exact path exists
+      if (fs.existsSync(puppeteerChromiumPath)) {
+        console.log('✅ Using Puppeteer bundled Chromium (exact path):', puppeteerChromiumPath);
+        return puppeteerChromiumPath;
+      }
+      
+      console.log('⚠️ Puppeteer path exists but file not found:', puppeteerChromiumPath);
+      console.log('🔍 Searching for chrome executable in parent directories...');
+      
+      // If the exact path doesn't exist, try to find chrome in the parent directory
+      const parentDir = path.dirname(puppeteerChromiumPath);
+      if (fs.existsSync(parentDir)) {
+        const found = findChromeExecutable(parentDir);
+        if (found) {
+          console.log('✅ Found Chrome in parent directory:', found);
+          return found;
+        }
+      }
+      
+      // Try to find in the cache directory structure
+      const cacheBase = '/home/sbx_user1051/.cache/puppeteer';
+      if (fs.existsSync(cacheBase)) {
+        console.log('🔍 Searching in cache directory:', cacheBase);
+        const found = findChromeExecutable(cacheBase);
+        if (found) {
+          console.log('✅ Found Chrome in cache directory:', found);
+          return found;
+        }
+      }
     }
   } catch (e) {
-    console.warn('⚠️ Puppeteer bundled Chromium not found, trying alternatives...');
+    console.warn('⚠️ Puppeteer bundled Chromium not found, trying alternatives...', e);
   }
 
   // Try environment variable
@@ -40,6 +106,17 @@ async function getChromiumPath(): Promise<string | null> {
     if (fs.existsSync(chromePath)) {
       console.log('✅ Using system Chrome:', chromePath);
       return chromePath;
+    }
+  }
+
+  // Last resort: search in Vercel cache directory
+  const vercelCacheBase = '/home/sbx_user1051/.cache/puppeteer';
+  if (fs.existsSync(vercelCacheBase)) {
+    console.log('🔍 Last resort: searching in Vercel cache:', vercelCacheBase);
+    const found = findChromeExecutable(vercelCacheBase);
+    if (found) {
+      console.log('✅ Found Chrome in Vercel cache:', found);
+      return found;
     }
   }
 
