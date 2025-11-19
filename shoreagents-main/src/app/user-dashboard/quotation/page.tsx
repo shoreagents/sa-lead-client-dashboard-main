@@ -343,17 +343,17 @@ export default function QuotationPage() {
             <div className="grid gap-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
                     <h2 className="text-2xl font-bold tracking-tight">Quotation Management</h2>
-                    <Badge variant="secondary" className="text-xs">
-                      {filteredQuotations.length} quotations
-                    </Badge>
-                    {isStale && (
-                      <Badge variant="outline" className="text-xs text-orange-600">
-                        Data may be outdated
-                      </Badge>
-                    )}
-                  </div>
+              <Badge variant="secondary" className="text-xs">
+                {filteredQuotations.length} quotations
+              </Badge>
+              {isStale && (
+                <Badge variant="outline" className="text-xs text-orange-600">
+                  Data may be outdated
+                </Badge>
+              )}
+            </div>
                   <p className="text-muted-foreground">
                     Create, manage, and track your quotations
                   </p>
@@ -367,13 +367,13 @@ export default function QuotationPage() {
                     <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
                     Refresh
                   </Button>
-                  <Button 
-                    className="bg-lime-600 hover:bg-lime-700"
-                    onClick={handleCreateQuotation}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Quotation
-                  </Button>
+                <Button 
+                  className="bg-lime-600 hover:bg-lime-700"
+                  onClick={handleCreateQuotation}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Quotation
+                </Button>
                 </div>
               </div>
             </div>

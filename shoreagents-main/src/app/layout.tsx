@@ -10,6 +10,7 @@ import { GlobalEngagementTracker } from "@/components/layout/GlobalEngagementTra
 import { AnonymousUserInitializer } from "@/components/layout/AnonymousUserInitializer";
 import { GlobalPricingModal } from "@/components/GlobalPricingModal";
 import { AnonymousUserButton } from "@/components/ui/anonymous-user-button";
+import { Stage2CaptureButton } from "@/components/ui/stage-2-capture-button";
 import { CurrencyProvider } from "@/lib/currencyContext";
 import { ToastProvider } from "@/lib/toast-context";
 import { AuthProvider } from "@/lib/auth-context";
@@ -72,6 +73,7 @@ export default function RootLayout({
                       <BottomNav />
                       {/* <GlobalPricingModal /> */}
                       <AnonymousUserButton />
+                      <Stage2CaptureButton />
                       </ChatProvider>
                     </FavoritesProvider>
                   </AdminAuthProvider>

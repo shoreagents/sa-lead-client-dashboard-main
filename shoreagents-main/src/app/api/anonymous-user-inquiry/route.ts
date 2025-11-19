@@ -4,13 +4,14 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { user_id, industry, company, employeeCount } = body;
+    const { user_id, industry, company, employeeCount, message } = body;
 
     console.log('📋 Anonymous user inquiry - Received data:', { 
       user_id, 
       industry, 
       company, 
-      employeeCount 
+      employeeCount,
+      message: message ? `${message.substring(0, 50)}...` : 'Not provided'
     });
 
     if (!user_id) {
@@ -74,14 +75,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ UPDATE LEAD PROGRESS TO STAGE 1
+    // ✅ UPDATE LEAD PROGRESS TO STAGE 1 (with business needs notes)
     console.log('📊 Updating lead progress to stage_1 for user:', user_id);
+    const progressUpsertData: any = {
+      user_id: user_id,
+      status: 'stage_1'
+    };
+
+    // Add notes if message is provided
+    if (message && message.trim()) {
+      progressUpsertData.notes = message.trim();
+      console.log('💬 Saving business needs message to lead_progress.notes');
+    }
+
     const { data: progressData, error: progressError } = await supabase
       .from('lead_progress')
-      .upsert({
-        user_id: user_id,
-        status: 'stage_1'
-      }, {
+      .upsert(progressUpsertData, {
         onConflict: 'user_id' // Update if exists, insert if not
       })
       .select(); // ADD SELECT TO GET RESULT
@@ -94,6 +103,9 @@ export async function POST(request: NextRequest) {
     } else {
       console.log('✅ Lead progress updated to stage_1');
       console.log('✅ Progress data:', progressData);
+      if (message) {
+        console.log('✅ Business needs message saved successfully');
+      }
     }
 
     return NextResponse.json({

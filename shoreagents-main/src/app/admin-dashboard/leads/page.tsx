@@ -38,7 +38,7 @@ type ColumnId =
   | 'new_lead'
   | 'stage_1'
   | 'stage_2'
-  | 'pending'
+  | 'quoted'
   | 'meeting_booked'
   | 'signed_up'
   | 'closed_won'
@@ -52,7 +52,7 @@ const columns: ColumnDefinition[] = [
   { id: 'new_lead', name: 'New Lead' },
   { id: 'stage_1', name: 'Stage 1' },
   { id: 'stage_2', name: 'Stage 2' },
-  { id: 'pending', name: 'Pending' },
+  { id: 'quoted', name: 'Quoted' },
   { id: 'meeting_booked', name: 'Meeting Booked' },
   { id: 'signed_up', name: 'Signed Up' },
   { id: 'closed_won', name: 'Closed Won' }
@@ -62,7 +62,7 @@ type LeadStats = {
   new: number
   stage1: number
   stage2: number
-  pending: number
+  quoted: number
   meeting_booked: number
   signed_up: number
   closed_won: number
@@ -105,7 +105,7 @@ export default function LeadManagement() {
     new: 0,
     stage1: 0,
     stage2: 0,
-    pending: 0,
+    quoted: 0,
     meeting_booked: 0,
     signed_up: 0,
     closed_won: 0
@@ -322,7 +322,7 @@ export default function LeadManagement() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-yellow-600">
-                      {isLoading ? '...' : stats.stage1 + stats.stage2 + stats.pending + stats.meeting_booked + stats.signed_up}
+                      {isLoading ? '...' : stats.stage1 + stats.stage2 + stats.quoted + stats.meeting_booked + stats.signed_up}
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Active deals

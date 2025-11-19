@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Building, Download, Check, Shield, DollarSign, Clock, Zap, Users, Star } from 'lucide-react';
@@ -9,6 +10,18 @@ import { useCurrency } from '@/lib/currencyContext';
 export default function CreateWorkforcePage() {
   const router = useRouter();
   const { convertPrice, formatPrice } = useCurrency();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Prevent hydration mismatch by only rendering currency on client
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Helper to safely display prices after mount
+  const displayPrice = (phpPrice: number) => {
+    if (!isMounted) return '...';
+    return formatPrice(convertPrice(phpPrice));
+  };
 
   const handleBookWorkforcePlanning = () => {
     router.push('/gettingstart');
@@ -207,15 +220,15 @@ export default function CreateWorkforcePage() {
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-gray-700 mb-2">Private Office (100sqm = 25 seats)</p>
-                    <p className="text-2xl font-bold text-orange-600">{formatPrice(convertPrice(3765))}/month</p>
+                    <p className="text-2xl font-bold text-orange-600">{displayPrice(3765)}/month</p>
                   </div>
                   <div className="text-center">
                     <p className="text-gray-700 mb-2">25 Dedicated Desks Alternative</p>
-                    <p className="text-lg text-gray-500 line-through">{formatPrice(convertPrice(7207))}/month</p>
+                    <p className="text-lg text-gray-500 line-through">{displayPrice(7207)}/month</p>
                   </div>
                   <div className="bg-lime-100 border border-lime-300 rounded-lg p-4 text-center">
                     <p className="text-sm text-gray-700 mb-1">Monthly Savings</p>
-                    <p className="text-xl font-bold text-lime-600">{formatPrice(convertPrice(3442))} (48%)</p>
+                    <p className="text-xl font-bold text-lime-600">{displayPrice(3442)} (48%)</p>
                   </div>
                 </div>
               </div>
@@ -375,14 +388,14 @@ export default function CreateWorkforcePage() {
                 <p className="text-gray-700 mb-4">100sqm office space</p>
                 
                 <div className="space-y-3 mb-6">
-                  <p className="text-gray-700">Office lease: {formatPrice(convertPrice(3765))}/month</p>
-                  <p className="text-gray-700">Staff costs (25 x {formatPrice(convertPrice(991))}): {formatPrice(convertPrice(24775))}/month</p>
-                  <p className="text-gray-700">Setup costs: {formatPrice(convertPrice(13514))} upfront</p>
+                  <p className="text-gray-700">Office lease: {displayPrice(3765)}/month</p>
+                  <p className="text-gray-700">Staff costs (25 x {displayPrice(991)}): {displayPrice(24775)}/month</p>
+                  <p className="text-gray-700">Setup costs: {displayPrice(13514)} upfront</p>
                 </div>
                 
                 <div className="space-y-2">
-                  <p className="text-lg font-bold text-lime-600">Total Monthly: {formatPrice(convertPrice(28540))}</p>
-                  <p className="text-lg font-bold text-blue-600">Total Upfront: {formatPrice(convertPrice(24809))}</p>
+                  <p className="text-lg font-bold text-lime-600">Total Monthly: {displayPrice(28540)}</p>
+                  <p className="text-lg font-bold text-blue-600">Total Upfront: {displayPrice(24809)}</p>
                 </div>
               </div>
 
@@ -392,14 +405,14 @@ export default function CreateWorkforcePage() {
                 <p className="text-gray-700 mb-4">150sqm office space</p>
                 
                 <div className="space-y-3 mb-6">
-                  <p className="text-gray-700">Office lease: {formatPrice(convertPrice(5648))}/month</p>
-                  <p className="text-gray-700">Staff costs (50 x {formatPrice(convertPrice(991))}): {formatPrice(convertPrice(49550))}/month</p>
-                  <p className="text-gray-700">Setup costs: {formatPrice(convertPrice(27027))} upfront</p>
+                  <p className="text-gray-700">Office lease: {displayPrice(5648)}/month</p>
+                  <p className="text-gray-700">Staff costs (50 x {displayPrice(991)}): {displayPrice(49550)}/month</p>
+                  <p className="text-gray-700">Setup costs: {displayPrice(27027)} upfront</p>
                 </div>
                 
                 <div className="space-y-2">
-                  <p className="text-lg font-bold text-blue-600">Total Monthly: {formatPrice(convertPrice(55198))}</p>
-                  <p className="text-lg font-bold text-blue-600">Total Upfront: {formatPrice(convertPrice(43964))}</p>
+                  <p className="text-lg font-bold text-blue-600">Total Monthly: {displayPrice(55198)}</p>
+                  <p className="text-lg font-bold text-blue-600">Total Upfront: {displayPrice(43964)}</p>
                 </div>
               </div>
 
@@ -409,14 +422,14 @@ export default function CreateWorkforcePage() {
                 <p className="text-gray-700 mb-4">250sqm office space</p>
                 
                 <div className="space-y-3 mb-6">
-                  <p className="text-gray-700">Office lease: {formatPrice(convertPrice(9414))}/month</p>
-                  <p className="text-gray-700">Staff costs (100 x {formatPrice(convertPrice(991))}): {formatPrice(convertPrice(99100))}/month</p>
-                  <p className="text-gray-700">Setup costs: {formatPrice(convertPrice(54054))} upfront</p>
+                  <p className="text-gray-700">Office lease: {displayPrice(9414)}/month</p>
+                  <p className="text-gray-700">Staff costs (100 x {displayPrice(991)}): {displayPrice(99100)}/month</p>
+                  <p className="text-gray-700">Setup costs: {displayPrice(54054)} upfront</p>
                 </div>
                 
                 <div className="space-y-2">
-                  <p className="text-lg font-bold text-orange-600">Total Monthly: {formatPrice(convertPrice(108514))}</p>
-                  <p className="text-lg font-bold text-orange-600">Total Upfront: {formatPrice(convertPrice(82252))}</p>
+                  <p className="text-lg font-bold text-orange-600">Total Monthly: {displayPrice(108514)}</p>
+                  <p className="text-lg font-bold text-orange-600">Total Upfront: {displayPrice(82252)}</p>
                 </div>
               </div>
             </div>
@@ -473,7 +486,7 @@ export default function CreateWorkforcePage() {
                     </li>
                     <li className="flex items-start">
                       <Star className="w-5 h-5 text-lime-600 mr-3 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700">{formatPrice(convertPrice(36036))}+ monthly budget</span>
+                      <span className="text-gray-700">{displayPrice(36036)}+ monthly budget</span>
                     </li>
                   </ul>
                 </div>

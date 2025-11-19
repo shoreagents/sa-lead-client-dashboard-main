@@ -187,7 +187,7 @@ export default function LeadQuotations() {
                       <DollarSign className="h-8 w-8 text-lime-600" />
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Total Value</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue, 'PHP')}</p>
+                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue, quotations[0]?.currency_code || 'AUD')}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -199,7 +199,7 @@ export default function LeadQuotations() {
                       <Calculator className="h-8 w-8 text-lime-600" />
                       <div className="ml-4">
                         <p className="text-sm font-medium text-gray-600">Average Value</p>
-                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.averageValue, 'PHP')}</p>
+                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.averageValue, quotations[0]?.currency_code || 'AUD')}</p>
                       </div>
                     </div>
                   </CardContent>

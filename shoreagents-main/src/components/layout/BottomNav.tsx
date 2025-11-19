@@ -60,6 +60,20 @@ export function BottomNav() {
   // const { // recordInteraction } = useEngagementTracking()
   const { appUser } = useAuth()
   
+  // Listen for custom event to open pricing calculator (from Stage 2 form)
+  useEffect(() => {
+    const handleOpenPricingCalculator = () => {
+      console.log('📊 Custom event received: Opening pricing calculator');
+      setShowPricingModal(true);
+    };
+
+    window.addEventListener('openPricingCalculator', handleOpenPricingCalculator);
+    
+    return () => {
+      window.removeEventListener('openPricingCalculator', handleOpenPricingCalculator);
+    };
+  }, []);
+  
   // Show/hide bottom nav based on scroll position
   useEffect(() => {
     let lastScrollY = window.scrollY

@@ -83,14 +83,14 @@ export default function CandidatesPage() {
             {/* Header */}
             <div className="grid gap-4">
               <div className="flex items-start justify-between">
-                <div>
+              <div>
                   <div className="flex items-center gap-2">
                     <h2 className="text-2xl font-bold tracking-tight">Premium Candidate Database</h2>
                     <Badge className="bg-lime-600 text-white">Full AI Insights</Badge>
                   </div>
                   <p className="text-muted-foreground mt-1">
                     Access detailed AI analysis, work preferences, and calculated monthly costs
-                  </p>
+                </p>
                 </div>
               </div>
             </div>
@@ -196,17 +196,17 @@ export default function CandidatesPage() {
                         <div className="flex items-start gap-4">
                           {/* Avatar */}
                           <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-md flex-shrink-0 border-2 border-lime-200">
-                            {candidate.user.avatar ? (
-                              <img 
-                                src={candidate.user.avatar} 
-                                alt={candidate.user.name}
+                          {candidate.user.avatar ? (
+                            <img 
+                              src={candidate.user.avatar} 
+                              alt={candidate.user.name}
                                 className="w-20 h-20 rounded-full object-cover"
-                              />
-                            ) : (
+                            />
+                          ) : (
                               <Users className="w-10 h-10 text-lime-600" />
-                            )}
-                          </div>
-                          
+                          )}
+                        </div>
+                        
                           {/* Name, Position, and Quick Stats */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
@@ -217,25 +217,25 @@ export default function CandidatesPage() {
                                 <p className="text-sm text-gray-600 mt-1 line-clamp-2">
                                   {candidate.user.position}
                                 </p>
-                              </div>
-                              
-                              {/* Favorite Button */}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleFavorite(candidate.user.id)}
+                        </div>
+                        
+                        {/* Favorite Button */}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleFavorite(candidate.user.id)}
                                 className="p-2 h-8 w-8 flex-shrink-0"
-                              >
-                                <Heart 
+                        >
+                          <Heart 
                                   className={`w-4 h-4 ${
-                                    favorites.includes(candidate.user.id) 
-                                      ? 'text-red-500 fill-current' 
-                                      : 'text-gray-400'
-                                  }`} 
-                                />
-                              </Button>
-                            </div>
-                            
+                              favorites.includes(candidate.user.id) 
+                                ? 'text-red-500 fill-current' 
+                                : 'text-gray-400'
+                            }`} 
+                          />
+                        </Button>
+                      </div>
+                    
                             {/* Location & Work Status */}
                             <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
                               <div className="flex items-center gap-1">
@@ -254,7 +254,7 @@ export default function CandidatesPage() {
                         </div>
 
                         {/* AI Score Breakdown - Always Visible */}
-                        {candidate.aiAnalysis && (
+                      {candidate.aiAnalysis && (
                           <div className="mt-4 p-3 bg-white rounded-lg shadow-sm">
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center gap-2">
@@ -297,8 +297,8 @@ export default function CandidatesPage() {
                                 </span>
                               </div>
                             </div>
-                          </div>
-                        )}
+                        </div>
+                      )}
 
                         {/* Expected Cost - Prominent Display */}
                         {clientMonthlyCost > 0 && (
@@ -307,19 +307,19 @@ export default function CandidatesPage() {
                               <div className="flex items-center gap-2">
                                 <DollarSign className="w-4 h-4" />
                                 <span className="text-sm font-medium">Expected Monthly Cost</span>
-                              </div>
+                      </div>
                               <span className="text-xl font-bold">
                                 {formatCurrency(clientMonthlyCost, selectedCurrency.code)}
-                              </span>
-                            </div>
+                        </span>
+                      </div>
                           </div>
                         )}
                       </CardHeader>
-                      
+
                       {/* Content Section */}
                       <CardContent className="flex-1 flex flex-col p-4">
                         {/* Key Strengths - Always Visible */}
-                        {candidate.aiAnalysis?.key_strengths && candidate.aiAnalysis.key_strengths.length > 0 && (
+                      {candidate.aiAnalysis?.key_strengths && candidate.aiAnalysis.key_strengths.length > 0 && (
                           <div className="mb-4">
                             <div className="flex items-center gap-2 mb-2">
                               <Zap className="w-4 h-4 text-lime-600" />
@@ -329,23 +329,23 @@ export default function CandidatesPage() {
                               {candidate.aiAnalysis.key_strengths.slice(0, isExpanded ? undefined : 4).map((strength, index) => (
                                 <Badge key={index} variant="secondary" className="text-xs bg-lime-100 text-lime-800 border-lime-200">
                                   {strength}
-                                </Badge>
-                              ))}
+                            </Badge>
+                          ))}
                               {!isExpanded && candidate.aiAnalysis.key_strengths.length > 4 && (
                                 <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
                                   +{candidate.aiAnalysis.key_strengths.length - 4} more
-                                </Badge>
-                              )}
+                            </Badge>
+                          )}
                             </div>
-                          </div>
-                        )}
+                        </div>
+                      )}
 
-                        {/* Bio Preview */}
-                        {candidate.user.bio && (
+                      {/* Bio Preview */}
+                      {candidate.user.bio && (
                           <div className="mb-4">
                             <p className={`text-sm text-gray-700 ${isExpanded ? '' : 'line-clamp-2'}`}>
-                              {candidate.user.bio}
-                            </p>
+                          {candidate.user.bio}
+                        </p>
                           </div>
                         )}
 
@@ -400,9 +400,9 @@ export default function CandidatesPage() {
                               </div>
                             )}
                           </div>
-                        )}
+                      )}
 
-                        {/* Actions - Fixed at bottom */}
+                      {/* Actions - Fixed at bottom */}
                         <div className="flex flex-col gap-2 pt-4 mt-auto">
                           {/* Expand/Collapse Button */}
                           <Button 
@@ -425,26 +425,26 @@ export default function CandidatesPage() {
                           </Button>
 
                           <div className="grid grid-cols-2 gap-2">
-                            <Button 
-                              size="sm" 
+                        <Button 
+                          size="sm" 
                               className="bg-lime-600 hover:bg-lime-700 text-white text-xs h-9"
                               onClick={() => window.location.href = `/user-dashboard/candidates/${candidate.user.id}`}
-                            >
-                              <Eye className="w-3 h-3 mr-1" />
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
                               View Details
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
                               className="text-xs h-9 border-lime-200 hover:bg-lime-50"
-                            >
-                              <MessageCircle className="w-3 h-3 mr-1" />
-                              Contact
-                            </Button>
+                        >
+                          <MessageCircle className="w-3 h-3 mr-1" />
+                          Contact
+                        </Button>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
                   )
                 })}
               </div>

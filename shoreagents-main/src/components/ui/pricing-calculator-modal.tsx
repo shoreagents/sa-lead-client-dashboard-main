@@ -744,8 +744,8 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
       // For anonymous users, set company, industry, and team size from database if available (Stage 1 lead capture)
       if (!isAuthenticated) {
         if (userFormStatus.company) {
-          setCompany(userFormStatus.company);
-          console.log('🏢 Setting company from database:', userFormStatus.company);
+        setCompany(userFormStatus.company);
+        console.log('🏢 Setting company from database:', userFormStatus.company);
         }
         if (userFormStatus.industry) {
           setIndustry(userFormStatus.industry);
@@ -797,7 +797,7 @@ export function PricingCalculatorModal({ isOpen, onClose }: PricingCalculatorMod
           setIndustry(userFormStatus.industry);
           console.log('🏭 Pre-filling industry on modal open:', userFormStatus.industry);
         } else {
-          setIndustry('');
+      setIndustry('');
         }
         if (userFormStatus?.desiredTeamSize) {
           setMemberCount(userFormStatus.desiredTeamSize);
