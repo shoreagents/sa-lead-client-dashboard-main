@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 // Client-side only particles component to avoid hydration mismatch
 function ClientParticles() {
@@ -166,8 +167,6 @@ import {
   Instagram,
   Linkedin
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -223,6 +222,10 @@ export default function ResumeSlugPage() {
   const [activeSection, setActiveSection] = useState<string>('resume');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
+  const shareRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
 
 
   const [typingStats, setTypingStats] = useState<any | null>(null);
@@ -236,16 +239,49 @@ export default function ResumeSlugPage() {
   const [isGameResultsDropdownOpen, setIsGameResultsDropdownOpen] = useState<boolean>(false);
 
 
-  // Close share dropdown when clicking outside
+  // Calculate dropdown position and close when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (isShareOpen && !target.closest('.share-dropdown') && !target.closest('[data-share-button]')) {
-        setIsShareOpen(false);
+    const updatePosition = () => {
+      if (isShareOpen && shareRef.current) {
+        const rect = shareRef.current.getBoundingClientRect();
+        // For fixed positioning, use viewport coordinates directly (no scroll offsets)
+        setDropdownPosition({
+          top: rect.bottom + 8, // 8px = mt-2
+          right: window.innerWidth - rect.right
+        });
+      } else {
+        setDropdownPosition(null);
       }
     };
 
+    if (isShareOpen) {
+      // Use setTimeout to ensure the DOM is updated before calculating position
+      setTimeout(updatePosition, 0);
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    } else {
+      setDropdownPosition(null);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isShareOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+      const target = event.target as Element;
+        if (!target.closest('[data-share-dropdown]')) {
+        setIsShareOpen(false);
+        }
+      }
+    };
+
+    if (isShareOpen) {
     document.addEventListener('mousedown', handleClickOutside);
+    }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -331,52 +367,74 @@ export default function ResumeSlugPage() {
 
   // Share resume function
   const shareResume = async (platform?: string) => {
-    const url = `${window.location.origin}/resume/${slug}`;
-    const title = resume?.title || 'Resume';
-    const text = `Check out ${resume?.user.fullName}'s resume`;
+    const currentUrl = new URL(window.location.href);
+    const baseUrl = currentUrl.origin;
+    const currentPath = currentUrl.pathname;
+    const resumeUrl = `${baseUrl}${currentPath}`;
+    const userName = resume?.user.fullName || 'Professional';
+    const resumeTitle = resume?.title || 'Resume';
 
     switch (platform) {
       case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
-        break;
-
-      case 'twitter':
-        window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+        const facebookShareText = `📄 Check out my professional resume: ${resumeUrl}\n\n💼 Looking to build your career in the BPO industry?\n\nBPOC.IO offers:\n✨ AI-powered resume builder\n🎯 Skills assessments & career games\n🤝 Direct connections to top employers\n📈 Build your future with thousands of professionals!\n\nJoin us today! 💪`;
+        
+        try {
+          await navigator.clipboard.writeText(facebookShareText);
+          setShareModalData({ platform: 'Facebook', text: facebookShareText, url: resumeUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resumeUrl)}`;
+            window.open(facebookUrl, '_blank', 'width=600,height=400');
+          }, 1500);
+        } catch (err) {
+          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resumeUrl)}`;
+          window.open(facebookUrl, '_blank', 'width=600,height=400');
+        }
+        setIsShareOpen(false);
         break;
 
       case 'linkedin':
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
-        break;
-
-      case 'instagram':
-        // Instagram doesn't support direct URL sharing, so we'll copy the URL
-        await copyUrl(url);
+        const linkedinShareText = `📄 Check out my professional resume: ${resumeUrl}\n\n💼 Ready to advance your career in the BPO industry?\n\nBPOC.IO offers:\n✅ AI-powered resume builder\n✅ Professional skills assessments\n✅ Direct connections to top employers\n✅ Career development tools\n\n🚀 Join thousands of professionals building their future!\n\n#BPO #CareerGrowth #Resume #ProfessionalDevelopment`;
+        
+        try {
+          await navigator.clipboard.writeText(linkedinShareText);
+          setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: resumeUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resumeUrl)}`;
+            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+          }, 1500);
+        } catch (err) {
+          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resumeUrl)}`;
+          window.open(linkedinUrl, '_blank', 'width=600,height=400');
+        }
+        setIsShareOpen(false);
         break;
 
       case 'copy':
-        await copyUrl(url);
+        await copyUrl(resumeUrl);
+        setIsShareOpen(false);
         break;
 
       default:
         // Default native sharing
+        const text = `Check out ${userName}'s resume: ${resumeTitle}`;
         if (navigator.share) {
           try {
             await navigator.share({
-              title: title,
+              title: resumeTitle,
               text: text,
-              url: url
+              url: resumeUrl
             });
           } catch (error) {
             console.error('Error sharing:', error);
           }
         } else {
           // Fallback to copying to clipboard
-          await copyUrl(url);
+          await copyUrl(resumeUrl);
         }
-    }
-    
-    // Close share dropdown
     setIsShareOpen(false);
+    }
   };
 
   // Edit resume function
@@ -415,7 +473,7 @@ export default function ResumeSlugPage() {
     }
   };
 
-  // Export to PDF function
+  // Export to PDF function using Puppeteer
   const exportToPDF = async () => {
     console.log('Export PDF clicked!');
     const element = document.getElementById('resume-content');
@@ -431,48 +489,563 @@ export default function ResumeSlugPage() {
       // Wait for fonts to load
       await document.fonts.ready;
       
-      console.log('Capturing resume content...');
+      console.log('Preparing resume content for PDF generation...');
       
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: element.scrollWidth,
-        height: element.scrollHeight
+      // Clone the element to avoid modifying the original
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      
+      // Get computed styles and apply them inline
+      const styles = window.getComputedStyle(element);
+      clonedElement.style.width = styles.width;
+      clonedElement.style.maxWidth = styles.maxWidth;
+      clonedElement.style.backgroundColor = styles.backgroundColor || '#ffffff';
+      clonedElement.style.color = styles.color || '#1f2937';
+      clonedElement.style.fontFamily = styles.fontFamily || 'Inter, sans-serif';
+      
+      // Find and preserve the divider element specifically
+      // Use attribute selectors to avoid issues with dots in class names
+      const dividerSelectors = [
+        '[class*="h-0.5"][class*="my-6"]',
+        '[class*="h-0.5"]',
+        'div[class*="h-0\\.5"]',
+        'div[class*="h-px"]'
+      ];
+      
+      let dividerElement: HTMLElement | null = null;
+      for (const selector of dividerSelectors) {
+        try {
+          dividerElement = element.querySelector(selector) as HTMLElement;
+          if (dividerElement) {
+            // Verify it's actually a divider by checking height
+            const computedStyle = window.getComputedStyle(dividerElement);
+            const height = parseFloat(computedStyle.height);
+            if (height <= 2) {
+              break;
+            } else {
+              dividerElement = null; // Not a divider, continue searching
+            }
+          }
+        } catch (e) {
+          // Invalid selector, try next one
+          continue;
+        }
+      }
+      
+      if (dividerElement) {
+        const dividerComputedStyle = window.getComputedStyle(dividerElement);
+        const dividerInlineBg = dividerElement.style.backgroundColor;
+        const dividerInlineOpacity = dividerElement.style.opacity;
+        
+        // Find the corresponding divider in the cloned element using the same method
+        let clonedDivider: HTMLElement | null = null;
+        for (const selector of dividerSelectors) {
+          try {
+            clonedDivider = clonedElement.querySelector(selector) as HTMLElement;
+            if (clonedDivider) {
+              // Verify it's actually a divider by checking height
+              const computedStyle = window.getComputedStyle(clonedDivider);
+              const height = parseFloat(computedStyle.height);
+              if (height <= 2) {
+                break;
+              } else {
+                clonedDivider = null; // Not a divider, continue searching
+              }
+            }
+          } catch (e) {
+            // Invalid selector, try next one
+            continue;
+          }
+        }
+        
+        if (clonedDivider) {
+          // Get the actual values - prioritize inline styles, then computed, then defaults
+          // For background color, preserve the original color
+          let bgColor = dividerElement.style.backgroundColor;
+          
+          // Check style attribute first (most reliable)
+          const styleAttr = dividerElement.getAttribute('style');
+          if (styleAttr) {
+            const bgMatch = styleAttr.match(/background-color:\s*([^;!]+)/i);
+            if (bgMatch && bgMatch[1]) {
+              const extractedColor = bgMatch[1].trim();
+              if (extractedColor && extractedColor !== 'transparent' && extractedColor !== 'rgba(0, 0, 0, 0)') {
+                bgColor = extractedColor;
+              }
+            }
+          }
+          
+          // Fallback to inline style property
+          if (!bgColor || bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === '') {
+            bgColor = dividerElement.style.backgroundColor;
+          }
+          
+          // Fallback to computed style
+          if (!bgColor || bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === '') {
+            const computedBg = dividerComputedStyle.backgroundColor;
+            if (computedBg && computedBg !== 'transparent' && computedBg !== 'rgba(0, 0, 0, 0)' && computedBg !== 'rgba(8, 6, 0, 0)') {
+              bgColor = computedBg;
+            } else {
+              // Only use black as last resort
+              bgColor = '#000000';
+            }
+          }
+          
+          // Preserve original opacity
+          let opacity = dividerElement.style.opacity;
+          if (!opacity || opacity === '') {
+            if (styleAttr) {
+              const opacityMatch = styleAttr.match(/opacity:\s*([^;]+)/i);
+              if (opacityMatch && opacityMatch[1]) {
+                opacity = opacityMatch[1].trim();
+              }
+            }
+          }
+          if (!opacity || opacity === '') {
+            opacity = dividerComputedStyle.opacity || '0.3';
+          }
+          const height = dividerElement.style.height || dividerComputedStyle.height || '0.5px';
+          const width = dividerElement.style.width || dividerComputedStyle.width || '100%';
+          const marginTop = dividerElement.style.marginTop || dividerComputedStyle.marginTop || '24px';
+          const marginBottom = dividerElement.style.marginBottom || dividerComputedStyle.marginBottom || '24px';
+          
+          // Build the complete style string
+          const styleString = [
+            `display: block`,
+            `visibility: visible`,
+            `width: ${width}`,
+            `height: ${height}`,
+            `margin-top: ${marginTop}`,
+            `margin-bottom: ${marginBottom}`,
+            `background-color: ${bgColor}`,
+            `opacity: ${opacity}`,
+            `box-shadow: none`,
+            `border: none`,
+            `padding: 0`
+          ].join('; ');
+          
+          // Set all styles at once
+          clonedDivider.setAttribute('data-divider', 'true');
+          clonedDivider.setAttribute('style', styleString);
+          
+          // Also set via style object for compatibility
+          clonedDivider.style.cssText = styleString;
+          
+          console.log('✅ Divider preserved with inline styles:', {
+            backgroundColor: bgColor,
+            opacity: opacity,
+            height: height,
+            width: width,
+            marginTop: marginTop,
+            marginBottom: marginBottom,
+            styleString: styleString
+          });
+        } else {
+          console.warn('⚠️ Divider not found in cloned element');
+          // Create a divider if it wasn't found
+          const headerSection = clonedElement.querySelector('div:first-child');
+          if (headerSection) {
+            const newDivider = document.createElement('div');
+            newDivider.setAttribute('data-divider', 'true');
+            newDivider.className = 'w-full h-0.5 my-6';
+            newDivider.style.cssText = 'display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: #000000; opacity: 1; box-shadow: none; border: none; padding: 0;';
+            headerSection.insertAdjacentElement('afterend', newDivider);
+            console.log('✅ Created new divider element');
+          }
+        }
+      } else {
+        console.warn('⚠️ Divider element not found in resume content');
+        // Try to create a divider after the header section
+        const headerSection = clonedElement.querySelector('div:first-child');
+        if (headerSection) {
+          const newDivider = document.createElement('div');
+          newDivider.setAttribute('data-divider', 'true');
+          newDivider.className = 'w-full h-0.5 my-6';
+          newDivider.style.cssText = 'display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: #000000; opacity: 1; box-shadow: none; border: none; padding: 0;';
+          headerSection.insertAdjacentElement('afterend', newDivider);
+          console.log('✅ Created new divider element (fallback)');
+        }
+      }
+      
+      // Get all computed styles for child elements
+      const allElements = element.querySelectorAll('*');
+      allElements.forEach((el) => {
+        const computedStyle = window.getComputedStyle(el);
+        const htmlEl = el as HTMLElement;
+        // Preserve important styles
+        if (computedStyle.color) htmlEl.style.color = computedStyle.color;
+        if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+          htmlEl.style.backgroundColor = computedStyle.backgroundColor;
+        }
+        if (computedStyle.fontSize) htmlEl.style.fontSize = computedStyle.fontSize;
+        if (computedStyle.fontWeight) htmlEl.style.fontWeight = computedStyle.fontWeight;
+        if (computedStyle.fontFamily) htmlEl.style.fontFamily = computedStyle.fontFamily;
+        if (computedStyle.margin) htmlEl.style.margin = computedStyle.margin;
+        if (computedStyle.padding) htmlEl.style.padding = computedStyle.padding;
       });
-
-      console.log('Canvas created, generating PDF...');
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
       
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
+      // Remove any black backgrounds, shadows, gradients, or problematic styles from cloned element
+      const allClonedElements = clonedElement.querySelectorAll('*');
+      allClonedElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const computedStyle = window.getComputedStyle(el);
+        
+        // Remove black backgrounds
+        if (htmlEl.style.backgroundColor === 'black' || 
+            htmlEl.style.backgroundColor === '#000000' ||
+            htmlEl.style.backgroundColor === 'rgb(0, 0, 0)' ||
+            htmlEl.style.backgroundColor === 'rgba(0, 0, 0, 1)') {
+          htmlEl.style.backgroundColor = 'transparent';
+        }
+        
+        // Remove shadows (but preserve divider lines)
+        // Only remove shadows if it's not a divider line
+        // Check for divider by class, height, or if it's a thin horizontal line with background color
+        const hasDividerClass = htmlEl.classList.contains('h-0.5') || 
+                                htmlEl.classList.contains('h-px') ||
+                                htmlEl.classList.contains('my-6');
+        const hasDividerHeight = computedStyle.height === '0.5px' ||
+                                 computedStyle.height === '1px' ||
+                                 (computedStyle.height && parseFloat(computedStyle.height) <= 2);
+        const hasDividerStyle = (computedStyle.width === '100%' || htmlEl.style.width === '100%') &&
+                                hasDividerHeight &&
+                                (computedStyle.backgroundColor !== 'transparent' && 
+                                 computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)');
+        const isDivider = hasDividerClass || hasDividerHeight || hasDividerStyle;
+        
+        if (!isDivider) {
+          htmlEl.style.boxShadow = 'none';
+          htmlEl.style.textShadow = 'none';
+          htmlEl.style.filter = 'none';
+        }
+        
+        // Remove gradients
+        if (computedStyle.backgroundImage && computedStyle.backgroundImage.includes('gradient')) {
+          htmlEl.style.backgroundImage = 'none';
+        }
+        if (htmlEl.style.backgroundImage && htmlEl.style.backgroundImage.includes('gradient')) {
+          htmlEl.style.backgroundImage = 'none';
+        }
+        
+        // Remove backdrop filters
+        htmlEl.style.backdropFilter = 'none';
+        htmlEl.style.webkitBackdropFilter = 'none';
+        
+        // Ensure no black borders (but preserve colored borders for dividers)
+        if (htmlEl.style.borderColor === 'black' || 
+            htmlEl.style.borderColor === '#000000') {
+          htmlEl.style.borderColor = 'transparent';
+        }
+        
+        // Preserve divider lines - ensure they have a visible background or border
+        if (isDivider) {
+          // Preserve the original background color if it exists
+          const originalBg = computedStyle.backgroundColor;
+          const inlineBg = htmlEl.style.backgroundColor;
+          
+          // Priority: inline style > computed style > fallback
+          if (inlineBg && inlineBg !== 'transparent' && inlineBg !== 'rgba(0, 0, 0, 0)') {
+            // Keep the inline style background color
+            htmlEl.style.backgroundColor = inlineBg;
+          } else if (originalBg && originalBg !== 'transparent' && originalBg !== 'rgba(0, 0, 0, 0)') {
+            // Keep the original background color
+            htmlEl.style.backgroundColor = originalBg;
+          } else {
+            // Use black for dividers if no color is set
+            htmlEl.style.backgroundColor = '#000000'; // Black color
+            htmlEl.style.opacity = '1'; // Full opacity for black
+          }
+          
+          // Ensure divider is visible
+          htmlEl.style.height = computedStyle.height || '0.5px' || '1px';
+          htmlEl.style.display = 'block';
+          htmlEl.style.width = '100%';
+          htmlEl.style.marginTop = computedStyle.marginTop || '24px';
+          htmlEl.style.marginBottom = computedStyle.marginBottom || '24px';
+          
+          // Preserve opacity for dividers (they might have opacity for styling)
+          if (computedStyle.opacity && parseFloat(computedStyle.opacity) < 1) {
+            // Keep the opacity for dividers as it's part of their design
+            htmlEl.style.opacity = computedStyle.opacity;
+          } else if (!htmlEl.style.opacity && sourceElement?.style?.opacity) {
+            // If no opacity was set but source has it, use source opacity
+            htmlEl.style.opacity = sourceElement.style.opacity;
+          } else if (!htmlEl.style.opacity) {
+            // Default opacity for dividers
+            htmlEl.style.opacity = '0.3';
+          }
+        } else {
+          // Remove opacity effects that might cause shadows (only for non-dividers)
+          if (computedStyle.opacity && parseFloat(computedStyle.opacity) < 1) {
+            htmlEl.style.opacity = '1';
+          }
+        }
+      });
+      
+      // Ensure the main element has white background
+      clonedElement.style.backgroundColor = '#ffffff';
+      clonedElement.style.color = '#1f2937';
+      
+      // Before creating HTML, ensure divider is visible in the cloned element
+      // Find the divider one more time and ensure it has all styles
+      const finalDividerCheck = clonedElement.querySelector('[data-divider="true"]') || 
+                                clonedElement.querySelector('[class*="h-0.5"][class*="my-6"]') ||
+                                clonedElement.querySelector('[class*="h-0.5"]');
+      
+      if (finalDividerCheck) {
+        const finalDivider = finalDividerCheck as HTMLElement;
+        const finalComputed = window.getComputedStyle(finalDivider);
+        
+        // Get template color if available
+        const bgColor = finalDivider.style.backgroundColor || finalComputed.backgroundColor || '#000000';
+        const opacity = finalDivider.style.opacity || finalComputed.opacity || '1';
+        
+        // Force all styles
+        finalDivider.setAttribute('data-divider', 'true');
+        finalDivider.style.cssText = `display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: ${bgColor}; opacity: ${opacity}; box-shadow: none; border: none; padding: 0;`;
+        
+        console.log('✅ Final divider check - styles applied:', {
+          backgroundColor: finalDivider.style.backgroundColor,
+          opacity: finalDivider.style.opacity,
+          cssText: finalDivider.style.cssText,
+          outerHTML: finalDivider.outerHTML.substring(0, 200)
+        });
+      } else {
+        console.warn('⚠️ Divider not found in final check, creating new one');
+        // Create divider after first div
+        const firstDiv = clonedElement.querySelector('div');
+        if (firstDiv) {
+          const newDivider = document.createElement('div');
+          newDivider.setAttribute('data-divider', 'true');
+          newDivider.className = 'w-full h-0.5 my-6';
+          newDivider.style.cssText = `display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: #000000; opacity: 1; box-shadow: none; border: none; padding: 0;`;
+          firstDiv.insertAdjacentElement('afterend', newDivider);
+          console.log('✅ Created new divider in final check');
+        }
+      }
+      
+      // Create a complete HTML document with styles
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              html, body {
+                font-family: ${styles.fontFamily || 'Inter, sans-serif'};
+                color: #1f2937;
+                background: #ffffff !important;
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                height: auto;
+                min-height: 100vh;
+              }
+              body > * {
+                background: #ffffff !important;
+              }
+              /* Override any black backgrounds */
+              [style*="background: black"],
+              [style*="background-color: black"],
+              [style*="background: #000"],
+              [style*="background-color: #000"],
+              [style*="background: rgb(0, 0, 0)"],
+              [style*="background-color: rgb(0, 0, 0)"] {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+              }
+              /* Ensure all divs have proper backgrounds */
+              div {
+                background: transparent !important;
+              }
+              div[class*="bg-"] {
+                background: #ffffff !important;
+              }
+              /* Remove any black overlays or pseudo-elements */
+              ::before,
+              ::after {
+                background: transparent !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+                display: none !important;
+              }
+              /* Remove all shadows (but preserve divider lines) */
+              *:not([class*="h-0.5"]):not([class*="h-px"]):not([style*="height: 0.5px"]):not([style*="height: 1px"]) {
+                box-shadow: none !important;
+                text-shadow: none !important;
+                filter: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+              }
+              /* Preserve divider lines */
+              [class*="h-0.5"],
+              [class*="h-px"],
+              [style*="height: 0.5px"],
+              [style*="height: 1px"],
+              [class*="my-6"] {
+                display: block !important;
+                visibility: visible !important;
+                width: 100% !important;
+              }
+              /* Ensure divider with my-6 class is visible */
+              [class*="h-0.5"][class*="my-6"],
+              [class*="h-0.5"],
+              [data-divider="true"] {
+                display: block !important;
+                visibility: visible !important;
+                width: 100% !important;
+                min-height: 0.5px !important;
+                margin-top: 24px !important;
+                margin-bottom: 24px !important;
+              }
+              /* Only set default color/opacity if not already set inline */
+              [class*="h-0.5"][class*="my-6"]:not([style*="background"]),
+              [class*="h-0.5"]:not([style*="background"]),
+              [data-divider="true"]:not([style*="background"]) {
+                background-color: #000000 !important;
+                opacity: 1 !important;
+              }
+              /* Force divider to be visible - but respect inline styles */
+              [data-divider="true"] {
+                display: block !important;
+                visibility: visible !important;
+                height: 0.5px !important;
+                width: 100% !important;
+                margin-top: 24px !important;
+                margin-bottom: 24px !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+              }
+              /* Only set default color/opacity if not set inline */
+              [data-divider="true"]:not([style*="background-color"]):not([style*="background:"]) {
+                background-color: #000000 !important;
+              }
+              [data-divider="true"]:not([style*="opacity"]) {
+                opacity: 1 !important;
+              }
+              /* Remove gradients */
+              [style*="gradient"],
+              [class*="gradient"],
+              [class*="shadow"] {
+                background-image: none !important;
+                box-shadow: none !important;
+      }
+              /* Remove glass effects */
+              [class*="glass"],
+              [class*="backdrop"] {
+                background: #ffffff !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+              }
+              ${Array.from(document.styleSheets)
+                .map((sheet) => {
+                  try {
+                    return Array.from(sheet.cssRules)
+                      .map((rule) => {
+                        const ruleText = rule.cssText;
+                        // Filter out any rules that might cause black backgrounds
+                        if (ruleText.includes('background: black') || 
+                            ruleText.includes('background-color: black') ||
+                            ruleText.includes('background: #000') ||
+                            ruleText.includes('background-color: #000')) {
+                          return '';
+                        }
+                        return ruleText;
+                      })
+                      .join('\n');
+                  } catch (e) {
+                    return '';
+                  }
+                })
+                .join('\n')}
+            </style>
+          </head>
+          <body style="background: #ffffff !important; color: #1f2937;">
+            ${clonedElement.outerHTML}
+          </body>
+        </html>
+      `;
 
-      let position = 0;
+      // Format filename as FirstName-LastName-BPOC-Resume.pdf
+      const fullName = resume?.user.fullName || 'Resume';
+      const nameParts = fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || 'Resume';
+      const lastName = nameParts.slice(1).join('-') || 'User';
+      const fileName = `${firstName}-${lastName}-BPOC-Resume.pdf`;
+      const pdfTitle = `${fullName} - Resume | BPOC.IO`;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Add title to HTML for PDF metadata
+      const htmlWithTitle = htmlContent.replace(
+        '<head>',
+        `<head>\n            <title>${pdfTitle}</title>`
+      );
 
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Debug: Check if divider is in the HTML
+      const hasDivider = htmlWithTitle.includes('data-divider="true"') || 
+                        htmlWithTitle.includes('h-0.5') ||
+                        htmlWithTitle.includes('my-6');
+      
+      if (hasDivider) {
+        console.log('✅ Divider found in HTML string');
+        // Extract a snippet of HTML around the divider for debugging
+        const dividerIndex = htmlWithTitle.indexOf('data-divider') || htmlWithTitle.indexOf('h-0.5');
+        if (dividerIndex > -1) {
+          const snippet = htmlWithTitle.substring(Math.max(0, dividerIndex - 100), dividerIndex + 300);
+          console.log('📄 Divider HTML snippet:', snippet);
+        }
+      } else {
+        console.error('❌ Divider NOT found in HTML string!');
+        console.log('📄 HTML preview (first 2000 chars):', htmlWithTitle.substring(0, 2000));
       }
 
-      const fileName = `${resume?.user.fullName || 'Resume'}-Resume.pdf`;
-      pdf.save(fileName);
+      console.log('Sending request to PDF generation API...');
 
-      console.log('PDF saved successfully');
+      // Call Puppeteer API
+      const response = await fetch('/api/resume/export-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          html: htmlWithTitle,
+          fileName: fileName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to generate PDF' }));
+        const errorMessage = errorData.details || errorData.error || 'Failed to generate PDF';
+        console.error('❌ PDF generation error:', errorData);
+        throw new Error(errorMessage);
+      }
+
+      // Get PDF blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('PDF downloaded successfully');
 
     } catch (error) {
       console.error('Error exporting PDF:', error);
-      alert('Error generating PDF. Please try again. Error: ' + (error as Error).message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const detailedMessage = errorMessage.includes('Failed to launch browser') 
+        ? 'PDF generation failed: Browser could not be launched. Please check server logs for details. If you\'re on Windows, make sure Chrome is installed.'
+        : `Error generating PDF: ${errorMessage}`;
+      alert(detailedMessage);
     } finally {
       setExporting(false);
     }
@@ -658,80 +1231,60 @@ export default function ResumeSlugPage() {
                    )}
                    
                    {/* Share Button with Dropdown */}
-                   <div className="relative">
+                   <div className="relative z-50" ref={shareRef}>
                      <Button
                        onClick={() => setIsShareOpen(!isShareOpen)}
                        variant="outline"
                        className="border-cyan-400/30 text-cyan-400 hover:bg-cyan-400/10"
-                       data-share-button
                      >
                        <Share2 className="h-4 w-4 mr-2" />
                        Share
                      </Button>
-                     
-                     {/* Share Dropdown Menu */}
-                     {isShareOpen && (
-                       <div className="absolute top-full right-0 mt-2 w-64 bg-black/90 border border-white/20 rounded-lg shadow-xl backdrop-blur-sm z-50 share-dropdown">
-                         <div className="p-2 space-y-1">
-                           {/* Native Share (if available) */}
-                           {typeof navigator !== 'undefined' && 'share' in navigator && (
-                             <div
-                               onClick={() => shareResume()}
-                               className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                             >
-                               <Share2 className="h-4 w-4 text-blue-400" />
-                               <span>Share via...</span>
                              </div>
-                           )}
-                           
-                           {/* Facebook */}
-                           <div
+                   
+                   {/* Share Dropdown Menu - Rendered via Portal to avoid overflow clipping */}
+                   {isShareOpen && dropdownPosition && typeof document !== 'undefined' && createPortal(
+                     <div
+                       data-share-dropdown
+                       className="fixed bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[9999] min-w-[240px]"
+                       style={{
+                         top: `${dropdownPosition.top}px`,
+                         right: `${dropdownPosition.right}px`
+                       }}
+                     >
+                       <div className="py-2">
+                         {/* Facebook Share */}
+                         <button
                              onClick={() => shareResume('facebook')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
+                           className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                            >
-                             <Facebook className="h-4 w-4 text-blue-600" />
-                             <span>Share on Facebook</span>
-                           </div>
+                           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
+                           <span className="font-medium">Share on Facebook</span>
+                         </button>
                            
-                           {/* X (Twitter) */}
-                           <div
-                             onClick={() => shareResume('twitter')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                           >
-                             <Twitter className="h-4 w-4 text-blue-400" />
-                             <span>Share on X (Twitter)</span>
-                           </div>
-                           
-                           {/* LinkedIn */}
-                           <div
+                         {/* LinkedIn Share */}
+                         <button
                              onClick={() => shareResume('linkedin')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
+                           className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                            >
-                             <Linkedin className="h-4 w-4 text-blue-700" />
-                             <span>Share on LinkedIn</span>
-                           </div>
+                           <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
+                           <span className="font-medium">Share on LinkedIn</span>
+                         </button>
+
+                         <div className="border-t border-white/10 my-1"></div>
                            
-                           {/* Instagram */}
-                           <div
-                             onClick={() => shareResume('instagram')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
-                           >
-                             <Instagram className="h-4 w-4 text-pink-500" />
-                             <span>Copy URL for Instagram</span>
-                           </div>
-                           
-                           {/* Copy URL */}
-                           <div
+                         {/* Copy Link */}
+                         <button
                              onClick={() => shareResume('copy')}
-                             className="w-full flex items-center gap-3 px-3 py-2 text-white hover:bg-white/10 rounded-md transition-colors text-left cursor-pointer"
+                           className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                            >
-                             <Copy className="h-4 w-4 text-green-400" />
-                             <span>Copy URL</span>
+                           <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">📋</div>
+                           <span className="font-medium">Copy Link</span>
+                         </button>
                            </div>
-                         </div>
-                       </div>
+                     </div>,
+                     document.body
                      )}
-                   </div>
                    
                    {/* Export PDF Button */}
                    <Button
@@ -1160,6 +1713,130 @@ export default function ResumeSlugPage() {
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="relative w-full max-w-2xl"
+          >
+            {/* Glow Effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
+            
+            {/* Modal Content */}
+            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl border-2 border-cyan-400/30 shadow-2xl overflow-hidden">
+              {/* Header with Gradient */}
+              <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                      <span className="text-3xl">✓</span>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Text Copied Successfully!</h3>
+                      <p className="text-cyan-100 text-sm">Ready to share on {shareModalData.platform}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowShareModal(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6">
+                {/* Instructions */}
+                <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-xl p-5 border border-cyan-400/20">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-xl">💡</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
+                      <ol className="space-y-2 text-gray-300">
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                          <span>The {shareModalData.platform} share dialog will open in 1.5 seconds</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                          <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                          <span>Your resume image will appear automatically - just hit Share!</span>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text Preview */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Post Text Preview</label>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(shareModalData.text);
+                          const btn = document.getElementById('copy-again-btn');
+                          if (btn) {
+                            btn.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                              btn.textContent = 'Copy Again';
+                            }, 2000);
+                          }
+                        } catch (err) {
+                          console.error('Failed to copy:', err);
+                        }
+                      }}
+                      id="copy-again-btn"
+                      className="text-xs px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-400/30 transition-all duration-200 hover:scale-105 font-medium"
+                    >
+                      Copy Again
+                    </button>
+                  </div>
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto">
+                    <p className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                      {shareModalData.text}
+                    </p>
+                  </div>
+                </div>
+
+                {/* BPOC Branding Footer */}
+                <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">B</span>
+                  </div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    BPOC.IO
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-400 text-sm">Where BPO Careers Begin</span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowShareModal(false)}
+                    className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
+                  >
+                    Got It! 👍
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

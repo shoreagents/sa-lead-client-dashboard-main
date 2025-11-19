@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { emitNotificationUpdate } from '@/lib/emit-notification'
 
 // POST - Mark notification as read
 export async function POST(
@@ -16,10 +17,23 @@ export async function POST(
     }
 
     // In a real app, update the notification in the database
-    // For mock data, just return success
+    // For now, create updated notification object
+    const updatedNotification = {
+      id,
+      title: 'Updated',
+      message: 'Notification marked as read',
+      type: 'info' as const,
+      read: true,
+      created_at: new Date().toISOString(),
+    }
+
+    // Emit real-time update via Socket.io
+    emitNotificationUpdate(updatedNotification, 'admin')
+
     return NextResponse.json({
       success: true,
       message: 'Notification marked as read',
+      data: updatedNotification,
     })
   } catch (error) {
     console.error('Error marking notification as read:', error)

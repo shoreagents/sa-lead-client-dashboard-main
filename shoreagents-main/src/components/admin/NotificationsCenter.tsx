@@ -15,7 +15,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { useSocket } from '@/lib/socket-client'
 
 interface Notification {
   id: string
@@ -31,8 +31,8 @@ export function NotificationsCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
-  const subscriptionRef = useRef<any>(null)
+  const { socket, isConnected } = useSocket()
+  const socketRef = useRef<any>(null)
 
   const fetchNotifications = async () => {
     try {
@@ -50,95 +50,78 @@ export function NotificationsCenter() {
     }
   }
 
-  // Set up real-time subscription
+  // Set up Socket.io real-time subscription
   useEffect(() => {
     // Initial fetch
     fetchNotifications()
 
-    // Set up Supabase Realtime subscription
-    try {
-      if (supabase) {
-        // Subscribe to changes in notifications table
-        const channel = supabase
-          .channel('admin-notifications')
-          .on(
-            'postgres_changes',
-            {
-              event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
-              schema: 'public',
-              table: 'notifications',
-            },
-            (payload) => {
-              console.log('🔔 Real-time notification update:', payload)
-              
-              // Handle different event types
-              if (payload.eventType === 'INSERT') {
-                // New notification added
-                const newNotification = payload.new as Notification
-                setNotifications((prev) => [newNotification, ...prev])
-                if (!newNotification.read) {
-                  setUnreadCount((prev) => prev + 1)
-                  // Show toast for new notifications
-                  toast.info(newNotification.title, {
-                    description: newNotification.message,
-                  })
-                }
-              } else if (payload.eventType === 'UPDATE') {
-                // Notification updated (e.g., marked as read)
-                const updatedNotification = payload.new as Notification
-                setNotifications((prev) => {
-                  const updated = prev.map((n) => 
-                    n.id === updatedNotification.id ? updatedNotification : n
-                  )
-                  // Recalculate unread count based on updated list
-                  const unread = updated.filter((n) => !n.read).length
-                  setUnreadCount(unread)
-                  return updated
-                })
-              } else if (payload.eventType === 'DELETE') {
-                // Notification deleted
-                const deletedId = payload.old.id
-                setNotifications((prev) => {
-                  const deleted = prev.find((n) => n.id === deletedId)
-                  if (deleted && !deleted.read) {
-                    setUnreadCount((prev) => Math.max(0, prev - 1))
-                  }
-                  return prev.filter((n) => n.id !== deletedId)
-                })
-              }
-            }
-          )
-          .subscribe((status) => {
-            console.log('📡 Subscription status:', status)
-            if (status === 'SUBSCRIBED') {
-              console.log('✅ Real-time notifications enabled')
-            } else if (status === 'CHANNEL_ERROR') {
-              console.warn('⚠️ Realtime subscription error, falling back to polling')
-            }
+    if (socket) {
+      // Join admin notifications room
+      socket.emit('join-admin-room')
+
+      // Listen for new notifications
+      const handleNewNotification = (notification: Notification) => {
+        console.log('🔔 New notification received:', notification)
+        setNotifications((prev) => [notification, ...prev])
+        if (!notification.read) {
+          setUnreadCount((prev) => prev + 1)
+          // Show toast for new notifications
+          toast.info(notification.title, {
+            description: notification.message,
           })
-
-        subscriptionRef.current = channel
-
-        // Cleanup subscription on unmount
-        return () => {
-          if (subscriptionRef.current) {
-            supabase.removeChannel(subscriptionRef.current)
-            subscriptionRef.current = null
-          }
         }
-      } else {
-        // Fallback to shorter polling if Supabase is not available
-        console.log('📡 Supabase not available, using polling fallback')
-        const interval = setInterval(fetchNotifications, 5000) // Poll every 5 seconds
-        return () => clearInterval(interval)
       }
-    } catch (error) {
-      console.error('Error setting up real-time subscription:', error)
-      // Fallback to polling on error
-      const interval = setInterval(fetchNotifications, 5000)
+
+      // Listen for notification updates
+      const handleNotificationUpdate = (notification: Notification) => {
+        console.log('🔔 Notification updated:', notification)
+        setNotifications((prev) => {
+          const updated = prev.map((n) => 
+            n.id === notification.id ? notification : n
+          )
+          // Recalculate unread count based on updated list
+          const unread = updated.filter((n) => !n.read).length
+          setUnreadCount(unread)
+          return updated
+        })
+      }
+
+      // Listen for notification deletion
+      const handleNotificationDelete = (notificationId: string) => {
+        console.log('🔔 Notification deleted:', notificationId)
+        setNotifications((prev) => {
+          const deleted = prev.find((n) => n.id === notificationId)
+          if (deleted && !deleted.read) {
+            setUnreadCount((prev) => Math.max(0, prev - 1))
+          }
+          return prev.filter((n) => n.id !== notificationId)
+        })
+      }
+
+      socket.on('new-notification', handleNewNotification)
+      socket.on('notification-updated', handleNotificationUpdate)
+      socket.on('notification-deleted', handleNotificationDelete)
+
+      socketRef.current = socket
+
+      console.log('✅ Socket.io real-time notifications enabled')
+
+      // Cleanup on unmount
+      return () => {
+        if (socket) {
+          socket.off('new-notification', handleNewNotification)
+          socket.off('notification-updated', handleNotificationUpdate)
+          socket.off('notification-deleted', handleNotificationDelete)
+          socket.emit('leave-admin-room')
+        }
+      }
+    } else {
+      // Fallback to polling if Socket.io is not available
+      console.log('📡 Socket.io not available, using polling fallback')
+      const interval = setInterval(fetchNotifications, 5000) // Poll every 5 seconds
       return () => clearInterval(interval)
     }
-  }, [])
+  }, [socket, isConnected])
 
   const markAsRead = async (id: string) => {
     try {
@@ -224,7 +207,7 @@ export function NotificationsCenter() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 pt-2">
               <Bell className="w-5 h-5 text-lime-600" />
               Notifications
               {unreadCount > 0 && (

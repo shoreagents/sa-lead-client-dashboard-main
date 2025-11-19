@@ -116,6 +116,21 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // For DISC personality page, pass the full URL with query params to help with OG image generation
+  if (request.nextUrl.pathname.startsWith('/career-tools/games/disc-personality')) {
+    const requestHeaders = new Headers(request.headers)
+    const fullUrl = request.url
+    requestHeaders.set('x-url', fullUrl)
+    requestHeaders.set('x-pathname', request.nextUrl.pathname)
+    requestHeaders.set('x-query-string', request.nextUrl.search)
+    
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    })
+  }
+
   return NextResponse.next()
 }
 
@@ -147,6 +162,7 @@ export const config = {
     '/api/games/typing-hero/session',
     '/api/games/disc-personality/session',
     '/api/games/disc/session',
-    '/api/games/ultimate/session'
+    '/api/games/ultimate/session',
+    '/career-tools/games/disc-personality'
   ],
 } 

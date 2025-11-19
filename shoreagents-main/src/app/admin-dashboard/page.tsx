@@ -164,7 +164,7 @@ export default function AdminDashboard() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-22">
+          <div className="flex flex-1 flex-col gap-4 p-4">
             <div className="w-full">
 
         {/* Loading State */}
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
             {/* Page Views and Unique Visitors Skeleton - Top left, 3 columns, 1 row */}
             <div className="col-span-3 row-span-1 grid grid-cols-2 gap-4">
               <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-2 pt-2">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-4 rounded" />
                 </CardHeader>
@@ -183,7 +183,7 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
               <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-2">
                   <Skeleton className="h-4 w-24" />
                   <Skeleton className="h-4 w-4 rounded" />
                 </CardHeader>
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
             {/* Page Views and Unique Visitors Cards - Top left, 3 columns, 2 rows */}
             <div className="col-span-3 row-span-1 grid grid-cols-2 gap-4">
               <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-2">
                   <CardTitle className="text-sm font-medium">Page Views</CardTitle>
                   <Eye className="h-4 w-4 text-lime-600" />
                 </CardHeader>
@@ -293,7 +293,7 @@ export default function AdminDashboard() {
               </Card>
 
               <Card className="border-l-4 border-l-lime-500 bg-gradient-to-t from-lime-50/50 to-white shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-2">
                   <CardTitle className="text-sm font-medium">Unique Visitors</CardTitle>
                   <Users className="h-4 w-4 text-lime-600" />
                 </CardHeader>
@@ -336,14 +336,14 @@ export default function AdminDashboard() {
             <div className="col-span-5 row-span-1">
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 pt-2">
                     <Database className="w-5 h-5 text-lime-600" />
                     System Health
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="flex justify-between items-center p-4 border rounded-lg">
+                    <div className="flex justify-between items-center p-2 border rounded-lg">
                       <span className="text-sm font-medium">Database Status</span>
                       <Badge className="bg-green-100 text-green-800">
                         <CheckCircle className="w-3 h-3 mr-1" />

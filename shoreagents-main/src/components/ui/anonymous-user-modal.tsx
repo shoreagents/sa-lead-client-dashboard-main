@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/ui/dialog-videocall';
 import { Send, X } from 'lucide-react';
 import { generateUserId } from '@/lib/userEngagementService';
 

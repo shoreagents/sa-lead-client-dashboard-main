@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
@@ -45,8 +45,11 @@ import {
   Users,
   Church,
   Home,
-  ChevronDown
+  ChevronDown,
+  Share2,
+  X
 } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { PacmanLoader } from 'react-spinners';
 
 import { FILIPINO_DISC_SCENARIOS } from '../../../../data/filipinoDiscScenarios';
@@ -309,6 +312,13 @@ export default function FilipinoDiscGame() {
   const [revealStep, setRevealStep] = useState(0);
   const [isInsightsExpanded, setIsInsightsExpanded] = useState(false);
   
+  // Share state
+  const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
+  const shareRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
+  
   // Music control state
   const [musicGender, setMusicGender] = useState<'male' | 'female'>('male');
   const [isMuted, setIsMuted] = useState(false);
@@ -398,6 +408,123 @@ export default function FilipinoDiscGame() {
       playMusic();
     }
   }, [gameState.gameStarted, backgroundMusic, isMusicPlaying]);
+
+  // Share dropdown positioning
+  useEffect(() => {
+    const updatePosition = () => {
+      if (isShareOpen && shareRef.current) {
+        const rect = shareRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + 8,
+          right: window.innerWidth - rect.right
+        });
+      } else {
+        setDropdownPosition(null);
+      }
+    };
+
+    if (isShareOpen) {
+      setTimeout(updatePosition, 0);
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
+    } else {
+      setDropdownPosition(null);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
+    };
+  }, [isShareOpen]);
+
+  // Handle click outside share dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
+        const target = event.target as Element;
+        if (!target.closest('[data-share-dropdown]')) {
+          setIsShareOpen(false);
+        }
+      }
+    };
+
+    if (isShareOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isShareOpen]);
+
+  // Share DISC results function
+  const shareDiscResults = async (platform?: string) => {
+    if (!discResult || !user) {
+      console.error('Cannot share: discResult or user is missing', { discResult, user });
+      return;
+    }
+
+    const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
+    const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+    const shareUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
+    // Match the URL format used in layout.tsx (without title parameter, with v parameter for cache busting)
+    const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&v=5`;
+
+    // Close dropdown first
+    setIsShareOpen(false);
+
+    switch (platform) {
+      case 'facebook':
+        const facebookShareText = `🎯 I'm a ${personalityType.animal}! ${personalityType.title}\n\n${personalityType.description}\n\nPerfect for ${personalityType.bpoRoles[0]} roles in the BPO industry!\n\nDiscover your BPO animal spirit: ${shareUrl}\n\n#BPOC #BPOCareers #DISC #PersonalityAssessment`;
+        
+        try {
+          await navigator.clipboard.writeText(facebookShareText);
+          setShareModalData({ platform: 'Facebook', text: facebookShareText, url: shareUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+            window.open(facebookUrl, '_blank', 'width=600,height=400');
+          }, 1500);
+        } catch (err) {
+          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+          window.open(facebookUrl, '_blank', 'width=600,height=400');
+        }
+        break;
+
+      case 'linkedin':
+        const linkedinShareText = `🎯 I'm a ${personalityType.animal}! ${personalityType.title}\n\n${personalityType.description}\n\nPerfect for ${personalityType.bpoRoles[0]} roles in the BPO industry!\n\nDiscover your BPO animal spirit: ${shareUrl}\n\n#BPOC #BPOCareers #DISC #PersonalityAssessment #CareerGrowth`;
+        
+        try {
+          await navigator.clipboard.writeText(linkedinShareText);
+          setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: shareUrl });
+          setShowShareModal(true);
+          setTimeout(() => {
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+          }, 1500);
+        } catch (err) {
+          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+          window.open(linkedinUrl, '_blank', 'width=600,height=400');
+        }
+        break;
+
+      case 'copy':
+        // For "Copy Link", only copy the URL, not the full share text
+        // Match profile/resume behavior - just show alert, no modal
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          alert('DISC results link copied to clipboard!');
+        } catch (err) {
+          console.error('Failed to copy link:', err);
+          alert('Failed to copy link. Please copy manually: ' + shareUrl);
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
 
   // Preview music function with countdown
   const previewMusic = async (type: 'maledisc' | 'femaledisc') => {
@@ -673,6 +800,43 @@ export default function FilipinoDiscGame() {
     }
   }, [user, gameState.gameStarted, gameState.userProfile]);
 
+  // Update meta tags when results are shown (for OG image) - MUST be before any early returns
+  useEffect(() => {
+    if (showResults && discResult && user) {
+      const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+      // Match the URL format used in layout.tsx (with v=5 for cache busting)
+      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&v=5`;
+      const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
+      
+      // Update or create meta tags
+      const updateMetaTag = (property: string, content: string) => {
+        let meta = document.querySelector(`meta[property="${property}"]`) || 
+                   document.querySelector(`meta[name="${property}"]`);
+        if (!meta) {
+          meta = document.createElement('meta');
+          meta.setAttribute('property', property);
+          document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+      };
+
+      updateMetaTag('og:title', `${personalityType.title} - ${animalName} Personality`);
+      updateMetaTag('og:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}. Take the BPOC DISC Personality Assessment to find your perfect BPO role.`);
+      updateMetaTag('og:image', ogImageUrl);
+      updateMetaTag('og:url', pageUrl);
+      updateMetaTag('og:type', 'website');
+      updateMetaTag('og:site_name', 'BPOC.IO');
+      
+      // Twitter meta tags
+      updateMetaTag('twitter:card', 'summary_large_image');
+      updateMetaTag('twitter:title', `${personalityType.title} - ${animalName} Personality`);
+      updateMetaTag('twitter:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}.`);
+      updateMetaTag('twitter:image', ogImageUrl);
+    }
+  }, [showResults, discResult, user]);
+
   const startGame = () => {
     // Stop any preview that's playing
     stopPreview();
@@ -699,7 +863,9 @@ export default function FilipinoDiscGame() {
   const generatePersonalizedQuestions = async (responses?: any[], scores?: any) => {
     if (!user) {
       console.error('❌ No user found for personalized questions');
-      completeGame();
+      // Use passed scores or current state scores
+      const finalScores = scores || gameState.scores;
+      completeGame(finalScores);
       return;
     }
 
@@ -756,28 +922,30 @@ export default function FilipinoDiscGame() {
           setShowAchievement(null);
         } else {
           console.error('❌ No personalized questions in response:', data);
-          completeGame();
+          completeGame(currentScores);
         }
       } else {
         const errorText = await response.text();
         console.error('❌ API call failed:', response.status, errorText);
         // Complete game without personalized questions
-        completeGame();
+        completeGame(currentScores);
       }
     } catch (error) {
       console.error('❌ Error generating personalized questions:', error);
       // Complete game without personalized questions
-      completeGame();
+      completeGame(currentScores);
     }
   };
 
-  const completeGame = () => {
+  const completeGame = (scores?: { D: number; I: number; S: number; C: number }) => {
     setGameState(prev => ({
       ...prev,
       gameCompleted: true,
       isGeneratingPersonalized: false
     }));
-    calculateResults(gameState.scores);
+    // Use provided scores or fallback to current state scores
+    const finalScores = scores || gameState.scores;
+    calculateResults(finalScores);
   };
 
 	// Safety check after functions are defined
@@ -1370,12 +1538,12 @@ Make it deeply personal and actionable based on their actual choices.`;
 							totalResponses: gameState.responses.length,
 							completionTime: Math.floor((Date.now() - (gameState.sessionStartTime?.getTime() || Date.now())) / 1000),
 							culturalContexts: ['FAMILY', 'WORK', 'SOCIAL', 'TRAFFIC', 'MONEY', 'CRISIS'],
-							personalizedQuestionsUsed: gameState.personalizedQuestions.length
+							personalizedQuestionsUsed: gameState.personalizedQuestions?.length || 0
             },
             coreResponses: gameState.responses.slice(0, 30),
             coreScores: gameState.scores,
             personalizedResponses: gameState.responses.slice(30),
-            personalizedQuestions: gameState.personalizedQuestions,
+            personalizedQuestions: gameState.personalizedQuestions || [],
 						finalResults: results,
 						aiAssessment: generatedAssessment,
 						aiBpoRoles: generatedBpoRoles,
@@ -1646,7 +1814,8 @@ Make it deeply personal and actionable based on their actual choices.`;
                               .replace(/Actionoriented/g, 'Action-oriented')
                               .replace(/Relationshipconscious/g, 'Relationship-conscious')
                               .replace(/Strategicrelationship/g, 'Strategic relationship')
-                              .replace(/Adaptablecommunicator/g, 'Adaptable communicator');
+                              .replace(/Adaptablecommunicator/g, 'Adaptable communicator')
+                              .replace(/\*\*/g, ''); // Remove markdown bold markers
                             
                             return (
                               <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm">
@@ -1680,6 +1849,7 @@ Make it deeply personal and actionable based on their actual choices.`;
                             // Clean up the content and display as bullet points
                             const cleanCultural = culturalSection
                               .replace(/^[^:]*:\s*/, '') // Remove everything before the first colon
+                              .replace(/\*\*/g, '') // Remove markdown bold markers
                               .trim();
                             
                             // Split by numbered items or bullet points and display each as a separate line
@@ -3311,6 +3481,166 @@ Make it deeply personal and actionable based on their actual choices.`;
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Share Modal - Rendered via Portal */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {showShareModal && (
+            <div 
+              className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  setShowShareModal(false);
+                }
+              }}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="relative w-full max-w-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+            {/* Glow Effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
+            
+            {/* Modal Content */}
+            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl border-2 border-cyan-400/30 shadow-2xl overflow-hidden">
+              {/* Header with Gradient */}
+              <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                      <span className="text-3xl">✓</span>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">
+                        {shareModalData.platform === 'Clipboard' ? 'Link Copied Successfully!' : 'Text Copied Successfully!'}
+                      </h3>
+                      <p className="text-cyan-100 text-sm">
+                        {shareModalData.platform === 'Clipboard' ? 'The link is ready to share!' : `Ready to share on ${shareModalData.platform}`}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowShareModal(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6">
+                {/* Instructions */}
+                <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-xl p-5 border border-cyan-400/20">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-xl">💡</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
+                      {shareModalData.platform === 'Clipboard' ? (
+                        <ol className="space-y-2 text-gray-300">
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                            <span>The link has been copied to your clipboard</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                            <span>Paste the link (Ctrl+V or Cmd+V) wherever you want to share it</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                            <span>The DISC results image will appear automatically when the link is shared!</span>
+                          </li>
+                        </ol>
+                      ) : (
+                        <ol className="space-y-2 text-gray-300">
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                            <span>The {shareModalData.platform} share dialog will open in 2 seconds</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                            <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                            <span>Your DISC results image will appear automatically - just hit Share!</span>
+                          </li>
+                        </ol>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text Preview */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                      {shareModalData.platform === 'Clipboard' ? 'Copied Link' : 'Post Text Preview'}
+                    </label>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(shareModalData.text);
+                          const btn = document.getElementById('copy-again-btn-disc');
+                          if (btn) {
+                            btn.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                              btn.textContent = 'Copy Again';
+                            }, 2000);
+                          }
+                        } catch (err) {
+                          console.error('Failed to copy:', err);
+                        }
+                      }}
+                      id="copy-again-btn-disc"
+                      className="text-xs px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-400/30 transition-all duration-200 hover:scale-105 font-medium"
+                    >
+                      Copy Again
+                    </button>
+                  </div>
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto">
+                    <p className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                      {shareModalData.text}
+                    </p>
+                  </div>
+                </div>
+
+                {/* BPOC Branding Footer */}
+                <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">B</span>
+                  </div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    BPOC.IO
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-400 text-sm">Where BPO Careers Begin</span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowShareModal(false)}
+                    className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
+                  >
+                    Got It! 👍
+                  </Button>
+                </div>
+              </div>
+            </div>
+            </motion.div>
+          </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
 
     </div>
   );

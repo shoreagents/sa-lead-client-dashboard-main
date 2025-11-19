@@ -41,10 +41,36 @@ import {
 } from 'lucide-react'
 
 function extractIdFromSlug(slug: string): string | null {
-  // Expect format: some-slug-{id}
+  // Expect format: some-slug-{id} or some-slug-recruiter-{uuid}
   const parts = slug.split('-')
   const last = parts[parts.length - 1]
-  return /^[0-9]+$/.test(last) ? last : null
+  
+  // Check if it's a numeric ID
+  if (/^[0-9]+$/.test(last)) {
+    return last
+  }
+  
+  // Check if it's a recruiter job (contains 'recruiter' in the slug)
+  if (slug.includes('recruiter')) {
+    // Extract UUID from the slug - UUIDs have format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    // Look for the UUID pattern in the slug
+    const uuidMatch = slug.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
+    if (uuidMatch) {
+      return `recruiter_${uuidMatch[0]}`
+    }
+    // If no UUID found, try to reconstruct from parts after 'recruiter'
+    const recruiterIndex = parts.indexOf('recruiter')
+    if (recruiterIndex >= 0 && recruiterIndex < parts.length - 1) {
+      // Get all parts after 'recruiter' and join them (they form the UUID)
+      const uuidParts = parts.slice(recruiterIndex + 1)
+      const potentialUuid = uuidParts.join('-')
+      if (potentialUuid.length >= 36) { // UUIDs are 36 characters
+        return `recruiter_${potentialUuid}`
+      }
+    }
+  }
+  
+  return null
 }
 
 export default function ApplicantsJobDetailPage() {

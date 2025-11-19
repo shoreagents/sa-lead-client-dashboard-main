@@ -67,12 +67,11 @@ export default function Page() {
       try {
         setLoading(true)
         setError(null)
-        // Use public active jobs and filter by applicants > 0
+        // Use public active jobs - show all jobs even with 0 applicants
         const res = await fetch('/api/jobs/active', { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load jobs')
         const data = await res.json()
         const list: JobSummary[] = (data.jobs || [])
-          .filter((j: any) => (j.applicants ?? 0) > 0)
           .map((j: any) => ({ 
             id: String(j.id), 
             company: j.company, 

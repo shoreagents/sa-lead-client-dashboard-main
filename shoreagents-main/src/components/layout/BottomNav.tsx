@@ -113,10 +113,10 @@ export function BottomNav() {
       timer = setTimeout(() => {
         const currentScrollY = window.scrollY
         
-        // Show nav when scrolling up or at top, hide when scrolling down
-        if (currentScrollY < lastScrollY || currentScrollY < 100) {
-      setIsVisible(true)
-        } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Show nav only when scrolling up, hide when scrolling down
+        if (currentScrollY < lastScrollY && currentScrollY > 100) {
+          setIsVisible(true)
+        } else if (currentScrollY > lastScrollY) {
           setIsVisible(false)
         }
         

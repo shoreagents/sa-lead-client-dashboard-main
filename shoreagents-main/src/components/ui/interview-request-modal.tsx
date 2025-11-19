@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/components/ui/dialog-videocall';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Calendar, User, CheckCircle } from 'lucide-react';
 import { LoginModal } from '@/components/ui/login-modal';

@@ -240,7 +240,7 @@ export function ChartAreaInteractive({ totalVisitors = 0, uniqueVisitors = 0, re
 
   return (
     <Card className="@container/card">
-      <CardHeader>
+      <CardHeader className="pt-2">
         <CardTitle>Total Visitors</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">
