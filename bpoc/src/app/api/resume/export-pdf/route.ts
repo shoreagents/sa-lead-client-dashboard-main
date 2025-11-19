@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
-import { execSync } from 'child_process';
 import * as fs from 'fs';
-import * as path from 'path';
 
 // Helper function to get Chromium executable path
 async function getChromiumPath(): Promise<string | null> {
+
   try {
-    // Try to use Puppeteer's bundled Chromium first
+    // Try to use Puppeteer's bundled Chromium
     const puppeteerChromiumPath = puppeteer.executablePath();
     if (puppeteerChromiumPath && fs.existsSync(puppeteerChromiumPath)) {
       console.log('✅ Using Puppeteer bundled Chromium:', puppeteerChromiumPath);
@@ -42,13 +41,6 @@ async function getChromiumPath(): Promise<string | null> {
       console.log('✅ Using system Chrome:', chromePath);
       return chromePath;
     }
-  }
-
-  // For serverless environments, Chromium should be installed during build
-  // Check if we're in a serverless environment and provide helpful error
-  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.NETLIFY) {
-    console.warn('⚠️ Serverless environment detected. Chromium must be installed during build.');
-    console.warn('⚠️ Make sure your build script includes: npx puppeteer browsers install chrome');
   }
 
   return null;
@@ -126,8 +118,27 @@ export async function POST(request: NextRequest) {
         launchOptions.executablePath = chromiumPath;
         console.log('✅ Using Chromium at:', chromiumPath);
       } else {
-        console.warn('⚠️ No Chromium found, trying default Puppeteer launch...');
-        // Will try to use Puppeteer's default (may fail in serverless)
+        // For Vercel, try to use Puppeteer's default path
+        // The cache path should be set by Puppeteer automatically
+        try {
+          const defaultPath = puppeteer.executablePath();
+          if (defaultPath) {
+            launchOptions.executablePath = defaultPath;
+            console.log('✅ Using Puppeteer default Chromium path:', defaultPath);
+          } else {
+            console.warn('⚠️ No Chromium found in default location');
+          }
+        } catch (e) {
+          console.warn('⚠️ Could not get Puppeteer default path:', e);
+        }
+      }
+      
+      // Log the executable path being used for debugging
+      if (launchOptions.executablePath) {
+        console.log('📌 Final Chromium executable path:', launchOptions.executablePath);
+        console.log('📌 Path exists:', fs.existsSync(launchOptions.executablePath));
+      } else {
+        console.log('📌 No explicit executable path - using Puppeteer default');
       }
 
       browser = await puppeteer.launch(launchOptions);
