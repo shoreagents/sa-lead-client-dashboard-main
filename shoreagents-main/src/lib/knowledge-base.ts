@@ -298,6 +298,14 @@ export const knowledgeBase: KnowledgeItem[] = [
     category: 'process'
   },
 
+  {
+    id: 'training-responsibility-objection',
+    title: 'CRITICAL: Client Trains Staff (Not Pre-Trained)',
+    content: 'IMPORTANT: Staff are NOT pre-trained for your specific business. YOU are responsible for training them on your systems, processes, and business operations. What we provide: Equipment, office space, HR, payroll, IT support, professional work environment. What YOU provide: Business-specific training, process documentation, system access, task guidance. Why: Our staff have general professional skills (English, software proficiency, communication), but they need YOUR training on YOUR specific tools, workflows, and standards. This is exactly like hiring locally - you wouldn\'t expect a local hire to know your CRM, your processes, or your clients without training. The advantage: Filipino staff are highly trainable, eager to learn, and loyal once trained. Many clients find them easier to train than local hires because they follow instructions carefully and ask questions when unsure. Training timeline: Most clients report 1-2 weeks for basic proficiency, 30 days for full productivity (same as local hires).',
+    keywords: ['pre-trained', 'pretrained', 'already trained', 'training', 'train', 'do i train', 'who trains', 'training difficult', 'training hard', 'need training', 'training required', 'onboarding', 'teach them', 'ready to work', 'ready to go'],
+    category: 'process'
+  },
+
   // ========================================
   // 📋 CUSTOMER FAQs - From Real Questions
   // ========================================
@@ -449,8 +457,8 @@ export const knowledgeBase: KnowledgeItem[] = [
   {
     id: 'faq-training-responsibility',
     title: 'FAQ: Who Trains Staff Member',
-    content: 'YOU train the staff member - this is crucial for success. ShoreAgents provides: Equipment, workspace, HR management, payroll, office infrastructure. YOU provide: Business-specific training, process documentation, task guidance. Why you must train: 1) You understand your business operations intimately. 2) Training ensures relevance to your specific needs. 3) Best results come from internal training. 4) Third-party training rarely delivers effective results. We handle everything except training so you can focus on integrating new team member into your business practices. This approach ensures training is tailored and effective for your organizational goals.',
-    keywords: ['training', 'train', 'onboard', 'teach', 'learn', 'who trains'],
+    content: 'YOU train the staff member - this is crucial for success. They are NOT pre-trained for your specific business. ShoreAgents provides: Equipment, workspace, HR management, payroll, office infrastructure. YOU provide: Business-specific training, process documentation, task guidance. Why you must train: 1) You understand your business operations intimately. 2) Training ensures relevance to your specific needs. 3) Best results come from internal training. 4) Third-party training rarely delivers effective results. Note: While our staff have general skills (communication, software proficiency), YOU train them on YOUR specific systems, processes, and business operations. We handle everything except training so you can focus on integrating new team member into your business practices. This approach ensures training is tailored and effective for your organizational goals.',
+    keywords: ['training', 'train', 'onboard', 'teach', 'learn', 'who trains', 'pre-trained', 'pretrained', 'already trained', 'trained already', 'training difficult', 'hard to train', 'difficult to train', 'training easy', 'do i train', 'do i have to train', 'training required', 'need training'],
     category: 'process'
   },
 
