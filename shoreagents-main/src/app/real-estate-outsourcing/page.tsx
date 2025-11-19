@@ -1,701 +1,884 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
-  DollarSign, 
-  TrendingUp, 
-  Users, 
-  Clock, 
-  CheckCircle, 
+  CheckCircle2,
+  XCircle,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
+  AlertCircle,
   ArrowRight,
   Building2,
   Globe,
-  Target,
-  Zap,
-  Award,
-  Phone,
-  Calculator,
-  BookOpen,
-  Star,
-  Shield,
-  MapPin,
-  Calendar,
-  User,
-  AlertTriangle,
-  Brain,
-  BarChart3,
-  Settings,
-  Briefcase,
-  FileText,
-  Scale,
-  Home
-} from 'lucide-react';
-import Image from 'next/image';
+  Phone
+} from "lucide-react";
+import Link from "next/link";
 
 export default function RealEstateOutsourcingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Breadcrumb */}
-        <div className="mb-8">
-          <nav className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>Home</span>
-            <ArrowRight className="w-4 h-4" />
-            <span>Outsourcing</span>
-            <ArrowRight className="w-4 h-4" />
-            <span className="text-gray-900 font-medium">Real Estate Outsourcing</span>
-          </nav>
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For $500K+ Real Estate Businesses
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Real Estate Outsourcing:<br />
+              <span className="text-lime-600">The $76,600 Reality Nobody Tells You</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Let me be blunt with you, mate. I've been running offshore staff for real estate businesses for 15 years now. 
+              I've placed over 500 VAs. And here's what nobody else in this space will tell you: <strong>if you're doing under 
+              $500K in annual revenue, real estate outsourcing will probably lose you money.</strong>
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* Hero Section */}
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Intro */}
         <div className="mb-16">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Real Estate Outsourcing: The Definitive Guide for Property Businesses
-          </h1>
-          
-          <p className="text-xl text-gray-600 max-w-4xl mb-8">
-            Systematic real estate outsourcing methodologies that eliminate enterprise operational waste while scaling 500+ person organizations across multiple markets and business units.
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Yeah, I just told you NOT to buy what I'm selling. That's because I reckon you deserve the truth, not another sales 
+            pitch about "saving 70% on costs" that conveniently forgets to mention you'll be slower for the first 60 days, not faster.
           </p>
           
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg">
-              Book a Strategy Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg">
-              How It Works
-            </Button>
-            <Button size="lg" variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg">
-              See Pricing
-            </Button>
-          </div>
-
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&h=600&fit=crop"
-              alt="Professional real estate outsourcing team in modern office environment showcasing offshore operations"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            This guide is for medium to large real estate businesses in the USA, Australia, and New Zealand—agencies pulling $500K+ 
+            annually, managing 20-30+ properties, or running teams where your time is worth $150+/hour. If that's you, real estate 
+            outsourcing can legitimately transform your business. If that's not you yet? Bookmark this and come back when you're ready.
+          </p>
+          
+          <Card className="bg-amber-50 border-l-4 border-amber-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>This guide is for:</strong> Medium to large real estate businesses doing $500K+ annual revenue, managing 
+                20-30+ properties, or running teams where your time is worth $150+/hour. If you're a solo agent or startup, bookmark 
+                this for later.
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Introduction */}
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Real Estate Outsourcing: Ultimate 2025 Enterprise Guide – Proven Systems That Save $5M+ Annually
-              </h2>
-              
-              <div className="bg-lime-50 rounded-lg p-6 mb-8">
-                <p className="text-lg text-gray-700 mb-6">
-                  Back in 2012, I made a $150,000 mistake that nearly killed my real estate operation. But that expensive lesson led to discoveries that now save enterprise real estate businesses $2-5 million annually while scaling real estate outsourcing operations 300-500% faster than traditional methods.
-                </p>
-                <p className="text-lg text-gray-700 mb-6">
-                  I thought I could just hire a "trained" real estate virtual assistant and everything would magically work at scale. What I got instead was someone working from home with chickens in the background who would disappear for days during critical transactions. The rain on corrugated roof during our training sessions made it impossible to build reliable real estate business processes.
-                </p>
-                <p className="text-lg text-gray-700">
-                  After that disaster, I tried freelancer platforms like Upwork and oDesk for real estate BPO support. That was actually even worse. We paid for a computer for property management work, and they stole it. The freelancer model with time tracking when they're independent – that's pretty hard for systematic real estate operations.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="text-center bg-lime-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-lime-600 mb-2">500+</div>
-                  <p className="text-gray-700">Enterprise Real Estate Placements</p>
-                </div>
-                <div className="text-center bg-green-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-green-600 mb-2">85%</div>
-                  <p className="text-gray-700">Average Cost Reduction</p>
-                </div>
-                <div className="text-center bg-blue-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">5x</div>
-                  <p className="text-gray-700">Faster Scaling Speed</p>
-                </div>
-                <div className="text-center bg-purple-50 rounded-lg p-6">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">12+</div>
-                  <p className="text-gray-700">Years BPO Experience</p>
-                </div>
-              </div>
-            </div>
+        <Separator className="my-12" />
 
-            {/* Three Disasters */}
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-8">
-                The Three Enterprise Real Estate Outsourcing Disasters That Cost Millions
-              </h3>
-              <p className="text-lg text-gray-700 mb-8">
-                After 500+ enterprise real estate outsourcing implementations across USA, Australia, and New Zealand, I've seen every possible mistake that destroys large-scale property business outsourcing operations. Here are the three disasters that cost companies $2-5 million annually in real estate back office support inefficiencies:
+        {/* The Reality Check Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <AlertCircle className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Reality Check: What Every Competitor Gets Wrong</h2>
+              <p className="text-lg text-gray-600">Walk into any real estate conference and you'll hear the same promises</p>
+            </div>
+          </div>
+          
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            Walk into any real estate conference and you'll hear the same promises: "Hire a VA for $15/hour! Save 70%! Scale instantly!" 
+            What they don't tell you is that <strong>70% of real estate outsourcing partnerships fail within 90 days.</strong>
+          </p>
+
+          <Card className="border-red-200 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Here's what actually happens:</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>You hire someone for "$15/hour"</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>Spend 60 hours training them (that's <strong>$9,000 of YOUR time</strong> if you bill at $150/hour)</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>Invest in software licenses ($2,000+/year)</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>Manage them 4 hours per week ($31,200 annually)</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <span className="text-red-600 font-bold mt-1">•</span>
+                  <span>Deal with mistakes during the first 90 days ($5,000 in rework)</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-900 font-bold">
+                  <span className="text-red-600 mt-1">•</span>
+                  <span>Suddenly that "$15/hour VA" costs you <strong>$76,600 in year one</strong></span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                <strong>That's the real cost. Not the advertised hourly rate.</strong>
               </p>
-              
-              <div className="space-y-8">
-                <Card className="border-red-200">
-                  <CardContent className="p-8">
-                    <div className="flex items-center mb-4">
-                      <AlertTriangle className="w-8 h-8 text-red-600 mr-3" />
-                      <h4 className="text-xl font-bold text-gray-900">1. Small-Scale Thinking Applied to Enterprise Real Estate Operations</h4>
-                    </div>
-                    <p className="text-gray-700 mb-4">
-                      Most enterprise real estate companies try to solve large-scale problems with individual virtual assistant solutions designed for solo agents. This creates management chaos with 50+ individual contractor relationships instead of systematic departmental replacement, quality inconsistency with no standardized training across real estate offshore services, scalability limits that prevent rapid expansion during market opportunities, and security risks with uncontrolled access to enterprise data.
-                    </p>
-                    <div className="bg-red-50 rounded-lg p-4">
-                      <p className="font-bold text-gray-900">Enterprise Reality:</p>
-                      <p className="text-gray-700">Large real estate operations require departmental solutions, not individual task completion. You need systematic real estate BPO infrastructure that scales from 50 to 500+ team members without breaking operational efficiency.</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-red-200">
-                  <CardContent className="p-8">
-                    <div className="flex items-center mb-4">
-                      <AlertTriangle className="w-8 h-8 text-red-600 mr-3" />
-                      <h4 className="text-xl font-bold text-gray-900">2. Platform-Based Solutions for Enterprise Real Estate Requirements</h4>
-                    </div>
-                    <p className="text-gray-700 mb-4">
-                      Enterprise real estate businesses cannot operate on freelancer platforms or marketplace solutions for property services outsourcing. These create fundamental enterprise risks including compliance violations with no enterprise-grade security, operational disruption when freelancers disappear during critical business periods, cultural misalignment with no systematic training on enterprise real estate operations, and cost inefficiency where platform fees exceed enterprise employment costs.
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-red-200">
-                  <CardContent className="p-8">
-                    <div className="flex items-center mb-4">
-                      <AlertTriangle className="w-8 h-8 text-red-600 mr-3" />
-                      <h4 className="text-xl font-bold text-gray-900">3. Generic BPO Companies Promising Enterprise Real Estate Expertise</h4>
-                    </div>
-                    <p className="text-gray-700 mb-4">
-                      Most BPO companies treat enterprise real estate like call center operations or data entry. They promise real estate business process outsourcing expertise they cannot deliver, including training guarantees that generally don't exist because it's just too hard with too many variations between real estate businesses, technology integration failures that cannot handle enterprise MLS and transaction management systems, market ignorance with no understanding of enterprise real estate cycles, and scalability promises they cannot deliver during enterprise growth phases.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* ShoreAgents Solution */}
-            <div className="mb-12">
-              <Card className="border-lime-200">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    The ShoreAgents Enterprise Real Estate Outsourcing Solution
-                  </h3>
-                  <p className="text-lg text-gray-700 mb-6">
-                    After learning from expensive mistakes and successfully implementing systematic real estate outsourcing for 500+ companies, here's what actually works for large-scale property business operations. According to National Association of Realtors research, agents spend only 11% of their time actually selling – our systematic approach transforms this productivity crisis.
-                  </p>
-                  
-                  <div className="space-y-8">
-                    <div>
-                      <h4 className="text-xl font-bold text-gray-900 mb-4">Enterprise-Grade Real Estate BPO Infrastructure</h4>
-                      <p className="text-gray-700 mb-4">
-                        I've plugged every hole in enterprise real estate outsourcing through systematic infrastructure development based on our Clark-based office operations. Our professional enterprise facilities include:
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Enterprise security protocols with biometric access</span>
-                          </div>
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Technology infrastructure with enterprise-grade internet</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Data security with endpoint protection</span>
-                          </div>
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Scalable operations for 50-500+ team members</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-xl font-bold text-gray-900 mb-4">Departmental Replacement Strategy for Real Estate Operations</h4>
-                      <p className="text-gray-700 mb-4">
-                        Instead of individual task completion, we provide complete real estate offshore services departmental solutions including:
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Transaction management departments</span>
-                          </div>
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Marketing operations centers</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Lead generation systems</span>
-                          </div>
-                          <div className="flex items-center">
-                            <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Administrative operations</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Honest Assessment */}
-            <div className="mb-12">
-              <Card className="border-lime-200">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    Honest Enterprise Capability Assessment
-                  </h3>
-                  <p className="text-lg text-gray-700 mb-6">
-                    Look, we do not train the staff – I'm going to be straight with you about real estate business process outsourcing. However, we're happy to show how they could do that on their own end. Unlike other providers, we're honest about enterprise requirements and capabilities:
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                      <h4 className="text-lg font-bold text-lime-600 mb-4">What We Actually Provide:</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                          <span>Enterprise infrastructure and management systems</span>
-                        </div>
-                        <div className="flex items-center">
-                          <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                          <span>Systematic recruitment for real estate aptitude</span>
-                        </div>
-                        <div className="flex items-center">
-                          <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                          <span>Cultural integration for Western enterprise business practices</span>
-                        </div>
-                        <div className="flex items-center">
-                          <CheckCircle className="w-5 h-5 text-lime-600 mr-3" />
-                          <span>Ongoing performance management and quality control</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-lg font-bold text-red-600 mb-4">What We Don't Provide:</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <AlertTriangle className="w-5 h-5 text-red-600 mr-3" />
-                          <span>Pre-trained enterprise real estate experts</span>
-                        </div>
-                        <div className="flex items-center">
-                          <AlertTriangle className="w-5 h-5 text-red-600 mr-3" />
-                          <span>Instant knowledge of your specific enterprise systems</span>
-                        </div>
-                        <div className="flex items-center">
-                          <AlertTriangle className="w-5 h-5 text-red-600 mr-3" />
-                          <span>Legal expertise or compliance interpretation</span>
-                        </div>
-                        <div className="flex items-center">
-                          <AlertTriangle className="w-5 h-5 text-red-600 mr-3" />
-                          <span>Guaranteed productivity without proper integration</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* AI-Powered Future */}
-            <div className="mb-12">
-              <Card className="border-lime-200">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    The AI-Powered Future of Real Estate Outsourcing
-                  </h3>
-                  <p className="text-lg text-gray-700 mb-6">
-                    Here's where things get really interesting for enterprise real estate operations. We don't offer AI-powered real estate assistants yet, but I'm going to show you exactly how to set this up yourself and where the industry is heading.
-                  </p>
-                  
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="text-xl font-bold text-gray-900 mb-4">Current AI Implementation at ShoreAgents</h4>
-                      <p className="text-gray-700 mb-4">
-                        My entire operations team now uses Claude projects for comprehensive business management including:
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Brain className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Recruitment and candidate screening</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Brain className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Operations and workflow management</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center">
-                            <Brain className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Finance and budget tracking</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Brain className="w-5 h-5 text-lime-600 mr-3" />
-                            <span>Team management and performance monitoring</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-lime-50 rounded-lg p-6">
-                      <h4 className="text-lg font-bold text-gray-900 mb-3">The Future Vision: Human Intelligence + Artificial Intelligence</h4>
-                      <p className="text-gray-700">
-                        The future of real estate outsourcing combines Filipino professional expertise with AI-powered capabilities. Every real estate offshore services role can have an element of AI enhancement when properly implemented. We're developing AI-integrated real estate services, but we're not there yet. What we can do now is show you how to implement AI tools with our existing real estate teams for maximum effectiveness.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* ROI Analysis */}
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-8">
-                Enterprise Real Estate Outsourcing ROI: The $2-5M Annual Savings Reality
-              </h3>
-              <p className="text-lg text-gray-700 mb-8">
-                Let me break down the real numbers that demonstrate why systematic enterprise real estate outsourcing isn't just beneficial – it's essential for competitive survival. Based on US Bureau of Labor Statistics data, the cost differential makes offshore operations inevitable for profitable growth.
+              <p className="text-gray-800 leading-relaxed">
+                Now, does that mean real estate outsourcing doesn't work? Not at all. I've got clients in Australia earning perfect 
+                5/5 performance reviews after six years with the same VA. American real estate teams that have scaled from 3 to 8 agents 
+                with Filipino support handling all the backend. New Zealand property managers who describe their offshore staff as 
+                "legends" who are irreplaceable.
               </p>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card className="border-red-200">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold text-red-600 mb-4">The True Cost of Enterprise Local Real Estate Staff</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <h5 className="font-semibold text-gray-900">USA Enterprise Real Estate (50+ Agents)</h5>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                          <li>• Transaction Coordinators (5): $300,000+ annually</li>
-                          <li>• Marketing Team (3): $180,000+ annually</li>
-                          <li>• Administrative Staff (4): $200,000+ annually</li>
-                          <li>• Management Overhead (2): $160,000+ annually</li>
-                          <li className="font-bold">Total Investment: $840,000+ USD annually</li>
-                        </ul>
-                      </div>
-                      <div>
-                        <h5 className="font-semibold text-gray-900">Australian Enterprise (50+ Agents)</h5>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                          <li>• Transaction Team (5): $400,000+ AUD annually</li>
-                          <li>• Marketing Operations (3): $240,000+ AUD annually</li>
-                          <li>• Administrative Team (4): $280,000+ AUD annually</li>
-                          <li>• Management Layer (2): $200,000+ AUD annually</li>
-                          <li className="font-bold">Total Investment: $1,120,000+ AUD annually</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-lime-200">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold text-lime-600 mb-4">ShoreAgents Enterprise Real Estate Outsourcing Investment</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <h5 className="font-semibold text-gray-900">Complete Enterprise Support (50+ Agent Equivalent)</h5>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                          <li>• Transaction coordination, marketing operations, administrative support</li>
-                          <li>• Professional infrastructure and enterprise management included</li>
-                          <li>• Systematic recruitment, training, and quality control</li>
-                          <li className="font-bold text-lime-600">Annual Investment: $150,000-$200,000 USD equivalent</li>
-                        </ul>
-                      </div>
-                      <div className="bg-lime-50 rounded-lg p-4">
-                        <p className="font-bold text-gray-900">Universal Savings: 75-85% cost reduction across all markets</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Service Tiers */}
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-8">
-                Enterprise Service Tiers for Every Real Estate Business Scale
-              </h3>
-              <p className="text-lg text-gray-700 mb-8">
-                Understanding that enterprise real estate businesses have different requirements based on size, market presence, and growth stage, we provide scalable real estate BPO solutions:
+              <p className="text-gray-800 leading-relaxed mt-4">
+                The difference? They went in with realistic expectations, proper revenue to support the investment, and understood they 
+                were building a long-term asset, not finding cheap labor.
               </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="border-lime-200">
-                  <CardContent className="p-6">
-                    <div className="text-center mb-6">
-                      <Home className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">Individual Agent Testing</h4>
-                      <p className="text-gray-600">Perfect for testing systematic approach with minimal investment</p>
-                    </div>
-                    <ul className="space-y-2 text-gray-700 mb-6">
-                      <li>• Transaction coordinator, listing specialist, or administrative assistant</li>
-                      <li>• Minimal investment testing for enterprise expansion</li>
-                    </ul>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-lime-600 mb-2">$14,300</div>
-                      <p className="text-gray-600 text-sm">annually vs $65,000+ for local equivalent</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-lime-200 border-2 border-lime-400">
-                  <CardContent className="p-6">
-                    <div className="bg-lime-600 text-white px-3 py-1 rounded-full text-sm font-bold mb-4 inline-block">Most Popular</div>
-                    <div className="text-center mb-6">
-                      <Building2 className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">Mid-Scale Enterprise (20-50 Agents)</h4>
-                      <p className="text-gray-600">Build your enterprise team with coordinated specialists</p>
-                    </div>
-                    <ul className="space-y-2 text-gray-700 mb-6">
-                      <li>• Complete transaction coordination across all agents</li>
-                      <li>• Integrated marketing operations for all properties</li>
-                      <li>• Systematic lead generation and nurturing</li>
-                      <li>• Comprehensive administrative operations</li>
-                    </ul>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-lime-600 mb-2">$75,000-$125,000</div>
-                      <p className="text-gray-600 text-sm">annually vs $400,000-$600,000 for local equivalent</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-lime-200">
-                  <CardContent className="p-6">
-                    <div className="text-center mb-6">
-                      <Briefcase className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                      <h4 className="text-xl font-bold text-gray-900 mb-2">Large Enterprise (50+ Agents)</h4>
-                      <p className="text-gray-600">Enterprise workforce solutions provide complete departmental replacement</p>
-                    </div>
-                    <ul className="space-y-2 text-gray-700 mb-6">
-                      <li>• Comprehensive transaction management across all markets</li>
-                      <li>• Integrated marketing operations for entire portfolio</li>
-                      <li>• Complete lead generation and conversion systems</li>
-                      <li>• Full administrative and compliance support</li>
-                      <li>• Custom integration with existing enterprise systems</li>
-                    </ul>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-lime-600 mb-2">Custom Pricing</div>
-                      <p className="text-gray-600 text-sm">with 75-85% savings vs local equivalent</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+            </CardContent>
+          </Card>
+        </section>
 
-            {/* Implementation Process */}
-            <div className="mb-12">
-              <Card className="border-lime-200">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    Implementation Process for Enterprise Real Estate Businesses
-                  </h3>
-                  <p className="text-lg text-gray-700 mb-8">
-                    Based on 500+ successful implementations, we've refined our proven process that ensures success regardless of market or business size. This systematic approach eliminates guesswork through tested methodologies.
-                  </p>
-                  
-                  <div className="space-y-8">
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-lime-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                        1
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">Real Estate Business Assessment</h4>
-                        <p className="text-gray-700 mb-4">Current state analysis includes transaction volume and business model evaluation, current software systems and technology assessment, operational workflow documentation and pain point identification, and cost structure analysis with optimization opportunities for property services outsourcing implementation.</p>
-                      </div>
+        <Separator className="my-12" />
+
+        {/* When You're NOT Ready Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When Real Estate Outsourcing Actually DESTROYS Your Business</h2>
+              <p className="text-lg text-gray-600">Here's the section nobody else writes. When you should NOT outsource</p>
+            </div>
+          </div>
+          
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Don't outsource if:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  "You're under $500K annual revenue (or managing under 20-30 properties)",
+                  "You have no documented processes",
+                  "Your business pivots constantly",
+                  "Personal client service is your differentiator",
+                  "You don't have 5-10 hours per week to manage",
+                  "You're in your first 90 days of business"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-gray-300 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Tasks you should NEVER delegate:</h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "High-stakes client negotiations",
+                    description: "Real-time decisions require local experience"
+                  },
+                  {
+                    title: "Fair housing sensitive communications in the USA",
+                    description: "Legal liability is too high"
+                  },
+                  {
+                    title: "Pricing strategy",
+                    description: "Requires intimate market knowledge"
+                  },
+                  {
+                    title: "License-requiring activities",
+                    description: "Contract advice, trust accounting"
+                  },
+                  {
+                    title: "Strategic business decisions",
+                    description: "Your vision, your risk, your call"
+                  }
+                ].map((task, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                      {index + 1}
                     </div>
-                    
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-lime-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                        2
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">Team Configuration and Cultural Integration</h4>
-                        <p className="text-gray-700 mb-4">Specialist selection includes real estate industry experience validation, technical skill assessment for required software, cultural fit evaluation for your business style, and communication ability testing for professional coordination. Market-specific training covers local terminology, regulatory compliance awareness, software platform certification, and professional communication protocols.</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-lime-600 text-white rounded-full flex items-center justify-center font-bold text-lg">
-                        3
-                      </div>
-                      <div>
-                        <h4 className="text-xl font-bold text-gray-900 mb-2">Systematic Integration and Launch</h4>
-                        <p className="text-gray-700">Controlled implementation includes limited scope initial launch for quality validation, process optimization based on performance data, communication refinement and protocol establishment, and quality control system implementation with ongoing performance monitoring and strategic planning.</p>
-                      </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-1">{task.title}</h4>
+                      <p className="text-gray-700">{task.description}</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* FAQ Section */}
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-8">
-                Frequently Asked Questions About Enterprise Real Estate Outsourcing
-              </h3>
-              
-              <div className="space-y-6">
-                <Card className="border-lime-200">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">
-                      How do offshore teams handle enterprise-scale real estate operations across multiple markets?
-                    </h4>
-                    <p className="text-gray-700">
-                      Our teams receive systematic training on major enterprise platforms used across all three markets. This includes multi-state MLS integration, enterprise transaction management systems, CRM platforms designed for large operations, and compliance protocols for different jurisdictions. The key is systematic training on YOUR specific enterprise systems with dedicated account management for large-scale coordination.
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-lime-200">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">
-                      How much does enterprise real estate outsourcing cost compared to local staff?
-                    </h4>
-                    <p className="text-gray-700">
-                      Our enterprise real estate outsourcing starts at $150,000-$200,000 annually for 50+ agent equivalent support, compared to $840,000+ for USA local staff or $1,120,000+ for Australian local staff. That's a 75-85% cost reduction while maintaining the same quality of work through our systematic property business outsourcing approach.
-                    </p>
-                  </CardContent>
-                </Card>
-                
-                <Card className="border-lime-200">
-                  <CardContent className="p-6">
-                    <h4 className="text-lg font-bold text-gray-900 mb-3">
-                      How quickly can you scale during market opportunities or seasonal demands?
-                    </h4>
-                    <p className="text-gray-700">
-                      Enterprise scalability is a primary advantage of systematic real estate outsourcing. We can add complete departments within 2-3 weeks rather than 6-12 months for local hiring. Teams can work extended hours during peak periods, temporary specialists can be deployed for market opportunities, and we maintain surge capacity for rapid expansion needs.
-                    </p>
-                  </CardContent>
-                </Card>
+                ))}
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Final CTA */}
-            <div className="mb-12">
-              <Card className="border-lime-200 bg-lime-50">
-                <CardContent className="p-8 text-center">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                    Transform Your Enterprise Real Estate Operations Today
-                  </h3>
-                  <p className="text-lg text-gray-700 mb-8">
-                    After 12 years of experience, 500+ successful enterprise placements, and scaling operations from small teams to enterprise-level businesses, I can tell you that the companies thriving in 2025 understand systematic operational optimization and real estate business process outsourcing advantages.
-                  </p>
-                  <p className="text-lg text-gray-700 mb-8">
-                    Don't make the same expensive mistakes that cost enterprises millions annually. Start with systematic real estate outsourcing that actually works at scale, backed by proven experience and designed specifically for enterprise operations.
-                  </p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg">
-                      📞 Schedule Your Enterprise Strategy Session
-                    </Button>
-                    <Button size="lg" variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg">
-                      Ready to save $2-5M annually while scaling 300% faster?
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+          <Card className="bg-gray-100 border-l-4 border-gray-600">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-2">⚠️ Cautionary Tales:</p>
+              <p className="text-gray-700 leading-relaxed mb-3">
+                I've seen real estate businesses crash and burn because they outsourced the wrong things. One Sydney agency delegated 
+                client-facing communications to a VA with a heavy accent—lost three luxury listings worth $150K in commission because 
+                clients felt they weren't getting "premium service."
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Another Melbourne property manager handed off trust accounting to offshore staff—compliance nightmare that nearly cost 
+                them their license.
+              </p>
+              <p className="text-gray-800 font-semibold mt-4">
+                Don't be those people. Some tasks simply cannot be delegated offshore, no matter how good the VA.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What Actually Works Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What You CAN Outsource in Real Estate (And What Actually Works)</h2>
+              <p className="text-lg text-gray-600">Right, now that I've scared off the people who shouldn't be doing this</p>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 space-y-8">
-              {/* CTA Cards */}
-              <Card className="border-lime-200">
-                <CardContent className="p-6 text-center">
-                  <DollarSign className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                  <h4 className="font-bold text-gray-900 mb-2">💰 See Our Enterprise Pricing</h4>
-                  <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white">
-                    Get Pricing
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              <Card className="border-lime-200">
-                <CardContent className="p-6 text-center">
-                  <BarChart3 className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                  <h4 className="font-bold text-gray-900 mb-2">📊 Explore Enterprise Insights</h4>
-                  <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50">
-                    Read Success Stories
-                  </Button>
-                </CardContent>
-              </Card>
+          <Card className="border-green-300 bg-green-50 mb-8">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-green-900 mb-6">Perfect for delegation:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  {
+                    title: "MLS listing updates",
+                    items: ["Photos, descriptions, price changes", "Administrative grunt work"]
+                  },
+                  {
+                    title: "CRM management",
+                    items: ["Contact updates, pipeline tracking", "Data entry"]
+                  },
+                  {
+                    title: "Transaction coordination",
+                    items: ["Document tracking, deadline management", "Compliance checklists"]
+                  },
+                  {
+                    title: "Appointment scheduling",
+                    items: ["Internal coordination", "Showing bookings"]
+                  },
+                  {
+                    title: "Marketing material creation",
+                    items: ["Flyers, social media graphics, property brochures", "With brand guidelines"]
+                  },
+                  {
+                    title: "Lead list building",
+                    items: ["Research, prospecting", "Database compilation"]
+                  },
+                  {
+                    title: "Email inbox management",
+                    items: ["Sorting, filtering", "Flagging priorities"]
+                  },
+                  {
+                    title: "Property management admin",
+                    items: ["Tenant communication, maintenance coordination", "Rent collection follow-up"]
+                  }
+                ].map((category, index) => (
+                  <Card key={index} className="bg-white border-green-200">
+                    <CardContent className="p-5">
+                      <div className="flex items-start gap-3 mb-3">
+                        <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                        <h4 className="text-lg font-bold text-gray-900">{category.title}</h4>
+                      </div>
+                      <ul className="space-y-2 ml-9">
+                        {category.items.map((item, i) => (
+                          <li key={i} className="text-gray-700 text-sm">{item}</li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-              {/* Table of Contents */}
-              <Card className="border-lime-200">
-                <CardContent className="p-6">
-                  <h4 className="font-bold text-gray-900 mb-4">Table of Contents</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="text-lime-600 font-medium">• Real Estate Outsourcing: Ultimate 2025 Enterprise Guide</div>
-                    <div className="text-gray-600">• The Three Enterprise Real Estate Outsourcing Disasters</div>
-                    <div className="text-gray-600">• The ShoreAgents Enterprise Solution</div>
-                    <div className="text-gray-600">• The AI-Powered Future</div>
-                    <div className="text-gray-600">• Enterprise ROI: $2-5M Annual Savings</div>
-                    <div className="text-gray-600">• Enterprise Service Tiers</div>
-                    <div className="text-gray-600">• Implementation Process</div>
-                    <div className="text-gray-600">• Integration with Enterprise Ecosystem</div>
-                    <div className="text-gray-600">• Working with ShoreAgents</div>
-                    <div className="text-gray-600">• Frequently Asked Questions</div>
-                    <div className="text-gray-600">• Transform Your Operations Today</div>
-                  </div>
-                </CardContent>
-              </Card>
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">The Real Advantage: Timezone Mathematics</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                The real advantage? Filipino VAs working Australian or New Zealand hours have a geographic gift. While American real 
+                estate agencies deal with their VAs working graveyard shifts (your 9am = their 9pm), Australian and Kiwi businesses 
+                get natural daytime overlap. Philippines is only +2 to +4 hours ahead—your business hours ARE their business hours.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                For USA clients, you wake up to completed overnight work. For AU/NZ clients, you get real-time collaboration without the 
+                burnout risk. That's not marketing talk—that's timezone mathematics.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
-              {/* Related Services */}
-              <Card className="border-lime-200">
-                <CardContent className="p-6">
-                  <h4 className="font-bold text-gray-900 mb-4">Related Services</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center space-x-3">
-                      <Home className="w-5 h-5 text-lime-600" />
-                      <span className="text-sm text-gray-700">Property Management Outsourcing</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <FileText className="w-5 h-5 text-lime-600" />
-                      <span className="text-sm text-gray-700">Mortgage Process Outsourcing</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Scale className="w-5 h-5 text-lime-600" />
-                      <span className="text-sm text-gray-700">Legal Process Outsourcing</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <Settings className="w-5 h-5 text-lime-600" />
-                      <span className="text-sm text-gray-700">Construction Outsourcing</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        <Separator className="my-12" />
+
+        {/* True Costs Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The True Cost: Stop Believing the "$15/Hour" Myth</h2>
+              <p className="text-lg text-gray-600">Everyone advertises hourly rates. Nobody shows you the all-in first-year cost</p>
             </div>
           </div>
+
+          <Card className="border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Year One Investment (USA Example):</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                  <Card className="border-gray-300 bg-white mb-4">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-gray-600 mb-2">Advertised:</p>
+                      <p className="text-5xl font-bold text-gray-900">$15<span className="text-xl text-gray-600">/hour</span></p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-blue-400 bg-white">
+                    <CardContent className="p-6 text-center">
+                      <p className="text-sm text-gray-600 mb-2">Actual Year One:</p>
+                      <p className="text-5xl font-bold text-blue-600">$37<span className="text-xl text-gray-600">/hour</span></p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card className="bg-white border-blue-300">
+                  <CardContent className="p-6">
+                    <h4 className="font-bold text-gray-900 mb-4">Year One Cost Breakdown:</h4>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">VA salary:</span>
+                        <span className="font-semibold">$21,600</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Software/tools:</span>
+                        <span className="font-semibold">$1,800</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Your training time (60 hrs @ $150/hr):</span>
+                        <span className="font-semibold">$9,000</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Your management time (4 hrs/wk):</span>
+                        <span className="font-semibold">$31,200</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Mistakes/rework (first 90 days):</span>
+                        <span className="font-semibold">$5,000</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-700">Initial productivity loss:</span>
+                        <span className="font-semibold">$8,000</span>
+                      </div>
+                      <Separator className="my-3" />
+                      <div className="flex justify-between pt-2">
+                        <span className="font-bold text-gray-900">Total Year One:</span>
+                        <span className="font-bold text-blue-600">$76,600</span>
+                      </div>
+                      <div className="flex justify-between pt-2">
+                        <span className="font-bold text-gray-900">Effective hourly rate:</span>
+                        <span className="font-bold text-blue-600">$37/hour (not $15)</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card className="bg-white border-blue-300 mb-4">
+                <CardContent className="p-6">
+                  <h4 className="font-bold text-gray-900 mb-4">Year Two (Ongoing):</h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">VA salary:</span>
+                      <span className="font-semibold">$21,600</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">Software:</span>
+                      <span className="font-semibold">$1,800</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">Management (2 hrs/week):</span>
+                      <span className="font-semibold">$15,600</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">Occasional mistakes:</span>
+                      <span className="font-semibold">$1,000</span>
+                    </div>
+                    <Separator className="my-3" />
+                    <div className="flex justify-between pt-2">
+                      <span className="font-bold text-gray-900">Total Year Two:</span>
+                      <span className="font-bold text-blue-600">$40,000</span>
+                    </div>
+                    <div className="flex justify-between pt-2">
+                      <span className="font-bold text-gray-900">Effective rate:</span>
+                      <span className="font-bold text-blue-600">$19/hour</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <p className="text-sm text-gray-700 text-center italic mb-4">
+                Break-even point? Month 18-24.
+              </p>
+              <p className="text-sm text-gray-700 text-center">
+                When does it make sense? When the 15+ hours per week you reclaim are worth $9,000+/month in billable time or revenue 
+                generation. If you're billing $150+/hour, that's easy maths. If you're a $50K/year solo agent? The maths don't work.
+              </p>
+              <p className="text-sm text-gray-700 text-center mt-4">
+                For Australian and New Zealand businesses: Add 20-30% to these numbers for local currency conversion, but remember 
+                your local staff comparison is even more expensive ($60K-80K AUD/NZD for admin vs $28K-35K for offshore), so your 
+                savings ratio is actually better.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 90-Day Timeline Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 90-Day Timeline: Why You'll Be Slower Before You're Faster</h2>
+              <p className="text-lg text-gray-600">Every competitor promises "immediate time savings" and "instant scale." That's absolute rubbish.</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                period: "Month 1 (Days 1-30)",
+                periodColor: "bg-red-600",
+                title: "The Investment Phase",
+                description: "Your productivity: ↓ 20-30% (you're SLOWER, not faster). Daily 30-60 minute check-ins required. Creating training materials (Looms, SOPs, checklists). Answering constant questions. Fixing mistakes.",
+                details: "Time invested: 40-60 hours. Value created: Minimal. Temptation to quit: HIGHEST.",
+                borderColor: "border-red-300",
+                bgColor: "bg-red-50",
+                textColor: "text-red-700"
+              },
+              {
+                period: "Month 2 (Days 30-60)",
+                periodColor: "bg-amber-600",
+                title: "The Frustration Phase",
+                description: "Your productivity: ↓ 10-15% (still net negative). VA contributing but quality inconsistent. Still 5-10 hours/week managing. Small time savings appearing (5 hours/week). Break-even on time (not losing, not gaining much).",
+                borderColor: "border-amber-300",
+                bgColor: "bg-amber-50",
+                textColor: "text-amber-700"
+              },
+              {
+                period: "Month 3 (Days 60-90)",
+                periodColor: "bg-blue-600",
+                title: "The Turning Point",
+                description: "Your productivity: +5-10% (small positive). VA becoming independent on routine tasks. Quality improving noticeably. Management drops to 3-5 hours/week. Small positive ROI starting.",
+                borderColor: "border-blue-300",
+                bgColor: "bg-blue-50"
+              },
+              {
+                period: "Month 4-6",
+                periodColor: "bg-green-600",
+                title: "The Payoff Phase",
+                description: "Your productivity: +20-40% (real gains). VA handling 15-20 hours/week confidently. You've reclaimed 10-15 hours of productive time. Management down to 2-3 hours/week. Real ROI visible: 3-5x return.",
+                borderColor: "border-green-300",
+                bgColor: "bg-green-50"
+              }
+            ].map((phase, index) => (
+              <Card key={index} className={`${phase.borderColor} ${phase.bgColor}`}>
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <Badge className={`${phase.periodColor} text-white`}>{phase.period}</Badge>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{phase.title}</h3>
+                      <p className="text-gray-700 leading-relaxed mb-3">{phase.description}</p>
+                      {phase.details && (
+                        <p className={`${phase.textColor} font-semibold`}>{phase.details}</p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600 mt-8">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-2">⚠️ The Hard Truth:</p>
+              <p className="text-gray-700 leading-relaxed">
+                Most failures happen in Month 1-2. People expect immediate results, get frustrated when they're actually SLOWER 
+                initially, and quit before reaching the payoff phase. That's why setting realistic expectations matters more than 
+                selling the dream.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Philippines vs Latin America Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Philippines vs Latin America vs Local: The Honest Comparison</h2>
+              <p className="text-lg text-gray-600">Not all offshore locations are equal, and nobody gives you the straight goods on this</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Philippines</h3>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="font-semibold">Cost:</span> <span className="text-gray-700">$8-15/hour</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">English level:</span> <span className="text-gray-700">Excellent (accent present but clear)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">USA time zone:</span> <span className="text-gray-700">Staff work night shift to match your business hours</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">AU/NZ time zone:</span> <span className="text-gray-700">+2 to +4 hours (natural daytime overlap)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Cultural fit:</span> <span className="text-gray-700">High (service-oriented culture)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Best for:</span> <span className="text-gray-700">All administrative roles, transaction coordination</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Latin America</h3>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="font-semibold">Cost:</span> <span className="text-gray-700">$12-25/hour (20-50% premium)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">English level:</span> <span className="text-gray-700">Native/bilingual</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">USA time zone:</span> <span className="text-gray-700">-1 to -3 hours (natural daytime alignment)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">AU/NZ time zone:</span> <span className="text-gray-700">-14 to -18 hours (poor overlap)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Cultural fit:</span> <span className="text-gray-700">Very high (Western work culture)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Best for:</span> <span className="text-gray-700">Sales roles where native accent matters</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-gray-300 bg-gray-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Local (USA/AU/NZ)</h3>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="font-semibold">Cost:</span> <span className="text-gray-700">$25-60/hour (3-5x offshore rates)</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">English level:</span> <span className="text-gray-700">Native</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Time zone:</span> <span className="text-gray-700">Same</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Cultural fit:</span> <span className="text-gray-700">Perfect</span>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Best for:</span> <span className="text-gray-700">High-touch client roles requiring local market expertise</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">The Real Decision Framework:</h3>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">For USA/Canada Businesses:</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    Filipino VAs work night shift (their time) to match your 9am-5pm business hours. They're available during YOUR day 
+                    for Slack messages, Zoom calls, client support—everything happens in real-time during your working hours. This 
+                    works for 95% of real estate roles.
+                  </p>
+                  <p className="text-gray-700 leading-relaxed mt-2">
+                    Latin America costs 20-50% more but staff work natural daytime hours. The premium buys you native English accent 
+                    for phone-heavy roles where accent perception matters—luxury sales, high-volume ISA calling.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">For Australia/New Zealand Businesses:</h4>
+                  <p className="text-gray-700 leading-relaxed">
+                    Philippines is the obvious winner. Staff work natural daytime hours (+2 to +4 hours) with perfect overlap during your 
+                    business hours. No night shift required, no burnout risk, natural real-time collaboration for ALL roles. This is 
+                    why 80% of my clients are AU/NZ—the timezone alignment is genuinely perfect.
+                  </p>
+                </div>
+                <p className="text-gray-800 font-semibold mt-4">
+                  Bottom line: Philippines delivers exceptional value for USA clients and perfect timezone alignment for AU/NZ clients. 
+                  Latin America is the premium option when native accent is worth the 20-50% cost increase.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Real Success Stories Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <TrendingUp className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Real Success: What Actually Works in Practice</h2>
+              <p className="text-lg text-gray-600">I'm not going to make up bullshit case studies. Here are real clients</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              {
+                company: "Barry Plant Property Management (Australia)",
+                description: "Started with one property management specialist. Conservative approach, professional reviews, specialized expertise. Result: Successful integration that protects their brand while improving efficiency."
+              },
+              {
+                company: "Century 21 Rich River (Australia)",
+                description: "Hired a team for property management and multimedia. Management's assessment after experience: \"The whole team there are legends.\" Not generic praise—that's \"we couldn't run without them\" recognition."
+              },
+              {
+                company: "Jason Gard Real Estate (Australia)",
+                description: "Needed to stop drowning in back-office work. Three years later: Perfect performance reviews, handling system automation, considering hybrid work arrangements because the trust is absolute."
+              },
+              {
+                company: "Professionals McDowell (New Zealand)",
+                description: "Started conservative, tested the approach. Years later: Perfect 5/5 performance ratings, \"If we could clone her we would\" from management. That's the irreplaceable team member every business wants."
+              }
+            ].map((story, index) => (
+              <Card key={index} className="border-lime-300 bg-lime-50">
+                <CardContent className="p-6">
+                  <h4 className="text-lg font-bold text-gray-900 mb-3">{story.company}</h4>
+                  <p className="text-gray-700 leading-relaxed">{story.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mt-8">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What do these success stories have in common?</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>They started conservative (one person, not a full team)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>They measured results professionally (not promotional testimonials, actual performance reviews)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>They committed long-term (years, not months)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>They specialized (property management expertise, not generic admin)</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>And they integrated culturally (team members, not service providers)</span>
+                </li>
+              </ul>
+              <p className="text-gray-800 font-semibold mt-4">
+                That's the blueprint. Not sexy, not fast, but it works.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When This Doesn't Work Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Honest Bit: When This Doesn't Work</h2>
+              <p className="text-lg text-gray-600">I promised brutal honesty, so here it is</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real estate outsourcing fails when:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  "You're looking for \"cheap labor\" (you'll get what you pay for)",
+                  "You're a solopreneur or startup (you're not big enough yet)",
+                  "You want someone to \"figure it out\" (they need your processes documented)",
+                  "You can't commit management time (5-10 hours weekly initially)",
+                  "You're constantly pivoting (training investment wasted)",
+                  "Your revenue doesn't support the investment (under $500K annually)",
+                  "You expect immediate results (60-90 days minimum before ROI)"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-2">Freelancer Platforms vs VA Companies:</p>
+              <p className="text-gray-700 leading-relaxed">
+                Freelancer platforms (Upwork, Fiverr) have 70-80% failure rates in real estate. You'll spend 4 months and $6,000+ 
+                finding ONE person who works out. VA companies (like us) cost more upfront ($1,800-2,500/month vs $800-1,200 for 
+                freelancers), but have 60-70% success rates with backup coverage, vetted candidates, and replacement guarantees.
+              </p>
+              <p className="text-gray-800 font-semibold mt-4">
+                The math: Spend $6,200 on failed freelancer attempts to eventually find success, or pay $5,800 more in year one for 
+                professional vetting, training support, and backup coverage. Most people cheap out, then learn the expensive way.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Are You Ready Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">Your Next Step: Are You Actually Ready?</h2>
+          
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            Most people reading this aren't ready. That's fine—bookmark it and come back when your revenue hits $500K+, when you've 
+            documented your core processes, or when your time is genuinely worth $150+/hour.
+          </p>
+
+          <Card className="border-lime-300 bg-gradient-to-br from-lime-50 to-green-50 mb-8">
+            <CardContent className="p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">If you ARE ready, here's what to do:</h3>
+              <div className="space-y-4">
+                {[
+                  "Document your top 10 recurring tasks (what specifically needs delegation)",
+                  "Calculate your true hourly value (total revenue ÷ hours worked)",
+                  "Commit 5-10 hours per week for first 90 days (management time required)",
+                  "Set aside first-year budget ($40K-75K depending on market)",
+                  "Accept the 90-day timeline (you'll be slower initially)"
+                ].map((step, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-lime-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <span className="text-gray-800 text-lg pt-0.5">{step}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900 text-white">
+            <CardContent className="p-8">
+              <p className="text-lg leading-relaxed mb-6">
+                At ShoreAgents, our real estate VA pricing runs <strong className="text-lime-400">$1,200-2,500/month full-time</strong> 
+                depending on expertise level and workspace setup. That's all-inclusive—salary, benefits, management, infrastructure, 
+                backup coverage.
+              </p>
+              <p className="text-gray-300 leading-relaxed">
+                We work with USA, Australian, and New Zealand real estate businesses that are serious about long-term offshore team 
+                building, not cheap labor experiments.
+              </p>
+              <p className="text-gray-300 leading-relaxed mt-4">
+                We're not the cheapest. We're not the biggest. But we're the ones telling you NOT to hire unless you're actually ready. 
+                Because successful partnerships matter more than quick sales.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Final CTA */}
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready for an Honest Assessment?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Want the honest conversation? Schedule a consultation where we'll actually tell you if you're ready or if you should wait.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
+            </div>
+            <p className="text-lime-100 mt-6 text-sm">
+              Not ready yet? Learn more about our approach and come back when the timing's right.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            Real estate outsourcing works brilliantly—when done right, by the right businesses, at the right time. Are you there yet?
+          </p>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
