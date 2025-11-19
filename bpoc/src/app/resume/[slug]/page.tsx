@@ -1006,22 +1006,61 @@ export default function ResumeSlugPage() {
       console.log('Sending request to PDF generation API...');
 
       // Call Puppeteer API
-      const response = await fetch('/api/resume/export-pdf', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          html: htmlWithTitle,
-          fileName: fileName,
-        }),
-      });
+      let response: Response;
+      try {
+        response = await fetch('/api/resume/export-pdf', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            html: htmlWithTitle,
+            fileName: fileName,
+          }),
+        });
+      } catch (fetchError) {
+        console.error('❌ Network error calling PDF API:', fetchError);
+        throw new Error(`Network error: ${fetchError instanceof Error ? fetchError.message : 'Failed to connect to server'}`);
+      }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to generate PDF' }));
-        const errorMessage = errorData.details || errorData.error || 'Failed to generate PDF';
-        console.error('❌ PDF generation error:', errorData);
-        throw new Error(errorMessage);
+        let errorData: any = {};
+        let errorMessage = `Server returned ${response.status}: ${response.statusText || 'Unknown error'}`;
+        
+        try {
+          const text = await response.text();
+          console.log('📄 Error response text:', text);
+          
+          if (text && text.trim()) {
+            try {
+              errorData = JSON.parse(text);
+              console.log('📄 Parsed error data:', errorData);
+            } catch (parseError) {
+              // If not JSON, use the text as error message
+              console.log('📄 Response is not JSON, using as text');
+              errorMessage = text.trim();
+            }
+          } else {
+            console.log('📄 Empty response body');
+          }
+        } catch (readError) {
+          console.error('❌ Failed to read error response:', readError);
+          errorMessage = `Server returned ${response.status}: ${response.statusText || 'Unknown error'}`;
+        }
+        
+        // Extract error message from errorData
+        if (errorData && typeof errorData === 'object' && Object.keys(errorData).length > 0) {
+          errorMessage = errorData.details || errorData.hint || errorData.error || errorData.message || errorMessage;
+        }
+        
+        console.error('❌ PDF generation error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData: errorData,
+          message: errorMessage
+        });
+        
+        throw new Error(errorMessage || 'Failed to generate PDF');
       }
 
       // Get PDF blob
@@ -1040,11 +1079,39 @@ export default function ResumeSlugPage() {
       console.log('PDF downloaded successfully');
 
     } catch (error) {
-      console.error('Error exporting PDF:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      const detailedMessage = errorMessage.includes('Failed to launch browser') 
-        ? 'PDF generation failed: Browser could not be launched. Please check server logs for details. If you\'re on Windows, make sure Chrome is installed.'
-        : `Error generating PDF: ${errorMessage}`;
+      console.error('❌ Error exporting PDF:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error constructor:', error?.constructor?.name);
+      console.error('❌ Error stringified:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      
+      let errorMessage = 'Unknown error';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message || error.toString();
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = (error as any).message || (error as any).error || JSON.stringify(error);
+      }
+      
+      let detailedMessage = `Error generating PDF: ${errorMessage}`;
+      
+      if (errorMessage.includes('Failed to launch browser') || 
+          errorMessage.includes('Could not find Chrome') || 
+          errorMessage.includes('executable') ||
+          errorMessage.includes('Browser was not found')) {
+        detailedMessage = 'PDF generation failed: Chrome/Chromium could not be found.\n\n' +
+          'For local development:\n' +
+          '1. Install Google Chrome browser, OR\n' +
+          '2. Run: npx puppeteer browsers install chrome\n' +
+          '3. Restart your development server\n' +
+          '4. Check server console logs for more details';
+      } else if (errorMessage.includes('timeout')) {
+        detailedMessage = 'PDF generation timed out. The resume might be too complex. Please try again or contact support.';
+      } else if (errorMessage.includes('Network error') || errorMessage.includes('fetch')) {
+        detailedMessage = 'Network error: Could not connect to the PDF generation service. Please check if the server is running.';
+      }
+      
       alert(detailedMessage);
     } finally {
       setExporting(false);
