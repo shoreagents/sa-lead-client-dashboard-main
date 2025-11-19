@@ -103,13 +103,33 @@ function ChatPageContent() {
   const handleModalTrigger = (modalType: string) => {
     switch (modalType) {
       case 'pricing_calculator_modal':
+      case 'pricing_form_modal': // Conversational pricing
         setShowPricingModal(true)
         break
       case 'interview_request_modal':
+      case 'interview_form_modal':
         setShowInterviewModal(true)
         break
       case 'anonymous_user_modal':
+      case 'contact_form_modal': // Map to anonymous modal for contact collection
         setShowAnonymousModal(true)
+        break
+      case 'quote_details_modal':
+        // TODO: Navigate to quotation page or show quote details modal
+        console.log('📊 Navigating to quotation page...')
+        window.location.href = '/user-dashboard/quotation'
+        break
+      case 'urgent_contact_modal':
+        // TODO: Show urgent contact modal or direct contact form
+        console.log('🚨 Urgent contact request detected')
+        setShowAnonymousModal(true) // Use anonymous modal for now
+        break
+      case 'demo_modal':
+      case 'demo_form_modal':
+        // TODO: Implement demo booking modal
+        console.log('📺 Demo request detected')
+        // For now, you can add a toast or notification
+        alert('Demo booking coming soon! Please contact us directly.')
         break
       default:
         console.log(`Unknown modal type: ${modalType}`)

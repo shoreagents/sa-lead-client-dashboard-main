@@ -312,15 +312,16 @@ model UserEnrichment {
 }
 
 model Conversation {
-  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id           String           @map("user_id") @db.VarChar(255)
-  conversation_type ConversationType @default(Anonymous) @map("conversation_type")
-  title             String?          @db.VarChar(255)
-  context_data      Json?            @map("context_data")
-  created_at        DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at        DateTime         @default(now()) @map("updated_at") @db.Timestamptz(6)
-  migrated_at       DateTime?        @map("migrated_at") @db.Timestamptz(6)
-  messages          Message[]
+  id                  String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id             String               @map("user_id") @db.VarChar(255)
+  conversation_type   ConversationType     @default(Anonymous) @map("conversation_type")
+  title               String?              @db.VarChar(255)
+  context_data        Json?                @map("context_data")
+  created_at          DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at          DateTime             @default(now()) @map("updated_at") @db.Timestamptz(6)
+  migrated_at         DateTime?            @map("migrated_at") @db.Timestamptz(6)
+  conversation_memory ConversationMemory[]
+  messages            Message[]
 
   @@index([user_id], map: "idx_conversations_user_id")
   @@index([conversation_type], map: "idx_conversations_type")
@@ -369,5 +370,44 @@ enum MessageRole {
   Assistant
 
   @@map("message_role_enum")
+  @@schema("public")
+}
+
+// Vector Embeddings for Knowledge Base (AI Agent - Phase 1)
+model KnowledgeEmbedding {
+  id         String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  content    String
+  title      String?
+  url        String?
+  embedding  Unsupported("vector")? // OpenAI text-embedding-3-small (1536 dimensions)
+  metadata   Json?
+  created_at DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@index([embedding])
+  @@map("knowledge_embeddings")
+  @@schema("public")
+}
+
+// Conversation Memory for AI Agent (AI Agent - Phase 2)
+model ConversationMemory {
+  id               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id          String                 @map("user_id")
+  conversation_id  String?                @map("conversation_id") @db.Uuid
+  memory_type      String                 @map("memory_type")
+  content          Json
+  embedding        Unsupported("vector")? // For semantic memory search (1536 dimensions)
+  importance_score Int?                   @default(5) @map("importance_score")
+  created_at       DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  expires_at       DateTime?              @map("expires_at") @db.Timestamptz(6)
+  metadata         Json?
+  conversations    Conversation?          @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "conversation_memory_user_idx")
+  @@index([conversation_id], map: "conversation_memory_conversation_idx")
+  @@index([memory_type], map: "conversation_memory_type_idx")
+  @@index([importance_score(sort: Desc)], map: "conversation_memory_importance_idx")
+  @@index([embedding])
+  @@map("conversation_memory")
   @@schema("public")
 }
