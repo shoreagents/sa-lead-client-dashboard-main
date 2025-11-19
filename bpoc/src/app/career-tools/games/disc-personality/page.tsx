@@ -312,11 +312,6 @@ export default function FilipinoDiscGame() {
   const [revealStep, setRevealStep] = useState(0);
   const [isInsightsExpanded, setIsInsightsExpanded] = useState(false);
   
-  // Share state
-  const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
-  const [showShareModal, setShowShareModal] = useState<boolean>(false);
-  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
-  const shareRef = useRef<HTMLDivElement>(null);
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
   
   // Music control state
@@ -2401,7 +2396,8 @@ Make it deeply personal and actionable based on their actual choices.`;
                           onClick={async () => {
                             const currentUrl = new URL(window.location.href);
                             const baseUrl = currentUrl.origin;
-                            const resultUrl = `${baseUrl}/results/bpoc-disc/${user.username || user.slug}`;
+                            const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+                            const resultUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
                             const animalEmojis: {[key: string]: string} = {
                               'EAGLE': '🦅',
                               'PEACOCK': '🦚',
@@ -2436,7 +2432,8 @@ Make it deeply personal and actionable based on their actual choices.`;
                           onClick={async () => {
                             const currentUrl = new URL(window.location.href);
                             const baseUrl = currentUrl.origin;
-                            const resultUrl = `${baseUrl}/results/bpoc-disc/${user.username || user.slug}`;
+                            const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+                            const resultUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
                             const animalEmojis: {[key: string]: string} = {
                               'EAGLE': '🦅',
                               'PEACOCK': '🦚',
@@ -2471,7 +2468,8 @@ Make it deeply personal and actionable based on their actual choices.`;
                           onClick={async () => {
                             const currentUrl = new URL(window.location.href);
                             const baseUrl = currentUrl.origin;
-                            const resultUrl = `${baseUrl}/results/bpoc-disc/${user.username || user.slug}`;
+                            const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
+                            const resultUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
                             const animalEmojis: {[key: string]: string} = {
                               'EAGLE': '🦅',
                               'PEACOCK': '🦚',
@@ -3517,10 +3515,10 @@ Make it deeply personal and actionable based on their actual choices.`;
                     </div>
                     <div>
                       <h3 className="text-2xl font-bold text-white">
-                        {shareModalData.platform === 'Clipboard' ? 'Link Copied Successfully!' : 'Text Copied Successfully!'}
+                        {shareModalData?.platform === 'Clipboard' ? 'Link Copied Successfully!' : 'Text Copied Successfully!'}
                       </h3>
                       <p className="text-cyan-100 text-sm">
-                        {shareModalData.platform === 'Clipboard' ? 'The link is ready to share!' : `Ready to share on ${shareModalData.platform}`}
+                        {shareModalData?.platform === 'Clipboard' ? 'The link is ready to share!' : `Ready to share on ${shareModalData?.platform || 'social media'}`}
                       </p>
                     </div>
                   </div>
@@ -3543,7 +3541,7 @@ Make it deeply personal and actionable based on their actual choices.`;
                     </div>
                     <div>
                       <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
-                      {shareModalData.platform === 'Clipboard' ? (
+                      {shareModalData?.platform === 'Clipboard' ? (
                         <ol className="space-y-2 text-gray-300">
                           <li className="flex items-start gap-2">
                             <span className="text-cyan-400 font-bold mt-0.5">1.</span>
@@ -3562,7 +3560,7 @@ Make it deeply personal and actionable based on their actual choices.`;
                         <ol className="space-y-2 text-gray-300">
                           <li className="flex items-start gap-2">
                             <span className="text-cyan-400 font-bold mt-0.5">1.</span>
-                            <span>The {shareModalData.platform} share dialog will open in 2 seconds</span>
+                            <span>The {shareModalData?.platform || 'social media'} share dialog will open in 2 seconds</span>
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-cyan-400 font-bold mt-0.5">2.</span>
@@ -3582,10 +3580,11 @@ Make it deeply personal and actionable based on their actual choices.`;
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
-                      {shareModalData.platform === 'Clipboard' ? 'Copied Link' : 'Post Text Preview'}
+                      {shareModalData?.platform === 'Clipboard' ? 'Copied Link' : 'Post Text Preview'}
                     </label>
                     <button
                       onClick={async () => {
+                        if (!shareModalData) return;
                         try {
                           await navigator.clipboard.writeText(shareModalData.text);
                           const btn = document.getElementById('copy-again-btn-disc');
@@ -3607,7 +3606,7 @@ Make it deeply personal and actionable based on their actual choices.`;
                   </div>
                   <div className="bg-gray-800/50 rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto">
                     <p className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
-                      {shareModalData.text}
+                      {shareModalData?.text || ''}
                     </p>
                   </div>
                 </div>
