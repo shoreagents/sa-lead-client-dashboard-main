@@ -167,8 +167,6 @@ import {
   Instagram,
   Linkedin
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -274,15 +272,15 @@ export default function ResumeSlugPage() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
-        const target = event.target as Element;
+      const target = event.target as Element;
         if (!target.closest('[data-share-dropdown]')) {
-          setIsShareOpen(false);
+        setIsShareOpen(false);
         }
       }
     };
 
     if (isShareOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -435,7 +433,7 @@ export default function ResumeSlugPage() {
           // Fallback to copying to clipboard
           await copyUrl(resumeUrl);
         }
-        setIsShareOpen(false);
+    setIsShareOpen(false);
     }
   };
 
@@ -475,7 +473,7 @@ export default function ResumeSlugPage() {
     }
   };
 
-  // Export to PDF function
+  // Export to PDF function using Puppeteer
   const exportToPDF = async () => {
     console.log('Export PDF clicked!');
     const element = document.getElementById('resume-content');
@@ -491,125 +489,487 @@ export default function ResumeSlugPage() {
       // Wait for fonts to load
       await document.fonts.ready;
       
-      console.log('Capturing resume content...');
+      console.log('Preparing resume content for PDF generation...');
       
-      // Capture the resume content as a high-quality image
-      const canvas = await html2canvas(element, {
-        scale: 2, // Higher quality
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight
-      });
-
-      console.log('Canvas created, generating PDF...');
-
-      // Initialize PDF with A4 dimensions
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      // Clone the element to avoid modifying the original
+      const clonedElement = element.cloneNode(true) as HTMLElement;
       
-      // A4 dimensions in mm
-      const pdfWidth = 210;
-      const pdfHeight = 297;
+      // Get computed styles and apply them inline
+      const styles = window.getComputedStyle(element);
+      clonedElement.style.width = styles.width;
+      clonedElement.style.maxWidth = styles.maxWidth;
+      clonedElement.style.backgroundColor = styles.backgroundColor || '#ffffff';
+      clonedElement.style.color = styles.color || '#1f2937';
+      clonedElement.style.fontFamily = styles.fontFamily || 'Inter, sans-serif';
       
-      // Add margins for better appearance (10mm on all sides)
-      const margin = 10;
-      const contentWidth = pdfWidth - (margin * 2);
-      // Reduce content height by 15mm to add larger buffer and prevent text from being cut off
-      const pageBuffer = 15; // Larger buffer to prevent cutting text at page boundaries
-      const contentHeight = pdfHeight - (margin * 2) - pageBuffer;
+      // Find and preserve the divider element specifically
+      // Use attribute selectors to avoid issues with dots in class names
+      const dividerSelectors = [
+        '[class*="h-0.5"][class*="my-6"]',
+        '[class*="h-0.5"]',
+        'div[class*="h-0\\.5"]',
+        'div[class*="h-px"]'
+      ];
       
-      // Use the full content width to maintain readability
-      // Don't scale down - maintain original proportions at a readable size
-      const scaledWidth = contentWidth; // Use full available width
-      const scaledHeight = (canvas.height * scaledWidth) / canvas.width;
-      
-      // Calculate total content height in PDF units
-      const totalContentHeight = scaledHeight;
-      
-      // Calculate how many pages we need (add small buffer to prevent rounding errors)
-      const totalPages = Math.ceil((totalContentHeight + 0.1) / contentHeight);
-      
-      console.log(`Resume height: ${totalContentHeight.toFixed(2)}mm, Pages needed: ${totalPages}`);
-      console.log(`Content width: ${scaledWidth}mm, Content height per page: ${contentHeight}mm (with ${pageBuffer}mm buffer)`);
-      
-      // Work in pixels to ensure perfect continuity between pages
-      const totalPixels = canvas.height;
-      const pixelsPerPageFloat = (contentHeight * totalPixels) / totalContentHeight;
-      // Use floor with additional safety margin to ensure we don't cut text
-      // Subtract 20 pixels as additional safety margin
-      const pixelsPerPage = Math.max(100, Math.floor(pixelsPerPageFloat) - 20);
-      
-      let processedPixels = 0;
-      
-      // Split content across pages
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) {
-          pdf.addPage();
-        }
-        
-        // Calculate remaining pixels
-        const remainingPixels = canvas.height - processedPixels;
-        
-        // Determine pixels for this page
-        let pixelsForThisPage: number;
-        if (page === totalPages - 1) {
-          // Last page: capture all remaining content
-          pixelsForThisPage = remainingPixels;
-        } else {
-          // Regular pages: use calculated pixels per page
-          // Be conservative - use slightly less to ensure we don't cut text
-          pixelsForThisPage = Math.min(pixelsPerPage, remainingPixels);
-        }
-        
-        if (pixelsForThisPage <= 0) {
-          break;
-        }
-        
-        // Calculate source rectangle
-        const sourceY = processedPixels;
-        const sourceHeight = pixelsForThisPage;
-        
-        // Create canvas for this page
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = sourceHeight;
-        const pageCtx = pageCanvas.getContext('2d');
-        
-        if (pageCtx) {
-          // Draw the portion for this page
-          pageCtx.drawImage(
-            canvas,
-            0, sourceY, canvas.width, sourceHeight,
-            0, 0, canvas.width, sourceHeight
-          );
-          
-          const pageImgData = pageCanvas.toDataURL('image/png', 1.0);
-          
-          // Calculate height in PDF units for this page
-          const pageHeightInMM = (sourceHeight * scaledWidth) / canvas.width;
-          
-          // Position content at the top of the content area (with margin)
-          const xPosition = margin;
-          const yPosition = margin;
-          
-          // Add image to PDF with proper positioning and margins
-          pdf.addImage(
-            pageImgData,
-            'PNG',
-            xPosition,
-            yPosition,
-            scaledWidth,
-            pageHeightInMM
-          );
-          
-          // Update processed pixels
-          processedPixels += sourceHeight;
+      let dividerElement: HTMLElement | null = null;
+      for (const selector of dividerSelectors) {
+        try {
+          dividerElement = element.querySelector(selector) as HTMLElement;
+          if (dividerElement) {
+            // Verify it's actually a divider by checking height
+            const computedStyle = window.getComputedStyle(dividerElement);
+            const height = parseFloat(computedStyle.height);
+            if (height <= 2) {
+              break;
+            } else {
+              dividerElement = null; // Not a divider, continue searching
+            }
+          }
+        } catch (e) {
+          // Invalid selector, try next one
+          continue;
         }
       }
+      
+      if (dividerElement) {
+        const dividerComputedStyle = window.getComputedStyle(dividerElement);
+        const dividerInlineBg = dividerElement.style.backgroundColor;
+        const dividerInlineOpacity = dividerElement.style.opacity;
+        
+        // Find the corresponding divider in the cloned element using the same method
+        let clonedDivider: HTMLElement | null = null;
+        for (const selector of dividerSelectors) {
+          try {
+            clonedDivider = clonedElement.querySelector(selector) as HTMLElement;
+            if (clonedDivider) {
+              // Verify it's actually a divider by checking height
+              const computedStyle = window.getComputedStyle(clonedDivider);
+              const height = parseFloat(computedStyle.height);
+              if (height <= 2) {
+                break;
+              } else {
+                clonedDivider = null; // Not a divider, continue searching
+              }
+            }
+          } catch (e) {
+            // Invalid selector, try next one
+            continue;
+          }
+        }
+        
+        if (clonedDivider) {
+          // Get the actual values - prioritize inline styles, then computed, then defaults
+          // For background color, preserve the original color
+          let bgColor = dividerElement.style.backgroundColor;
+          
+          // Check style attribute first (most reliable)
+          const styleAttr = dividerElement.getAttribute('style');
+          if (styleAttr) {
+            const bgMatch = styleAttr.match(/background-color:\s*([^;!]+)/i);
+            if (bgMatch && bgMatch[1]) {
+              const extractedColor = bgMatch[1].trim();
+              if (extractedColor && extractedColor !== 'transparent' && extractedColor !== 'rgba(0, 0, 0, 0)') {
+                bgColor = extractedColor;
+              }
+            }
+          }
+          
+          // Fallback to inline style property
+          if (!bgColor || bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === '') {
+            bgColor = dividerElement.style.backgroundColor;
+          }
+          
+          // Fallback to computed style
+          if (!bgColor || bgColor === 'transparent' || bgColor === 'rgba(0, 0, 0, 0)' || bgColor === '') {
+            const computedBg = dividerComputedStyle.backgroundColor;
+            if (computedBg && computedBg !== 'transparent' && computedBg !== 'rgba(0, 0, 0, 0)' && computedBg !== 'rgba(8, 6, 0, 0)') {
+              bgColor = computedBg;
+            } else {
+              // Only use black as last resort
+              bgColor = '#000000';
+            }
+          }
+          
+          // Preserve original opacity
+          let opacity = dividerElement.style.opacity;
+          if (!opacity || opacity === '') {
+            if (styleAttr) {
+              const opacityMatch = styleAttr.match(/opacity:\s*([^;]+)/i);
+              if (opacityMatch && opacityMatch[1]) {
+                opacity = opacityMatch[1].trim();
+              }
+            }
+          }
+          if (!opacity || opacity === '') {
+            opacity = dividerComputedStyle.opacity || '0.3';
+          }
+          const height = dividerElement.style.height || dividerComputedStyle.height || '0.5px';
+          const width = dividerElement.style.width || dividerComputedStyle.width || '100%';
+          const marginTop = dividerElement.style.marginTop || dividerComputedStyle.marginTop || '24px';
+          const marginBottom = dividerElement.style.marginBottom || dividerComputedStyle.marginBottom || '24px';
+          
+          // Build the complete style string
+          const styleString = [
+            `display: block`,
+            `visibility: visible`,
+            `width: ${width}`,
+            `height: ${height}`,
+            `margin-top: ${marginTop}`,
+            `margin-bottom: ${marginBottom}`,
+            `background-color: ${bgColor}`,
+            `opacity: ${opacity}`,
+            `box-shadow: none`,
+            `border: none`,
+            `padding: 0`
+          ].join('; ');
+          
+          // Set all styles at once
+          clonedDivider.setAttribute('data-divider', 'true');
+          clonedDivider.setAttribute('style', styleString);
+          
+          // Also set via style object for compatibility
+          clonedDivider.style.cssText = styleString;
+          
+          console.log('✅ Divider preserved with inline styles:', {
+            backgroundColor: bgColor,
+            opacity: opacity,
+            height: height,
+            width: width,
+            marginTop: marginTop,
+            marginBottom: marginBottom,
+            styleString: styleString
+          });
+        } else {
+          console.warn('⚠️ Divider not found in cloned element');
+          // Create a divider if it wasn't found
+          const headerSection = clonedElement.querySelector('div:first-child');
+          if (headerSection) {
+            const newDivider = document.createElement('div');
+            newDivider.setAttribute('data-divider', 'true');
+            newDivider.className = 'w-full h-0.5 my-6';
+            newDivider.style.cssText = 'display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: #000000; opacity: 1; box-shadow: none; border: none; padding: 0;';
+            headerSection.insertAdjacentElement('afterend', newDivider);
+            console.log('✅ Created new divider element');
+          }
+        }
+      } else {
+        console.warn('⚠️ Divider element not found in resume content');
+        // Try to create a divider after the header section
+        const headerSection = clonedElement.querySelector('div:first-child');
+        if (headerSection) {
+          const newDivider = document.createElement('div');
+          newDivider.setAttribute('data-divider', 'true');
+          newDivider.className = 'w-full h-0.5 my-6';
+          newDivider.style.cssText = 'display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: #000000; opacity: 1; box-shadow: none; border: none; padding: 0;';
+          headerSection.insertAdjacentElement('afterend', newDivider);
+          console.log('✅ Created new divider element (fallback)');
+        }
+      }
+      
+      // Get all computed styles for child elements
+      const allElements = element.querySelectorAll('*');
+      allElements.forEach((el) => {
+        const computedStyle = window.getComputedStyle(el);
+        const htmlEl = el as HTMLElement;
+        // Preserve important styles
+        if (computedStyle.color) htmlEl.style.color = computedStyle.color;
+        if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+          htmlEl.style.backgroundColor = computedStyle.backgroundColor;
+        }
+        if (computedStyle.fontSize) htmlEl.style.fontSize = computedStyle.fontSize;
+        if (computedStyle.fontWeight) htmlEl.style.fontWeight = computedStyle.fontWeight;
+        if (computedStyle.fontFamily) htmlEl.style.fontFamily = computedStyle.fontFamily;
+        if (computedStyle.margin) htmlEl.style.margin = computedStyle.margin;
+        if (computedStyle.padding) htmlEl.style.padding = computedStyle.padding;
+      });
+      
+      // Remove any black backgrounds, shadows, gradients, or problematic styles from cloned element
+      const allClonedElements = clonedElement.querySelectorAll('*');
+      allClonedElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const computedStyle = window.getComputedStyle(el);
+        
+        // Remove black backgrounds
+        if (htmlEl.style.backgroundColor === 'black' || 
+            htmlEl.style.backgroundColor === '#000000' ||
+            htmlEl.style.backgroundColor === 'rgb(0, 0, 0)' ||
+            htmlEl.style.backgroundColor === 'rgba(0, 0, 0, 1)') {
+          htmlEl.style.backgroundColor = 'transparent';
+        }
+        
+        // Remove shadows (but preserve divider lines)
+        // Only remove shadows if it's not a divider line
+        // Check for divider by class, height, or if it's a thin horizontal line with background color
+        const hasDividerClass = htmlEl.classList.contains('h-0.5') || 
+                                htmlEl.classList.contains('h-px') ||
+                                htmlEl.classList.contains('my-6');
+        const hasDividerHeight = computedStyle.height === '0.5px' ||
+                                 computedStyle.height === '1px' ||
+                                 (computedStyle.height && parseFloat(computedStyle.height) <= 2);
+        const hasDividerStyle = (computedStyle.width === '100%' || htmlEl.style.width === '100%') &&
+                                hasDividerHeight &&
+                                (computedStyle.backgroundColor !== 'transparent' && 
+                                 computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)');
+        const isDivider = hasDividerClass || hasDividerHeight || hasDividerStyle;
+        
+        if (!isDivider) {
+          htmlEl.style.boxShadow = 'none';
+          htmlEl.style.textShadow = 'none';
+          htmlEl.style.filter = 'none';
+        }
+        
+        // Remove gradients
+        if (computedStyle.backgroundImage && computedStyle.backgroundImage.includes('gradient')) {
+          htmlEl.style.backgroundImage = 'none';
+        }
+        if (htmlEl.style.backgroundImage && htmlEl.style.backgroundImage.includes('gradient')) {
+          htmlEl.style.backgroundImage = 'none';
+        }
+        
+        // Remove backdrop filters
+        htmlEl.style.backdropFilter = 'none';
+        htmlEl.style.webkitBackdropFilter = 'none';
+        
+        // Ensure no black borders (but preserve colored borders for dividers)
+        if (htmlEl.style.borderColor === 'black' || 
+            htmlEl.style.borderColor === '#000000') {
+          htmlEl.style.borderColor = 'transparent';
+        }
+        
+        // Preserve divider lines - ensure they have a visible background or border
+        if (isDivider) {
+          // Preserve the original background color if it exists
+          const originalBg = computedStyle.backgroundColor;
+          const inlineBg = htmlEl.style.backgroundColor;
+          
+          // Priority: inline style > computed style > fallback
+          if (inlineBg && inlineBg !== 'transparent' && inlineBg !== 'rgba(0, 0, 0, 0)') {
+            // Keep the inline style background color
+            htmlEl.style.backgroundColor = inlineBg;
+          } else if (originalBg && originalBg !== 'transparent' && originalBg !== 'rgba(0, 0, 0, 0)') {
+            // Keep the original background color
+            htmlEl.style.backgroundColor = originalBg;
+          } else {
+            // Use black for dividers if no color is set
+            htmlEl.style.backgroundColor = '#000000'; // Black color
+            htmlEl.style.opacity = '1'; // Full opacity for black
+          }
+          
+          // Ensure divider is visible
+          htmlEl.style.height = computedStyle.height || '0.5px' || '1px';
+          htmlEl.style.display = 'block';
+          htmlEl.style.width = '100%';
+          htmlEl.style.marginTop = computedStyle.marginTop || '24px';
+          htmlEl.style.marginBottom = computedStyle.marginBottom || '24px';
+          
+          // Preserve opacity for dividers (they might have opacity for styling)
+          if (computedStyle.opacity && parseFloat(computedStyle.opacity) < 1) {
+            // Keep the opacity for dividers as it's part of their design
+            htmlEl.style.opacity = computedStyle.opacity;
+          } else if (!htmlEl.style.opacity && sourceElement?.style?.opacity) {
+            // If no opacity was set but source has it, use source opacity
+            htmlEl.style.opacity = sourceElement.style.opacity;
+          } else if (!htmlEl.style.opacity) {
+            // Default opacity for dividers
+            htmlEl.style.opacity = '0.3';
+          }
+        } else {
+          // Remove opacity effects that might cause shadows (only for non-dividers)
+          if (computedStyle.opacity && parseFloat(computedStyle.opacity) < 1) {
+            htmlEl.style.opacity = '1';
+          }
+        }
+      });
+      
+      // Ensure the main element has white background
+      clonedElement.style.backgroundColor = '#ffffff';
+      clonedElement.style.color = '#1f2937';
+      
+      // Before creating HTML, ensure divider is visible in the cloned element
+      // Find the divider one more time and ensure it has all styles
+      const finalDividerCheck = clonedElement.querySelector('[data-divider="true"]') || 
+                                clonedElement.querySelector('[class*="h-0.5"][class*="my-6"]') ||
+                                clonedElement.querySelector('[class*="h-0.5"]');
+      
+      if (finalDividerCheck) {
+        const finalDivider = finalDividerCheck as HTMLElement;
+        const finalComputed = window.getComputedStyle(finalDivider);
+        
+        // Get template color if available
+        const bgColor = finalDivider.style.backgroundColor || finalComputed.backgroundColor || '#000000';
+        const opacity = finalDivider.style.opacity || finalComputed.opacity || '1';
+        
+        // Force all styles
+        finalDivider.setAttribute('data-divider', 'true');
+        finalDivider.style.cssText = `display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: ${bgColor}; opacity: ${opacity}; box-shadow: none; border: none; padding: 0;`;
+        
+        console.log('✅ Final divider check - styles applied:', {
+          backgroundColor: finalDivider.style.backgroundColor,
+          opacity: finalDivider.style.opacity,
+          cssText: finalDivider.style.cssText,
+          outerHTML: finalDivider.outerHTML.substring(0, 200)
+        });
+      } else {
+        console.warn('⚠️ Divider not found in final check, creating new one');
+        // Create divider after first div
+        const firstDiv = clonedElement.querySelector('div');
+        if (firstDiv) {
+          const newDivider = document.createElement('div');
+          newDivider.setAttribute('data-divider', 'true');
+          newDivider.className = 'w-full h-0.5 my-6';
+          newDivider.style.cssText = `display: block; visibility: visible; width: 100%; height: 0.5px; margin-top: 24px; margin-bottom: 24px; background-color: #000000; opacity: 1; box-shadow: none; border: none; padding: 0;`;
+          firstDiv.insertAdjacentElement('afterend', newDivider);
+          console.log('✅ Created new divider in final check');
+        }
+      }
+      
+      // Create a complete HTML document with styles
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <style>
+              * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+              }
+              html, body {
+                font-family: ${styles.fontFamily || 'Inter, sans-serif'};
+                color: #1f2937;
+                background: #ffffff !important;
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                height: auto;
+                min-height: 100vh;
+              }
+              body > * {
+                background: #ffffff !important;
+              }
+              /* Override any black backgrounds */
+              [style*="background: black"],
+              [style*="background-color: black"],
+              [style*="background: #000"],
+              [style*="background-color: #000"],
+              [style*="background: rgb(0, 0, 0)"],
+              [style*="background-color: rgb(0, 0, 0)"] {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
+              }
+              /* Ensure all divs have proper backgrounds */
+              div {
+                background: transparent !important;
+              }
+              div[class*="bg-"] {
+                background: #ffffff !important;
+              }
+              /* Remove any black overlays or pseudo-elements */
+              ::before,
+              ::after {
+                background: transparent !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
+                display: none !important;
+              }
+              /* Remove all shadows (but preserve divider lines) */
+              *:not([class*="h-0.5"]):not([class*="h-px"]):not([style*="height: 0.5px"]):not([style*="height: 1px"]) {
+                box-shadow: none !important;
+                text-shadow: none !important;
+                filter: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+              }
+              /* Preserve divider lines */
+              [class*="h-0.5"],
+              [class*="h-px"],
+              [style*="height: 0.5px"],
+              [style*="height: 1px"],
+              [class*="my-6"] {
+                display: block !important;
+                visibility: visible !important;
+                width: 100% !important;
+              }
+              /* Ensure divider with my-6 class is visible */
+              [class*="h-0.5"][class*="my-6"],
+              [class*="h-0.5"],
+              [data-divider="true"] {
+                display: block !important;
+                visibility: visible !important;
+                width: 100% !important;
+                min-height: 0.5px !important;
+                margin-top: 24px !important;
+                margin-bottom: 24px !important;
+              }
+              /* Only set default color/opacity if not already set inline */
+              [class*="h-0.5"][class*="my-6"]:not([style*="background"]),
+              [class*="h-0.5"]:not([style*="background"]),
+              [data-divider="true"]:not([style*="background"]) {
+                background-color: #000000 !important;
+                opacity: 1 !important;
+              }
+              /* Force divider to be visible - but respect inline styles */
+              [data-divider="true"] {
+                display: block !important;
+                visibility: visible !important;
+                height: 0.5px !important;
+                width: 100% !important;
+                margin-top: 24px !important;
+                margin-bottom: 24px !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+              }
+              /* Only set default color/opacity if not set inline */
+              [data-divider="true"]:not([style*="background-color"]):not([style*="background:"]) {
+                background-color: #000000 !important;
+              }
+              [data-divider="true"]:not([style*="opacity"]) {
+                opacity: 1 !important;
+              }
+              /* Remove gradients */
+              [style*="gradient"],
+              [class*="gradient"],
+              [class*="shadow"] {
+                background-image: none !important;
+                box-shadow: none !important;
+              }
+              /* Remove glass effects */
+              [class*="glass"],
+              [class*="backdrop"] {
+                background: #ffffff !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+              }
+              ${Array.from(document.styleSheets)
+                .map((sheet) => {
+                  try {
+                    return Array.from(sheet.cssRules)
+                      .map((rule) => {
+                        const ruleText = rule.cssText;
+                        // Filter out any rules that might cause black backgrounds
+                        if (ruleText.includes('background: black') || 
+                            ruleText.includes('background-color: black') ||
+                            ruleText.includes('background: #000') ||
+                            ruleText.includes('background-color: #000')) {
+                          return '';
+                        }
+                        return ruleText;
+                      })
+                      .join('\n');
+                  } catch (e) {
+                    return '';
+                  }
+                })
+                .join('\n')}
+            </style>
+          </head>
+          <body style="background: #ffffff !important; color: #1f2937;">
+            ${clonedElement.outerHTML}
+          </body>
+        </html>
+      `;
 
       // Format filename as FirstName-LastName-BPOC-Resume.pdf
       const fullName = resume?.user.fullName || 'Resume';
@@ -617,13 +977,75 @@ export default function ResumeSlugPage() {
       const firstName = nameParts[0] || 'Resume';
       const lastName = nameParts.slice(1).join('-') || 'User';
       const fileName = `${firstName}-${lastName}-BPOC-Resume.pdf`;
-      pdf.save(fileName);
+      const pdfTitle = `${fullName} - Resume | BPOC.IO`;
 
-      console.log('PDF saved successfully');
+      // Add title to HTML for PDF metadata
+      const htmlWithTitle = htmlContent.replace(
+        '<head>',
+        `<head>\n            <title>${pdfTitle}</title>`
+      );
+
+      // Debug: Check if divider is in the HTML
+      const hasDivider = htmlWithTitle.includes('data-divider="true"') || 
+                        htmlWithTitle.includes('h-0.5') ||
+                        htmlWithTitle.includes('my-6');
+      
+      if (hasDivider) {
+        console.log('✅ Divider found in HTML string');
+        // Extract a snippet of HTML around the divider for debugging
+        const dividerIndex = htmlWithTitle.indexOf('data-divider') || htmlWithTitle.indexOf('h-0.5');
+        if (dividerIndex > -1) {
+          const snippet = htmlWithTitle.substring(Math.max(0, dividerIndex - 100), dividerIndex + 300);
+          console.log('📄 Divider HTML snippet:', snippet);
+        }
+      } else {
+        console.error('❌ Divider NOT found in HTML string!');
+        console.log('📄 HTML preview (first 2000 chars):', htmlWithTitle.substring(0, 2000));
+      }
+
+      console.log('Sending request to PDF generation API...');
+
+      // Call Puppeteer API
+      const response = await fetch('/api/resume/export-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          html: htmlWithTitle,
+          fileName: fileName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to generate PDF' }));
+        const errorMessage = errorData.details || errorData.error || 'Failed to generate PDF';
+        console.error('❌ PDF generation error:', errorData);
+        throw new Error(errorMessage);
+      }
+
+      // Get PDF blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('PDF downloaded successfully');
 
     } catch (error) {
       console.error('Error exporting PDF:', error);
-      alert('Error generating PDF. Please try again. Error: ' + (error as Error).message);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const detailedMessage = errorMessage.includes('Failed to launch browser') 
+        ? 'PDF generation failed: Browser could not be launched. Please check server logs for details. If you\'re on Windows, make sure Chrome is installed.'
+        : `Error generating PDF: ${errorMessage}`;
+      alert(detailedMessage);
     } finally {
       setExporting(false);
     }
@@ -818,7 +1240,7 @@ export default function ResumeSlugPage() {
                        <Share2 className="h-4 w-4 mr-2" />
                        Share
                      </Button>
-                   </div>
+                             </div>
                    
                    {/* Share Dropdown Menu - Rendered via Portal to avoid overflow clipping */}
                    {isShareOpen && dropdownPosition && typeof document !== 'undefined' && createPortal(
@@ -833,7 +1255,7 @@ export default function ResumeSlugPage() {
                        <div className="py-2">
                          {/* Facebook Share */}
                          <button
-                           onClick={() => shareResume('facebook')}
+                             onClick={() => shareResume('facebook')}
                            className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                          >
                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
@@ -842,7 +1264,7 @@ export default function ResumeSlugPage() {
 
                          {/* LinkedIn Share */}
                          <button
-                           onClick={() => shareResume('linkedin')}
+                             onClick={() => shareResume('linkedin')}
                            className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                          >
                            <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
@@ -853,16 +1275,16 @@ export default function ResumeSlugPage() {
 
                          {/* Copy Link */}
                          <button
-                           onClick={() => shareResume('copy')}
+                             onClick={() => shareResume('copy')}
                            className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
-                         >
+                           >
                            <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">📋</div>
                            <span className="font-medium">Copy Link</span>
                          </button>
-                       </div>
+                           </div>
                      </div>,
                      document.body
-                   )}
+                     )}
                    
                    {/* Export PDF Button */}
                    <Button

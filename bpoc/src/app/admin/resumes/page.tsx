@@ -23,8 +23,6 @@ import {
   BarChart3,
   Loader2
 } from 'lucide-react'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -261,13 +259,26 @@ export default function ResumesPage() {
     setExportingResumeId(resumeId)
 
     try {
-      // Fetch resume data
-      const response = await fetch(`/api/admin/resumes/${resumeId}/preview?t=${Date.now()}`, { cache: 'no-store' })
-      const data = await response.json()
+      // First, get the resume slug from the resume list or fetch it
+      const resume = resumes.find(r => r.id === resumeId)
+      if (!resume || !resume.resume_slug) {
+        toast.error('Resume not found')
+        return
+      }
+
+      // Fetch actual resume data using the same API as the resume view page
+      const response = await fetch(`/api/get-saved-resume/${resume.resume_slug}`, {
+        cache: 'no-store'
+      })
       
       if (!response.ok) {
-        toast.error('Failed to fetch resume data')
-        return
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch resume data')
+      }
+
+      const data = await response.json()
+      if (!data.success || !data.resume) {
+        throw new Error('Resume not found')
       }
 
       const resumeData = data.resume
@@ -277,58 +288,22 @@ export default function ResumesPage() {
 
       let element: HTMLElement | null = null
 
-      // Get HTML content - prefer resume_html, or fetch from resume_slug if needed
-      let htmlContent = resumeData?.resume_html
-
-      // If HTML content contains "preview not available" or is missing, fetch from slug
-      if ((!htmlContent || htmlContent.includes('preview not available') || htmlContent.includes('Resume preview not available')) && resumeData?.resume_slug) {
-        try {
-          // Fetch the resume page HTML
-          const htmlResponse = await fetch(`/${resumeData.resume_slug}`, { cache: 'no-store' })
-          const htmlText = await htmlResponse.text()
-          
-          // Extract the resume-content div from the HTML using regex
-          // Look for the div with id="resume-content"
-          const resumeContentMatch = htmlText.match(/<div[^>]*id=["']resume-content["'][^>]*>([\s\S]*?)<\/div>/i)
-          
-          if (resumeContentMatch && resumeContentMatch[1]) {
-            // Found the resume-content div
-            htmlContent = `<div id="resume-content">${resumeContentMatch[1]}</div>`
-          } else {
-            // Try to find any div with class containing "resume"
-            const resumeDivMatch = htmlText.match(/<div[^>]*class=["'][^"']*resume[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)
-            if (resumeDivMatch && resumeDivMatch[1]) {
-              htmlContent = `<div id="resume-content">${resumeDivMatch[1]}</div>`
-            } else {
-              // Last resort: try to get the main content area
-              const mainMatch = htmlText.match(/<main[^>]*>([\s\S]*?)<\/main>/i)
-              if (mainMatch && mainMatch[1]) {
-                htmlContent = `<div id="resume-content">${mainMatch[1]}</div>`
-              }
-            }
-          }
-        } catch (fetchError) {
-          console.warn('Failed to fetch resume HTML, using available data:', fetchError)
-          // If fetch fails, check if we have resume_data to generate HTML
-          if (resumeData?.resume_data) {
-            // We'll handle this below
-          }
-        }
+      // Always generate HTML from resume_data to ensure it matches what's displayed
+      if (!resumeData.data) {
+        throw new Error('No resume data available to export')
       }
 
-      // If still no valid HTML content, try to generate from resume_data
-      if (!htmlContent || htmlContent.includes('preview not available') || htmlContent.includes('Resume preview not available')) {
-        if (resumeData?.resume_data) {
-          // Generate HTML from resume_data structure
-          const resumeDataObj = typeof resumeData.resume_data === 'string' 
-            ? JSON.parse(resumeData.resume_data) 
-            : resumeData.resume_data
-          
-          htmlContent = generateResumeHTMLFromData(resumeDataObj, userName)
-        } else {
-          throw new Error('No resume content available to export')
-        }
-      }
+      // Generate HTML from resume_data structure (same as what's displayed on the page)
+      const resumeDataObj = typeof resumeData.data === 'string' 
+        ? JSON.parse(resumeData.data) 
+        : resumeData.data
+      
+      // Pass user data to match the same priority as the resume view page
+      const htmlContent = generateResumeHTMLFromData(
+        resumeDataObj, 
+        resumeData.user?.fullName || userName,
+        resumeData.user // Pass full user object
+      )
 
       // Create a properly attached container in the main document
       const hiddenContainer = document.createElement('div')
@@ -407,7 +382,7 @@ export default function ResumesPage() {
   }
 
   // Helper function to generate HTML from resume data (matches the resume view page structure)
-  const generateResumeHTMLFromData = (resumeData: any, userName: string): string => {
+  const generateResumeHTMLFromData = (resumeData: any, userName: string, userData?: any): string => {
     // Extract the actual content structure
     const content = resumeData?.content || resumeData
     const template = resumeData?.template || {}
@@ -418,12 +393,13 @@ export default function ResumesPage() {
     const secondaryColor = template?.secondaryColor || '#6b7280'
     const fontFamily = template?.fontFamily || 'Inter, sans-serif'
     
-    // Get name from headerInfo or content
-    const name = headerInfo?.name || content?.name || userName || 'Professional'
-    const title = headerInfo?.title || content?.bestJobTitle || content?.title || 'Professional'
-    const location = headerInfo?.location || content?.location || ''
-    const email = headerInfo?.email || content?.email || ''
-    const phone = headerInfo?.phone || content?.phone || ''
+    // Get name, title, location - match the same priority as resume view page
+    // Priority: user data > resume data content > resume data headerInfo
+    const name = userData?.fullName || content?.name || headerInfo?.name || userName || 'Professional'
+    const title = userData?.position || content?.bestJobTitle || headerInfo?.title || content?.title || 'Professional'
+    const location = userData?.location || headerInfo?.location || content?.location || ''
+    const email = headerInfo?.email || content?.email || userData?.email || ''
+    const phone = headerInfo?.phone || content?.phone || userData?.phone || ''
     
     let html = `<div id="resume-content" style="font-family: ${fontFamily}, sans-serif; width: 100%; max-width: 800px; margin: 0 auto; padding: 40px; background: white; color: #1f2937; box-sizing: border-box; overflow: hidden;">`
     
@@ -439,12 +415,7 @@ export default function ResumesPage() {
     if (location) {
       html += `<p style="color: #4b5563; margin-bottom: 8px;">${escapeHtml(location)}</p>`
     }
-    if (email || phone) {
-      html += `<div style="margin-top: 8px;">`
-      if (email) html += `<span style="color: #4b5563; margin-right: 16px;">${escapeHtml(email)}</span>`
-      if (phone) html += `<span style="color: #4b5563;">${escapeHtml(phone)}</span>`
-      html += `</div>`
-    }
+    // Note: Email and phone are NOT displayed in the resume view page, so we don't include them here
     html += `</div>`
     
     if (profilePhoto) {
@@ -454,8 +425,8 @@ export default function ResumesPage() {
     }
     html += `</div>`
     
-    // Divider
-    html += `<div style="width: 100%; height: 2px; margin: 24px 0; background-color: ${primaryColor}; opacity: 0.3;"></div>`
+    // Divider (use template primary color with 0.3 opacity, matching resume view page)
+    html += `<div data-divider="true" class="w-full h-0.5 my-6" style="width: 100%; height: 0.5px; margin: 24px 0; background-color: ${primaryColor}; opacity: 0.3;"></div>`
     
     // Professional Summary
     if (content?.summary) {
@@ -648,127 +619,192 @@ export default function ResumesPage() {
       .replace(/'/g, '&#039;')
   }
 
-  // Helper function to generate PDF from an element
+  // Helper function to generate PDF using Puppeteer API
   const generatePDFFromElement = async (element: HTMLElement, userName: string) => {
-    console.log('Capturing resume content...')
+    console.log('Preparing resume content for PDF generation...')
 
-    // Capture the resume content as a high-quality image
-    const canvas = await html2canvas(element, {
-      scale: 2, // Higher quality
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: element.scrollWidth,
-      height: element.scrollHeight,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight
+    // Clone the element to avoid modifying the original
+    const clonedElement = element.cloneNode(true) as HTMLElement
+    
+    // Get computed styles and apply them inline
+    const styles = window.getComputedStyle(element)
+    clonedElement.style.width = styles.width
+    clonedElement.style.maxWidth = styles.maxWidth
+    clonedElement.style.backgroundColor = styles.backgroundColor || '#ffffff'
+    clonedElement.style.color = styles.color || '#1f2937'
+    clonedElement.style.fontFamily = styles.fontFamily || 'Inter, sans-serif'
+    
+    // Get all computed styles for child elements
+    const allElements = element.querySelectorAll('*')
+    allElements.forEach((el) => {
+      const computedStyle = window.getComputedStyle(el)
+      const htmlEl = el as HTMLElement
+      // Preserve important styles
+      if (computedStyle.color) htmlEl.style.color = computedStyle.color
+      if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+        htmlEl.style.backgroundColor = computedStyle.backgroundColor
+      }
+      if (computedStyle.fontSize) htmlEl.style.fontSize = computedStyle.fontSize
+      if (computedStyle.fontWeight) htmlEl.style.fontWeight = computedStyle.fontWeight
+      if (computedStyle.fontFamily) htmlEl.style.fontFamily = computedStyle.fontFamily
+      if (computedStyle.margin) htmlEl.style.margin = computedStyle.margin
+      if (computedStyle.padding) htmlEl.style.padding = computedStyle.padding
     })
-
-    console.log('Canvas created, generating PDF...')
-
-    // Initialize PDF with A4 dimensions
-    const pdf = new jsPDF('p', 'mm', 'a4')
-
-    // A4 dimensions in mm
-    const pdfWidth = 210
-    const pdfHeight = 297
-
-    // Add margins for better appearance (10mm on all sides)
-    const margin = 10
-    const contentWidth = pdfWidth - (margin * 2)
-    // Reduce content height by 15mm to add larger buffer and prevent text from being cut off
-    const pageBuffer = 15 // Larger buffer to prevent cutting text at page boundaries
-    const contentHeight = pdfHeight - (margin * 2) - pageBuffer
-
-    // Use the full content width to maintain readability
-    const scaledWidth = contentWidth
-    const scaledHeight = (canvas.height * scaledWidth) / canvas.width
-
-    // Calculate total content height in PDF units
-    const totalContentHeight = scaledHeight
-
-    // Calculate how many pages we need (add small buffer to prevent rounding errors)
-    const totalPages = Math.ceil((totalContentHeight + 0.1) / contentHeight)
-
-    console.log(`Resume height: ${totalContentHeight.toFixed(2)}mm, Pages needed: ${totalPages}`)
-    console.log(`Canvas dimensions: ${canvas.width}x${canvas.height}px`)
-    console.log(`Content height per page: ${contentHeight}mm (with ${pageBuffer}mm buffer)`)
-
-    // Work in pixels to ensure perfect continuity between pages
-    const totalPixels = canvas.height
-    const pixelsPerPageFloat = (contentHeight * totalPixels) / totalContentHeight
-    // Use floor with additional safety margin to ensure we don't cut text
-    // Subtract 20 pixels as additional safety margin
-    const pixelsPerPage = Math.max(100, Math.floor(pixelsPerPageFloat) - 20)
-
-    let processedPixels = 0
-
-    // Split content across pages
-    for (let page = 0; page < totalPages; page++) {
-      if (page > 0) {
-        pdf.addPage()
+    
+    // Remove any black backgrounds, shadows, gradients, or problematic styles from cloned element
+    const allClonedElements = clonedElement.querySelectorAll('*')
+    allClonedElements.forEach((el) => {
+      const htmlEl = el as HTMLElement
+      const computedStyle = window.getComputedStyle(el)
+      
+      // Check if it's a divider (preserve dividers even if black)
+      const isDivider = htmlEl.getAttribute('data-divider') === 'true' ||
+                       htmlEl.classList.contains('h-0.5') ||
+                       htmlEl.classList.contains('h-px') ||
+                       htmlEl.classList.contains('my-6') ||
+                       (parseFloat(computedStyle.height) <= 2 && computedStyle.width === '100%')
+      
+      // Remove black backgrounds (but preserve dividers)
+      if (!isDivider && (htmlEl.style.backgroundColor === 'black' || 
+          htmlEl.style.backgroundColor === '#000000' ||
+          htmlEl.style.backgroundColor === 'rgb(0, 0, 0)' ||
+          htmlEl.style.backgroundColor === 'rgba(0, 0, 0, 1)')) {
+        htmlEl.style.backgroundColor = 'transparent'
       }
-
-      // Calculate remaining pixels
-      const remainingPixels = totalPixels - processedPixels
-
-      // Determine pixels for this page
-      let pixelsForThisPage: number
-      if (page === totalPages - 1) {
-        // Last page: capture all remaining content
-        pixelsForThisPage = remainingPixels
-      } else {
-        // Regular pages: use calculated pixels per page
-        // Be conservative - use slightly less to ensure we don't cut text
-        pixelsForThisPage = Math.min(pixelsPerPage, remainingPixels)
+      
+      // Remove shadows
+      htmlEl.style.boxShadow = 'none'
+      htmlEl.style.textShadow = 'none'
+      htmlEl.style.filter = 'none'
+      
+      // Remove gradients
+      if (computedStyle.backgroundImage && computedStyle.backgroundImage.includes('gradient')) {
+        htmlEl.style.backgroundImage = 'none'
       }
-
-      if (pixelsForThisPage <= 0 || processedPixels >= totalPixels) {
-        break
+      if (htmlEl.style.backgroundImage && htmlEl.style.backgroundImage.includes('gradient')) {
+        htmlEl.style.backgroundImage = 'none'
       }
-
-      // Calculate source rectangle
-      const sourceY = processedPixels
-      const sourceHeight = pixelsForThisPage
-
-      // Create canvas for this page
-      const pageCanvas = document.createElement('canvas')
-      pageCanvas.width = canvas.width
-      pageCanvas.height = sourceHeight
-      const pageCtx = pageCanvas.getContext('2d')
-
-      if (pageCtx) {
-        // Draw the portion for this page
-        pageCtx.drawImage(
-          canvas,
-          0, sourceY, canvas.width, sourceHeight,
-          0, 0, canvas.width, sourceHeight
-        )
-
-        const pageImgData = pageCanvas.toDataURL('image/png', 1.0)
-
-        // Calculate height in PDF units for this page
-        const pageHeightInMM = (sourceHeight * scaledWidth) / canvas.width
-
-        // Position content at the top of the content area (with margin)
-        const xPosition = margin
-        const yPosition = margin
-
-        // Add image to PDF with proper positioning and margins
-        pdf.addImage(
-          pageImgData,
-          'PNG',
-          xPosition,
-          yPosition,
-          scaledWidth,
-          pageHeightInMM
-        )
-
-        // Update processed pixels
-        processedPixels += sourceHeight
+      
+      // Remove backdrop filters
+      htmlEl.style.backdropFilter = 'none'
+      htmlEl.style.webkitBackdropFilter = 'none'
+      
+      // Ensure no black borders
+      if (htmlEl.style.borderColor === 'black' || 
+          htmlEl.style.borderColor === '#000000') {
+        htmlEl.style.borderColor = 'transparent'
       }
-    }
+      
+      // Remove opacity effects that might cause shadows
+      if (computedStyle.opacity && parseFloat(computedStyle.opacity) < 1) {
+        htmlEl.style.opacity = '1'
+      }
+    })
+    
+    // Ensure the main element has white background
+    clonedElement.style.backgroundColor = '#ffffff'
+    clonedElement.style.color = '#1f2937'
+    
+    // Create a complete HTML document with styles
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            html, body {
+              font-family: ${styles.fontFamily || 'Inter, sans-serif'};
+              color: #1f2937;
+              background: #ffffff !important;
+              padding: 0;
+              margin: 0;
+              width: 100%;
+              height: auto;
+              min-height: 100vh;
+            }
+            body > * {
+              background: #ffffff !important;
+            }
+            /* Override any black backgrounds */
+            [style*="background: black"],
+            [style*="background-color: black"],
+            [style*="background: #000"],
+            [style*="background-color: #000"],
+            [style*="background: rgb(0, 0, 0)"],
+            [style*="background-color: rgb(0, 0, 0)"] {
+              background: #ffffff !important;
+              background-color: #ffffff !important;
+            }
+            /* Ensure all divs have proper backgrounds */
+            div {
+              background: transparent !important;
+            }
+            div[class*="bg-"] {
+              background: #ffffff !important;
+            }
+            /* Remove any black overlays or pseudo-elements */
+            ::before,
+            ::after {
+              background: transparent !important;
+              box-shadow: none !important;
+              text-shadow: none !important;
+              display: none !important;
+            }
+            /* Remove all shadows */
+            * {
+              box-shadow: none !important;
+              text-shadow: none !important;
+              filter: none !important;
+              backdrop-filter: none !important;
+              -webkit-backdrop-filter: none !important;
+            }
+            /* Remove gradients */
+            [style*="gradient"],
+            [class*="gradient"],
+            [class*="shadow"] {
+              background-image: none !important;
+              box-shadow: none !important;
+            }
+            /* Remove glass effects */
+            [class*="glass"],
+            [class*="backdrop"] {
+              background: #ffffff !important;
+              backdrop-filter: none !important;
+              -webkit-backdrop-filter: none !important;
+            }
+            ${Array.from(document.styleSheets)
+              .map((sheet) => {
+                try {
+                  return Array.from(sheet.cssRules)
+                    .map((rule) => {
+                      const ruleText = rule.cssText
+                      // Filter out any rules that might cause black backgrounds
+                      if (ruleText.includes('background: black') || 
+                          ruleText.includes('background-color: black') ||
+                          ruleText.includes('background: #000') ||
+                          ruleText.includes('background-color: #000')) {
+                        return ''
+                      }
+                      return ruleText
+                    })
+                    .join('\n')
+                } catch (e) {
+                  return ''
+                }
+              })
+              .join('\n')}
+          </style>
+        </head>
+        <body style="background: #ffffff !important; color: #1f2937;">
+          ${clonedElement.outerHTML}
+        </body>
+      </html>
+    `
 
     // Format filename as FirstName-LastName-BPOC-Resume.pdf
     const fullName = userName || 'Resume'
@@ -776,9 +812,47 @@ export default function ResumesPage() {
     const firstName = nameParts[0] || 'Resume'
     const lastName = nameParts.slice(1).join('-') || 'User'
     const fileName = `${firstName}-${lastName}-BPOC-Resume.pdf`
-    pdf.save(fileName)
+    const pdfTitle = `${fullName} - Resume | BPOC.IO`
 
-    console.log('PDF saved successfully')
+    // Add title to HTML for PDF metadata
+    const htmlWithTitle = htmlContent.replace(
+      '<head>',
+      `<head>\n            <title>${pdfTitle}</title>`
+    )
+
+    console.log('Sending request to PDF generation API...')
+
+    // Call Puppeteer API
+    const response = await fetch('/api/resume/export-pdf', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        html: htmlWithTitle,
+        fileName: fileName,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to generate PDF')
+    }
+
+    // Get PDF blob
+    const blob = await response.blob()
+    
+    // Create download link
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    console.log('PDF downloaded successfully')
     toast.success('Resume exported to PDF successfully!')
   }
 
