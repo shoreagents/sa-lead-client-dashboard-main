@@ -934,7 +934,7 @@ export default function ResumeSlugPage() {
               [class*="shadow"] {
                 background-image: none !important;
                 box-shadow: none !important;
-              }
+      }
               /* Remove glass effects */
               [class*="glass"],
               [class*="backdrop"] {
@@ -1257,22 +1257,22 @@ export default function ResumeSlugPage() {
                          <button
                              onClick={() => shareResume('facebook')}
                            className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
-                         >
+                           >
                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
                            <span className="font-medium">Share on Facebook</span>
                          </button>
-
+                           
                          {/* LinkedIn Share */}
                          <button
                              onClick={() => shareResume('linkedin')}
                            className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
-                         >
+                           >
                            <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
                            <span className="font-medium">Share on LinkedIn</span>
                          </button>
 
                          <div className="border-t border-white/10 my-1"></div>
-
+                           
                          {/* Copy Link */}
                          <button
                              onClick={() => shareResume('copy')}

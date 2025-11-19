@@ -6,23 +6,99 @@ import { Sparkles, Facebook, Instagram, Mail } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden bg-black/20 backdrop-blur-sm">
+    <footer className="relative py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Animated Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950"></div>
+      
       {/* Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-cyan-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute top-0 right-1/4 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Large animated gradient orbs */}
+        <motion.div 
+          className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            x: [0, 30, 0],
+            y: [0, -20, 0],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute top-0 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            x: [0, -25, 0],
+            y: [0, 15, 0],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-1/2 right-1/3 w-72 h-72 bg-pink-500/15 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.4, 1],
+            x: [0, 20, 0],
+            y: [0, -30, 0],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+        <motion.div 
+          className="absolute top-1/3 left-1/3 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.25, 1],
+            x: [0, -15, 0],
+            y: [0, 25, 0],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5
+          }}
+        />
+        
+        {/* Animated mesh gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_50%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(168,85,247,0.1),transparent_50%)]"></div>
+        
+        {/* Subtle animated grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(6,182,212,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(6,182,212,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px'
+          }}
+        />
       </div>
+      
+      {/* Glass morphism overlay */}
+      <div className="absolute inset-0 backdrop-blur-sm bg-gradient-to-b from-white/5 via-transparent to-black/20"></div>
       
       <div className="container mx-auto relative z-10">
         {/* Main Footer Content */}
-        <div className="grid md:grid-cols-2 gap-12 mb-8">
+        <div className="grid md:grid-cols-2 gap-8 mb-6">
           {/* Left Section - Company Information */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="space-y-6"
+            className="space-y-4"
           >
             {/* Logo and Company Name */}
             <div className="flex items-center space-x-3">
@@ -167,7 +243,7 @@ export default function Footer() {
 
         {/* Bottom Section - Copyright and Legal Links */}
         <motion.div 
-          className="pt-8 border-t border-white/10"
+          className="pt-6 border-t border-white/10"
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
