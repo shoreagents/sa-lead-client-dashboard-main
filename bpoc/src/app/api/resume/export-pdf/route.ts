@@ -44,6 +44,24 @@ function findChromeExecutable(dir: string, depth: number = 0): string | null {
 
 // Helper function to get Chromium executable path
 async function getChromiumPath(): Promise<string | null> {
+  // On Windows, prioritize system Chrome over Puppeteer Chromium for better stability
+  if (process.platform === 'win32') {
+    const systemChromePaths = [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      process.env.LOCALAPPDATA ? `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe` : '',
+      process.env.PROGRAMFILES ? `${process.env.PROGRAMFILES}\\Google\\Chrome\\Application\\chrome.exe` : '',
+      process.env['PROGRAMFILES(X86)'] ? `${process.env['PROGRAMFILES(X86)']}\\Google\\Chrome\\Application\\chrome.exe` : '',
+    ].filter(Boolean) as string[];
+    
+    for (const chromePath of systemChromePaths) {
+      if (fs.existsSync(chromePath)) {
+        console.log('✅ Using system Chrome (Windows):', chromePath);
+        return chromePath;
+      }
+    }
+  }
+
   try {
     // Try to use Puppeteer's bundled Chromium
     const puppeteerChromiumPath = puppeteer.executablePath();
@@ -88,11 +106,16 @@ async function getChromiumPath(): Promise<string | null> {
     return process.env.CHROME_PATH;
   }
 
-  // Try common system locations
+  // Try common system locations (prioritize system Chrome on Windows for stability)
   const commonPaths = [
-    // Windows
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    // Windows - try system Chrome first (more stable than Puppeteer Chromium)
+    ...(process.platform === 'win32' ? [
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      process.env.LOCALAPPDATA ? `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe` : '',
+      process.env.PROGRAMFILES ? `${process.env.PROGRAMFILES}\\Google\\Chrome\\Application\\chrome.exe` : '',
+      process.env['PROGRAMFILES(X86)'] ? `${process.env['PROGRAMFILES(X86)']}\\Google\\Chrome\\Application\\chrome.exe` : '',
+    ].filter(Boolean) : []),
     // Linux
     '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
@@ -103,7 +126,7 @@ async function getChromiumPath(): Promise<string | null> {
   ];
 
   for (const chromePath of commonPaths) {
-    if (fs.existsSync(chromePath)) {
+    if (chromePath && fs.existsSync(chromePath)) {
       console.log('✅ Using system Chrome:', chromePath);
       return chromePath;
     }
@@ -141,18 +164,22 @@ export async function POST(request: NextRequest) {
     console.log('📄 Filename:', fileName || 'resume.pdf');
 
     // Launch browser with optimized settings
-    try {
-      const launchOptions: any = {
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=IsolateOrigins,site-per-process',
-          '--single-process', // Important for serverless environments
+    // Declare launchOptions outside try block so it's accessible in catch block
+    let launchOptions: any = {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=IsolateOrigins,site-per-process',
+        // Windows-specific: Don't use --single-process as it can cause ECONNRESET
+        // Use it only for serverless environments (not Windows local dev)
+        ...(process.platform !== 'win32' && (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) 
+          ? ['--single-process'] 
+          : []),
           '--disable-extensions',
           '--disable-plugins',
           '--disable-background-networking',
@@ -187,8 +214,9 @@ export async function POST(request: NextRequest) {
           '--use-mock-keychain',
         ],
         timeout: 60000, // 60 second timeout for browser launch
-      };
+    };
 
+    try {
       // Try to find Chromium executable
       const chromiumPath = await getChromiumPath();
       if (chromiumPath) {
@@ -214,26 +242,104 @@ export async function POST(request: NextRequest) {
       if (launchOptions.executablePath) {
         console.log('📌 Final Chromium executable path:', launchOptions.executablePath);
         console.log('📌 Path exists:', fs.existsSync(launchOptions.executablePath));
+        if (!fs.existsSync(launchOptions.executablePath)) {
+          console.error('❌ Chromium executable not found at specified path!');
+          console.error('❌ Attempting to find Chrome in cache directory...');
+          const cacheBase = process.platform === 'win32' 
+            ? path.join(process.env.LOCALAPPDATA || '', '.cache', 'puppeteer')
+            : '/home/sbx_user1051/.cache/puppeteer';
+          // Try to find Chrome recursively in cache using the helper function
+          const windowsCacheBase = process.platform === 'win32' 
+            ? path.join(process.env.LOCALAPPDATA || process.env.USERPROFILE || '', '.cache', 'puppeteer')
+            : '/home/sbx_user1051/.cache/puppeteer';
+          
+          if (fs.existsSync(windowsCacheBase)) {
+            const found = findChromeExecutable(windowsCacheBase);
+            if (found) {
+              console.log('✅ Found Chrome in cache:', found);
+              launchOptions.executablePath = found;
+            } else {
+              console.error('❌ Chrome not found in cache directory:', windowsCacheBase);
+            }
+          } else {
+            console.error('❌ Cache directory does not exist:', windowsCacheBase);
+          }
+        }
       } else {
         console.log('📌 No explicit executable path - using Puppeteer default');
+        try {
+          const defaultPath = puppeteer.executablePath();
+          console.log('📌 Puppeteer default path:', defaultPath);
+          if (defaultPath && fs.existsSync(defaultPath)) {
+            launchOptions.executablePath = defaultPath;
+            console.log('✅ Using Puppeteer default path');
+          }
+        } catch (e) {
+          console.error('❌ Could not get Puppeteer default path:', e);
+        }
       }
+
+      console.log('🚀 Launching browser with options:', {
+        executablePath: launchOptions.executablePath,
+        headless: launchOptions.headless,
+        argsCount: launchOptions.args?.length || 0,
+        platform: process.platform
+      });
+
+      // On Windows, verify the executable exists and is accessible
+      if (process.platform === 'win32' && launchOptions.executablePath) {
+        if (!fs.existsSync(launchOptions.executablePath)) {
+          throw new Error(`Chrome executable not found at: ${launchOptions.executablePath}`);
+        }
+        console.log('✅ Chrome executable verified on Windows');
+      }
+
+      // Launch with increased timeout for Windows
+      const launchTimeout = process.platform === 'win32' ? 90000 : 60000;
+      launchOptions.timeout = launchTimeout;
 
       browser = await puppeteer.launch(launchOptions);
       console.log('✅ Browser launched successfully');
     } catch (launchError) {
       console.error('❌ Failed to launch browser:', launchError);
-      const errorMessage = launchError instanceof Error ? launchError.message : 'Unknown error';
+      console.error('❌ Launch error type:', typeof launchError);
+      console.error('❌ Launch error constructor:', launchError?.constructor?.name);
+      
+      // Extract error message more thoroughly
+      let errorMessage = 'Unknown error';
+      if (launchError instanceof Error) {
+        errorMessage = launchError.message || launchError.toString();
+      } else if (typeof launchError === 'string') {
+        errorMessage = launchError;
+      } else if (launchError && typeof launchError === 'object') {
+        errorMessage = (launchError as any).message || 
+                      (launchError as any).toString() || 
+                      JSON.stringify(launchError);
+      }
+      
       const errorStack = launchError instanceof Error ? launchError.stack : undefined;
+      
+      console.error('❌ Extracted error message:', errorMessage);
       
       // Try to provide more helpful error message
       let hint = 'Puppeteer requires Chrome/Chromium. ';
-      if (errorMessage.includes('executable') || errorMessage.includes('chrome') || errorMessage.includes('Could not find Chrome')) {
+      if (errorMessage.includes('ECONNRESET') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('read ECONNRESET')) {
+        hint = 'Chrome connection was reset - Chrome may have crashed during startup. ';
+        if (process.platform === 'win32') {
+          hint += 'Solutions: 1) Close all Chrome/Chromium windows, 2) Check if Windows Defender/antivirus is blocking Chrome, 3) Restart your dev server, 4) Try using system Chrome instead (install Google Chrome browser).';
+        } else {
+          hint += 'Try: 1) Kill any existing Chrome processes (killall chrome), 2) Restart your dev server, 3) Try again.';
+        }
+      } else if (errorMessage.includes('executable') || 
+          errorMessage.includes('chrome') || 
+          errorMessage.includes('Could not find Chrome') ||
+          errorMessage.includes('Browser was not found')) {
         if (process.env.VERCEL) {
           hint += 'For Vercel deployments, add this to your package.json build script: "build": "npx puppeteer browsers install chrome && next build". Or set CHROME_PATH environment variable in Vercel dashboard.';
         } else if (process.env.AWS_LAMBDA_FUNCTION_NAME) {
           hint += 'For AWS Lambda, you need to bundle Chromium with your deployment or use a Lambda layer with Chromium.';
         } else {
-          hint += 'For serverless deployments, install Chromium during build: `npx puppeteer browsers install chrome`. For local development, install Chrome browser or set CHROME_PATH environment variable.';
+          hint += 'For local development: 1) Install Google Chrome browser, OR 2) Run: npx puppeteer browsers install chrome, then restart your dev server.';
         }
       } else if (errorMessage.includes('timeout')) {
         hint += 'Browser launch timed out. This might be due to system resource constraints.';
@@ -246,6 +352,7 @@ export async function POST(request: NextRequest) {
           error: 'Failed to launch browser',
           details: errorMessage,
           hint: hint,
+          executablePath: launchOptions.executablePath || 'not set',
           ...(process.env.NODE_ENV === 'development' && errorStack ? { stack: errorStack } : {})
         },
         { status: 500 }
