@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
           [username]
         );
         
-        if (res.rowCount > 0) {
+        if (res.rowCount && res.rowCount > 0) {
           profile = res.rows[0];
         }
       } finally {
@@ -284,29 +284,6 @@ export async function GET(request: NextRequest) {
                 )}
               </div>
 
-              {/* Resume Score Badge (if available) */}
-              {resumeScore && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    bottom: -20,
-                    right: 40,
-                    background: '#10b981',
-                    color: 'black',
-                    padding: '12px 24px',
-                    borderRadius: '100px',
-                    fontSize: 24,
-                    fontWeight: 800,
-                    boxShadow: '0 10px 20px rgba(0,0,0,0.3)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    transform: 'rotate(-5deg)',
-                  }}
-                >
-                  <span style={{ fontSize: 32, marginRight: 4, display: 'flex' }}>{resumeScore}</span>
-                  <span style={{ fontSize: 16, textTransform: 'uppercase', display: 'flex' }}>Score</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
