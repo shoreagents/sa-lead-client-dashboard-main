@@ -46,7 +46,19 @@ export async function GET(request: NextRequest) {
       (profile?.location_city 
         ? `${profile.location_city}${profile?.location_country ? ', ' + profile.location_country : ''}`
         : null);
-    const avatarUrl = profile?.avatar_url || null;
+        
+    // Ensure high-quality avatar if it's from Supabase or Vercel Blob
+    let avatarUrl = profile?.avatar_url || null;
+    
+    // Aggressive quality fix: remove any existing sizing params first
+    if (avatarUrl) {
+       // Remove existing query params if any to get the original raw image
+       // This often returns the full resolution original upload
+       const urlObj = new URL(avatarUrl);
+       urlObj.search = ''; 
+       avatarUrl = urlObj.toString();
+    }
+
     const resumeScore = profile?.resume_score || null;
 
     const imageResponse = new ImageResponse(
@@ -56,224 +68,245 @@ export async function GET(request: NextRequest) {
             height: '100%',
             width: '100%',
             display: 'flex',
-            flexDirection: 'row',
-            backgroundColor: '#0f172a',
-            backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(6, 182, 212, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 50%)',
+            flexDirection: 'column',
+            backgroundColor: '#000000',
+            backgroundImage: `
+              radial-gradient(circle at 100% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 40%),
+              radial-gradient(circle at 0% 100%, rgba(14, 165, 233, 0.2) 0%, transparent 40%)
+            `,
             position: 'relative',
+            fontFamily: '"Inter", sans-serif',
           }}
         >
-          {/* Left Side - Profile Info */}
+          {/* High Contrast Cyber Grid */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
+              maskImage: 'radial-gradient(circle at center, black 40%, transparent 100%)',
+              width: '100%',
+              height: '100%',
+            }}
+          />
+
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              padding: '80px',
-              width: '60%',
+              flex: 1,
+              padding: '50px',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              position: 'relative',
+              zIndex: 10,
             }}
           >
-            {/* Profile Photo & Username */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 40,
-              }}
-            >
-              {/* Avatar */}
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  width="160"
-                  height="160"
-                  style={{
-                    borderRadius: '50%',
-                    border: '5px solid #06B6D4',
-                    objectFit: 'cover',
-                    boxShadow: '0 10px 40px rgba(6, 182, 212, 0.5)',
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: '160px',
-                    height: '160px',
-                    borderRadius: '50%',
-                    border: '5px solid #06B6D4',
-                    background: 'linear-gradient(135deg, #06B6D4 0%, #A855F7 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 10px 40px rgba(6, 182, 212, 0.5)',
-                  }}
-                >
+            {/* Left: Identity Block */}
+            <div style={{ display: 'flex', flexDirection: 'column', width: '62%', justifyContent: 'center', alignItems: 'flex-start' }}>
+              
+              {/* Glowing Brand Tag */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: 40,
+                  background: 'rgba(14, 165, 233, 0.1)',
+                  border: '1px solid rgba(14, 165, 233, 0.3)',
+                  padding: '10px 24px',
+                  borderRadius: '50px',
+                  width: 'auto',
+                  zIndex: 10,
+                  boxShadow: '0 0 20px rgba(14, 165, 233, 0.15)',
+                }}
+              >
+                <div style={{ color: '#38bdf8', fontSize: 24, fontWeight: 800, letterSpacing: '1px', display: 'flex' }}>BPOC.IO</div>
+                <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.2)', margin: '0 15px', display: 'flex' }} />
+                <div style={{ color: '#e0f2fe', fontSize: 20, fontWeight: 500, display: 'flex' }}>Where BPO Careers Begin</div>
+              </div>
+
+              {/* Name - Massive & Bright */}
+              <div
+                style={{
+                  fontSize: 84,
+                  fontWeight: 900,
+                  color: '#ffffff',
+                  lineHeight: 1,
+                  letterSpacing: '-0.03em',
+                  marginBottom: 20,
+                  display: 'flex',
+                  textShadow: '0 4px 30px rgba(0,0,0,0.8)',
+                }}
+              >
+                {displayName}
+              </div>
+
+              {/* Role - Gradient Text */}
+              <div
+                style={{
+                  fontSize: 42,
+                  fontWeight: 700,
+                  background: 'linear-gradient(90deg, #38bdf8, #c084fc, #34d399)',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  display: 'flex',
+                  marginBottom: 30,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                {title}
+              </div>
+
+              {/* Location with Icon */}
+              {location && (
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 50 }}>
                   <div
                     style={{
-                      fontSize: '64px',
-                      color: 'white',
-                      fontWeight: 'bold',
                       display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: 'rgba(255,255,255,0.1)',
+                      marginRight: 12,
                     }}
                   >
-                    {displayName.charAt(0).toUpperCase()}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
                   </div>
+                  <div style={{ color: '#e2e8f0', fontSize: 26, fontWeight: 500, display: 'flex' }}>{location}</div>
                 </div>
               )}
 
-              {/* Username & Location */}
+              {/* High Contrast CTA Button */}
               <div
                 style={{
+                  background: 'white',
+                  padding: '20px 40px',
+                  borderRadius: '16px',
                   display: 'flex',
-                  flexDirection: 'column',
-                  marginLeft: 30,
+                  alignItems: 'center',
+                  width: 'auto',
+                  boxShadow: '0 0 40px rgba(14, 165, 233, 0.2)',
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 52,
-                    fontWeight: 'bold',
-                    color: 'white',
-                    display: 'flex',
-                  }}
-                >
-                  @{displayName}
-                </div>
-                {location && (
-                  <div
-                    style={{
-                      fontSize: 24,
-                      color: '#67E8F9',
-                      marginTop: 10,
-                      display: 'flex',
-                    }}
-                  >
-                    {location}
-                  </div>
-                )}
+                <div style={{ color: 'black', fontSize: 28, fontWeight: 800, marginRight: 10, display: 'flex' }}>Join {displayName.split(' ')[0]}</div>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
               </div>
             </div>
 
-            {/* Job Title */}
-            <div
-              style={{
-                fontSize: 36,
-                color: 'white',
-                marginBottom: 60,
-                display: 'flex',
-                fontWeight: '600',
-              }}
-            >
-              {title}
-            </div>
-
-            {/* BPOC Logo/Text */}
-            <div
-              style={{
-                fontSize: 48,
-                fontWeight: 'bold',
-                display: 'flex',
-                letterSpacing: '2px',
-                color: '#06B6D4',
-              }}
-            >
-              BPOC.IO
-            </div>
-          </div>
-
-          {/* Right Side - CTA */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '40%',
-              background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%)',
-              borderLeft: '2px solid rgba(6, 182, 212, 0.4)',
-              padding: '60px',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-              }}
-            >
+            {/* Right: Avatar Spotlight */}
+            <div style={{ display: 'flex', width: '38%', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+              {/* Concentric Glow Rings */}
               <div
                 style={{
-                  fontSize: 48,
-                  fontWeight: 'bold',
-                  color: 'white',
-                  lineHeight: 1.2,
-                  display: 'flex',
+                  position: 'absolute',
+                  width: '420px',
+                  height: '420px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%)',
+                  border: '1px solid rgba(14, 165, 233, 0.1)',
                 }}
-              >
-                Join {displayName}
-              </div>
+              />
               <div
                 style={{
-                  fontSize: 38,
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginTop: 10,
-                  display: 'flex',
+                  position: 'absolute',
+                  width: '340px',
+                  height: '340px',
+                  borderRadius: '50%',
+                  border: '1px solid rgba(168, 85, 247, 0.2)',
+                  animation: 'spin 10s linear infinite',
                 }}
-              >
-                on BPOC.IO
-              </div>
+              />
 
+              {/* Avatar Image - Using standard img for consistent rendering */}
               <div
                 style={{
-                  fontSize: 24,
-                  color: '#67E8F9',
-                  marginTop: 30,
-                  lineHeight: 1.5,
                   display: 'flex',
-                  flexDirection: 'column',
+                  width: '252px', // Container size
+                  height: '252px',
+                  padding: '6px',
+                  background: 'linear-gradient(135deg, #0ea5e9, #a855f7)',
+                  borderRadius: '50%',
+                  boxShadow: '0 0 50px rgba(14, 165, 233, 0.3)',
+                  overflow: 'hidden',
+                  justifyContent: 'center',
                   alignItems: 'center',
                 }}
               >
-                <div style={{ display: 'flex' }}>Build Your BPO Career</div>
-                <div style={{ display: 'flex', marginTop: 10 }}>with AI-Powered Tools</div>
+                {avatarUrl ? (
+                  /* using img tag with explicit dimensions and object-fit to prevent tiling/collage effect */
+                  <img
+                    src={avatarUrl}
+                    width="240"
+                    height="240"
+                    style={{
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      backgroundColor: '#000',
+                      border: '4px solid #000',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '240px',
+                      height: '240px',
+                      borderRadius: '50%',
+                      backgroundColor: '#000',
+                      border: '4px solid #000',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'linear-gradient(135deg, #111, #222)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: '96px',
+                        fontWeight: 900,
+                        background: 'linear-gradient(135deg, #fff, #aaa)',
+                        backgroundClip: 'text',
+                        color: 'transparent',
+                        display: 'flex',
+                      }}
+                    >
+                      {displayName.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* CTA Button */}
-              <div
-                style={{
-                  marginTop: 40,
-                  background: 'linear-gradient(135deg, #06B6D4 0%, #A855F7 100%)',
-                  borderRadius: '12px',
-                  padding: '20px 50px',
-                  display: 'flex',
-                  border: '2px solid rgba(255, 255, 255, 0.2)',
-                  boxShadow: '0 10px 30px rgba(6, 182, 212, 0.5)',
-                }}
-              >
+              {/* Resume Score Badge (if available) */}
+              {resumeScore && (
                 <div
                   style={{
-                    fontSize: 32,
-                    fontWeight: 'bold',
-                    color: 'white',
+                    position: 'absolute',
+                    bottom: -20,
+                    right: 40,
+                    background: '#10b981',
+                    color: 'black',
+                    padding: '12px 24px',
+                    borderRadius: '100px',
+                    fontSize: 24,
+                    fontWeight: 800,
+                    boxShadow: '0 10px 20px rgba(0,0,0,0.3)',
                     display: 'flex',
+                    alignItems: 'center',
+                    transform: 'rotate(-5deg)',
                   }}
                 >
-                  Sign Up Now
+                  <span style={{ fontSize: 32, marginRight: 4, display: 'flex' }}>{resumeScore}</span>
+                  <span style={{ fontSize: 16, textTransform: 'uppercase', display: 'flex' }}>Score</span>
                 </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: 20,
-                  color: '#94A3B8',
-                  marginTop: 30,
-                  display: 'flex',
-                }}
-              >
-                Where BPO Careers Begin
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -294,4 +327,3 @@ export async function GET(request: NextRequest) {
     return new Response('Error generating image', { status: 500 });
   }
 }
-
