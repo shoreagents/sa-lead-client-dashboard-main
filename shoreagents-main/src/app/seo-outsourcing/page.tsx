@@ -1,592 +1,558 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { colors } from "@/lib/colors";
 import { SideNav } from "@/components/layout/SideNav";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  CheckCircle2,
+  XCircle,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  FileText,
+  Users,
+  Globe,
+  Calculator,
+  Target,
+  Shield,
+  Search
+} from "lucide-react";
+import Link from "next/link";
 
 export default function SeoOutsourcingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <SideNav />
+      
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        {/* Background Gradient */}
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(135deg, ${colors.lime[50]} 0%, ${colors.ocean[50]} 100%)`
-          }}
-        />
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For $300K+ Annual Revenue Businesses
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              SEO Outsourcing:<br />
+              <span className="text-lime-600">The $300K Revenue Question Nobody Wants to Answer</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Here's a question most SEO agencies won't touch: what's your annual revenue?
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              Not because they're being polite. Because the answer determines whether outsourcing your SEO will make you money or cost you a fortune. And most businesses asking about SEO outsourcing aren't ready for it.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        {/* Content */}
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            
-            {/* Left Column - Content */}
-            <div className="text-center lg:text-left">
-              {/* SEO Tag */}
-              <div className="inline-flex items-center gap-2 bg-lime-100 text-lime-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                SEO OUTSOURCING
-              </div>
-              
-              {/* Main Heading */}
-              <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Claude-Powered{" "}
-                <span className="text-lime-600">SEO</span>
-              </h1>
-              
-              {/* Subheading */}
-              <p className="text-xl lg:text-2xl text-gray-700 mb-8 font-medium">
-                When AI Meets Filipino Talent
-              </p>
-              
-              {/* Description */}
-              <p className="text-lg text-gray-600 mb-10 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Transform your search rankings with dedicated SEO professionals who combine AI tools with human strategy - delivering measurable results at{" "}
-                <span className="font-bold text-gray-900">$440/month all-inclusive.</span>
-              </p>
-              
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-3 text-lg font-semibold rounded-lg transition-colors duration-300 flex items-center gap-2">
-                  Get SEO Support →
-                </Button>
-                <Button variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-600 hover:text-white px-8 py-3 text-lg font-semibold rounded-lg transition-colors duration-300 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  View Case Studies
-                </Button>
-              </div>
-            </div>
-            
-            {/* Right Column - Trust Section */}
-            <div className="lg:pl-8">
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 lg:p-10 shadow-xl border border-white/20">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center lg:text-left">
-                  Trusted by Leading Brands
-                </h3>
-                
-                {/* Trust Indicators */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">AI-Enhanced Strategy</h4>
-                      <p className="text-gray-600 text-sm">Advanced algorithms combined with human expertise</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Measurable Results</h4>
-                      <p className="text-gray-600 text-sm">Track your progress with detailed analytics</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Dedicated Team</h4>
-                      <p className="text-gray-600 text-sm">Experienced Filipino SEO professionals</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Businesses Choose Shore Agents for SEO Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-              Why Businesses Choose Shore Agents for SEO
-            </h2>
-            <p className="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">
-              From DIY SEO disasters to systematic success - our approach combines AI-powered insights with human strategy to deliver actual rankings, not theoretical SEO.
-            </p>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            {/* Left Column - Key Features */}
-            <div className="space-y-8">
-              {/* Feature 1: AI-Enhanced Strategy */}
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">AI-Enhanced Strategy</h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    Claude-powered content analysis, keyword research, and competitor intelligence delivering data-driven SEO decisions.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Feature 2: Algorithm Understanding */}
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Algorithm Understanding</h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    Deep knowledge of search engine algorithms and ranking factors with systematic approach to optimization.
-                  </p>
-                </div>
-              </div>
-              
-              {/* Feature 3: Results Focus */}
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Results Focus</h3>
-                  <p className="text-gray-700 leading-relaxed">
-                    Measurable improvements in rankings, organic traffic, and lead generation - not just vanity metrics.
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Right Column - Testimonial Card */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 lg:p-10">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Stephen's SEO Evolution</h3>
-              <div className="space-y-4 text-gray-700 leading-relaxed">
-                <p>
-                  "The thing is, I thought SEO was just stuffing keywords everywhere. Pretty cool how wrong I was! We spent months doing 'SEO' that actually hurt our rankings."
-                </p>
-                <p>
-                  "So basically, after that disaster, we realized we needed people who understood both the technical side and the strategy. That's when we started integrating Uncle Claude for content analysis."
-                </p>
-                <p>
-                  "One client's organic traffic increased 400% in 6 months. Their lead generation costs dropped by 60% because they weren't relying on paid ads anymore."
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Complete SEO Outsourcing Services Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-              Complete SEO Outsourcing Services
-            </h2>
-            <p className="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">
-              From technical audits to content strategy, we provide comprehensive SEO support that drives actual business results.
-            </p>
-          </div>
-          
-          {/* Services Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* Technical SEO */}
-            <div className="bg-lime-50 rounded-lg p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Technical SEO</h3>
-              </div>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Site speed optimization</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Mobile responsiveness</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Schema markup</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">URL structure</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Keyword Research */}
-            <div className="bg-lime-50 rounded-lg p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Keyword Research</h3>
-              </div>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">AI-powered analysis</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Competitor research</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Long-tail opportunities</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Search intent mapping</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Content Strategy */}
-            <div className="bg-lime-50 rounded-lg p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Content Strategy</h3>
-              </div>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Content planning</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">AI-enhanced writing</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Topic clustering</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Content optimization</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Link Building */}
-            <div className="bg-lime-50 rounded-lg p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Link Building</h3>
-              </div>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Authority building</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Guest posting</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Relationship outreach</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Quality link acquisition</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Local SEO */}
-            <div className="bg-lime-50 rounded-lg p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Local SEO</h3>
-              </div>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Google Business Profile</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Local citations</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Review management</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Map optimization</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Analytics & Reporting */}
-            <div className="bg-lime-50 rounded-lg p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mr-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">Analytics & Reporting</h3>
-              </div>
-              <ul className="space-y-2">
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Performance tracking</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">ROI measurement</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Monthly reporting</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="w-1.5 h-1.5 bg-lime-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                  <span className="text-gray-700">Strategy optimization</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Uncle Claude Meets SEO Strategy Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-              Uncle Claude Meets SEO Strategy
-            </h2>
-            <p className="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto">
-              How we combine AI intelligence with human strategy for competitive advantage.
-            </p>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            {/* Left Column - AI-Powered SEO Services */}
-            <div className="space-y-6">
-              {/* Card 1: AI-Powered Content Analysis */}
-              <div className="bg-lime-50 rounded-lg p-6 border border-lime-100 shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">AI-Powered Content Analysis</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Claude analyzes top-ranking pages to identify content gaps, semantic relationships, and optimization opportunities.
-                </p>
-              </div>
-              
-              {/* Card 2: Intelligent Keyword Research */}
-              <div className="bg-lime-50 rounded-lg p-6 border border-lime-100 shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Intelligent Keyword Research</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  AI-driven keyword discovery and intent analysis revealing opportunities competitors miss.
-                </p>
-              </div>
-              
-              {/* Card 3: Automated Optimization */}
-              <div className="bg-lime-50 rounded-lg p-6 border border-lime-100 shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Automated Optimization</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Smart title tags, meta descriptions, and content optimization based on real-time algorithm insights.
-                </p>
-              </div>
-            </div>
-            
-            {/* Right Column - The Claude Advantage */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 lg:p-10">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">The Claude Advantage</h3>
-              <div className="space-y-4 text-gray-700 leading-relaxed mb-8">
-                <p>
-                  While competitors are still doing manual keyword research, our team leverages Claude for deep content analysis and strategy development.
-                </p>
-                <p>
-                  This isn't about replacing human expertise - it's about amplifying it. Our SEO professionals use AI insights to make better strategic decisions faster.
-                </p>
-              </div>
-              
-              {/* Testimonial Box */}
-              <div className="bg-lime-50 rounded-lg p-6 border border-lime-100">
-                <p className="text-gray-700 italic mb-3">
-                  "The combination of AI analysis and Filipino talent gives us a competitive edge that traditional SEO agencies can't match."
-                </p>
-                <p className="text-gray-600 font-medium">- Stephen Atcheler, Shore Agents</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SEO Investment That Pays For Itself Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-              SEO Investment That Pays For Itself
-            </h2>
-          </div>
-          
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 lg:p-12">
-              <div className="grid md:grid-cols-3 gap-8 mb-8">
-                <div className="text-center">
-                  <div className="text-4xl lg:text-5xl font-bold text-gray-900 mb-2">$440</div>
-                  <div className="text-gray-600 font-medium">Per SEO specialist/month</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl lg:text-5xl font-bold text-lime-600 mb-2">400%</div>
-                  <div className="text-gray-600 font-medium">Average traffic increase</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl lg:text-5xl font-bold text-lime-600 mb-2">60%</div>
-                  <div className="text-gray-600 font-medium">Reduction in ad spend</div>
-                </div>
-              </div>
-              
-              <div className="text-center mb-8">
-                <p className="text-gray-700 text-lg">
-                  All-inclusive: Salary, benefits, SEO tools, workspace, and AI platform access
-                </p>
-              </div>
-              
-              <div className="text-center">
-                <Button className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-3 text-lg font-semibold rounded-lg transition-colors duration-300">
-                  Calculate Your Investment →
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Related Digital Services Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-              Related Digital Services
-            </h2>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-            {/* Content Writing Outsourcing */}
-            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-lime-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Content Writing Outsourcing</h3>
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  AI-enhanced content creation that ranks and converts.
-                </p>
-                <a href="/services/our-services" className="text-lime-600 hover:text-lime-700 font-semibold transition-colors duration-300">
-                  Learn More →
-                </a>
-              </div>
-            </div>
-
-            {/* Website Outsourcing */}
-            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-lime-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Website Outsourcing</h3>
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  SEO-optimized websites built for performance and conversions.
-                </p>
-                <a href="/services/our-services" className="text-lime-600 hover:text-lime-700 font-semibold transition-colors duration-300">
-                  Learn More →
-                </a>
-              </div>
-            </div>
-
-            {/* Graphic Design Outsourcing */}
-            <div className="bg-lime-50 rounded-xl p-6 lg:p-8 border border-lime-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-lime-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Graphic Design Outsourcing</h3>
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  Visual content that supports your SEO and branding goals.
-                </p>
-                <a href="/services/our-services" className="text-lime-600 hover:text-lime-700 font-semibold transition-colors duration-300">
-                  Learn More →
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Ready to Dominate Search Rankings Section */}
-      <section className="py-20 bg-lime-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
-            Ready to Dominate Search Rankings?
-          </h2>
-          <p className="text-xl text-white mb-10 leading-relaxed">
-            Join businesses who've eliminated their dependency on paid ads through systematic SEO success.
+        {/* Intro */}
+        <div className="mb-16">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            I'm Stephen Atcheler. I've spent 15 years building offshore teams, and I've watched countless businesses hire SEO agencies when they absolutely shouldn't have. The industry loves to talk about success stories. Nobody mentions the spectacular failures.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold rounded-lg transition-colors duration-300 flex items-center gap-2">
-              Start SEO Growth →
-            </Button>
-            <Button className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-3 text-lg font-semibold rounded-lg transition-colors duration-300 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-              </svg>
-              View Success Stories
-            </Button>
-          </div>
+          <Card className="bg-amber-50 border-l-4 border-amber-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>This article is for:</strong> Businesses doing $300K+ in annual revenue, based in the USA, Australia, or New Zealand, who are seriously considering outsourcing their SEO. If you're below that threshold, I'll tell you exactly why you should wait - and what to do instead.
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </section>
+
+        <Separator className="my-12" />
+
+        {/* What the SEO Industry Gets Wrong Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What the SEO Outsourcing Industry Gets Catastrophically Wrong</h2>
+              <p className="text-lg text-gray-600">Every SEO agency's website reads like the same marketing template</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Every SEO agency's website reads like the same marketing template: "Save 30-70%! Access expert teams! Scale without hiring!" Complete rubbish, all of it.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Here's what they don't tell you: that $2,000/month retainer becomes $5,183/month in year one when you factor in reality. Your management time (5-10 hours weekly during setup), the mistakes you'll pay to fix, the tools the agency doesn't include, the content you'll need to redo because it's off-brand.
+              </p>
+              <p className="text-gray-800 leading-relaxed">
+                The Google Trends data tells the real story. In the USA, search interest for "SEO outsourcing" stays relatively consistent - this is a mature, professional market where businesses know what they're buying. Australia shows one massive spike in February 2025, then drops to near zero. That spike? Probably a bunch of businesses getting burned and warning others. New Zealand has insufficient search data to even show a trend.
+              </p>
+              <p className="text-gray-800 font-semibold mt-4">
+                That pattern reveals something critical: SEO outsourcing isn't a consumer decision. It's a calculated business investment that only makes sense at specific revenue levels.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Revenue Threshold Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Revenue Threshold Nobody Discusses</h2>
+              <p className="text-lg text-gray-600">Let's do the maths every agency avoids</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Small Business ($50K-200K Annual Revenue)</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <p className="text-gray-700">Monthly SEO cost: $500-1,000. Annual spend: $6,000-12,000.</p>
+                <p className="text-gray-800 font-semibold">
+                  That's 3-24% of your gross revenue on one marketing channel with zero guaranteed returns. Your profit margins can't absorb that. You're better off with Google Business Profile optimisation and asking happy customers for reviews. Total cost: $0.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Medium Business ($200K-1M Annual Revenue)</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <p className="text-gray-700">Monthly SEO cost: $2,000-3,000. Annual spend: $24,000-36,000.</p>
+                <p className="text-gray-700">
+                  At the lower end of this range ($200K revenue), that's still 12-18% of revenue - too high. The break-even point sits around $300K-500K annual revenue, where SEO becomes 5-10% of gross revenue. That's sustainable.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Large Business ($1M+ Annual Revenue)</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <p className="text-gray-700">Monthly SEO cost: $5,000-10,000. Annual spend: $60,000-120,000.</p>
+                <p className="text-gray-700">
+                  At this scale, that's 1.2-12% of revenue. The ROI math finally works. You can afford the 6-12 month timeline before seeing returns.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500 mt-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                The $300K threshold exists because that's where SEO outsourcing costs become a reasonable percentage of revenue. Below that, you're gambling with money your business needs for operations.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What SEO Actually Costs Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What SEO Outsourcing Actually Costs (Beyond the Invoice)</h2>
+              <p className="text-lg text-gray-600">ShoreAgents charges $1,200-2,500/month. But that quoted rate? That's not your actual cost.</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-lg font-semibold text-gray-900 mb-4">
+                ShoreAgents charges $1,200-2,500/month for full-time offshore SEO specialists. Industry average in the USA runs $2,000-5,000/month for agencies. Australia and New Zealand pay similar rates in local currency (AU$3,000-7,000, NZ$3,500-7,500).
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">But that quoted rate? That's not your actual cost.</p>
+              
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year One Reality:</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Agency retainer:</span>
+                  <span className="font-semibold">$24,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your management time (5 hrs/wk × 52 × $100/hr):</span>
+                  <span className="font-semibold">$26,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Additional tools not included:</span>
+                  <span className="font-semibold">$1,200/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Content creation if not in package:</span>
+                  <span className="font-semibold">$6,000/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">First 90 days of mistakes:</span>
+                  <span className="font-semibold">$3,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Training your team on new processes:</span>
+                  <span className="font-semibold">$2,000</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Total Year One:</span>
+                  <span className="font-bold text-red-600 text-xl">$62,200</span>
+                </div>
+                <p className="text-red-700 font-semibold mt-2">Effective monthly rate: $5,183 (not $2,000)</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Year two drops significantly - maybe $3,500/month effective rate - because you've sorted the processes and reduced management time. But that first year? Prepare for the real number.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                This is why the revenue threshold matters. A business doing $200K annually cannot afford $62,200 for SEO. A business doing $800K can.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Three-Month Reality Check Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Three-Month Reality Check</h2>
+              <p className="text-lg text-gray-600">Agencies promise results in 30-60 days. Here's what actually happens.</p>
+            </div>
+          </div>
+
+          {/* Timeline Cards */}
+          <div className="space-y-4">
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-blue-600 text-white">Month One</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Honeymoon</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      You're in 2-3 hours of onboarding meetings. Strategy sessions. Audit reviews. Your agency publishes their first round of "optimised" content. You're excited. You're also checking rankings daily. Nothing's happening yet. Google needs time to crawl, index, and rank new content. You knew this intellectually. Emotionally, you're wondering if you made a mistake.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-amber-600 text-white">Month Two</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Doubt</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Some technical fixes are live. Maybe 5-10 pieces of content published. Your rankings for target keywords moved from position 50 to position 30. Congratulations, nobody clicks on position 30. Traffic is basically unchanged. You're now questioning everything about this agency.
+                    </p>
+                    <p className="text-gray-800 font-semibold mt-3">
+                      American businesses at this stage start drafting emails about "expectations not being met." Australian businesses are more direct: "This isn't working, mate." New Zealand businesses are still giving them the benefit of the doubt but definitely Googling "how to fire SEO agency."
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-green-600 text-white">Month Three</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Turning Point</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Content's fully indexed. Technical foundation is solid. You're seeing keywords creep into positions 15-20. Traffic's up maybe 10-20% if you're lucky. Not impressive yet, but the trajectory is there. This is where you either commit to the process or kill it prematurely.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-lime-600 text-white">Month Four-Six</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Payoff</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Rankings stabilise in top 10 for several keywords. Traffic increase hits 30-50%. Conversions start appearing from organic search. The ROI is becoming visible. You stop checking rankings daily because you're now checking revenue from organic traffic.
+                    </p>
+                    <p className="text-gray-800 font-semibold mt-3">
+                      Everyone who made it to month six wishes they'd started sooner. Everyone who quit at month two is telling their business group that "SEO outsourcing doesn't work."
+                    </p>
+                    <p className="text-gray-800 font-semibold mt-3">
+                      The difference? Expectations set properly from day one.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When You Should NOT Outsource Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When You Absolutely Should Not Outsource SEO</h2>
+              <p className="text-lg text-gray-600">I'm going to save some of you a lot of money right now</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Don't outsource if you're under $300K annual revenue",
+                    description: "The math doesn't work. Use that budget for Google Ads where you get immediate data on what converts."
+                  },
+                  {
+                    title: "Don't outsource if you can't commit 12 months",
+                    description: "SEO is a minimum 6-month play to see ROI, and that assumes everything goes right. Month-to-month arrangements guarantee failure because there's no strategic continuity."
+                  },
+                  {
+                    title: "Don't outsource if nobody internal understands marketing",
+                    description: "Someone needs to review content, approve strategy, and spot when the agency's drifting off-brand. If that's nobody, you'll pay for a lot of content you can't use."
+                  },
+                  {
+                    title: "Don't outsource if you expect 'set it and forget it'",
+                    description: "Quality SEO requires 2-5 hours weekly of your involvement. Strategy calls. Content review. Performance discussions. If you don't have that time, don't start."
+                  },
+                  {
+                    title: "Don't outsource if you're in a highly regulated industry without compliance expertise",
+                    description: "Healthcare, finance, legal - these sectors have strict content rules. Generic SEO agencies make expensive compliance mistakes. You need someone who understands HIPAA, SEC regulations, or your country's advertising standards."
+                  },
+                  {
+                    title: "Don't outsource if you need results in under 90 days",
+                    description: "If your business needs leads right now, use Google Ads. SEO is a long-term asset that compounds. It's not a short-term lead generation tool."
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h4>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50 mt-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The Gallery Group, a Queensland construction company, came to ShoreAgents doing $2.5 million annually. They hired a full-time offshore estimator who also handled their SEO content coordination (since he understood the industry). After 8 months, organic traffic was up 180%, and they saved $73,000 annually versus hiring locally. Their revenue supported the investment timeline.
+              </p>
+              <p className="text-gray-800 leading-relaxed">
+                A Sydney startup doing $180K annually asked about SEO outsourcing. I told them to focus on partnerships and referrals until they hit $400K. They came back 18 months later at $550K revenue and then it made sense.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Time Zones and Communication Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Actually Matters: Time Zones and Communication</h2>
+              <p className="text-lg text-gray-600">Location choice impacts collaboration and results</p>
+            </div>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Filipino Teams Working USA Hours</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                When you hire Filipino specialists for USA business hours, they're working night shift in Manila (9am New York = 9pm Manila). That means real-time collaboration - you message them at 10am your time, they respond immediately because they're online working. This is the entire point of hiring offshore teams that work your hours.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                Some USA businesses prefer this because urgent issues get handled same-day. Others worry about staff burnout from permanent night shifts, though many Filipino professionals specifically choose night shift work for the pay premium and quieter work environment.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Australian and New Zealand Advantage</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                For Australian and New Zealand businesses, the Philippines offers natural time zone alignment. Sydney is only +2-3 hours ahead of Manila. You're both working during daylight hours. A 10am meeting in Melbourne is 7am in Manila - both normal business hours, no night shift required.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                This is why Filipino teams work particularly well for Australian and New Zealand businesses - genuine timezone overlap without requiring anyone to work nights.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">USA Agencies and Local Teams</h3>
+              <p className="text-gray-700 leading-relaxed">
+                USA-based agencies cost 2-3x more than offshore teams but operate in your exact time zone. Zero communication lag. Australian and New Zealand local agencies similarly offer same-timezone benefits but at premium rates (AU$4,000-7,000/month, NZ$3,800-6,500/month).
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What to Actually Look For Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <Search className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What to Actually Look For</h2>
+              <p className="text-lg text-gray-600">Red flags and green flags when choosing an SEO provider</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {[
+                  "You want an SEO provider who shows you exactly where every backlink comes from. Monthly. If they resist that transparency, they're using spam tactics that'll eventually penalise your site.",
+                  "You want someone who admits when SEO isn't the right solution. If every answer to your business challenges is 'more SEO,' find someone else.",
+                  "You want realistic timelines in writing. 'Meaningful results in 3-6 months' is realistic. 'First page rankings in 30 days' is a lie.",
+                  "You want to see their own website's backlink profile. If they're using dodgy tactics on their own site, they'll use them on yours."
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                ShoreAgents provides full-time offshore specialists at $1,200-2,500/month because Filipino talent offers the quality-cost balance that works. Not because they're "cheap labour" - because they're skilled professionals who cost less than hiring in Sydney, Auckland, or San Francisco. The Xact Homes case study shows 5/5 performance reviews across 12 months with measurable efficiency improvements.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Bottom Line Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">The Bottom Line</h2>
+          
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            SEO outsourcing works brilliantly at the right revenue level with realistic expectations. It fails spectacularly when businesses treat it as a quick fix or start before they're financially ready.
+          </p>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                If you're doing $300K+ annually, can commit 12 months, and have 2-5 hours weekly for collaboration, outsourcing makes sense. You'll spend roughly $60K in year one (including hidden costs), see meaningful results by month 4-6, and achieve positive ROI by month 12-18.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed">
+                If you're below that threshold, wait. Build your revenue with other channels. Come back to SEO when the math supports the investment.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                That's the honest answer nobody else gives you. The revenue question determines everything.
+              </p>
+              <p className="text-gray-900 font-bold text-xl text-center mt-4">
+                Ready to discuss whether offshore SEO makes sense for your specific situation? Contact ShoreAgents for a qualification call. We'll tell you if you're ready - or if you should wait.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Final CTA */}
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready for an Honest Assessment?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Contact ShoreAgents for a qualification call. We'll tell you if you're ready - or if you should wait.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            SEO outsourcing works brilliantly when done right, by ready businesses, with realistic expectations. The revenue question determines everything.
+          </p>
+        </div>
+      </div>
     </div>
-  )
+  );
 }

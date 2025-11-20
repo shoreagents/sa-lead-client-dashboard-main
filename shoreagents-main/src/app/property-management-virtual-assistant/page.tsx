@@ -1,829 +1,715 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import { 
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
-  ArrowRight,
+  CheckCircle2,
+  XCircle,
   DollarSign,
-  Target,
-  Zap,
-  Award,
-  Phone,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
   AlertCircle,
-  BarChart,
-  HelpCircle,
-  Briefcase,
-  FileText,
-  Home,
-  HardHat,
+  ArrowRight,
   Building2,
-  Search,
-  Cpu,
+  FileText,
+  Users,
+  Globe,
+  Calculator,
+  Target,
+  Shield,
+  Home,
+  Phone,
+  Mail,
   Calendar,
-  Key,
-  ClipboardList,
-  Wrench,
-  FileCheck,
-  MessageCircle,
-  TrendingDown,
-  Globe
-} from 'lucide-react';
-import Image from 'next/image';
+  Wrench
+} from "lucide-react";
+import Link from "next/link";
 
 export default function PropertyManagementVirtualAssistantPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For 100+ Unit Property Managers
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Property Management Virtual Assistant:<br />
+              <span className="text-lime-600">The $30,000 Decision</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Managing 100+ rental units? You're spending roughly 30 hours every week on admin work that someone else could handle for $1,500/month.
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              That's data entry, tenant emails, maintenance coordination, rent reminders, and CRM updates—work that keeps your operation running but doesn't require you specifically. At 100 units, you're either paying $50,000+ for local admin staff or burning 1,500+ hours per year doing it yourself.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <Badge variant="destructive" className="mb-4 bg-red-600 text-white px-4 py-2 text-sm font-semibold flex items-center justify-center w-fit mx-auto">
-            <AlertCircle className="w-4 h-4 mr-2" />
-            CRITICAL: Property Managers Losing $50,000+ Annually on Inefficient Operations
-          </Badge>
-          <p className="text-lg text-gray-600 mb-6">
-            While smart property management companies scale with systematic property management virtual assistant solutions, others get trapped by expensive local hiring, operational bottlenecks, and tenant service failures. Don't become another casualty.
-          </p>
-
-          <h1 className="text-5xl font-bold text-gray-900 mb-8">
-            Property Management Virtual Assistant
-          </h1>
-
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&h=600&fit=crop"
-              alt="Professional property management virtual assistant working with property management software and tenant communication systems"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Book a Strategy Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              How It Works
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              See Pricing
-              <DollarSign className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Stephen's Story */}
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 flex items-center">
-            <AlertCircle className="w-10 h-10 text-red-600 mr-3" />
-            Stephen's $150K Property Management Disaster
-          </h2>
-          <div className="space-y-4">
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold">
-              Back in 2012, I made a $150,000 mistake that nearly killed my property management expansion.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              I thought I could just hire local admin staff and somehow scale from 150 to 300+ properties without drowning in paperwork, tenant complaints, and operational chaos. What I got instead was mounting costs, declining service quality, and property managers burning out from administrative overload.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              But here's what I discovered when I implemented specialized property management virtual assistants who understood the specific workflows of property management…
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold italic">
-              A property management virtual assistant transforms property management operations by handling up to 80% of administrative tasks remotely, enabling property managers to scale from 150 to 300+ properties without proportional staff increases.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Whether you need a leasing assistant for tenant acquisition, a property admin assistant for daily operations, a tenant relations assistant for communication management, or a property maintenance coordinator for repair workflows – modern property management virtual assistants provide comprehensive solutions that traditional hiring simply cannot match.
-            </p>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">300+</div>
-              <div className="text-gray-600 font-medium">Properties Per Manager Capacity</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">75%</div>
-              <div className="text-gray-600 font-medium">Cost Savings vs Local Hiring</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">80%</div>
-              <div className="text-gray-600 font-medium">Administrative Tasks Handled</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">40%</div>
-              <div className="text-gray-600 font-medium">Faster Tenant Response Times</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Strategic Case */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Target className="w-8 h-8 text-lime-600 mr-3" />
-            The Strategic Case for Property Management Virtual Assistants in 2025
-          </h2>
+        {/* Intro */}
+        <div className="mb-16">
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Property management virtual assistants have transformed from cost-cutting measures to competitive advantages that leading property companies leverage to outpace competitors. Unlike generic virtual assistant services, property management assistants specialize in property-specific workflows, compliance requirements, and tenant communication protocols.
+            Here's the reality most property management companies figure out too late: A Philippines virtual assistant costs $19,800 per year and handles 70% of your back-office work while you sleep. They work US daytime hours (night shift for them), you wake up to completed tasks, and you save $30,000-50,000 annually compared to local staff.
           </p>
-
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">According to industry research, property management firms implementing structured strategies report:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">60-75% reduction in administrative overhead costs</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">40% improvement in tenant response times</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">65% increase in property manager capacity</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">85% improvement in lease renewal rates</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">3.5x more time for relationship building</span>
-            </div>
-          </div>
-
-          <div className="text-center mt-6">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Schedule Your Free Property Management VA Consultation
-            </Button>
-          </div>
-        </div>
-
-        {/* Cost-Benefit Analysis */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <BarChart className="w-8 h-8 text-lime-600 mr-3" />
-            Real-World Impact: The Cost-Benefit Analysis
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            Based on our 500+ placements, here's the savings breakdown for a typical property management company managing 200+ properties:
-          </p>
-
-          <div className="overflow-x-auto">
-            <table className="w-full bg-white rounded-lg shadow-md">
-              <thead className="bg-lime-600 text-white">
-                <tr>
-                  <th className="px-6 py-4 text-left font-semibold">Function</th>
-                  <th className="px-6 py-4 text-right font-semibold">Local Cost (Annual)</th>
-                  <th className="px-6 py-4 text-right font-semibold">PMVA Cost (Annual)</th>
-                  <th className="px-6 py-4 text-right font-semibold">Savings</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Leasing Coordination</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$58,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$18,500</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">68%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Tenant Communication</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$52,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$16,800</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">68%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Maintenance Coordination</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$55,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$17,200</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">69%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Administrative Support</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$48,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$15,600</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">68%</td>
-                </tr>
-                <tr className="bg-lime-100 font-bold">
-                  <td className="px-6 py-4 text-gray-900">Total Annual Savings</td>
-                  <td className="px-6 py-4 text-right text-gray-900">$213,000</td>
-                  <td className="px-6 py-4 text-right text-gray-900">$68,100</td>
-                  <td className="px-6 py-4 text-right text-lime-600 text-xl">$144,900</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p className="text-gray-700 leading-relaxed mt-6 font-semibold">
-            Beyond direct savings, the strategic advantage comes from redirecting local staff to high-value activities like landlord acquisition, strategic planning, and complex tenant relationships.
-          </p>
-
-          <div className="text-center mt-6">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <DollarSign className="mr-2 h-5 w-5" />
-              See Complete Cost Analysis & ROI Projections
-            </Button>
-          </div>
-        </div>
-
-        {/* Core Functions */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <ClipboardList className="w-8 h-8 text-lime-600 mr-3" />
-            Core Property Management Functions Enhanced by Virtual Assistants
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-8">
-            Property management encompasses diverse operational areas, each with specific property management virtual assistant applications. Here are the primary functions delivering exceptional ROI when supported by specialized property management assistants:
-          </p>
-
-          <div className="space-y-8">
-            {/* Tenant Lifecycle */}
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Users className="w-6 h-6 text-lime-600 mr-2" />
-                  1. Tenant Lifecycle Management
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  The complete tenant journey from inquiry to move-out involves numerous touchpoints ideal for leasing assistant and tenant relations assistant support:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Prospecting & Inquiry Management</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Initial inquiry responses</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Viewing appointment scheduling</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Follow-up communication</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Lead qualification</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Application Processing</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Application form review</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Reference checking coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Background check processing</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Application status updates</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Lease Administration</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Lease document preparation</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">DocuSign coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Bond lodging processing</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Move-in inspection scheduling</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Marketing */}
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <TrendingUp className="w-6 h-6 text-lime-600 mr-2" />
-                  2. Property Advertising and Marketing
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  Effective property marketing requires consistent execution across multiple channels through dedicated property admin assistants:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">Listing creation and optimization for Realestate.com.au, Domain, TradeMe</span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">Social media post creation and distribution</span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">Property description writing and enhancement</span>
-                  </div>
-                  <div className="flex items-start">
-                    <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">Photo coordination and upload management</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Maintenance */}
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Wrench className="w-6 h-6 text-lime-600 mr-2" />
-                  3. Maintenance Coordination and Management
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  Maintenance requests require systematic coordination between multiple parties through specialized property maintenance coordinators:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Request Processing</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Maintenance request intake via multiple channels</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Priority assessment and categorization</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Landlord approval coordination for repairs</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Work order creation and distribution</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Tradesperson Management</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Approved contractor coordination and scheduling</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Quote collection and comparison</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Access arrangement between tenants and contractors</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Work completion follow-up and documentation</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-8">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <Target className="mr-2 h-5 w-5" />
-              Discover Our Proven Implementation Process
-            </Button>
-          </div>
-        </div>
-
-        {/* Philippines Advantage */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Globe className="w-8 h-8 text-lime-600 mr-3" />
-            Stephen's Take: The Philippines Advantage for Property Management
-          </h2>
-          <div className="space-y-4 mb-6">
-            <p className="text-gray-700 leading-relaxed">
-              After working with property management virtual assistants from multiple countries, I've found that Filipino professionals excel in property management support for several key reasons. First, their natural service orientation aligns perfectly with the hospitality aspects of property management. Second, their English proficiency enables nuanced tenant communication that maintains professional relationships.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Most importantly, Filipino property management assistants understand the importance of building long-term relationships, which is crucial in property management where tenant retention directly impacts profitability. When we recruit property management virtual assistants in the Philippines, we specifically look for candidates who have customer service experience and can demonstrate empathy in their communication.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              The cultural compatibility means less training time on soft skills and more focus on property-specific procedures. This translates to faster implementation and better results for property management companies.
-            </p>
-          </div>
-
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Key Philippines Advantages:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2" />
-                  English Proficiency
-                </h4>
-                <p className="text-gray-700 text-sm">Clear, professional communication with tenants and landlords</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2" />
-                  Service Culture
-                </h4>
-                <p className="text-gray-700 text-sm">Natural hospitality and customer service orientation</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2" />
-                  Time Zone Compatibility
-                </h4>
-                <p className="text-gray-700 text-sm">Perfect overlap with Australian and New Zealand business hours</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2" />
-                  Cost Effectiveness
-                </h4>
-                <p className="text-gray-700 text-sm">60-75% savings with premium quality service</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Service Options */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Property Management Virtual Assistant Service Options
-          </h2>
-          <p className="text-gray-700 text-center mb-8 leading-relaxed">
-            ShoreAgents offers flexible property management virtual assistant solutions tailored to your company size and operational needs:
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-lime-200 bg-lime-50 h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Start Small</h3>
-                <div className="text-4xl font-bold text-lime-600 mb-3">One Agent</div>
-                <p className="text-gray-700 mb-6 flex-grow">
-                  Perfect for property management companies managing 50-150 properties. Test our specialized property management assistant model with a single dedicated team member.
-                </p>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white font-semibold mt-auto">
-                  Start with One Agent
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50 h-full flex flex-col relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-lime-600 text-white px-4 py-1 font-semibold">Most Popular</Badge>
-              </div>
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Scale Smart</h3>
-                <div className="text-4xl font-bold text-lime-600 mb-3">Team</div>
-                <p className="text-gray-700 mb-6 flex-grow">
-                  Ideal for growing property management companies with 150-400 properties. Multiple specialized roles including leasing assistants and maintenance coordinators.
-                </p>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white font-semibold mt-auto">
-                  Build Your Team
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50 h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Enterprise Scale</h3>
-                <div className="text-4xl font-bold text-lime-600 mb-3">Workforce</div>
-                <p className="text-gray-700 mb-6 flex-grow">
-                  For large property management companies with 400+ properties. Complete departmental coverage with specialized property management virtual assistants across all functions.
-                </p>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white font-semibold mt-auto">
-                  Scale Your Workforce
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* AI Future */}
-        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Cpu className="w-8 h-8 text-lime-600 mr-3" />
-            The Future: AI-Enhanced Property Management Virtual Assistants
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            Property management is evolving rapidly with AI integration. While we don't offer AI-powered property management virtual assistants yet, the industry is moving toward hybrid human-AI models that will revolutionize operations:
-          </p>
-
-          <Card className="border-lime-200 bg-white mb-6">
+          
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Stephen's Vision: AI + Human Intelligence</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                My entire operations team now uses Claude projects for recruitment, operations, finance, and task tracking. Our web development team codes using Cursor with Claude – they're building React and Node.js applications instead of basic PHP.
+              <p className="text-gray-800 font-medium">
+                <strong>But only if you set it up right.</strong>
               </p>
-              <p className="text-gray-700 leading-relaxed">
-                The future property management virtual assistant will combine Filipino service excellence with AI automation. Imagine tenant inquiries handled instantly, maintenance patterns predicted before problems occur, and lease renewals optimized through data analysis.
+            </CardContent>
+          </Card>
+        </div>
+
+        <Separator className="my-12" />
+
+        {/* Numbers Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Numbers Everyone Avoids Talking About</h2>
+              <p className="text-lg text-gray-600">Let's cut through the marketing and look at real costs</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Local Admin Staff in the US:</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Salary:</span>
+                    <span className="font-semibold">$40,000-55,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Benefits:</span>
+                    <span className="font-semibold">$8,000-12,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Office space:</span>
+                    <span className="font-semibold">$3,000-6,000</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between pt-2">
+                    <span className="font-bold text-gray-900">Total:</span>
+                    <span className="font-bold text-red-600 text-xl">$51,000-73,000/year</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Philippines VA Through Shore Agents:</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Monthly cost (salary + workspace):</span>
+                    <span className="font-semibold">$1,650/month</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Setup fee (one-time):</span>
+                    <span className="font-semibold">$1,100</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between pt-2">
+                    <span className="font-bold text-gray-900">Year 1:</span>
+                    <span className="font-bold text-green-600 text-xl">$20,900 total</span>
+                  </div>
+                  <div className="flex justify-between pt-2">
+                    <span className="font-bold text-gray-900">Year 2+:</span>
+                    <span className="font-bold text-green-600 text-xl">$19,800/year</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                At 100 units generating $15,000/month in management fees, that VA represents 11% of your gross revenue. Local staff? 28-40%.
+              </p>
+              <p className="text-gray-900 font-bold text-xl">
+                The math isn't complicated. You're paying 3x more for the same work output.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What Your VA Actually Does Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Home className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Your VA Actually Does</h2>
+              <p className="text-lg text-gray-600">Think about what buried you last week</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Monday morning: 47 unread tenant emails, 12 maintenance requests sitting in your inbox, and 3 owner reports you promised by Friday.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Tuesday: Spent 4 hours entering work orders into AppFolio and updating tenant records from move-outs.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Wednesday: Chasing down late rent payments, updating listings across Zillow and Apartments.com, scheduling contractor visits.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Thursday: Processing invoices, generating owner statements, coordinating showing schedules with agents.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                Friday: You're caught up. Until Monday hits and it starts over.
               </p>
             </CardContent>
           </Card>
 
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Current AI Integration Opportunities</h3>
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Here's what changes with a VA:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Your VA works US business hours—9am to 5pm your time. They're handling tasks during your day while you focus on owner relationships, complex negotiations, property acquisitions, and the work that actually grows your business.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Need something done? Assign it in your task system. They're working your schedule, responding to tenant emails while you're in meetings, entering work orders while you're doing property inspections, processing invoices while you're closing deals.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                You're not waiting for overnight work. You're delegating during the day and moving forward.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Night Shift Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-amber-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Night Shift Reality (For Them)</h2>
+              <p className="text-lg text-gray-600">Let's address what every BPO company glosses over</p>
+            </div>
+          </div>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Let's address what every BPO company glosses over: Your VA works night shift in the Philippines.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Manila is 12-16 hours ahead. Your 9am = their 9pm. Your 5pm = their 5am. They're working graveyard shift to match US business hours.
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">
+                Most companies either hide this or pretend it doesn't matter. We've been doing this since 2012—it matters if you don't handle it right.
+              </p>
+              <h4 className="font-bold text-gray-900 mb-3">What we do about it:</h4>
+              <ul className="space-y-2 text-sm text-gray-700 mb-4">
+                <li>• Shore Agents has health and wellness programs, shift rotation options, performance monitoring for early burnout detection, and career progression paths</li>
+                <li>• We actively manage graveyard shift health. Gym access. Sleep education. Regular monitoring. Backup coverage so they can actually take time off</li>
+              </ul>
+              <h4 className="font-bold text-gray-900 mb-3">Your responsibility:</h4>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• Respect that they're working night shift to support your business day</li>
+                <li>• Don't pile urgent tasks at the end of their shift when they're exhausted</li>
+                <li>• Use the task management system so they can plan their workload</li>
+                <li>• Appreciate the work—night shift is harder than day shift</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The companies crushing it with Philippines VAs? They treat their VAs well and build sustainable workflows. The ones failing? They treat VAs like disposable robots and wonder why turnover is brutal.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What They Handle Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What They Handle (And What They Don't)</h2>
+              <p className="text-lg text-gray-600">Where VAs excel vs where they don't</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Where VAs excel:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Tenant Management:</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Tenant communication using your scripts</li>
+                    <li>• Application processing and tracking</li>
+                    <li>• Lease renewal coordination</li>
+                    <li>• Move-in/move-out documentation</li>
+                    <li>• Rent collection tracking</li>
+                    <li>• Late fee calculations</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Software Administration:</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• AppFolio, Buildium, Rent Manager data entry</li>
+                    <li>• Daily CRM updates</li>
+                    <li>• Work order creation and tracking</li>
+                    <li>• Payment processing</li>
+                    <li>• Document organization</li>
+                    <li>• Owner report generation</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Financial Admin:</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Invoice processing</li>
+                    <li>• Expense categorization</li>
+                    <li>• Owner distributions</li>
+                    <li>• Monthly reporting</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Marketing & Listings:</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• MLS, Zillow, Apartments.com updates</li>
+                    <li>• Photo galleries</li>
+                    <li>• Virtual tour coordination</li>
+                    <li>• Lead tracking</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Vendor Coordination:</h4>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Work order assignment</li>
+                    <li>• Contractor scheduling</li>
+                    <li>• Job completion follow-up</li>
+                    <li>• Maintenance tracking</li>
+                  </ul>
+                </div>
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                Add it up: 60-80 hours per week of execution work at $9-10/hour vs $25-35/hour for local staff doing identical tasks.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Where they don't:</h3>
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Physical tasks:</h4>
+                  <p className="text-sm text-gray-700">On-site showings, inspections, emergency response requiring immediate presence. Obviously a VA in Manila can't do a property walkthrough in Dallas.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Strategic decisions:</h4>
+                  <p className="text-sm text-gray-700">Complex lease negotiations, owner conflicts, major expenditure approvals, legal compliance interpretation. VAs execute your decisions—they don't make them.</p>
+                </div>
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                That's the difference between task executor and decision maker. Know it, respect it, and you'll be successful.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Why Our Platform Matters Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Building2 className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Why Our Platform Actually Matters</h2>
+              <p className="text-lg text-gray-600">Most BPO companies operate on "trust us, they're working." That's not how we operate.</p>
+            </div>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Shore Agents built actual software. You get a dashboard that updates every 60 seconds showing:
+              </p>
+              <ul className="space-y-2 text-sm text-gray-700 mb-4">
+                <li>• Clock-in/clock-out tracking</li>
+                <li>• Live productivity scores (0-100%)</li>
+                <li>• Task completion status</li>
+                <li>• Hours worked to the minute</li>
+              </ul>
+              <p className="text-gray-800 font-semibold mb-4">
+                You're not hoping they're working—you're seeing real data.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Built-in task management means you create a task, assign your VA, set a due date, and get instant notification. Real-time status tracking. File attachments in each task. Completion timestamps. You see your entire team's workload at a glance.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                No more email chains. No "did you get my message?" Just clear assignment and execution tracking.
+              </p>
+              <p className="text-gray-800 leading-relaxed">
+                We also automate performance reviews (Month 1, 3, 5, then every 6 months), track onboarding progress live, provide Account Manager support within 24 hours, and give VAs an AI assistant for work questions so they get unstuck faster.
+              </p>
+              <p className="text-gray-800 font-semibold mt-4">
+                This is infrastructure, not phone calls and promises.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Training Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Training Reality</h2>
+              <p className="text-lg text-gray-600">"AppFolio-trained VAs" is marketing speak. Here's what it actually means</p>
+            </div>
+          </div>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                "AppFolio-trained VAs" is marketing speak. What it actually means: they know basic navigation. They don't know YOUR setup, YOUR workflows, YOUR vendor network, YOUR reporting needs.
+              </p>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real timeline:</h3>
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Week 1-2: Learning your specific system</h4>
+                  <p className="text-sm text-gray-700">Your custom fields, templates, workflow preferences.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Week 3-4: Supervised execution</h4>
+                  <p className="text-sm text-gray-700">They do tasks, you review and correct.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Week 5-8: Semi-independent work</h4>
+                  <p className="text-sm text-gray-700">They handle most tasks with spot-checks.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Month 3-4: Fully independent</h4>
+                  <p className="text-sm text-gray-700">They're crushing 80% of tasks without questions.</p>
+                </div>
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                That's 30-60 days to full productivity. Not "day one ready" like competitors claim, but honest and it works.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Your training investment: 30-40 hours over the first two months. Mostly creating Loom videos documenting your processes. Yeah, it sucks. But Month 3 forward, that VA saves you 80-100 hours monthly.
+              </p>
+              <p className="text-gray-900 font-bold text-xl text-center">
+                Do the math: 40 hours invested, 1,200+ hours saved annually.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When This Makes Sense Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <Target className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When This Makes Sense (And When It Doesn't)</h2>
+              <p className="text-lg text-gray-600">You're ready if vs You're not ready if</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-lime-200 bg-white">
+            <Card className="border-green-300 bg-green-50">
               <CardContent className="p-6">
-                <h4 className="font-bold text-gray-900 mb-3 flex items-center">
-                  <MessageCircle className="w-5 h-5 text-lime-600 mr-2" />
-                  Automated Communication
-                </h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="text-gray-700">• AI-powered initial tenant inquiry responses</li>
-                  <li className="text-gray-700">• Smart scheduling for property viewings</li>
-                  <li className="text-gray-700">• Automated lease renewal reminders</li>
-                  <li className="text-gray-700">• Predictive maintenance notifications</li>
-                </ul>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">You're ready if:</h3>
+                <div className="space-y-3">
+                  {[
+                    "You're managing 100-500 units. This is the sweet spot. VA costs 10-15% of management fee revenue, saves you massive time.",
+                    "You're drowning in data entry, tenant communication, maintenance coordination, report generation, listing management, invoice processing.",
+                    "You have basic processes documented or can create them. Even just Loom videos showing how you do things.",
+                    "You understand this takes 30-60 days to full productivity, not plug-and-play day one."
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="border-lime-200 bg-white">
+            <Card className="border-red-300 bg-red-50">
               <CardContent className="p-6">
-                <h4 className="font-bold text-gray-900 mb-3 flex items-center">
-                  <BarChart className="w-5 h-5 text-lime-600 mr-2" />
-                  Data Analysis
-                </h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="text-gray-700">• Tenant behavior analysis for retention</li>
-                  <li className="text-gray-700">• Market analysis for rent optimization</li>
-                  <li className="text-gray-700">• Maintenance pattern recognition</li>
-                  <li className="text-gray-700">• Portfolio performance analytics</li>
-                </ul>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">You're not ready if:</h3>
+                <div className="space-y-3">
+                  {[
+                    "You're under 50 units. Not enough volume to keep a VA busy full-time. Come back when you grow.",
+                    "Everything is \"in your head\" with zero documentation. You'd be creating training while training the VA, which is painful.",
+                    "You expect instant productivity or want someone making strategic decisions vs executing tasks.",
+                    "Most of your work requires physical presence. VAs handle remote work—if 80% of your job is on-site, this isn't the solution."
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>
+        </section>
 
-          <div className="text-center mt-6">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <Cpu className="mr-2 h-5 w-5" />
-              Explore AI Virtual Assistant Future
-            </Button>
+        <Separator className="my-12" />
+
+        {/* Real ROI Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <TrendingUp className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Real ROI</h2>
+              <p className="text-lg text-gray-600">Let's do the actual math</p>
+            </div>
           </div>
-        </div>
 
-        {/* Related Solutions */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Explore Related Virtual Assistant Solutions
-          </h2>
-          <p className="text-gray-700 text-center mb-8">
-            Expand your offshore team capabilities with specialized virtual assistants across multiple business functions:
-          </p>
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year 1 investment:</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">VA cost:</span>
+                  <span className="font-semibold">$20,900</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your training time:</span>
+                  <span className="font-semibold">40 hours over 2 months</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Software and setup:</span>
+                  <span className="font-semibold">minimal</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Home className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Real Estate</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Comprehensive sales support for agents and agencies</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year 1 return:</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Time saved:</span>
+                  <span className="font-semibold">1,200+ hours</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your hourly value at 100+ units:</span>
+                  <span className="font-semibold">$75-150/hour minimum</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Value of time saved:</span>
+                  <span className="font-semibold">$90,000-180,000</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Net benefit:</span>
+                  <span className="font-bold text-green-600 text-xl">$69,000-159,000</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <HardHat className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Construction</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Project coordination and administrative support</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year 2+ ongoing:</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Cost:</span>
+                  <span className="font-semibold">$19,800/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Management time:</span>
+                  <span className="font-semibold">2-3 hours weekly</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Savings vs local staff:</span>
+                  <span className="font-semibold">$30,000-50,000 annually</span>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-gray-700 mt-4">
+                <p><strong>At 100 units:</strong> You're basically printing money by not overpaying for local staff to do work a VA handles perfectly.</p>
+                <p><strong>At 200 units:</strong> You can afford 2-3 VAs and still spend less than one local admin person.</p>
+                <p><strong>At 500 units:</strong> You're running a proper operation with multiple VAs as your ops engine, saving $100,000+ annually vs building a local team.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Building2 className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Mortgage</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Loan processing and broker support services</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+        <Separator className="my-12" />
 
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Briefcase className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Administrative</h3>
-                <p className="text-gray-700 mb-4 flex-grow">General business administration and support</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Search className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">SEO</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Search optimization and digital marketing support</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Cpu className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">AI-Enhanced</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Future-ready AI-powered virtual assistance</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
+        {/* Getting Started Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <ArrowRight className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Getting Started</h2>
+              <p className="text-lg text-gray-600">We qualify you first. Free 15-minute consultation to assess if you're actually ready.</p>
+            </div>
           </div>
-        </div>
 
-        {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <HelpCircle className="w-10 h-10 text-lime-600 mr-3" />
-            Frequently Asked Questions: Property Management Virtual Assistants
-          </h2>
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Step 1: Qualification</h4>
+                  <p className="text-sm text-gray-700">Free 15-minute consultation to assess if you're actually ready. If you're under 50 units or have zero processes documented, we'll tell you straight—come back when you're ready.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Step 2: Browse Candidates</h4>
+                  <p className="text-sm text-gray-700">If you are ready: browse our pre-vetted candidate database same day. Filter by property management experience and software skills. See actual work history and communication samples. One-click to request interviews.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Step 3: Interview & Hire</h4>
+                  <p className="text-sm text-gray-700">Interview 2-4 candidates over 7-14 days. We handle timezone scheduling. Reference checks included. One-click to send hire request—we handle the rest.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Step 4: Onboarding</h4>
+                  <p className="text-sm text-gray-700">Onboarding tracked live in your dashboard. Contract signed, background checks complete, equipment setup, software access, start date—you see exact progress, not guessing.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Step 5: Training & Ramp-Up</h4>
+                  <p className="text-sm text-gray-700">Training and ramp-up takes 30-60 days. Week 1-2 they learn your system via Loom videos. Week 3-4 supervised execution. Week 5-8 semi-independent. Month 3+ fully productive.</p>
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-2">Step 6: Ongoing Management</h4>
+                  <p className="text-sm text-gray-700">Ongoing management through the platform. Daily task assignments. Weekly 5-minute dashboard checks. Monthly 15-minute performance reviews. Quarterly automated formal reviews. Account Manager support when needed.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Bottom Line Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">The Bottom Line</h2>
           
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What specific tasks can a property management virtual assistant handle?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Property management virtual assistants handle the complete tenant lifecycle including inquiry responses, application processing, lease coordination, maintenance request management, rent collection follow-up, inspection scheduling, lease renewals, and landlord communication. They work within your property management software and follow your established procedures to maintain consistency and quality standards.
-                </AccordionContent>
-              </AccordionItem>
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                If you're managing 100+ units and either paying $50,000+ for local admin staff or working 60-hour weeks doing it yourself, you're making an expensive mistake.
+              </p>
+            </CardContent>
+          </Card>
 
-              <AccordionItem value="item-2" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How much can property management companies save with virtual assistants?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Property management companies typically achieve 60-75% cost savings through virtual assistant implementation. A role that costs $55,000-$65,000 annually locally generally costs $16,000-$20,000 when supported by a Filipino property management virtual assistant, including all management fees and benefits. Beyond direct savings, companies eliminate recruitment, office space, equipment, and local employment compliance costs.
-                </AccordionContent>
-              </AccordionItem>
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                A Philippines VA costs $1,650/month. They work US business hours (night shift for them, but that's our problem to manage, not yours). They handle 70% of your admin workload. You save $30,000-50,000 per year minimum.
+              </p>
+            </CardContent>
+          </Card>
 
-              <AccordionItem value="item-3" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do property management virtual assistants handle urgent maintenance requests?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Property management virtual assistants follow established escalation procedures for urgent maintenance requests. They can immediately acknowledge receipt, assess urgency based on predefined criteria, contact approved contractors for emergency situations, and escalate to local property managers when required. They maintain 24/7 availability for true emergencies while handling routine maintenance coordination during business hours.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What property management software do virtual assistants work with?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Property management virtual assistants are trained on all major platforms including Console Cloud, PropertyMe, Palace, REST Professional, AppFolio, Buildium, and Rent Manager. They can work within your existing system through secure VPN connections with proper user access controls. Most virtual assistants can become proficient with new software within 1-2 weeks with proper training and documentation.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How long does it take to implement a property management virtual assistant?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Implementation typically takes 30-60 days from start to full productivity. This includes 1-2 weeks for recruitment and selection, 1-2 weeks for onboarding and initial training, and 2-4 weeks to reach full productivity. Success depends on having documented procedures, proper software access setup, and clear communication protocols. Companies with well-documented processes can achieve faster implementation timelines.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What's the difference between a property management virtual assistant and a general virtual assistant?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Property management virtual assistants specialize specifically in property management workflows, terminology, and software platforms. They understand tenant communication protocols, lease requirements, maintenance coordination, and compliance procedures. General virtual assistants typically handle broader administrative tasks but lack the specialized knowledge of property management processes, tenant relations, and industry-specific software platforms.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </div>
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Yes, they work graveyard shift. Yes, training takes 30-60 days. Yes, you need basic processes documented. But the economics work, the time savings are real, and we've been doing this since 2012.
+              </p>
+              <p className="text-gray-900 font-bold text-xl text-center mt-4">
+                We're not selling fairy tales. We're selling a business model that lets you scale to 200, 300, 500+ units without bleeding cash on expensive local staff doing work that doesn't require local presence.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Final CTA */}
-        <div className="bg-gradient-to-br from-lime-600 to-green-600 rounded-2xl shadow-xl p-12 text-center text-white mb-16">
-          <h2 className="text-4xl font-bold mb-4 flex items-center justify-center">
-            <Zap className="w-10 h-10 text-white mr-3" />
-            Ready to Transform Your Property Management Operations?
-          </h2>
-          <p className="text-xl mb-6 opacity-90">
-            Whether you're managing 50 properties or 500, specialized property management virtual assistants can transform your operations, reduce costs, and improve tenant satisfaction.
-          </p>
-          <p className="text-lg mb-8 opacity-90">
-            Our comprehensive outsourcing approach means you get specialized property management assistants backed by professional infrastructure, ongoing management, and proven results from 500+ successful placements.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 text-white">
-              <BarChart className="w-8 h-8 mx-auto mb-2" />
-              <div className="text-3xl font-bold mb-2 text-white">1. Portfolio Analysis</div>
-              <div className="text-sm opacity-90 text-white">We analyze your processes and identify savings</div>
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready to Stop Overpaying for Admin Work?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Schedule a free consultation and we'll tell you straight if you're ready or not.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 text-white">
-              <Target className="w-8 h-8 mx-auto mb-2" />
-              <div className="text-3xl font-bold mb-2 text-white">2. Custom Strategy</div>
-              <div className="text-sm opacity-90 text-white">Receive tailored implementation plan with ROI</div>
-            </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 text-white">
-              <Zap className="w-8 h-8 mx-auto mb-2" />
-              <div className="text-3xl font-bold mb-2 text-white">3. Fast Implementation</div>
-              <div className="text-sm opacity-90 text-white">Start within 30-60 days</div>
-            </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-              <Calendar className="mr-2 h-5 w-5" />
-              Schedule Your Free Strategy Call Today
-            </Button>
-            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-semibold">
-              Stop the Chaos – Book Now
-              <Clock className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-
-          <p className="text-sm opacity-75 font-semibold">
-            ⏰ The cost of waiting is higher than the cost of starting.
-          </p>
-          <p className="text-sm opacity-75 mt-2">
-            Join 500+ businesses already transforming their operations with ShoreAgents virtual assistants
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            A Philippines VA costs $19,800 per year and handles 70% of your back-office work. You save $30,000-50,000 annually compared to local staff. But only if you set it up right.
           </p>
         </div>
-
       </div>
     </div>
   );

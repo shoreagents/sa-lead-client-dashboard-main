@@ -1,837 +1,915 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import { 
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
-  ArrowRight,
+  CheckCircle2,
+  XCircle,
   DollarSign,
-  Target,
-  Zap,
-  Award,
-  Phone,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
   AlertCircle,
-  BarChart,
-  TrendingDown,
-  X,
-  HelpCircle,
-  Briefcase,
-  Calculator,
-  FileCheck,
-  UserCheck,
-  Settings,
-  Lightbulb,
-  Globe,
+  ArrowRight,
   Building2,
-  Layers,
-  FileText
-} from 'lucide-react';
-import Image from 'next/image';
+  FileText,
+  Users,
+  Globe,
+  Calculator
+} from "lucide-react";
+import Link from "next/link";
 
 export default function BookkeepingOutsourcingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For $250K+ Annual Revenue Businesses
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Bookkeeping Outsourcing:<br />
+              <span className="text-lime-600">When $50/Month Software Beats $2,000/Month Specialists</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Here's what every bookkeeping outsourcing provider conveniently forgets to mention: <strong>if your business does under $250,000 in annual revenue, you're probably better off with Xero and YouTube tutorials than hiring anyone offshore.</strong>
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              Controversial? Maybe. But I've watched businesses waste $60,000 in their first year outsourcing bookkeeping when DIY software would've cost them $1,200 total. The bookkeeping outsourcing market is exploding—$46 billion in 2024, projected to hit $107 billion by 2033—but that doesn't mean it's right for your business.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <Badge variant="destructive" className="mb-4 bg-red-600 text-white px-4 py-2 text-sm font-semibold flex items-center justify-center w-fit mx-auto">
-            <AlertCircle className="w-4 h-4 mr-2" />
-            CRITICAL: Australian Businesses Hemorrhaging $87,000+ Annually on Broken Bookkeeping Services
-          </Badge>
-          <p className="text-lg text-gray-600 mb-6">
-            While smart businesses dominate with systematic bookkeeping outsourcing and offshore bookkeeping services, others get destroyed by $70/hour local bookkeepers demanding endless questions. Stop the financial bleeding NOW.
+        {/* Intro */}
+        <div className="mb-16">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            I'm Stephen Atcheler. I've been placing offshore bookkeeping specialists with businesses across the USA, Australia, and New Zealand for 15 years. I've seen companies save six figures annually through proper implementation. I've also seen plenty burn through cash because they outsourced too early, to the wrong people, or without understanding what they were actually buying.
           </p>
-
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
-            Bookkeeping Outsourcing: Ultimate 2025 Proven System – Eliminate $87,000+ Annual Losses
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            From Stephen Atcheler's personal $150K bookkeeping disaster to revolutionizing financial bookkeeping outsourcing for 500+ businesses across Australia, New Zealand, and USA – the complete systematic solution.
-          </p>
-
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&h=600&fit=crop"
-              alt="Professional bookkeeper working with financial documents, calculator and laptop showing accounting software"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Book Your Bookkeeping Transformation Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              See Pricing
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">82%</div>
-              <div className="text-gray-600 font-medium">Cost Savings vs Local Bookkeeping</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">500+</div>
-              <div className="text-gray-600 font-medium">Successful BPO Placements</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">$12,800</div>
-              <div className="text-gray-600 font-medium">Annual Cost vs $72,000+ Local</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">14</div>
-              <div className="text-gray-600 font-medium">Days Average Setup</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Stephen's $150K Nightmare Story */}
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 flex items-center">
-            <AlertCircle className="w-10 h-10 text-red-600 mr-3" />
-            My $150,000 Bookkeeping Nightmare – Why I Created This System
-          </h2>
-          <div className="space-y-4">
-            <p className="text-lg text-gray-700 leading-relaxed">
-              I'm Stephen Atcheler, and before I revolutionized professional bookkeeping outsourcing for hundreds of businesses, I nearly went bankrupt from my own bookkeeping incompetence.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Back in 2010-11, I owned Rebel Estate Agents after converting from Just Results Property. My journey went Ray White employee → Metro City Realty → REMAX contractor → business owner. At 20 years old, I was entrepreneurial but absolutely clueless about small business bookkeeping outsourcing.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold italic">
-              The Breaking Point: "I was doing bookkeeping at night after selling all day, then introduced staff and had no clue about payroll or chart of accounts. I was pretty shitty at bookkeeping – that's being honest."
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Enter the local bookkeeper solution. $70 per hour. Seemed reasonable until reality hit – she'd ask me a million questions about where receipts went, how to categorize expenses, basically everything. I was paying premium rates while still doing half the work myself.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Then my business expanded into property management. More payroll, more complexity. She started coming four days a week, six hours daily. Do the math: $1,680 weekly, over $87,000 annually just for bookkeeping services outsourcing that still required constant management.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              I'd been experimenting with outsourcing for sales admin, so I thought I'd try it for bookkeeping. Found a company in Manila called DVP specializing in offshore bookkeeping services. The difference was immediate – not just cost, but competence and independence.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold italic">
-              The Cultural Advantage: "If their mum didn't make them become a nurse, they probably ended up being an accountant or bookkeeper. The Philippines has incredible financial talent."
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Back then, training was harder – limited software, no AI tools, more manual processes. Today's cloud bookkeeping outsourcing with Xero, QuickBooks, and AI training systems makes implementation seamless. You can even create custom ChatGPT bots specifically for your bookkeeping processes.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              From that $150,000 mistake, I built the systematic approach that's now transformed 500+ businesses. Every painful lesson learned, every mistake avoided, every efficiency gained – it's all built into our bookkeeping outsourcing methodology.
-            </p>
-          </div>
-        </div>
-
-        {/* Cost Savings Analysis */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <DollarSign className="w-10 h-10 text-lime-600 mr-3" />
-            Bookkeeping Outsourcing Cost Savings Analysis
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <X className="w-6 h-6 text-red-600 mr-2" />
-                  Traditional Local Bookkeeping
-                </h3>
-                <div className="space-y-3 text-gray-700">
-                  <div className="flex justify-between">
-                    <span>Hourly Rate:</span>
-                    <span className="font-bold">$70/hour</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Weekly Hours:</span>
-                    <span className="font-bold">24 hours (4 days × 6 hours)</span>
-                  </div>
-                  <div className="flex justify-between text-xl text-red-600 font-bold border-t-2 border-red-200 pt-3">
-                    <span>Annual Cost:</span>
-                    <span>$87,360</span>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-red-200">
-                    <p className="font-bold mb-2">Additional Costs:</p>
-                    <ul className="space-y-1 text-sm">
-                      <li>• Recruitment: $5,000</li>
-                      <li>• Training Time: $8,000</li>
-                      <li>• Management Overhead: $12,000</li>
-                      <li>• Equipment/Software: $3,000</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="flex justify-between text-2xl text-red-600 font-bold border-t-2 border-red-300 pt-3 mt-4">
-                    <span>Total Annual Cost:</span>
-                    <span>$115,360</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <CheckCircle className="w-6 h-6 text-lime-600 mr-2" />
-                  ShoreAgents Bookkeeping Outsourcing
-                </h3>
-                <div className="space-y-3 text-gray-700">
-                  <div className="flex justify-between">
-                    <span>Annual Rate:</span>
-                    <span className="font-bold">$12,800</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Availability:</span>
-                    <span className="font-bold">Full-time dedicated</span>
-                  </div>
-                  <div className="flex justify-between text-xl text-lime-600 font-bold border-t-2 border-lime-200 pt-3">
-                    <span>Setup Fee:</span>
-                    <span>$2,500 (one-time)</span>
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-lime-200">
-                    <p className="font-bold mb-2">Included Services:</p>
-                    <ul className="space-y-1 text-sm">
-                      <li>• AI-powered recruitment</li>
-                      <li>• Custom training & integration</li>
-                      <li>• Ongoing management</li>
-                      <li>• Technology setup & support</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="flex justify-between text-2xl text-lime-600 font-bold border-t-2 border-lime-300 pt-3 mt-4">
-                    <span>Total Annual Cost:</span>
-                    <span>$15,300</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Savings Calculation */}
-          <Card className="border-lime-200 bg-gradient-to-br from-lime-600 to-green-600 text-white">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-3xl font-bold mb-4">Annual Savings Calculation</h3>
-              <div className="text-5xl font-bold mb-2">$100,060</div>
-              <p className="text-xl mb-4">Annual Savings</p>
-              <p className="text-lg opacity-90">That's 87% cost reduction while improving quality and reliability</p>
-            </CardContent>
-          </Card>
-
-          {/* ROI Beyond Cost */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6 text-center">
-                <Clock className="w-12 h-12 text-lime-600 mx-auto mb-3" />
-                <h4 className="font-bold text-gray-900 mb-2">Time Recovery</h4>
-                <p className="text-sm text-gray-700">Eliminate 10+ hours weekly spent managing local bookkeepers</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6 text-center">
-                <Target className="w-12 h-12 text-lime-600 mx-auto mb-3" />
-                <h4 className="font-bold text-gray-900 mb-2">Accuracy Improvement</h4>
-                <p className="text-sm text-gray-700">Reduce errors by 60-80% through systematic processes</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6 text-center">
-                <TrendingUp className="w-12 h-12 text-lime-600 mx-auto mb-3" />
-                <h4 className="font-bold text-gray-900 mb-2">Scalability</h4>
-                <p className="text-sm text-gray-700">Add specialized functions without exponential cost increases</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6 text-center">
-                <Zap className="w-12 h-12 text-lime-600 mx-auto mb-3" />
-                <h4 className="font-bold text-gray-900 mb-2">Technology Access</h4>
-                <p className="text-sm text-gray-700">Leverage AI tools and cloud integration unavailable traditionally</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Why Traditional Services Fail */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 flex items-center">
-            <X className="w-10 h-10 text-red-600 mr-3" />
-            Why Traditional Bookkeeping Services Destroy Australian Businesses
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <AlertCircle className="w-6 h-6 text-red-600 mr-2" />
-                  The $70/Hour Question Trap That Kills Productivity
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Every Australian business owner falls into this trap: hire a local bookkeeper thinking you're getting expert financial bookkeeping outsourcing. Instead, you get endless questions, constant interruptions, and someone who needs your input for basic decisions. "Where's this receipt?" "How should I categorize this?" You're paying premium rates while providing the expertise yourself.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <TrendingDown className="w-6 h-6 text-red-600 mr-2" />
-                  The Scalability Death Spiral
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Start with basic bookkeeping at $35,000 annually. Add payroll processing – another $25,000. Need accounts payable management – $20,000 more. Require financial reporting expertise – additional $30,000. Suddenly you're spending $110,000+ for what bookkeeping BPO services deliver at $20,000 total.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Settings className="w-6 h-6 text-red-600 mr-2" />
-                  Technology Resistance and Software Limitations
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Local bookkeepers resist cloud-based systems, avoid automation, and lack training in modern platforms. They prefer familiar manual processes that increase billable hours while decreasing efficiency. Meanwhile, Philippines-based professionals excel in Xero, QuickBooks, MYOB, and integrated AI tools.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Globe className="w-6 h-6 text-red-600 mr-2" />
-                  Geographic Talent Shortage in Australia
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Sydney, Melbourne, Brisbane, and Perth businesses compete for limited qualified bookkeepers. This creates artificial scarcity, inflated prices, and declining service quality. The Philippines offers abundant English-speaking, university-educated financial professionals specifically trained for Australian bookkeeping outsourcing.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* The ShoreAgents Revolution */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">
-            <Zap className="w-10 h-10 text-lime-600 mr-3" />
-            The ShoreAgents Bookkeeping Outsourcing Revolution
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <UserCheck className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">AI-Powered Recruitment</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  We don't post ads and hope for the best. Our systematic recruitment includes video interviews with every potential bookkeeper. We transcribe these interviews, analyze responses, and use AI matching to ensure perfect cultural and technical fit.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Award className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">Proven Client Success</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Team Urban X operates seven staff across their financial departments. Gallery Homes needed construction bookkeeping outsourcing for their large finance department. Our specialists understand industry-specific requirements from day one.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Lightbulb className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">Custom AI Training Systems</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  We create custom ChatGPT training bots specifically programmed with your chart of accounts, business processes, and industry requirements. Your bookkeeper has instant access to expert-level guidance 24/7.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Building2 className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">Specialized Industry Expertise</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Real Estate Specialists understand trust accounts and commission structures. Construction Experts handle progress claims and retention management. Professional Services specialists manage time-based billing and project profitability.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Layers className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">Scalable Team Integration</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Start with one specialist, scale to complete financial departments. Our bookkeeping back office outsourcing grows with your business – accounts payable, receivable, payroll, and financial reporting all integrate seamlessly.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <Shield className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-xl font-bold text-gray-900">Quality Control Excellence</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  We've spent years perfecting cultural integration for Australian businesses. Our specialists understand local business practices, communication styles, and quality expectations. They think strategically about your financial operations.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Service Levels */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <Briefcase className="w-10 h-10 text-lime-600 mr-3" />
-            Complete Bookkeeping Outsourcing Service Levels
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <div className="flex items-center justify-center mb-4">
-                    <UserCheck className="w-12 h-12 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Entry Level</h3>
-                  <p className="text-3xl font-bold text-lime-600 mb-2">$12,800</p>
-                  <p className="text-gray-600 mb-4">annually</p>
-                  <p className="text-gray-700 leading-relaxed mb-6">
-                    Perfect for growing businesses needing reliable professional bookkeeping outsourcing without local premium costs. Your dedicated specialist handles data entry, bank reconciliations, invoicing, expense categorization, and monthly financial reporting.
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-6">
-                    Includes complete setup, industry-specific training, ongoing management, and direct communication channels. 82% cost savings with superior specialization.
-                  </p>
-                </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Start with One Bookkeeper
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow h-full flex flex-col relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-lime-600 text-white px-4 py-1 font-semibold">Most Popular</Badge>
-              </div>
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <div className="flex items-center justify-center mb-4">
-                    <Users className="w-12 h-12 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Growth Level</h3>
-                  <p className="text-3xl font-bold text-lime-600 mb-2">$45,000</p>
-                  <p className="text-gray-600 mb-4">Specialized Financial Team</p>
-                  <p className="text-gray-700 leading-relaxed mb-6">
-                    Established businesses requiring comprehensive bookkeeping services outsourcing across multiple functions. Build specialized teams handling accounts payable, accounts receivable, payroll processing, and financial reporting.
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-4">
-                    Team approach ensures coverage, deep specialization, and collaborative efficiency while maintaining 70-85% cost savings.
-                  </p>
-                  <p className="text-xs text-gray-600 italic">
-                    vs $280,000+ local equivalent
-                  </p>
-                </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Build Your Financial Team
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <div className="flex items-center justify-center mb-4">
-                    <BarChart className="w-12 h-12 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Enterprise Level</h3>
-                  <p className="text-3xl font-bold text-lime-600 mb-2">Custom</p>
-                  <p className="text-gray-600 mb-4">Complete Financial Operations</p>
-                  <p className="text-gray-700 leading-relaxed mb-6">
-                    Large-scale operations requiring enterprise-grade bookkeeping BPO services with advanced security, compliance management, and sophisticated reporting capabilities. Complete integration with existing ERP systems.
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed mb-6">
-                    Perfect for businesses with $5M+ revenue needing sophisticated financial operations without Sydney or Melbourne overhead costs. Includes executive-level financial analysis and strategic reporting.
-                  </p>
-                </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Enterprise Financial Solutions
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Software-Specific Expertise */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Settings className="w-8 h-8 text-lime-600 mr-3" />
-            Software-Specific Bookkeeping Outsourcing Expertise
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Xero Bookkeeping Outsourcing</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Our Xero bookkeeping outsourcing specialists are certified in advanced features including bank feed management, automated reconciliations, multi-currency handling, and project tracking. They understand Australian tax requirements, BAS preparation, and local banking integration.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">QuickBooks Bookkeeping Outsourcing</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Comprehensive QuickBooks bookkeeping outsourcing covering both Online and Desktop versions. Our specialists excel in chart of account optimization, inventory management, job costing, and advanced reporting for construction and professional services.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">MYOB and Sage Specialization</h3>
-                <p className="text-gray-700 leading-relaxed">
-                  Expert MYOB bookkeeping outsourcing and Sage bookkeeping outsourcing for businesses with established systems. Our specialists handle complex migrations, advanced reporting, and integration with industry-specific add-ons plus Australian compliance knowledge.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Implementation Timeline */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <Clock className="w-10 h-10 text-lime-600 mr-3" />
-            30-60-90 Day Bookkeeping Outsourcing Implementation
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="bg-lime-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
-                    <span className="text-lime-600 font-bold text-xl">1-14</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Comprehensive Assessment and Matching</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Deep dive into your current bookkeeping challenges, software systems, industry requirements, and growth plans. Our AI-powered matching system evaluates video-interviewed candidates against your specific criteria. Every potential bookkeeper is scored on technical skills, communication style, industry experience, and cultural fit.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="bg-lime-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
-                    <span className="text-lime-600 font-bold text-xl">15-30</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Integration and Custom Training</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Your selected specialist undergoes intensive training on your specific systems, processes, and business requirements. We create custom AI training bots programmed with your chart of accounts, approval workflows, and industry-specific procedures. Unlike traditional training that takes months, our systematic approach has your bookkeeper productive from day one.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="bg-lime-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
-                    <span className="text-lime-600 font-bold text-xl">31-60</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Full Productivity and Quality Control</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  Your bookkeeper operates independently with ongoing quality monitoring and performance optimization. We track accuracy rates, processing speeds, and communication effectiveness to ensure superior performance compared to local alternatives. Monthly financial reports improve in quality and timeliness while you experience cost savings.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <div className="bg-lime-100 rounded-full w-12 h-12 flex items-center justify-center mr-4">
-                    <span className="text-lime-600 font-bold text-xl">61-90</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Optimization and Scale Planning</h3>
-                </div>
-                <p className="text-gray-700 leading-relaxed">
-                  With proven success, we identify expansion opportunities. Most clients add specialized functions like accounts payable outsourcing, payroll processing outsourcing, or industry-specific services based on demonstrated value and cost savings. Your bookkeeping operation becomes a strategic advantage.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8 text-center">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <FileCheck className="mr-2 h-5 w-5" />
-              See Complete Implementation Process
-            </Button>
-          </div>
-        </div>
-
-        {/* Geographic Advantages */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Globe className="w-8 h-8 text-lime-600 mr-3" />
-            Geographic Advantages for Australian, New Zealand & USA Markets
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Australian Bookkeeping Outsourcing</h3>
-              <p className="text-gray-700 leading-relaxed mb-3">
-                Philippines operates 2-4 hours behind Australian time zones, creating perfect overlap for real-time collaboration. While Sydney businesses sleep, your bookkeeper processes transactions for next-day delivery.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Our specialists understand Australian GST, PAYG, superannuation, and BAS requirements. They're trained in local banking systems, AUSTRAC compliance, and industry-specific regulations.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">New Zealand Market Specialization</h3>
-              <p className="text-gray-700 leading-relaxed mb-3">
-                New Zealand businesses benefit from minimal time zone difference and cultural alignment. Our bookkeepers understand GST differences, KiwiSaver requirements, and local employment regulations.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Particularly valuable for property management companies dealing with REINZ compliance and Property Guru integration requirements specific to New Zealand real estate operations.
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">USA Operations and GAAP Compliance</h3>
-              <p className="text-gray-700 leading-relaxed mb-3">
-                For US businesses or Australian companies with US operations, our specialists bring GAAP expertise, state-specific tax knowledge, and experience with complex multi-state reporting requirements.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Time zone advantages allow overnight processing of East Coast transactions, West Coast support during business hours, and continuous coverage that local bookkeepers cannot provide.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <HelpCircle className="w-10 h-10 text-lime-600 mr-3" />
-            Complete Bookkeeping Outsourcing FAQ
-          </h2>
           
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What does bookkeeping outsourcing actually cost compared to local Australian hiring?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Our professional bookkeeping outsourcing specialists start at $12,800 AUD annually compared to $72,000+ for equivalent Australian talent. That's 82% cost savings while typically improving accuracy, speed, and reliability. Include recruitment costs, training time, and management overhead – your savings often exceed 85%.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Will offshore bookkeepers understand Australian compliance and tax requirements?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Absolutely. Our specialists are specifically trained in Australian business practices including GST, PAYG, superannuation, BAS preparation, and AUSTRAC compliance. They work with local software like Xero and understand banking integration better than many local bookkeepers who resist cloud systems.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do you guarantee quality control and prevent errors?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  We use AI-powered training systems, systematic quality monitoring, and proven management methodologies developed through 500+ successful placements. Our error rates typically fall below 1% compared to 3-5% for traditional local arrangements. Custom ChatGPT training bots provide instant expert guidance for complex decisions.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What software platforms do your bookkeeping specialists support?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Complete expertise in Xero bookkeeping outsourcing, QuickBooks bookkeeping outsourcing, MYOB bookkeeping outsourcing, and Sage bookkeeping outsourcing. Our specialists are certified in advanced features and can handle complex integrations, custom reporting, and automated workflows that maximize efficiency.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How quickly can we implement bookkeeping outsourcing?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Initial setup typically completes within 14 days including candidate matching, system integration, and custom training. This far exceeds traditional local hiring which averages 8-12 weeks and often results in poor cultural fits requiring restart.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Can we scale beyond basic bookkeeping into specialized functions?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Definitely. Most clients expand into accounts payable outsourcing, accounts receivable outsourcing, payroll processing outsourcing, and financial reporting outsourcing. We can build complete financial departments or integrate with other services like sales admin and customer service.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-7" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What happens if the bookkeeping arrangement doesn't work out?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  With 500+ successful placements and 95%+ retention rates, mismatches are rare due to our systematic screening process. However, if issues arise, we handle replacement immediately and ensure business continuity. Our goal is long-term partnerships, not short-term placements.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-8" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do you handle data security and confidentiality?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Enterprise-grade security protocols including encrypted connections, secure access controls, and comprehensive confidentiality agreements. Our specialists work from professional facilities with monitored environments and backup systems. Data security often exceeds what small businesses can implement with local staff.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-9" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What about time zone differences and communication?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Philippines operates 2-4 hours behind Australian time zones, creating perfect overlap for real-time collaboration. Communication is in professional English with cultural alignment that often exceeds local hiring. Plus, overnight processing means you start each day with updated financials.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-10" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How does bookkeeping outsourcing compare to bookkeeping software and automation?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Software handles routine data entry but human expertise manages exceptions, complex categorizations, compliance requirements, and strategic financial analysis. Our specialists leverage automation tools while providing judgment and problem-solving that software cannot replicate. It's the best of both worlds.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
+          <Card className="bg-amber-50 border-l-4 border-amber-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>This guide is for:</strong> Established businesses doing $250,000+ in revenue with 50+ monthly transactions who need full-time bookkeeping support. If you're a startup founder doing 20 transactions a month, stop reading now. You're not ready, and I'm not going to pretend you are.
+              </p>
+            </CardContent>
+          </Card>
         </div>
+
+        <Separator className="my-12" />
+
+        {/* Should You Even Outsource Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Question Nobody Asks: Should You Even Outsource?</h2>
+              <p className="text-lg text-gray-600">Most bookkeeping outsourcing content starts by listing benefits. They never address the fundamental question.</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">You're Too Small If:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  "Annual revenue under $250,000",
+                  "Fewer than 50 transactions per month",
+                  "Single entity with no complexity",
+                  "You have more time than money",
+                  "Startup in first 12-18 months",
+                  "Your 'bookkeeping' is 5 hours per month"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Break-Even Math */}
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Why $250,000 Matters—The Break-Even Math:</h3>
+              <div className="mb-4">
+                <p className="font-semibold text-gray-900 mb-3">SMALL BUSINESS ($150K revenue, 20% margin = $30K profit)</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Outsourced bookkeeper:</span>
+                    <span className="font-semibold">$24,000/year</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Software/tools:</span>
+                    <span className="font-semibold">$1,500/year</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Your training time:</span>
+                    <span className="font-semibold">$4,000 (one-time)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Your management:</span>
+                    <span className="font-semibold">$15,600/year</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">First-year mistakes:</span>
+                    <span className="font-semibold">~$3,000</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between pt-2">
+                    <span className="font-bold text-gray-900">TOTAL FIRST YEAR:</span>
+                    <span className="font-bold text-red-600 text-lg">$48,100</span>
+                  </div>
+                  <p className="text-red-700 font-semibold mt-2">That's 160% of your entire profit.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">BETTER OPTION UNDER $250K:</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Xero/QuickBooks:</span>
+                  <span className="font-semibold">$1,080/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your time (8 hrs/month @ $100/hr):</span>
+                  <span className="font-semibold">$9,600/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Quarterly review by local bookkeeper:</span>
+                  <span className="font-semibold">$3,000/year</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">TOTAL:</span>
+                  <span className="font-bold text-green-600 text-lg">$13,680/year</span>
+                </div>
+                <p className="text-green-700 font-semibold mt-2">Savings: $34,420 in year one</p>
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                If you're under that threshold, bookmark this article and come back when you've grown. Until then, use software and learn the basics yourself. It's better business.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What Bookkeeping Outsourcing Actually Is Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <FileText className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Bookkeeping Outsourcing Actually Is (And Isn't)</h2>
+              <p className="text-lg text-gray-600">Understanding what you're actually buying</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What You're Actually Buying:</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Bookkeeping outsourcing means hiring someone offshore—typically in the Philippines—to handle transaction recording, reconciliations, and financial reporting. You're getting professional bookkeeping skills at $1,200-2,500 per month full-time instead of $3,500-6,000 for a local hire in the USA, $4,000-7,000 in Australia, or $3,800-6,500 in New Zealand.
+              </p>
+              <p className="text-gray-700 leading-relaxed">
+                The work happens during your business hours (which means night shift for Filipino specialists serving USA clients, but natural daytime overlap for Australian and New Zealand businesses due to the +2 to +4 hour time zone advantage).
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What It Definitely Isn't:</h3>
+              <ul className="space-y-2">
+                {[
+                  "It's not a CPA. It's not tax strategy advice.",
+                  "It's not someone who can lodge your BAS statements in Australia, file GST returns in New Zealand, or make multi-state sales tax decisions in the USA without local oversight.",
+                  "It's not '24/7 coverage' for anything requiring physical presence or instant local knowledge."
+                ].map((item, index) => (
+                  <li key={index} className="flex items-start gap-3 text-gray-700">
+                    <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-gray-800 font-semibold mt-4">
+                Your outsourced bookkeeper records transactions and prepares financial statements. Your CPA or accountant provides strategy, tax planning, and compliance expertise. Both roles are necessary; neither replaces the other.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 90-Day Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 90-Day Reality: You'll Get Slower Before You Get Faster</h2>
+              <p className="text-lg text-gray-600">Every provider promises "immediate results." That's marketing fiction.</p>
+            </div>
+          </div>
+
+          {/* Timeline Cards */}
+          <div className="space-y-4">
+            {/* Month 1 */}
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-red-600 text-white">Month 1</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Productivity Crash</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      You're creating training materials, recording Loom videos explaining your chart of accounts, answering questions about every transaction. You're 20-30% slower than doing it yourself. Net result: negative productivity. Every business owner wants to quit here.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Month 2 */}
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-amber-600 text-white">Month 2</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Learning Curve</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Quality is inconsistent. You're still checking everything, correcting mistakes, explaining industry-specific terminology. You're not losing time anymore, but you're not gaining any either. Net result: break-even.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Month 3 */}
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-blue-600 text-white">Month 3</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Turning Point</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      They're starting to catch mistakes before you do. Bank reconciliations are accurate. You're down to weekly check-ins instead of daily. Net result: small positive (maybe 5 hours reclaimed).
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Month 4+ */}
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-green-600 text-white">Month 4+</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Payoff</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      They're handling 15-20 hours of work competently. You've reclaimed 10-15 productive hours weekly. Management drops to 2-3 hours per week. This is when ROI actually starts. Net result: significant positive.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600 mt-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                The 90-day timeline is your investment period. Anyone promising instant results is either lying or hasn't actually done this before.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What You Can (And Can't) Outsource Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What You Can (And Can't) Outsource</h2>
+              <p className="text-lg text-gray-600">Not all bookkeeping tasks are created equal</p>
+            </div>
+          </div>
+
+          {/* Safe to Outsource */}
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-green-900 mb-6">Safe to Outsource:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  "Transaction recording and data entry",
+                  "Bank reconciliations",
+                  "Accounts payable/receivable processing",
+                  "Expense categorisation",
+                  "Invoice generation",
+                  "Financial statement preparation",
+                  "Monthly/quarterly reporting",
+                  "Payroll data entry (not decision-making)"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Risky */}
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-amber-900 mb-6">Risky—Proceed with Extreme Caution:</h3>
+              <div className="space-y-3">
+                {[
+                  "Tax return preparation (can do with CPA review)",
+                  "Payroll processing (errors affect employee trust)",
+                  "Financial forecasting (needs business context)",
+                  "BAS statements in Australia (may need local BAS agent)",
+                  "GST returns in New Zealand (IRD-specific knowledge)",
+                  "Multi-state sales tax in USA (too complex)"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Never Outsource */}
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-red-900 mb-6">Never Outsource:</h3>
+              <div className="space-y-3">
+                {[
+                  "Strategic financial planning",
+                  "Tax strategy decisions",
+                  "Final sign-offs on financial statements",
+                  "Banking relationship management",
+                  "Fraud detection/investigation",
+                  "Direct communication with tax authorities"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                The Philippines produces excellent bookkeepers with strong technical skills. What they can't do is replace your local tax professional who understands the specific nuances of IRS rules, ATO requirements, or IRD regulations. Anyone selling you that fantasy is setting you up for expensive problems.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* True All-In Cost Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The True All-In Cost (That Nobody Mentions)</h2>
+              <p className="text-lg text-gray-600">What Gets Advertised vs. What You Actually Pay</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-lg font-semibold text-gray-900 mb-4">What Gets Advertised:</p>
+              <p className="text-gray-700 mb-6">"Hire an offshore bookkeeper for $15-25/hour! Save 60-70%!"</p>
+              
+              <p className="text-lg font-semibold text-gray-900 mb-4">What You Actually Pay—First Year Reality (USA Business Example):</p>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Bookkeeper salary:</span>
+                  <span className="font-semibold">$41,600</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Software licenses:</span>
+                  <span className="font-semibold">$1,200/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your training time:</span>
+                  <span className="font-semibold">$6,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your management (5 hrs/wk × 12 weeks):</span>
+                  <span className="font-semibold">$9,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Ongoing management (2 hrs/wk × 40 weeks):</span>
+                  <span className="font-semibold">$12,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">First 90-day mistakes:</span>
+                  <span className="font-semibold">$4,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Setup/transition:</span>
+                  <span className="font-semibold">$2,000</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">REAL YEAR ONE TOTAL:</span>
+                  <span className="font-bold text-red-600 text-xl">$75,800</span>
+                </div>
+                <p className="text-red-700 font-semibold mt-2">Effective hourly rate: $36/hour (not $20!)</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year Two Onwards:</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Bookkeeper:</span>
+                  <span className="font-semibold">$41,600</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Software:</span>
+                  <span className="font-semibold">$1,200</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Management (1 hr/week):</span>
+                  <span className="font-semibold">$7,800</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Mistakes:</span>
+                  <span className="font-semibold">~$1,000</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">YEAR TWO TOTAL:</span>
+                  <span className="font-bold text-blue-600 text-xl">$51,600</span>
+                </div>
+                <p className="text-blue-700 font-semibold mt-2">Effective rate: $25/hour</p>
+                <p className="text-gray-800 font-semibold mt-3">Break-even point: Month 18-24</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                The savings are real—but they're back-loaded. You're investing first, then reaping benefits. Anyone promising immediate cost savings is either incompetent or dishonest.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Geography Decision Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Philippines vs. Latin America vs. Local: The Geography Decision</h2>
+              <p className="text-lg text-gray-600">Where you're located matters for time zones and cost</p>
+            </div>
+          </div>
+
+          {/* USA Businesses */}
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">For USA Businesses:</h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Philippines ($1,200-2,000/month):</p>
+                  <ul className="space-y-1 text-sm text-gray-700 ml-4">
+                    <li>• 70-85% cost savings</li>
+                    <li>• Works your business hours (9am-5pm USA time)</li>
+                    <li>• Excellent English skills</li>
+                    <li>• Strong bookkeeping training</li>
+                    <li>• Professional service delivery during your workday</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Latin America ($2,000-3,500/month):</p>
+                  <ul className="space-y-1 text-sm text-gray-700 ml-4">
+                    <li>• 40-60% cost savings</li>
+                    <li>• 1-3 hours time difference (real-time collaboration possible)</li>
+                    <li>• Native English or bilingual</li>
+                    <li>• Same-day urgency handling</li>
+                    <li>• Premium: 30-50% more than Philippines</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Local USA ($3,500-6,000/month):</p>
+                  <ul className="space-y-1 text-sm text-gray-700 ml-4">
+                    <li>• Zero savings (baseline cost)</li>
+                    <li>• Perfect time zone alignment</li>
+                    <li>• Deep local tax knowledge</li>
+                    <li>• In-person option available</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Australian Businesses */}
+          <Card className="border-lime-300 bg-lime-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">For Australian Businesses:</h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Philippines ($1,500-2,300/month):</p>
+                  <ul className="space-y-1 text-sm text-gray-700 ml-4">
+                    <li>• 70-85% cost savings</li>
+                    <li>• +2 to +4 hours time difference ✅ PERFECT</li>
+                    <li>• Natural daytime overlap for real-time communication</li>
+                    <li>• No graveyard shift concerns</li>
+                    <li className="font-semibold">This is your sweet spot</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Latin America ($2,500-4,000/month):</p>
+                  <ul className="space-y-1 text-sm text-gray-700 ml-4">
+                    <li>• 40-60% cost savings</li>
+                    <li>• -14 to -16 hours (opposite side of globe)</li>
+                    <li>• Terrible time zone fit</li>
+                    <li className="font-semibold text-red-600">Don't do this</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* New Zealand Businesses */}
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">For New Zealand Businesses:</h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Philippines ($1,500-2,300/month):</p>
+                  <ul className="space-y-1 text-sm text-gray-700 ml-4">
+                    <li>• 70-85% cost savings</li>
+                    <li>• +4 to +5 hours time difference ✅ EXCELLENT</li>
+                    <li>• Great daytime overlap</li>
+                    <li>• Natural fit for NZ businesses</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Latin America ($2,500-4,000/month):</p>
+                  <ul className="space-y-1 text-sm text-gray-700 ml-4">
+                    <li>• -16 to -18 hours (worst possible)</li>
+                    <li>• Complete opposite schedule</li>
+                    <li className="font-semibold text-red-600">Avoid this</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                The Verdict: If you're in Australia or New Zealand, the Philippines is your obvious choice—better time zone than USA businesses get, same cost savings. If you're in the USA and need real-time collaboration, Latin America makes sense despite the premium. If you're in the USA and transaction volume is high but urgency is low, Philippines works brilliantly.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Freelancer vs Professional Firm Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-amber-100 rounded-full p-3">
+              <Users className="w-8 h-8 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Freelancer vs. Professional Firm: The $30,000 Decision</h2>
+              <p className="text-lg text-gray-600">Two paths, very different outcomes</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* Freelancer */}
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Option A: Freelancer (Upwork/Fiverr/OnlineJobs.ph)</h3>
+                <div className="mb-4">
+                  <p className="font-semibold text-green-700 mb-2">Pros:</p>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Cheaper ($10-20/hr vs. $30-40 through firms)</li>
+                    <li>• No long-term contracts</li>
+                    <li>• Direct relationship</li>
+                    <li>• Flexibility</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-red-700 mb-2">Cons:</p>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• 70-80% failure rate</li>
+                    <li>• No backup coverage</li>
+                    <li>• You handle everything (payroll, equipment, HR)</li>
+                    <li>• High turnover</li>
+                    <li>• Unvetted (profiles lie, skills inflated)</li>
+                    <li>• Time investment (months finding one who works)</li>
+                  </ul>
+                </div>
+                <p className="text-gray-800 font-semibold mt-4">Success probability: 20-30% work out long-term.</p>
+              </CardContent>
+            </Card>
+
+            {/* Professional Firm */}
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Option B: Professional Firm (Like ShoreAgents)</h3>
+                <div className="mb-4">
+                  <p className="font-semibold text-green-700 mb-2">Pros:</p>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Vetted specialists (top 2-5% only)</li>
+                    <li>• Backup coverage included</li>
+                    <li>• Management support</li>
+                    <li>• Replacement guarantee</li>
+                    <li>• Faster hiring (7-14 days vs. months)</li>
+                    <li>• Professional standards</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-red-700 mb-2">Cons:</p>
+                  <ul className="space-y-1 text-sm text-gray-700">
+                    <li>• Higher cost ($2,000-3,500/month vs. $1,200-2,000 freelancer)</li>
+                    <li>• Longer contracts (6-12 months minimum)</li>
+                    <li>• Less flexibility</li>
+                    <li>• 30-50% premium for infrastructure</li>
+                  </ul>
+                </div>
+                <p className="text-gray-800 font-semibold mt-4">Success probability: 60-70% work out long-term.</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">The Math:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Freelancer Path:</p>
+                  <div className="space-y-1 text-sm text-gray-700">
+                    <p>Attempt 1: $1,200/month × 2 months = $2,400 (unreliable, fired)</p>
+                    <p>Attempt 2: $1,500/month × 3 months = $4,500 (quit for better offer)</p>
+                    <p>Attempt 3: $1,300/month × 2 months = $2,600 (incompetent, fired)</p>
+                    <p>Attempt 4: $1,800/month = SUCCESS</p>
+                    <p className="font-semibold mt-2">Total to find good one: $9,500 + 9 months wasted</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 mb-2">Firm Path:</p>
+                  <div className="space-y-1 text-sm text-gray-700">
+                    <p>Month 1: $3,000/month = SUCCESS from start</p>
+                    <p>Ongoing: $3,000/month</p>
+                    <p className="font-semibold mt-2">By Year 1:</p>
+                    <p>Freelancer (if successful by attempt 4): $31,100 total</p>
+                    <p>Firm (successful from start): $36,000 total</p>
+                    <p className="font-semibold text-green-700 mt-2">Difference: $4,900 for 9 months less hassle</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-blue-300">
+                <p className="text-gray-800 font-semibold mb-2">When to gamble on freelancers:</p>
+                <p className="text-sm text-gray-700">You have time, experience managing remote teams, tight budget, willing to try multiple people.</p>
+                <p className="text-gray-800 font-semibold mt-3 mb-2">When to use a firm:</p>
+                <p className="text-sm text-gray-700">First-time outsourcing, value reliability over maximum savings, need backup coverage, don't want hiring headaches.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Regional Compliance Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <FileText className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Regional Compliance Realities</h2>
+              <p className="text-lg text-gray-600">What offshore bookkeepers can and cannot handle</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">USA Businesses:</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Your offshore bookkeeper can handle transaction recording, reconciliations, and financial statement preparation brilliantly. They cannot make multi-state sales tax decisions, handle IRS correspondence directly, or develop tax strategy. You still need your local CPA for planning and compliance sign-offs.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Australian Businesses:</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Your offshore bookkeeper can maintain books and prepare reports. For BAS statements, superannuation compliance, Single Touch Payroll (STP), and award wage calculations, you'll want local review or a registered BAS agent. The Australian tax system's complexity requires local expertise for compliance work.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">New Zealand Businesses:</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Your offshore bookkeeper handles day-to-day transaction recording beautifully. For GST returns filed with IRD, PAYE calculations, KiwiSaver, and FBT, local oversight is essential. New Zealand's relatively straightforward system still requires someone who understands IRD's specific requirements.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-lime-300 bg-gradient-to-br from-lime-50 to-green-50 mt-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">The Hybrid Model That Works:</h3>
+              <p className="text-gray-800 leading-relaxed">
+                Offshore bookkeeper handles 80% of work (transaction recording, reconciliations, reporting). Local CPA/accountant handles 20% (tax planning, compliance review, regulatory filings). This gives you 60-70% cost savings while maintaining compliance safety.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When It Makes Sense Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When Bookkeeping Outsourcing Actually Makes Sense</h2>
+              <p className="text-lg text-gray-600">You're a good candidate if you meet these criteria</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">You're a good candidate if:</h3>
+                <div className="space-y-2">
+                  {[
+                    "Annual revenue $250,000-300,000 minimum",
+                    "50+ transactions monthly",
+                    "Currently spending 15+ hours/month on bookkeeping",
+                    "Your books are behind (you're not current)",
+                    "You have systems documented (or willing to create them)",
+                    "You can commit 5-10 hours weekly for first 90 days",
+                    "Budget allows $50,000-70,000 first-year investment",
+                    "You have (or will hire) a local CPA for tax work",
+                    "You understand you're investing for 18-24 month payoff"
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">You're NOT ready if:</h3>
+                <div className="space-y-2">
+                  {[
+                    "Doing under $250,000 annually",
+                    "Fewer than 50 monthly transactions",
+                    "Everything's 'in your head' with no documentation",
+                    "Expecting instant results",
+                    "Budget is extremely tight",
+                    "You want to replace your CPA entirely",
+                    "Looking for someone to 'just figure it out'",
+                    "Not willing to invest management time"
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What ShoreAgents Actually Does Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">What ShoreAgents Actually Does</h2>
+          
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            We're different because we'll tell you if you're not ready. If you're doing $120,000 in revenue, we'll honestly say wait until you hit $250,000. If your systems aren't documented, we'll explain why you need to fix that first. If you're trying to offshore compliance work that must stay local, we'll tell you it won't work.
+          </p>
+
+          <Card className="border-lime-300 bg-lime-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Our full-time bookkeeping specialists cost <strong>$1,200-2,500/month</strong> depending on experience and complexity. That's for dedicated professionals who work your business hours (USA night shift reality, or Australian/NZ daytime for perfect time zone alignment).
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                We handle recruitment, payroll, HR, equipment, and management support. You get backup coverage if someone's sick or on leave. You get replacement guarantee if fit isn't right. Most importantly, you get honest advice about what's realistic.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                But here's what we won't do: sell you on outsourcing if you're not ready. Our success depends on your success. That means qualifying you properly and sometimes saying "not yet."
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900 text-white">
+            <CardContent className="p-8">
+              <p className="text-lg leading-relaxed mb-4">
+                Want to discuss if outsourcing makes sense for your specific situation? Schedule a consultation where we'll review your revenue, transaction volume, and systems. We'll tell you honestly if you're ready or if you should wait. No sales pitch—just 15 years of experience telling it straight.
+              </p>
+              <p className="text-gray-300 leading-relaxed">
+                Not ready yet but want to stay informed? Learn about our approach and come back when you hit that $250K threshold. We'll still be here.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Final CTA */}
-        <div className="bg-gradient-to-br from-lime-600 to-green-600 rounded-2xl shadow-xl p-12 text-center text-white mb-16">
-          <h2 className="text-4xl font-bold mb-4 flex items-center justify-center">
-            <Zap className="w-10 h-10 text-white mr-3" />
-            Transform Your Bookkeeping Operations – Save $100,000+ Annually
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join 500+ businesses that eliminated bookkeeping chaos while achieving 82% cost savings through systematic bookkeeping outsourcing. Get Stephen Atcheler's proven methodology that transformed financial operations across Australia, New Zealand, and USA.
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready for an Honest Assessment?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Schedule a consultation. We'll review your revenue, transaction volume, and systems. We'll tell you honestly if you're ready or if you should wait.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            Bookkeeping outsourcing works brilliantly when done by properly-sized businesses, at the right stage, with realistic expectations. Don't waste $60,000 rushing in unprepared.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Book Your Transformation Call
-            </Button>
-            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-semibold">
-              <Calculator className="mr-2 h-5 w-5" />
-              Calculate Your Savings
-            </Button>
-          </div>
         </div>
-
-        {/* Related Services */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Expand Beyond Bookkeeping</h2>
-          <p className="text-gray-600 mb-8 text-center">
-            Smart Integration Strategy: Start with bookkeeping outsourcing to experience the ShoreAgents difference, then expand into specialized services as your business grows. Most clients add 2-3 additional services within 6 months based on proven results.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 text-center">
-                <Building2 className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                <h3 className="font-bold text-gray-900 mb-2">Complete Business Process Outsourcing</h3>
-                <p className="text-sm text-gray-600 mb-4">Transform your entire business operations with comprehensive BPO solutions.</p>
-                <Button variant="outline" size="sm" className="border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold">
-                  Explore Solutions
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 text-center">
-                <Users className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                <h3 className="font-bold text-gray-900 mb-2">Virtual Assistant Services</h3>
-                <p className="text-sm text-gray-600 mb-4">Professional virtual assistants for administrative and specialized support.</p>
-                <Button variant="outline" size="sm" className="border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold">
-                  Browse VA Services
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 text-center">
-                <Building2 className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                <h3 className="font-bold text-gray-900 mb-2">Real Estate Outsourcing</h3>
-                <p className="text-sm text-gray-600 mb-4">Specialized support for real estate agents and property businesses.</p>
-                <Button variant="outline" size="sm" className="border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold">
-                  Real Estate Solutions
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6 text-center">
-                <Calculator className="w-12 h-12 text-lime-600 mx-auto mb-4" />
-                <h3 className="font-bold text-gray-900 mb-2">Accounting Outsourcing</h3>
-                <p className="text-sm text-gray-600 mb-4">Professional accounting services including financial reporting and tax.</p>
-                <Button variant="outline" size="sm" className="border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold">
-                  Accounting Services
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
       </div>
     </div>
   );
