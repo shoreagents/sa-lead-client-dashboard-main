@@ -728,7 +728,7 @@ export default function ResumeSlugPage() {
         
         // Remove backdrop filters
         htmlEl.style.backdropFilter = 'none';
-        htmlEl.style.webkitBackdropFilter = 'none';
+        (htmlEl.style as any).webkitBackdropFilter = 'none';
         
         // Ensure no black borders (but preserve colored borders for dividers)
         if (htmlEl.style.borderColor === 'black' || 
@@ -766,9 +766,6 @@ export default function ResumeSlugPage() {
           if (computedStyle.opacity && parseFloat(computedStyle.opacity) < 1) {
             // Keep the opacity for dividers as it's part of their design
             htmlEl.style.opacity = computedStyle.opacity;
-          } else if (!htmlEl.style.opacity && sourceElement?.style?.opacity) {
-            // If no opacity was set but source has it, use source opacity
-            htmlEl.style.opacity = sourceElement.style.opacity;
           } else if (!htmlEl.style.opacity) {
             // Default opacity for dividers
             htmlEl.style.opacity = '0.3';
