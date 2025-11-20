@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       const description = `View ${fullName}'s professional resume on BPOC.IO - ${position}`;
 
       // Construct OG image URL with version parameter to bust cache
-      const ogImageUrl = `${baseUrl}/api/og/resume?slug=${slug}&v=2`;
+      const ogImageUrl = `${baseUrl}/api/og/resume?slug=${slug}&v=3`;
 
       return {
         title: `${title} - ${fullName} | BPOC.IO`,
@@ -85,7 +85,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   // Fallback metadata if fetch fails
-  const ogImageUrl = `${baseUrl}/api/og/resume?slug=${slug}&v=2`;
+  const ogImageUrl = `${baseUrl}/api/og/resume?slug=${slug}&v=3`;
   return {
     title: `Resume | BPOC.IO`,
     description: 'View professional resume on BPOC.IO - Where BPO Careers Begin',
