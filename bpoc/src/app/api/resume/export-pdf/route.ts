@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
+import puppeteerCore from 'puppeteer-core';
 import * as fs from 'fs';
 import * as path from 'path';
+
+// For Vercel/serverless, use lightweight Chromium
+let chromium: any = null;
+if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  try {
+    chromium = require('@sparticuz/chromium-min');
+  } catch (e) {
+    console.warn('⚠️ @sparticuz/chromium-min not available, will use regular puppeteer');
+  }
+}
 
 // Helper function to recursively find chrome executable in a directory
 function findChromeExecutable(dir: string, depth: number = 0): string | null {
@@ -44,6 +55,19 @@ function findChromeExecutable(dir: string, depth: number = 0): string | null {
 
 // Helper function to get Chromium executable path
 async function getChromiumPath(): Promise<string | null> {
+  // For Vercel/serverless, use @sparticuz/chromium-min
+  if (chromium && (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)) {
+    try {
+      const chromiumPath = await chromium.executablePath();
+      if (chromiumPath && fs.existsSync(chromiumPath)) {
+        console.log('✅ Using @sparticuz/chromium-min for serverless:', chromiumPath);
+        return chromiumPath;
+      }
+    } catch (e) {
+      console.warn('⚠️ Failed to get @sparticuz/chromium-min path:', e);
+    }
+  }
+
   // On Windows, prioritize system Chrome over Puppeteer Chromium for better stability
   if (process.platform === 'win32') {
     const systemChromePaths = [
@@ -85,14 +109,34 @@ async function getChromiumPath(): Promise<string | null> {
         }
       }
       
-      // Try to find in the cache directory structure
-      const cacheBase = '/home/sbx_user1051/.cache/puppeteer';
-      if (fs.existsSync(cacheBase)) {
-        console.log('🔍 Searching in cache directory:', cacheBase);
-        const found = findChromeExecutable(cacheBase);
-        if (found) {
-          console.log('✅ Found Chrome in cache directory:', found);
-          return found;
+      // Try to find in the cache directory structure (Vercel/Linux)
+      const cacheBases = [
+        '/home/sbx_user1051/.cache/puppeteer', // Vercel default
+        path.join(process.env.HOME || '', '.cache', 'puppeteer'), // Linux home
+        '/tmp/.cache/puppeteer', // Alternative temp location
+      ];
+      
+      for (const cacheBase of cacheBases) {
+        if (cacheBase && fs.existsSync(cacheBase)) {
+          console.log('🔍 Searching in cache directory:', cacheBase);
+          const found = findChromeExecutable(cacheBase);
+          if (found) {
+            console.log('✅ Found Chrome in cache directory:', found);
+            return found;
+          }
+        }
+      }
+      
+      // For Vercel, also try to find in node_modules/.cache
+      if (process.env.VERCEL) {
+        const nodeModulesCache = path.join(process.cwd(), 'node_modules', '.cache', 'puppeteer');
+        if (fs.existsSync(nodeModulesCache)) {
+          console.log('🔍 Searching in node_modules cache:', nodeModulesCache);
+          const found = findChromeExecutable(nodeModulesCache);
+          if (found) {
+            console.log('✅ Found Chrome in node_modules cache:', found);
+            return found;
+          }
         }
       }
     }
@@ -132,16 +176,36 @@ async function getChromiumPath(): Promise<string | null> {
     }
   }
 
-  // Last resort: search in Vercel cache directory
-  const vercelCacheBase = '/home/sbx_user1051/.cache/puppeteer';
-  if (fs.existsSync(vercelCacheBase)) {
-    console.log('🔍 Last resort: searching in Vercel cache:', vercelCacheBase);
-    const found = findChromeExecutable(vercelCacheBase);
-    if (found) {
-      console.log('✅ Found Chrome in Vercel cache:', found);
-      return found;
+  // Last resort: search in various cache directories
+  const lastResortPaths = [
+    '/home/sbx_user1051/.cache/puppeteer', // Vercel default
+    path.join(process.env.HOME || '', '.cache', 'puppeteer'), // Linux home
+    '/tmp/.cache/puppeteer', // Temp location
+  ];
+  
+  if (process.env.VERCEL) {
+    lastResortPaths.push(
+      path.join(process.cwd(), 'node_modules', '.cache', 'puppeteer'),
+      path.join('/tmp', 'puppeteer'),
+    );
+  }
+  
+  for (const cacheBase of lastResortPaths) {
+    if (cacheBase && fs.existsSync(cacheBase)) {
+      console.log('🔍 Last resort: searching in:', cacheBase);
+      const found = findChromeExecutable(cacheBase);
+      if (found) {
+        console.log('✅ Found Chrome in last resort search:', found);
+        return found;
+      }
     }
   }
+
+  console.error('❌ Chrome/Chromium not found in any location');
+  console.error('❌ Platform:', process.platform);
+  console.error('❌ VERCEL:', process.env.VERCEL);
+  console.error('❌ Process cwd:', process.cwd());
+  console.error('❌ HOME:', process.env.HOME);
 
   return null;
 }
@@ -294,12 +358,22 @@ export async function POST(request: NextRequest) {
         console.log('✅ Chrome executable verified on Windows');
       }
 
-      // Launch with increased timeout for Windows
-      const launchTimeout = process.platform === 'win32' ? 90000 : 60000;
-      launchOptions.timeout = launchTimeout;
+      // For Vercel/serverless, use puppeteer-core with @sparticuz/chromium-min
+      if (chromium && (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)) {
+        console.log('🌐 Using puppeteer-core with @sparticuz/chromium-min for serverless');
+        launchOptions.args = [...chromium.args, ...launchOptions.args];
+        launchOptions.executablePath = await chromium.executablePath();
+        launchOptions.headless = chromium.headless;
+        browser = await puppeteerCore.launch(launchOptions);
+        console.log('✅ Browser launched successfully (serverless)');
+      } else {
+        // Launch with increased timeout for Windows
+        const launchTimeout = process.platform === 'win32' ? 90000 : 60000;
+        launchOptions.timeout = launchTimeout;
 
-      browser = await puppeteer.launch(launchOptions);
-      console.log('✅ Browser launched successfully');
+        browser = await puppeteer.launch(launchOptions);
+        console.log('✅ Browser launched successfully');
+      }
     } catch (launchError) {
       console.error('❌ Failed to launch browser:', launchError);
       console.error('❌ Launch error type:', typeof launchError);
