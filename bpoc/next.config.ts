@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   experimental: {
     esmExternals: true,
   },
+  // Exclude puppeteer packages from serverless bundle to avoid size limits
+  serverExternalPackages: ['puppeteer-core', '@sparticuz/chromium'],
   // Webpack config to exclude problematic imports
   webpack: (config, { isServer }) => {
     if (!isServer) {

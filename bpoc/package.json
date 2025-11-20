@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npx puppeteer browsers install chrome && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && npx puppeteer browsers install chrome || echo 'Chromium installation failed - will try during build'",
+    "install-chromium": "npx puppeteer browsers install chrome"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.60.0",
@@ -58,6 +59,8 @@
     "pg": "^8.16.3",
     "prisma": "^6.17.1",
     "puppeteer": "^24.30.0",
+    "puppeteer-core": "^24.30.0",
+    "@sparticuz/chromium": "^141.0.0",
     "react": "19.1.0",
     "react-day-picker": "^9.11.1",
     "react-dom": "19.1.0",
