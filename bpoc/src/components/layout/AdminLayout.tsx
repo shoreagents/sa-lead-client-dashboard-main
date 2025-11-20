@@ -216,8 +216,22 @@ export default function AdminLayout({
                 )}
                 title="Go to Home"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-purple-600 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <div 
+                    className="w-full h-full bg-gradient-to-r from-cyan-400 via-purple-400 to-green-400"
+                    style={{
+                      maskImage: 'url(/BPOC.IO-LOGO.svg)',
+                      WebkitMaskImage: 'url(/BPOC.IO-LOGO.svg)',
+                      maskSize: 'contain',
+                      WebkitMaskSize: 'contain',
+                      maskPosition: 'center',
+                      WebkitMaskPosition: 'center',
+                      maskRepeat: 'no-repeat',
+                      WebkitMaskRepeat: 'no-repeat',
+                      backgroundSize: '200% 200%',
+                      animation: 'gradient-shift 3s ease infinite'
+                    }}
+                  />
                 </div>
                 {!sidebarMinimized && (
                   <div>

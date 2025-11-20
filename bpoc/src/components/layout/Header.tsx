@@ -48,6 +48,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useAdmin } from '@/contexts/AdminContext'
 import { getSessionToken } from '@/lib/auth-helpers'
 
+import { AnimatedLogo } from '@/components/ui/AnimatedLogo'
+
 interface HeaderProps {
   className?: string
 }
@@ -712,8 +714,8 @@ export default function Header({}: HeaderProps) {
               whileTap={{ scale: 0.95 }}
               className="relative"
             >
-              <div className="w-8 h-8 glass-card flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-cyan-400" />
+              <div className="w-10 h-10 flex items-center justify-center">
+                <AnimatedLogo />
               </div>
             </motion.div>
             <div className="flex flex-col">
