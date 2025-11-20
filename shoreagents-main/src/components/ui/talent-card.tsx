@@ -6,18 +6,19 @@ import Image from 'next/image';
 import { Button } from './button';
 import { Card, CardContent } from './card';
 import { Badge } from './badge';
-// import { ButtonLoader } from './loader'; // Removed - will be recreated later
 import { 
   User, 
   Eye,
   Trophy,
   Calendar,
   Flame,
-  Heart
+  Heart,
+  ArrowRight
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { candidateTracker } from '@/lib/candidateTrackingService';
 import { useFavorites } from '@/lib/favorites-context';
+import { cn } from '@/lib/utils';
 
 interface TalentCardProps {
   data: EmployeeCardData;
@@ -35,20 +36,12 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
   // Function to calculate gradual popularity score (0-100)
   const calculateGradualPopularity = (rawScore: number): number => {
     if (!rawScore || rawScore <= 0) return 0;
-    
-    // Use logarithmic scaling to make it harder to reach 100%
-    // This creates a more gradual progression
-    const maxRawScore = 1000; // Adjust this based on your data range
+    const maxRawScore = 1000;
     const normalizedScore = Math.min(rawScore / maxRawScore, 1);
-    
-    // Apply logarithmic scaling: log(1 + x) / log(2) gives us 0-1 range
-    const logScore = Math.log(1 + normalizedScore * 9) / Math.log(10); // 9x multiplier for more spread
-    
-    // Convert to percentage and cap at 100
+    const logScore = Math.log(1 + normalizedScore * 9) / Math.log(10);
     return Math.min(logScore * 100, 100);
   }
 
-  // Calculate score based on various factors
   const calculateScore = () => {
     let score = 0;
     if (hasResume) score += 20;
@@ -59,7 +52,6 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
     if (data.user?.location) score += 10;
     if (data.user?.avatar) score += 10;
     
-    // Use AI analysis score if available
     if (data.aiAnalysis?.overall_score) {
       return data.aiAnalysis.overall_score;
     }
@@ -69,28 +61,19 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
 
   const score = calculateScore();
 
-  // Fetch hotness score for this candidate
   useEffect(() => {
     const fetchHotnessScore = async () => {
       try {
         setIsLoadingHotness(true);
-        console.log('🔍 Fetching hotness score for candidate:', data.user?.id);
-        
         if (!data.user?.id) {
-          console.warn('No user ID available for hotness score calculation');
           setIsLoadingHotness(false);
           return;
         }
-        
         const analytics = await candidateTracker.getCandidateAnalytics(data.user.id);
-        console.log('📊 Received analytics data:', analytics);
-        
         if (analytics && typeof analytics.hotness_score === 'number') {
           setHotnessScore(analytics.hotness_score);
-          console.log('✅ Set hotness score:', analytics.hotness_score);
         } else {
           setHotnessScore(0);
-          console.log('📊 No hotness score data, setting to 0');
         }
       } catch (error) {
         console.error('❌ Error fetching hotness score:', error);
@@ -99,143 +82,142 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
         setIsLoadingHotness(false);
       }
     };
-
     fetchHotnessScore();
   }, [data.user.id]);
 
-  // Get hotness level and color
   const getHotnessLevel = (score: number) => {
-    if (score >= 80) return { level: 'HOT', color: 'bg-red-500', textColor: 'text-red-600' };
-    if (score >= 60) return { level: 'WARM', color: 'bg-orange-500', textColor: 'text-orange-600' };
-    if (score >= 40) return { level: 'COOL', color: 'bg-blue-500', textColor: 'text-blue-600' };
-    if (score >= 20) return { level: 'CHILL', color: 'bg-green-500', textColor: 'text-green-600' };
-    return { level: 'COLD', color: 'bg-gray-400', textColor: 'text-gray-600' };
+    if (score >= 80) return { level: 'HOT', color: 'bg-red-500', textColor: 'text-red-600', iconColor: 'text-red-500' };
+    if (score >= 60) return { level: 'WARM', color: 'bg-orange-500', textColor: 'text-orange-600', iconColor: 'text-orange-500' };
+    if (score >= 40) return { level: 'COOL', color: 'bg-blue-500', textColor: 'text-blue-600', iconColor: 'text-blue-500' };
+    if (score >= 20) return { level: 'CHILL', color: 'bg-lime-500', textColor: 'text-lime-600', iconColor: 'text-lime-500' };
+    return { level: 'NEW', color: 'bg-slate-400', textColor: 'text-slate-500', iconColor: 'text-slate-400' };
   };
 
   const gradualScore = calculateGradualPopularity(hotnessScore);
   const hotness = getHotnessLevel(gradualScore);
   
-
-
   return (
-    <Card className="w-full max-w-sm mx-auto bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 relative h-full flex flex-col">
-      {/* Score badge in top right */}
-      <div className="absolute -top-2 -right-2 bg-yellow-100 text-yellow-800 border border-yellow-200 rounded-full px-3 py-1 flex items-center justify-center text-sm font-bold shadow-lg">
-        <Trophy className="w-3 h-3 mr-1" />
-        {score}
-      </div>
+    <Card className="group relative w-full bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+      {/* Selection Overlay */}
+      <div className="absolute inset-0 border-2 border-transparent group-hover:border-lime-500/20 rounded-[2rem] transition-colors pointer-events-none z-10"></div>
 
-      {/* Hotness indicator in top left */}
-      {!isLoadingHotness && hotnessScore > 0 && (
-        <div className="absolute -top-2 -left-2 bg-white border border-gray-200 rounded-full px-2 py-1 flex items-center justify-center text-xs font-semibold shadow-lg">
-          <Flame className={`w-3 h-3 mr-1 ${hotness.textColor}`} />
-          <span className={hotness.textColor}>{hotness.level}</span>
+      <div className="p-6 flex flex-col h-full relative z-0">
+        
+        {/* Top Bar: Badges */}
+        <div className="flex justify-between items-start mb-6">
+           {/* Hotness Badge */}
+           <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-50", hotness.textColor)}>
+              <Flame className={cn("w-3 h-3", hotness.iconColor)} />
+              {hotness.level}
+           </div>
+
+           {/* Score Badge */}
+           <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-100">
+              <Trophy className="w-3 h-3" />
+              {score}
+           </div>
         </div>
-      )}
-      <CardContent className="p-6 flex flex-col h-full">
-        {/* Profile Section */}
-        <div className="flex flex-col items-center space-y-4 mb-6">
-          {/* Avatar */}
-          <div className="w-20 h-20 bg-gradient-to-br from-lime-400 to-lime-600 rounded-full flex items-center justify-center relative overflow-hidden">
-            {data.user.avatar ? (
-              <Image
-                src={data.user.avatar}
-                alt={data.user.name}
-                className="w-full h-full object-cover"
-                width={80}
-                height={80}
-              />
-            ) : (
-              <User className="w-10 h-10 text-white" />
-            )}
-          </div>
-          
-          {/* Name and Position */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <h3 className="text-lg font-bold text-gray-900">
-                {data.user.name}
-              </h3>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(data.user.id);
-                }}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                title={isFavorite(data.user.id) ? 'Remove from favorites' : 'Add to favorites'}
-              >
-                <Heart 
-                  className={`w-4 h-4 ${
-                    isFavorite(data.user.id) 
-                      ? 'text-red-500 fill-current' 
-                      : 'text-gray-400 hover:text-red-500'
-                  }`} 
-                />
-              </button>
+
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="relative mb-4">
+            <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-br from-slate-100 to-slate-200 group-hover:from-lime-400 group-hover:to-lime-600 transition-colors duration-500">
+               <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
+                  {data.user.avatar ? (
+                    <Image
+                      src={data.user.avatar}
+                      alt={data.user.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-slate-50">
+                      <User className="w-10 h-10 text-slate-300" />
+                    </div>
+                  )}
+               </div>
             </div>
-            <p className="text-sm text-gray-600">
-              {(() => {
+            {/* Favorite Button Absolute */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(data.user.id);
+              }}
+              className="absolute -right-1 bottom-0 p-2 bg-white rounded-full shadow-md border border-slate-100 hover:scale-110 transition-transform z-20"
+            >
+              <Heart 
+                className={cn("w-4 h-4 transition-colors", isFavorite(data.user.id) ? 'text-red-500 fill-red-500' : 'text-slate-400 hover:text-red-500')} 
+              />
+            </button>
+          </div>
+
+          <h3 className="text-xl font-bold text-slate-900 text-center mb-1 group-hover:text-lime-700 transition-colors">
+            {data.user.name}
+          </h3>
+          <p className="text-sm text-slate-500 text-center font-medium uppercase tracking-wide">
+            {(() => {
                 const position = hasWorkStatus && data.workStatus?.currentPosition 
                   ? data.workStatus.currentPosition 
-                  : (data.user.position || 'Position not specified');
-                // If position contains commas, take only the first role
-                return position?.split(',')[0]?.trim() || 'Position not specified';
-              })()}
-            </p>
-          </div>
-
-          {/* Email */}
+                  : (data.user.position || 'Talent');
+                return position?.split(',')[0]?.trim() || 'Talent';
+            })()}
+          </p>
         </div>
 
+        {/* Divider */}
+        <div className="w-full h-px bg-slate-100 mb-6"></div>
 
-        {/* Spacer to push button to bottom */}
-        <div className="flex-1"></div>
+        {/* Stats / Info */}
+        <div className="space-y-4 flex-1">
+           {/* Hotness Bar */}
+           {!isLoadingHotness && hotnessScore > 0 && (
+             <div className="space-y-1.5">
+               <div className="flex justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                 <span>Demand</span>
+                 <span className={hotness.textColor}>{Math.min(Math.round(gradualScore), 100)}%</span>
+               </div>
+               <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                 <div 
+                   className={cn("h-full rounded-full transition-all duration-1000", hotness.color)}
+                   style={{ width: `${Math.min(gradualScore, 100)}%` }}
+                 ></div>
+               </div>
+             </div>
+           )}
+           
+           {/* Placeholder for pills/skills if we had them */}
+           <div className="flex flex-wrap gap-2 justify-center">
+              {data.user.location && (
+                <Badge variant="secondary" className="bg-slate-50 text-slate-500 font-normal text-xs hover:bg-slate-100">
+                   {data.user.location}
+                </Badge>
+              )}
+              {hasResume && (
+                <Badge variant="secondary" className="bg-blue-50 text-blue-600 font-normal text-xs hover:bg-blue-100">
+                   CV Ready
+                </Badge>
+              )}
+           </div>
+        </div>
 
-        {/* Hotness Bar */}
-        {isLoadingHotness ? (
-          <div className="mb-4 flex items-center justify-center">
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full border-2 border-current border-t-transparent w-5 h-5" />
-              <span className="text-sm text-gray-600"></span>
-            </div>
-          </div>
-        ) : hotnessScore > 0 && (
-          <div className="mb-4">
-            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-              <span>Popularity</span>
-              <span className="font-semibold">{Math.min(Math.round(calculateGradualPopularity(hotnessScore)), 100)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className={`h-2 rounded-full transition-all duration-500 ease-out ${hotness.color}`}
-                style={{ width: `${Math.min(calculateGradualPopularity(hotnessScore), 100)}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="space-y-2">
+        {/* Actions */}
+        <div className="mt-6 space-y-3">
           <Button
-            onClick={() => {
-              // Navigate to employee profile page
-              router.push(`/employee/${data.user.id}`);
-            }}
-            className="w-full bg-gradient-to-r from-lime-600 to-lime-700 hover:from-lime-700 hover:to-lime-800 text-white flex items-center justify-center space-x-2"
+            onClick={() => router.push(`/employee/${data.user.id}`)}
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl h-12 shadow-lg shadow-slate-900/10 group-hover:shadow-xl transition-all"
           >
-            <Eye className="w-4 h-4" />
-            <span>View Profile</span>
+            View Profile
           </Button>
           <Button
             onClick={onAskForInterview}
             variant="outline"
-            className="w-full border-lime-200 text-lime-700 hover:bg-lime-50 hover:border-lime-300 hover:text-lime-800 flex items-center justify-center space-x-2"
+            className="w-full border-slate-200 text-slate-600 hover:text-lime-700 hover:border-lime-200 hover:bg-lime-50 rounded-xl h-12 font-semibold transition-all"
           >
-            <Calendar className="w-4 h-4" />
-            <span>Ask for Interview</span>
+            Request Interview
           </Button>
         </div>
-      </CardContent>
+
+      </div>
     </Card>
   );
 }
