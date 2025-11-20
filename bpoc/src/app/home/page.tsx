@@ -16,6 +16,8 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   FileText,
   BrainIcon,
   GamepadIcon,
@@ -50,6 +52,7 @@ function HomePageContent() {
   const [userProfile, setUserProfile] = useState<any>(null)
   const [profileLoading, setProfileLoading] = useState(true)
   const [showRecruiterModal, setShowRecruiterModal] = useState(false)
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null)
 
   // Early check: Sign out recruiters if they access /home
   useEffect(() => {
@@ -748,7 +751,7 @@ function HomePageContent() {
       <Hero />
 
         {/* Features Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-slate-900/50 via-blue-900/20 to-purple-900/30">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-slate-900/80 via-blue-900/30 to-purple-900/40">
           {/* Enhanced Animated Background Elements */}
           <div className="absolute inset-0">
             {/* Large floating orbs */}
@@ -901,7 +904,7 @@ function HomePageContent() {
                   }}
                   className="group"
                 >
-                  <Card className="glass-card border-white/10 h-full hover:border-white/30 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-cyan-500/10 relative overflow-hidden">
+                  <Card className="glass-card bg-slate-900/40 backdrop-blur-xl border-white/10 h-full hover:border-cyan-500/30 hover:ring-1 hover:ring-cyan-500/20 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-cyan-500/20 relative overflow-hidden">
                     {/* Animated gradient border */}
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg"></div>
                     
@@ -982,7 +985,7 @@ function HomePageContent() {
 
 
         {/* Why Choose BPOC.IO Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white/5 via-purple-500/5 to-cyan-500/5 relative overflow-hidden">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-950 via-purple-950/20 to-cyan-950/20 relative overflow-hidden">
           {/* Animated background elements */}
           <div className="absolute inset-0">
             <div className="absolute top-10 right-10 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -1116,7 +1119,7 @@ function HomePageContent() {
                 </Badge>
               </motion.div>
               
-              <Card className="glass-card border-red-500/40 hover:border-red-400/60 h-full relative overflow-hidden transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-red-500/20">
+              <Card className="glass-card bg-gradient-to-b from-slate-900/60 to-slate-900/40 backdrop-blur-xl border-red-500/50 hover:border-red-400/80 h-full relative overflow-hidden transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-red-500/30 hover:scale-[1.02]">
                 {/* Enhanced Glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-purple-500/5 to-pink-500/10 rounded-xl"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-xl"></div>
@@ -1227,7 +1230,7 @@ function HomePageContent() {
       </section>
 
         {/* How It Works Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-emerald-900/30 via-teal-900/20 to-cyan-900/40">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-emerald-950/40 via-teal-900/30 to-cyan-900/40">
           {/* Enhanced animated background elements */}
           <div className="absolute inset-0">
             {/* Main floating orbs */}
@@ -1484,7 +1487,7 @@ function HomePageContent() {
       </section>
 
       {/* Top Users */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-amber-900/30 via-yellow-900/20 to-orange-900/40 relative overflow-hidden">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-amber-950/40 via-yellow-900/30 to-orange-900/40 relative overflow-hidden">
         {/* Enhanced animated background elements */}
         <div className="absolute inset-0">
           {/* Trophy-themed floating orbs */}
@@ -1553,7 +1556,7 @@ function HomePageContent() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="glass-card border-white/10 max-w-4xl mx-auto"
+            className="glass-card bg-slate-900/40 backdrop-blur-xl border-white/10 max-w-4xl mx-auto shadow-2xl shadow-black/50 rounded-xl overflow-hidden"
           >
             <CardContent className="p-0 overflow-x-auto">
               <Table>
@@ -1681,7 +1684,7 @@ function HomePageContent() {
       </section>
 
       {/* Success Stories */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-pink-900/40 relative overflow-hidden">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-950/40 via-purple-900/30 to-pink-900/40 relative overflow-hidden">
         {/* Enhanced animated background elements */}
         <div className="absolute inset-0">
           {/* Success-themed floating orbs */}
@@ -1771,7 +1774,7 @@ function HomePageContent() {
                     transition={{ delay: 0.3 + (index * 0.1) }}
                     className="w-full md:w-[32%] shrink-0 flex"
                   >
-                    <Card className="glass-card border-white/10 p-5 md:p-6 min-h-[220px] w-full">
+                    <Card className="glass-card bg-slate-900/40 backdrop-blur-xl border-white/10 hover:border-white/20 p-6 md:p-8 min-h-[240px] w-full shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div className="flex items-center space-x-4 mb-4">
                       <div className="w-20 h-20 rounded-full overflow-hidden bg-white/10 flex items-center justify-center ring-2 ring-white/10">
                         <img src={t.avatar} alt={t.name} className="w-full h-full object-contain" />
@@ -1840,6 +1843,630 @@ function HomePageContent() {
           </motion.div>
 
           {/* Statistics removed by request */}
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-6 relative overflow-hidden bg-gradient-to-br from-indigo-900/40 via-purple-900/30 to-cyan-900/40">
+        {/* Enhanced animated background elements */}
+        <div className="absolute inset-0">
+          {/* Floating orbs */}
+          <div className="absolute top-10 left-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-20 right-20 w-28 h-28 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-10 left-1/4 w-36 h-36 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
+          <div className="absolute bottom-20 right-1/3 w-24 h-24 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-1500"></div>
+          
+          {/* Additional particles */}
+          <div className="absolute top-1/3 left-1/3 w-20 h-20 bg-indigo-400/8 rounded-full blur-2xl animate-pulse delay-500"></div>
+          <div className="absolute bottom-1/3 right-1/4 w-16 h-16 bg-purple-400/8 rounded-full blur-2xl animate-pulse delay-3000"></div>
+          <div className="absolute top-1/2 right-10 w-14 h-14 bg-cyan-400/8 rounded-full blur-2xl animate-pulse delay-2500"></div>
+          
+          {/* Gradient mesh overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-transparent to-purple-500/5"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-pink-500/5"></div>
+        </div>
+        <div className="container mx-auto max-w-4xl relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold gradient-text mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Everything you need to know about BPOC.IO
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* FAQ Item 1 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 0 ? null : 0)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <MessageSquare className="w-5 h-5 text-cyan-400" />
+                      What is BPOC.IO?
+                    </div>
+                    {openFaqIndex === 0 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 0 && (
+                  <CardContent>
+                    <p className="text-gray-300 leading-relaxed">
+                      BPOC.IO is a comprehensive career platform designed specifically for BPO professionals. We offer AI-powered resume building, skill assessments (Typing Hero and DISC Personality), job matching, and direct connections to top BPO employers. Our platform helps you build your professional profile, improve your skills, and advance your BPO career.
+                    </p>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 2 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 1 ? null : 1)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <FileText className="w-5 h-5 text-cyan-400" />
+                      How does the AI Resume Builder work?
+                    </div>
+                    {openFaqIndex === 1 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 1 && (
+                  <CardContent>
+                    <p className="text-gray-300 leading-relaxed mb-3">
+                      Our AI Resume Builder uses advanced technology to help you create professional resumes:
+                    </p>
+                    <ul className="space-y-2 text-gray-300">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>Upload or Build:</strong> Upload your existing resume or build one from scratch</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>AI Analysis:</strong> Our AI analyzes your resume and provides improvement suggestions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>Multiple Templates:</strong> Choose from professional templates tailored for BPO roles</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>Export Options:</strong> Download as PDF or share directly with employers</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 3 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 2 ? null : 2)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <GamepadIcon className="w-5 h-5 text-cyan-400" />
+                      What are Career Games and how do they help?
+                    </div>
+                    {openFaqIndex === 2 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 2 && (
+                  <CardContent>
+                    <p className="text-gray-300 leading-relaxed mb-3">
+                      Our Career Games are skill assessments that help you showcase your abilities:
+                    </p>
+                    <ul className="space-y-2 text-gray-300">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>Typing Hero:</strong> Test and improve your typing speed and accuracy - crucial for BPO roles</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>DISC Personality:</strong> Discover your personality type (Eagle, Peacock, Turtle, or Owl) and understand your workplace strengths</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>Leaderboard Rankings:</strong> Compete with other professionals and improve your rank</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                        <span><strong>Share Results:</strong> Share your achievements on social media to showcase your skills</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 4 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 3 ? null : 3)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <Trophy className="w-5 h-5 text-cyan-400" />
+                      How does the Leaderboard and Ranking System work?
+                    </div>
+                    {openFaqIndex === 3 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 3 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    Your overall rank is calculated based on 5 components:
+                  </p>
+                  <ul className="space-y-2 text-gray-300 mb-4">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Typing Hero (25%):</strong> Based on your best WPM, accuracy, average WPM, and sessions completed</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>DISC Personality (25%):</strong> Based on assessment confidence, completed sessions, and having a primary type</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Profile Completion (15%):</strong> Complete your personal data, work status, avatar, bio, and location</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Resume Building (20%):</strong> Based on your resume AI score and having a saved resume</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Application Activity (15%):</strong> Based on total applications, active applications, and successful hires</span>
+                    </li>
+                  </ul>
+                  <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-4 mt-4">
+                    <p className="text-cyan-200 text-sm font-semibold mb-2">Rank Tiers:</p>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                      <div><span className="text-cyan-400">💎 Diamond:</span> 90-100</div>
+                      <div><span className="text-slate-300">💠 Platinum:</span> 75-89</div>
+                      <div><span className="text-yellow-400">🥇 Gold:</span> 60-74</div>
+                      <div><span className="text-gray-300">🥉 Silver:</span> 40-59</div>
+                      <div><span className="text-orange-400">🏅 Bronze:</span> 0-39</div>
+                    </div>
+                  </div>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 5 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 4 ? null : 4)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <GamepadIcon className="w-5 h-5 text-cyan-400" />
+                      What is the Typing Hero Game?
+                    </div>
+                    {openFaqIndex === 4 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 4 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    Typing Hero is an interactive typing speed and accuracy game designed specifically for BPO professionals:
+                  </p>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Speed Testing:</strong> Measure your typing speed in Words Per Minute (WPM) with real-time feedback</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Accuracy Tracking:</strong> Monitor your typing accuracy percentage to improve precision</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Progress Tracking:</strong> Track your best WPM, average WPM, and total sessions completed</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Leaderboard Integration:</strong> Compete with other professionals and improve your overall rank</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>BPO-Relevant:</strong> Practice with content relevant to BPO industry scenarios and terminology</span>
+                    </li>
+                  </ul>
+                  <p className="text-gray-300 mt-3">
+                    Typing speed and accuracy are crucial skills for BPO roles, and Typing Hero helps you develop and showcase these abilities!
+                  </p>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 6 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.6 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 5 ? null : 5)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <BrainIcon className="w-5 h-5 text-cyan-400" />
+                      What is the DISC Personality Assessment?
+                    </div>
+                    {openFaqIndex === 5 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 5 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    The DISC Personality Assessment helps you discover your workplace personality type:
+                  </p>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>🦅 Eagle (Dominance):</strong> The Sky Dominator - Natural leaders who thrive on challenges</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>🦚 Peacock (Influence):</strong> The Social Star - Enthusiastic communicators who excel in team environments</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>🐢 Turtle (Steadiness):</strong> The Steady Guardian - Reliable team players who value stability</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>🦉 Owl (Conscientiousness):</strong> The Wise Analyst - Detail-oriented professionals who prioritize quality</span>
+                    </li>
+                  </ul>
+                  <p className="text-gray-300 mt-3">
+                    Complete the assessment to discover your BPO animal and understand which roles suit you best!
+                  </p>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 7 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.7 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 6 ? null : 6)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <Users className="w-5 h-5 text-cyan-400" />
+                      How do I apply for jobs on BPOC.IO?
+                    </div>
+                    {openFaqIndex === 6 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 6 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    Applying for jobs is simple:
+                  </p>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Have a Resume:</strong> Build or upload your resume using our AI Resume Builder</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Browse Jobs:</strong> Visit the Jobs section to see available BPO positions</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Match Your Profile:</strong> Our AI matches jobs to your skills and experience</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>One-Click Apply:</strong> Apply directly with your BPOC.IO profile and resume</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Track Applications:</strong> Monitor your application status in your dashboard</span>
+                    </li>
+                  </ul>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 8 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.8 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 7 ? null : 7)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <Shield className="w-5 h-5 text-cyan-400" />
+                      Is BPOC.IO free to use?
+                    </div>
+                    {openFaqIndex === 7 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 7 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    Yes! BPOC.IO is completely free for job seekers:
+                  </p>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Free Account:</strong> Create your account at no cost</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Free Resume Builder:</strong> Build unlimited resumes with AI assistance</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Free Career Games:</strong> Play Typing Hero and DISC assessments unlimited times</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Free Job Applications:</strong> Apply to as many jobs as you want</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>No Hidden Fees:</strong> We never charge for basic features</span>
+                    </li>
+                  </ul>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 10 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1.0 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 9 ? null : 9)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-5 h-5 text-cyan-400" />
+                      Can I share my profile and achievements?
+                    </div>
+                    {openFaqIndex === 9 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 9 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    Absolutely! Sharing helps you showcase your skills:
+                  </p>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Resume Sharing:</strong> Share your resume link on Facebook, LinkedIn, or copy the link</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Game Results:</strong> Share your Typing Hero and DISC personality results with custom images</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Profile Link:</strong> Share your public profile URL to showcase your achievements</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Social Media Ready:</strong> All shares include beautiful preview images optimized for social platforms</span>
+                    </li>
+                  </ul>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 11 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1.1 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 10 ? null : 10)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <Zap className="w-5 h-5 text-cyan-400" />
+                      How quickly can I get started?
+                    </div>
+                    {openFaqIndex === 10 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 10 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    You can get started in just a few minutes:
+                  </p>
+                  <ol className="space-y-2 text-gray-300 list-decimal list-inside">
+                    <li><strong>Create Account (1 minute):</strong> Sign up with your email - it's free and instant</li>
+                    <li><strong>Complete Profile (2-3 minutes):</strong> Add your basic information and work status</li>
+                    <li><strong>Build Resume (5-10 minutes):</strong> Use our AI builder or upload your existing resume</li>
+                    <li><strong>Play Career Games (5-10 minutes):</strong> Complete Typing Hero and DISC assessments</li>
+                    <li><strong>Start Applying (Immediate):</strong> Browse and apply to jobs right away!</li>
+                  </ol>
+                  <p className="text-gray-300 mt-3">
+                    Total time: <strong className="text-cyan-400">15-25 minutes</strong> to have a complete, professional profile ready for employers!
+                  </p>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+
+            {/* FAQ Item 12 */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 1.2 }}
+            >
+              <Card className="bg-gray-800/50 border-gray-700/50 backdrop-blur-sm hover:border-cyan-500/30 transition-all h-full">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => setOpenFaqIndex(openFaqIndex === 11 ? null : 11)}
+                >
+                  <CardTitle className="flex items-center justify-between text-white">
+                    <div className="flex items-center gap-3">
+                      <Calculator className="w-5 h-5 text-cyan-400" />
+                      How is my resume AI score calculated?
+                    </div>
+                    {openFaqIndex === 11 ? (
+                      <ChevronUp className="w-5 h-5 text-cyan-400" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-gray-400" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {openFaqIndex === 11 && (
+                  <CardContent>
+                  <p className="text-gray-300 leading-relaxed mb-3">
+                    Our AI analyzes your resume across multiple dimensions:
+                  </p>
+                  <ul className="space-y-2 text-gray-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Content Quality:</strong> Relevance, clarity, and completeness of information</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Formatting:</strong> Professional structure and visual presentation</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Keywords:</strong> Industry-relevant terms and skills that match job requirements</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Experience:</strong> Work history, achievements, and career progression</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-cyan-400 mt-1 flex-shrink-0" />
+                      <span><strong>Education & Skills:</strong> Qualifications and technical abilities</span>
+                    </li>
+                  </ul>
+                  <p className="text-gray-300 mt-3">
+                    The AI provides specific suggestions to improve your score and make your resume more attractive to employers.
+                  </p>
+                  </CardContent>
+                )}
+              </Card>
+            </motion.div>
+          </div>
+
         </div>
       </section>
 

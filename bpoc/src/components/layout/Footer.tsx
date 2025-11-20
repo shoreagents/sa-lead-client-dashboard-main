@@ -103,11 +103,25 @@ export default function Footer() {
             {/* Logo and Company Name */}
             <div className="flex items-center space-x-3">
               <motion.div 
-                className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/25"
+                className="w-12 h-12 flex items-center justify-center"
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
               >
-                <Sparkles className="w-6 h-6 text-white" />
+                <div 
+                  className="w-full h-full bg-gradient-to-r from-cyan-400 via-purple-400 to-green-400"
+                  style={{
+                    maskImage: 'url(/BPOC.IO-LOGO.svg)',
+                    WebkitMaskImage: 'url(/BPOC.IO-LOGO.svg)',
+                    maskSize: 'contain',
+                    WebkitMaskSize: 'contain',
+                    maskPosition: 'center',
+                    WebkitMaskPosition: 'center',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskRepeat: 'no-repeat',
+                    backgroundSize: '200% 200%',
+                    animation: 'gradient-shift 3s ease infinite'
+                  }}
+                />
               </motion.div>
               <div>
                 <div className="text-2xl font-bold gradient-text">BPOC.IO</div>
