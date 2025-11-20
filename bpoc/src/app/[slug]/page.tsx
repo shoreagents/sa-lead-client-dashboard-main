@@ -22,8 +22,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           const data = await response.json();
       const profile = data.user;
 
-      // Construct OG image URL
-      const ogImageUrl = `${baseUrl}/api/og?username=${slug}`;
+      // Construct OG image URL with version parameter for cache busting
+      const ogImageUrl = `${baseUrl}/api/og?username=${slug}&v=2`;
 
       // Build dynamic metadata
       const fullName = profile.full_name || profile.first_name || slug;
@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   // Fallback metadata if fetch fails
-  const ogImageUrl = `${baseUrl}/api/og?username=${slug}`;
+  const ogImageUrl = `${baseUrl}/api/og?username=${slug}&v=2`;
   return {
     title: `${slug} | BPOC.IO`,
     description: 'View profile on BPOC.IO - Where BPO Careers Begin',
