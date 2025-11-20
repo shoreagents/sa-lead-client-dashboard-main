@@ -1,6 +1,10 @@
 import { Metadata } from 'next';
 import { headers } from 'next/headers';
 
+// Force dynamic rendering since we use headers() to get query params
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 interface LayoutProps {
   children: React.ReactNode;
 }
