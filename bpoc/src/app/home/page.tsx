@@ -43,6 +43,7 @@ import {
 } from 'lucide-react'
 import { formatNumber, generateInitials } from '@/lib/utils'
 import ProfileCompletionModal from '@/components/auth/ProfileCompletionModal'
+import { AnimatedLogo } from '@/components/ui/AnimatedLogo'
 
 function HomePageContent() {
   const router = useRouter()
@@ -1131,8 +1132,8 @@ function HomePageContent() {
                 
                 <CardHeader className="text-center pt-2 pb-4 relative z-10">
                   <CardTitle className="text-2xl text-white mb-1 flex items-center justify-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/25">
-                      <Sparkles className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 flex items-center justify-center">
+                      <AnimatedLogo className="w-full h-full" />
                     </div>
                     BPOC.IO
                   </CardTitle>

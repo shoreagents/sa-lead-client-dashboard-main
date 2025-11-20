@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
+import { AnimatedLogo } from '@/components/ui/AnimatedLogo'
 import { 
   LogIn, 
   Mail, 
@@ -179,6 +180,9 @@ export default function LoginForm({ open, onOpenChange, onSwitchToSignUp }: Logi
             <DialogTitle className="text-2xl sm:text-3xl font-bold gradient-text flex items-center justify-center gap-3">
               <LogIn className="w-6 h-6 sm:w-8 sm:h-8" />
               {mode === 'login' ? 'Welcome Back' : 'Reset Password'}
+              <div className="w-8 h-8 flex items-center justify-center">
+                <AnimatedLogo className="w-full h-full" />
+              </div>
             </DialogTitle>
             <DialogDescription className="text-gray-300 text-sm sm:text-base">
               {mode === 'login' ? 'Sign in to your BPOC.IO account to continue your BPO career journey' : 'Enter your account email and we will send you a password reset link.'}

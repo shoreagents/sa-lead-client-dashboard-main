@@ -1006,15 +1006,15 @@ export default function ResumeSlugPage() {
       let response: Response;
       try {
         response = await fetch('/api/resume/export-pdf', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            html: htmlWithTitle,
-            fileName: fileName,
-          }),
-        });
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          html: htmlWithTitle,
+          fileName: fileName,
+        }),
+      });
       } catch (fetchError) {
         console.error('❌ Network error calling PDF API:', fetchError);
         throw new Error(`Network error: ${fetchError instanceof Error ? fetchError.message : 'Failed to connect to server'}`);
