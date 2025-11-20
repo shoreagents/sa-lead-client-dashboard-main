@@ -1468,6 +1468,93 @@ export default function TypingHeroPage() {
     return gameStats.elapsedTime >= 60; // 1 minute
   };
 
+  // Helper function to generate fallback analysis
+  const generateFallbackAnalysis = (wpm: number, accuracy: number, stats: any, difficulty: string, streakData: any) => {
+    const bestStreak = streakData?.bestStreak || 0;
+    
+    // Generate personalized strengths based on actual performance
+    const personalizedStrengths = [];
+    if (wpm >= 60) {
+      personalizedStrengths.push("Excellent typing speed");
+      personalizedStrengths.push("Fast word recognition");
+    } else if (wpm >= 40) {
+      personalizedStrengths.push("Good typing speed");
+      personalizedStrengths.push("Steady progress");
+    } else {
+      personalizedStrengths.push("Building typing fundamentals");
+      personalizedStrengths.push("Consistent practice");
+    }
+    
+    if (accuracy >= 90) {
+      personalizedStrengths.push("High accuracy rate");
+    } else if (accuracy >= 80) {
+      personalizedStrengths.push("Good accuracy");
+    }
+    
+    if (bestStreak >= 20) {
+      personalizedStrengths.push("Strong focus and concentration");
+    }
+    
+    if (stats.fires > stats.poos) {
+      personalizedStrengths.push("More successes than mistakes");
+    }
+    
+    if (personalizedStrengths.length === 0) {
+      personalizedStrengths.push("Session completion");
+      personalizedStrengths.push("Willingness to practice");
+    }
+    
+    const fallbackAssessment = {
+      overallAssessment: `You achieved ${wpm} WPM with ${accuracy.toFixed(1)}% accuracy. ${wpm >= 60 ? 'Excellent work!' : wpm >= 40 ? 'Good progress!' : 'Keep practicing!'}`,
+      performanceLevel: wpm >= 80 ? "Expert" : wpm >= 60 ? "Advanced" : wpm >= 40 ? "Intermediate" : wpm >= 20 ? "Developing" : "Beginner",
+      strengths: personalizedStrengths,
+      improvementAreas: accuracy < 85 ? ["Accuracy", "Error reduction"] : wpm < 40 ? ["Typing speed", "Consistency"] : ["Advanced techniques", "Speed consistency"],
+      personalizedTips: [
+        {
+          category: accuracy < 85 ? "Accuracy" : "Speed",
+          tip: accuracy < 85 
+            ? "Slow down slightly to improve accuracy - speed will follow naturally"
+            : "Try typing burst exercises to push your speed limits",
+          explanation: accuracy < 85
+            ? "Accurate typing creates better muscle memory than fast, error-prone typing"
+            : "Short bursts of fast typing help improve your peak speed safely"
+        }
+      ],
+      encouragement: wpm >= 60 
+        ? "Excellent typing speed! You're well above average. Keep refining your technique!"
+        : wpm >= 40
+        ? "Good progress! You're developing solid typing skills. Keep practicing!"
+        : "Great start! Every session makes you better. Focus on accuracy and speed will come!",
+      nextSessionGoal: wpm < 30
+        ? "Aim for 30+ WPM while maintaining 85%+ accuracy"
+        : wpm < 50
+        ? "Try to reach 50 WPM with consistent accuracy"
+        : "Work on maintaining your speed while improving precision"
+    };
+    
+    // Return comprehensive analysis structure matching the API response
+    return {
+      sessionMetadata: {
+        timestamp: new Date().toISOString(),
+        difficultyLevel: difficulty || 'rockstar',
+        sessionDuration: stats.elapsedTime || 0,
+        totalWords: stats.totalWords || 0,
+        charactersTyped: stats.charactersTyped || 0
+      },
+      performanceMetrics: {
+        wpm: wpm || 0,
+        accuracy: accuracy || 0,
+        correctWords: stats.correctWords || 0,
+        missedWords: stats.missedWords || 0,
+        fires: stats.fires || 0,
+        poos: stats.poos || 0,
+        longestStreak: bestStreak,
+        currentStreak: streakData?.currentStreak || 0
+      },
+      aiAssessment: fallbackAssessment
+    };
+  };
+
   // End game
   const endGame = async (success: boolean, finalMetrics?: { wpm?: number; accuracy?: number }) => {
     if (endCalledRef.current) return;
@@ -1530,7 +1617,7 @@ export default function TypingHeroPage() {
         // NEW: Calculate enhanced metrics for business intelligence
         const enhancedMetrics = calculateEnhancedMetrics(hiddenMetrics, gameStats);
         
-        // Get AI analysis first
+        // Get AI analysis first - ALWAYS generate analysis, even if API fails
         let aiAnalysis = {};
         // Show loading spinner while AI analysis runs
         setLoadingAssessment(true);
@@ -1557,13 +1644,33 @@ export default function TypingHeroPage() {
             })
           });
           
-          const aiResult = await aiResponse.json();
-          if (aiResult.success) {
-            aiAnalysis = aiResult.analysis;
-            setAiAssessment(aiResult.analysis.aiAssessment);
+          if (aiResponse.ok) {
+            const aiResult = await aiResponse.json();
+            if (aiResult.success && aiResult.analysis) {
+              // Only use the analysis if it's a valid object, not an error message
+              if (typeof aiResult.analysis === 'object' && 
+                  !(aiResult.analysis.toString && aiResult.analysis.toString().includes('SyntaxError'))) {
+                aiAnalysis = aiResult.analysis;
+                setAiAssessment(aiResult.analysis.aiAssessment);
+              } else {
+                console.warn('AI analysis is not a valid object, generating fallback');
+                // Generate fallback analysis
+                aiAnalysis = generateFallbackAnalysis(wpmToSave, accToSave, gameStats, currentDifficulty, streakData);
+              }
+            } else {
+              // API returned but no analysis - generate fallback
+              console.warn('AI API returned but no analysis, generating fallback');
+              aiAnalysis = generateFallbackAnalysis(wpmToSave, accToSave, gameStats, currentDifficulty, streakData);
+            }
+          } else {
+            // API call failed - generate fallback
+            console.warn('AI API call failed, generating fallback analysis');
+            aiAnalysis = generateFallbackAnalysis(wpmToSave, accToSave, gameStats, currentDifficulty, streakData);
           }
         } catch (aiError) {
-          console.error('Failed to get AI analysis:', aiError);
+          console.error('Failed to get AI analysis, generating fallback:', aiError);
+          // Always generate fallback analysis if API fails
+          aiAnalysis = generateFallbackAnalysis(wpmToSave, accToSave, gameStats, currentDifficulty, streakData);
         } finally {
           // Hide loading spinner regardless of success/failure
           setLoadingAssessment(false);
