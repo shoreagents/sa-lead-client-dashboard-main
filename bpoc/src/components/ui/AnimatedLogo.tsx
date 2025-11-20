@@ -11,8 +11,8 @@ export function AnimatedLogo({ className }: AnimatedLogoProps) {
     <div 
       className={cn("w-full h-full bg-gradient-to-r from-cyan-400 via-purple-400 to-green-400", className)}
       style={{
-        maskImage: 'url(/BPOC.IO-LOGO.svg)',
-        WebkitMaskImage: 'url(/BPOC.IO-LOGO.svg)',
+        maskImage: 'url(/BPOC.IO-LOGO-IDEA.svg)',
+        WebkitMaskImage: 'url(/BPOC.IO-LOGO-IDEA.svg)',
         maskSize: 'contain',
         WebkitMaskSize: 'contain',
         maskPosition: 'center',

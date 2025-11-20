@@ -4,7 +4,7 @@ import { ArrowLeft, Trophy, Zap, BarChart3, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PageProps {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }
 
 async function getTypingHeroResults(username: string) {
@@ -27,7 +27,7 @@ async function getTypingHeroResults(username: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { username } = params;
+  const { username } = await params;
   
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.bpoc.io');
@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function TypingHeroResultPage({ params }: PageProps) {
-  const { username } = params;
+  const { username } = await params;
   const profile = await getTypingHeroResults(username);
   
   if (!profile) {
@@ -101,12 +101,23 @@ export default async function TypingHeroResultPage({ params }: PageProps) {
   let aiAnalysis: any = null;
   try {
     if (typingStats?.ai_analysis) {
-      aiAnalysis = typeof typingStats.ai_analysis === 'string' 
-        ? JSON.parse(typingStats.ai_analysis)
-        : typingStats.ai_analysis;
+      if (typeof typingStats.ai_analysis === 'string') {
+        // Try to parse as JSON first
+        try {
+          aiAnalysis = JSON.parse(typingStats.ai_analysis);
+        } catch (jsonError) {
+          // If it's not JSON, it might be markdown/text or an error message - skip it
+          console.warn('AI analysis is not valid JSON, skipping:', typingStats.ai_analysis.substring(0, 100));
+          aiAnalysis = null;
+        }
+      } else {
+        // Already an object
+        aiAnalysis = typingStats.ai_analysis;
+      }
     }
   } catch (error) {
     console.error('Error parsing AI analysis:', error);
+    aiAnalysis = null;
   }
 
   return (

@@ -192,23 +192,89 @@ Format your response as JSON with these fields:
     // Parse the JSON response
     let assessment;
     try {
-      assessment = JSON.parse(responseText);
+      // Try to extract JSON from the response (in case it's wrapped in markdown)
+      let jsonText = responseText.trim();
+      
+      // Remove markdown code blocks if present
+      if (jsonText.startsWith('```json')) {
+        jsonText = jsonText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (jsonText.startsWith('```')) {
+        jsonText = jsonText.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+      
+      // Try to find JSON object in the text
+      const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonText = jsonMatch[0];
+      }
+      
+      assessment = JSON.parse(jsonText);
     } catch (parseError) {
-      // Fallback if JSON parsing fails
+      console.warn('Failed to parse AI assessment as JSON, using personalized fallback:', parseError);
+      // Personalized fallback based on actual performance - never save the error message
+      const wpm = sessionData.wpm || 0;
+      const accuracy = sessionData.accuracy || 0;
+      const bestStreak = sessionData.streakData?.bestStreak || 0;
+      
+      // Generate personalized strengths based on actual performance
+      const personalizedStrengths = [];
+      if (wpm >= 60) {
+        personalizedStrengths.push("Excellent typing speed");
+        personalizedStrengths.push("Fast word recognition");
+      } else if (wpm >= 40) {
+        personalizedStrengths.push("Good typing speed");
+        personalizedStrengths.push("Steady progress");
+      } else {
+        personalizedStrengths.push("Building typing fundamentals");
+        personalizedStrengths.push("Consistent practice");
+      }
+      
+      if (accuracy >= 90) {
+        personalizedStrengths.push("High accuracy rate");
+      } else if (accuracy >= 80) {
+        personalizedStrengths.push("Good accuracy");
+      }
+      
+      if (bestStreak >= 20) {
+        personalizedStrengths.push("Strong focus and concentration");
+      }
+      
+      if (sessionData.fires > sessionData.poos) {
+        personalizedStrengths.push("More successes than mistakes");
+      }
+      
+      // Ensure we have at least some strengths
+      if (personalizedStrengths.length === 0) {
+        personalizedStrengths.push("Session completion");
+        personalizedStrengths.push("Willingness to practice");
+      }
+      
       assessment = {
-        overallAssessment: "Good session! Keep practicing to improve your typing skills.",
-        performanceLevel: sessionData.wpm >= 60 ? "Advanced" : sessionData.wpm >= 40 ? "Intermediate" : "Developing",
-        strengths: ["Completed the session", "Showed persistence"],
-        improvementAreas: ["Consistency", "Accuracy"],
+        overallAssessment: `You achieved ${wpm} WPM with ${accuracy.toFixed(1)}% accuracy. ${wpm >= 60 ? 'Excellent work!' : wpm >= 40 ? 'Good progress!' : 'Keep practicing!'}`,
+        performanceLevel: wpm >= 80 ? "Expert" : wpm >= 60 ? "Advanced" : wpm >= 40 ? "Intermediate" : wpm >= 20 ? "Developing" : "Beginner",
+        strengths: personalizedStrengths,
+        improvementAreas: accuracy < 85 ? ["Accuracy", "Error reduction"] : wpm < 40 ? ["Typing speed", "Consistency"] : ["Advanced techniques", "Speed consistency"],
         personalizedTips: [
           {
-            category: "General",
-            tip: "Focus on accuracy first, then speed will follow naturally",
-            explanation: "Building muscle memory with correct patterns is more effective than rushing"
+            category: accuracy < 85 ? "Accuracy" : "Speed",
+            tip: accuracy < 85 
+              ? "Slow down slightly to improve accuracy - speed will follow naturally"
+              : "Try typing burst exercises to push your speed limits",
+            explanation: accuracy < 85
+              ? "Accurate typing creates better muscle memory than fast, error-prone typing"
+              : "Short bursts of fast typing help improve your peak speed safely"
           }
         ],
-        encouragement: "Keep up the great work! Every session makes you better.",
-        nextSessionGoal: `Try to ${sessionData.wpm < 40 ? 'maintain accuracy above 90%' : 'increase WPM by 2-3 points'}`
+        encouragement: wpm >= 60 
+          ? "Excellent typing speed! You're well above average. Keep refining your technique!"
+          : wpm >= 40
+          ? "Good progress! You're developing solid typing skills. Keep practicing!"
+          : "Great start! Every session makes you better. Focus on accuracy and speed will come!",
+        nextSessionGoal: wpm < 30
+          ? "Aim for 30+ WPM while maintaining 85%+ accuracy"
+          : wpm < 50
+          ? "Try to reach 50 WPM with consistent accuracy"
+          : "Work on maintaining your speed while improving precision"
       };
     }
 
@@ -390,9 +456,31 @@ Format your response as JSON with these fields:
         : "Work on maintaining your speed while improving precision"
     };
 
+    // Generate comprehensive fallback analysis structure
+    const fallbackComprehensiveAnalysis = {
+      sessionMetadata: {
+        timestamp: new Date().toISOString(),
+        difficultyLevel: sessionData.difficultyLevel || 'rockstar',
+        sessionDuration: sessionData.elapsedTime || 0,
+        totalWords: sessionData.totalWords || 0,
+        charactersTyped: sessionData.charactersTyped || 0
+      },
+      performanceMetrics: {
+        wpm: sessionData.wpm || 0,
+        accuracy: sessionData.accuracy || 0,
+        correctWords: sessionData.correctWords || 0,
+        missedWords: sessionData.missedWords || 0,
+        fires: sessionData.fires || 0,
+        poos: sessionData.poos || 0,
+        longestStreak: sessionData.streakData?.bestStreak || 0,
+        currentStreak: sessionData.streakData?.currentStreak || 0
+      },
+      aiAssessment: fallbackAssessment
+    };
+
     return NextResponse.json({
       success: true,
-      assessment: fallbackAssessment
+      analysis: fallbackComprehensiveAnalysis
     });
   }
 }

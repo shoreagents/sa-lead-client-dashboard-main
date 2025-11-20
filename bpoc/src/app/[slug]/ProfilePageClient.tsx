@@ -3413,16 +3413,52 @@ export default function ProfilePage() {
                                     <div className="text-gray-300 text-sm leading-relaxed">
                                     {(() => {
                                       try {
-                                        const analysis = typeof userProfile.game_stats.typing_hero_stats.ai_analysis === 'string' 
-                                          ? JSON.parse(userProfile.game_stats.typing_hero_stats.ai_analysis)
-                                          : userProfile.game_stats.typing_hero_stats.ai_analysis;
+                                        const aiAnalysis = userProfile.game_stats?.typing_hero_stats?.ai_analysis;
                                         
-                                        if (analysis.aiAssessment && analysis.aiAssessment.strengths && analysis.aiAssessment.strengths.length > 0) {
+                                        if (!aiAnalysis) {
+                                          return (
+                                            <div className="text-gray-400 italic">
+                                              No AI analysis available yet. Complete a typing session to get personalized strengths!
+                                            </div>
+                                          );
+                                        }
+                                        
+                                        // Parse AI analysis
+                                        let analysis: any = null;
+                                        if (typeof aiAnalysis === 'string') {
+                                          // Check if it's an error message
+                                          if (aiAnalysis.includes('SyntaxError') || aiAnalysis.includes('Error')) {
+                                            return (
+                                              <div className="text-gray-400 italic">
+                                                AI analysis is being processed. Please try again later.
+                                              </div>
+                                            );
+                                          }
+                                          // Try to parse as JSON
+                                          try {
+                                            analysis = JSON.parse(aiAnalysis);
+                                          } catch (parseError) {
+                                            return (
+                                              <div className="text-gray-400 italic">
+                                                AI analysis data is invalid. Please complete a new typing session.
+                                              </div>
+                                            );
+                                          }
+                                        } else {
+                                          analysis = aiAnalysis;
+                                        }
+                                        
+                                        // Extract strengths from the analysis structure
+                                        const strengths = analysis?.aiAssessment?.strengths || 
+                                                         analysis?.strengths || 
+                                                         [];
+                                        
+                                        if (strengths.length > 0 && Array.isArray(strengths)) {
                                           return (
                                             <div>
                                               <span className="text-yellow-400 font-semibold">Your Typing Strengths:</span>
                                               <ul className="mt-2 ml-4 space-y-2">
-                                                {analysis.aiAssessment.strengths.map((strength: string, index: number) => (
+                                                {strengths.map((strength: string, index: number) => (
                                                   <li key={index} className="flex items-start gap-2">
                                                     <span className="text-yellow-400 mt-1">💪</span>
                                                     <span>{strength}</span>
@@ -3435,10 +3471,11 @@ export default function ProfilePage() {
                                         
                                         return (
                                           <div className="text-gray-400 italic">
-                                            No strengths data available
+                                            No strengths data available. Complete a typing session to get AI-analyzed strengths!
                                           </div>
                                         );
                                       } catch (error) {
+                                        console.error('Error loading typing strengths:', error);
                                         return (
                                           <div className="text-gray-400 italic">
                                             Unable to load strengths data
@@ -3996,6 +4033,7 @@ export default function ProfilePage() {
                                                     <span 
                                                       dangerouslySetInnerHTML={{
                                                       __html: cleanComprehensive
+                                                        .replace(/\*\*/g, '') // Remove markdown bold syntax
                                                         .replace(/\n\n/g, '</p><p class="mb-4">') // Add paragraph spacing
                                                         .replace(/^/, '<p class="mb-4">') // Start with paragraph
                                                         .replace(/$/, '</p>') // End with paragraph
@@ -4038,7 +4076,7 @@ export default function ProfilePage() {
                                                     .map((point: string, bulletIndex: number) => (
                                                       <div key={bulletIndex} className="flex items-start gap-2 mb-6">
                                                         <span className="text-purple-400 mt-1">•</span>
-                                                        <span className="text-gray-300 leading-relaxed">{point.replace(/^•\s*/, '')}</span>
+                                                        <span className="text-gray-300 leading-relaxed">{point.replace(/\*\*/g, '').replace(/^•\s*/, '')}</span>
                                                   </div>
                                                 ))}
                                                 </div>
@@ -4152,6 +4190,7 @@ export default function ProfilePage() {
                                                     className="text-gray-300 leading-relaxed"
                                                     dangerouslySetInnerHTML={{
                                                       __html: trait
+                                                        .replace(/\*\*/g, '') // Remove markdown bold syntax
                                                         .replace(/\b(leadership|communication|analytical|creative|organized|strategic|empathetic|decisive|collaborative|detail-oriented|methodical|quality-focused|perfectionist|emerging|quiet|leader|process-oriented|thinker|problem-solver)\b/gi, 
                                                           '<span class="text-green-400 font-semibold">$1</span>')
                                                         .replace(/\b(strong|natural|key|primary|essential|core|fundamental)\b/gi, 
@@ -4228,6 +4267,7 @@ export default function ProfilePage() {
                                                 className="text-gray-300 leading-relaxed"
                                                 dangerouslySetInnerHTML={{
                                                   __html: point
+                                                    .replace(/\*\*/g, '') // Remove markdown bold syntax
                                                     .replace(/\b(pakikisama|malasakit|bayanihan|kapwa|utang na loob|hiya|pagkamatiyaga|tiyaga)\b/gi, 
                                                       '<span class="text-purple-400 font-semibold">$1</span>')
                                                     .replace(/\b(ability to get along|genuine care|community spirit|shared identity|debt of gratitude|sense of shame|relating to others|patience|perseverance)\b/gi, 
