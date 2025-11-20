@@ -8,9 +8,13 @@ import * as path from 'path';
 let chromium: any = null;
 if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
   try {
-    chromium = require('@sparticuz/chromium-min');
+    chromium = require('@sparticuz/chromium');
+    // Configure for serverless
+    if (chromium && typeof chromium.setGraphicsMode === 'function') {
+      chromium.setGraphicsMode(false);
+    }
   } catch (e) {
-    console.warn('⚠️ @sparticuz/chromium-min not available, will use regular puppeteer');
+    console.warn('⚠️ @sparticuz/chromium not available, will use regular puppeteer:', e);
   }
 }
 
@@ -358,14 +362,28 @@ export async function POST(request: NextRequest) {
         console.log('✅ Chrome executable verified on Windows');
       }
 
-      // For Vercel/serverless, use puppeteer-core with @sparticuz/chromium-min
+      // For Vercel/serverless, use puppeteer-core with @sparticuz/chromium
       if (chromium && (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME)) {
-        console.log('🌐 Using puppeteer-core with @sparticuz/chromium-min for serverless');
-        launchOptions.args = [...chromium.args, ...launchOptions.args];
-        launchOptions.executablePath = await chromium.executablePath();
-        launchOptions.headless = chromium.headless;
-        browser = await puppeteerCore.launch(launchOptions);
-        console.log('✅ Browser launched successfully (serverless)');
+        console.log('🌐 Using puppeteer-core with @sparticuz/chromium for serverless');
+        try {
+          // Get executable path - chromium handles extraction automatically
+          const chromiumPath = await chromium.executablePath();
+          console.log('📌 Chromium executable path:', chromiumPath);
+          
+          // Merge args - chromium provides optimized args for serverless
+          const chromiumArgs = chromium.args || [];
+          launchOptions.args = [...chromiumArgs, ...launchOptions.args];
+          launchOptions.executablePath = chromiumPath;
+          launchOptions.headless = chromium.headless !== false; // Default to headless
+          
+          console.log('🚀 Launching with @sparticuz/chromium, args count:', launchOptions.args.length);
+          browser = await puppeteerCore.launch(launchOptions);
+          console.log('✅ Browser launched successfully (serverless)');
+        } catch (chromiumError) {
+          console.error('❌ Failed to launch with @sparticuz/chromium:', chromiumError);
+          // Fallback to regular puppeteer if chromium fails
+          throw chromiumError;
+        }
       } else {
         // Launch with increased timeout for Windows
         const launchTimeout = process.platform === 'win32' ? 90000 : 60000;
