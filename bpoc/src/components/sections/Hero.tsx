@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ArrowRight,
-  Sparkles,
   TrendingUp,
   Users,
   Award,
@@ -32,6 +31,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { formatNumber } from '@/lib/utils'
+import { AnimatedLogo } from '@/components/ui/AnimatedLogo'
 
 const typingText = [
   'Your BPO Career Starts Here',
@@ -633,8 +633,8 @@ export default function Hero() {
               {/* Demo Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-purple-400 rounded-lg flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-black" />
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <AnimatedLogo className="w-full h-full" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-white">BPOC.IO</h3>

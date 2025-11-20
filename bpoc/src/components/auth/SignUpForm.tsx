@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
+import { AnimatedLogo } from '@/components/ui/AnimatedLogo'
 import { 
   UserPlus, 
   Mail, 
@@ -404,11 +405,17 @@ export default function SignUpForm({ open, onOpenChange, onSwitchToLogin }: Sign
                   <>
                     <FileText className="w-6 h-6 sm:w-8 sm:h-8" />
                     Terms and Conditions
+                    <div className="w-8 h-8 flex items-center justify-center">
+                      <AnimatedLogo className="w-full h-full" />
+                    </div>
                   </>
                 ) : (
                   <>
                     <UserPlus className="w-6 h-6 sm:w-8 sm:h-8" />
                     Join BPOC.IO
+                    <div className="w-8 h-8 flex items-center justify-center">
+                      <AnimatedLogo className="w-full h-full" />
+                    </div>
                   </>
                 )}
               </DialogTitle>
