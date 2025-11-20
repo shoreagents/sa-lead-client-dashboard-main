@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
@@ -45,11 +45,8 @@ import {
   Users,
   Church,
   Home,
-  ChevronDown,
-  Share2,
-  X
+  ChevronDown
 } from 'lucide-react';
-import { createPortal } from 'react-dom';
 import { PacmanLoader } from 'react-spinners';
 
 import { FILIPINO_DISC_SCENARIOS } from '../../../../data/filipinoDiscScenarios';
@@ -241,14 +238,6 @@ export default function FilipinoDiscGame() {
   const [showSharedResults, setShowSharedResults] = useState(false);
   const { user, session } = useAuth();
   
-  // NEW: Share dropdown state
-  const [isShareOpen, setIsShareOpen] = useState(false);
-  const shareRef = useRef<HTMLDivElement>(null);
-  
-  // NEW: Share modal state
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string } | null>(null);
-  
   // Check for shared results on page load
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -264,23 +253,6 @@ export default function FilipinoDiscGame() {
       }
     }
   }, []);
-  
-  // Handle clicks outside share dropdown
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
-        setIsShareOpen(false);
-      }
-    }
-    
-    if (isShareOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isShareOpen]);
   
   const [gameState, setGameState] = useState<GameState>({
     currentQuestion: 0,
@@ -311,13 +283,6 @@ export default function FilipinoDiscGame() {
   const [showSpiritReveal, setShowSpiritReveal] = useState(false);
   const [revealStep, setRevealStep] = useState(0);
   const [isInsightsExpanded, setIsInsightsExpanded] = useState(false);
-  
-  // Share state
-  const [isShareOpen, setIsShareOpen] = useState<boolean>(false);
-  const [showShareModal, setShowShareModal] = useState<boolean>(false);
-  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
-  const shareRef = useRef<HTMLDivElement>(null);
-  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
   
   // Music control state
   const [musicGender, setMusicGender] = useState<'male' | 'female'>('male');
@@ -408,123 +373,6 @@ export default function FilipinoDiscGame() {
       playMusic();
     }
   }, [gameState.gameStarted, backgroundMusic, isMusicPlaying]);
-
-  // Share dropdown positioning
-  useEffect(() => {
-    const updatePosition = () => {
-      if (isShareOpen && shareRef.current) {
-        const rect = shareRef.current.getBoundingClientRect();
-        setDropdownPosition({
-          top: rect.bottom + 8,
-          right: window.innerWidth - rect.right
-        });
-      } else {
-        setDropdownPosition(null);
-      }
-    };
-
-    if (isShareOpen) {
-      setTimeout(updatePosition, 0);
-      window.addEventListener('scroll', updatePosition, true);
-      window.addEventListener('resize', updatePosition);
-    } else {
-      setDropdownPosition(null);
-    }
-
-    return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, [isShareOpen]);
-
-  // Handle click outside share dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (shareRef.current && !shareRef.current.contains(event.target as Node)) {
-        const target = event.target as Element;
-        if (!target.closest('[data-share-dropdown]')) {
-          setIsShareOpen(false);
-        }
-      }
-    };
-
-    if (isShareOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isShareOpen]);
-
-  // Share DISC results function
-  const shareDiscResults = async (platform?: string) => {
-    if (!discResult || !user) {
-      console.error('Cannot share: discResult or user is missing', { discResult, user });
-      return;
-    }
-
-    const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    const userTitle = user?.user_metadata?.position || user?.user_metadata?.current_position || 'BPO Professional';
-    const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-    const shareUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
-    // Match the URL format used in layout.tsx (without title parameter, with v parameter for cache busting)
-    const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&v=5`;
-
-    // Close dropdown first
-    setIsShareOpen(false);
-
-    switch (platform) {
-      case 'facebook':
-        const facebookShareText = `🎯 I'm a ${personalityType.animal}! ${personalityType.title}\n\n${personalityType.description}\n\nPerfect for ${personalityType.bpoRoles[0]} roles in the BPO industry!\n\nDiscover your BPO animal spirit: ${shareUrl}\n\n#BPOC #BPOCareers #DISC #PersonalityAssessment`;
-        
-        try {
-          await navigator.clipboard.writeText(facebookShareText);
-          setShareModalData({ platform: 'Facebook', text: facebookShareText, url: shareUrl });
-          setShowShareModal(true);
-          setTimeout(() => {
-            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-            window.open(facebookUrl, '_blank', 'width=600,height=400');
-          }, 1500);
-        } catch (err) {
-          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-          window.open(facebookUrl, '_blank', 'width=600,height=400');
-        }
-        break;
-
-      case 'linkedin':
-        const linkedinShareText = `🎯 I'm a ${personalityType.animal}! ${personalityType.title}\n\n${personalityType.description}\n\nPerfect for ${personalityType.bpoRoles[0]} roles in the BPO industry!\n\nDiscover your BPO animal spirit: ${shareUrl}\n\n#BPOC #BPOCareers #DISC #PersonalityAssessment #CareerGrowth`;
-        
-        try {
-          await navigator.clipboard.writeText(linkedinShareText);
-          setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: shareUrl });
-          setShowShareModal(true);
-          setTimeout(() => {
-            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-            window.open(linkedinUrl, '_blank', 'width=600,height=400');
-          }, 1500);
-        } catch (err) {
-          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-          window.open(linkedinUrl, '_blank', 'width=600,height=400');
-        }
-        break;
-
-      case 'copy':
-        // For "Copy Link", only copy the URL, not the full share text
-        // Match profile/resume behavior - just show alert, no modal
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          alert('DISC results link copied to clipboard!');
-        } catch (err) {
-          console.error('Failed to copy link:', err);
-          alert('Failed to copy link. Please copy manually: ' + shareUrl);
-        }
-        break;
-
-      default:
-        break;
-    }
-  };
 
   // Preview music function with countdown
   const previewMusic = async (type: 'maledisc' | 'femaledisc') => {
@@ -800,43 +648,6 @@ export default function FilipinoDiscGame() {
     }
   }, [user, gameState.gameStarted, gameState.userProfile]);
 
-  // Update meta tags when results are shown (for OG image) - MUST be before any early returns
-  useEffect(() => {
-    if (showResults && discResult && user) {
-      const personalityType = ANIMAL_PERSONALITIES[discResult.primaryType as keyof typeof ANIMAL_PERSONALITIES];
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-      // Match the URL format used in layout.tsx (with v=5 for cache busting)
-      const ogImageUrl = `${baseUrl}/api/og/disc-results?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}&v=5`;
-      const pageUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
-      
-      // Update or create meta tags
-      const updateMetaTag = (property: string, content: string) => {
-        let meta = document.querySelector(`meta[property="${property}"]`) || 
-                   document.querySelector(`meta[name="${property}"]`);
-        if (!meta) {
-          meta = document.createElement('meta');
-          meta.setAttribute('property', property);
-          document.head.appendChild(meta);
-        }
-        meta.setAttribute('content', content);
-      };
-
-      updateMetaTag('og:title', `${personalityType.title} - ${animalName} Personality`);
-      updateMetaTag('og:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}. Take the BPOC DISC Personality Assessment to find your perfect BPO role.`);
-      updateMetaTag('og:image', ogImageUrl);
-      updateMetaTag('og:url', pageUrl);
-      updateMetaTag('og:type', 'website');
-      updateMetaTag('og:site_name', 'BPOC.IO');
-      
-      // Twitter meta tags
-      updateMetaTag('twitter:card', 'summary_large_image');
-      updateMetaTag('twitter:title', `${personalityType.title} - ${animalName} Personality`);
-      updateMetaTag('twitter:description', `Discover your BPO animal spirit! I'm a ${animalName} - ${personalityType.title}.`);
-      updateMetaTag('twitter:image', ogImageUrl);
-    }
-  }, [showResults, discResult, user]);
-
   const startGame = () => {
     // Stop any preview that's playing
     stopPreview();
@@ -863,9 +674,7 @@ export default function FilipinoDiscGame() {
   const generatePersonalizedQuestions = async (responses?: any[], scores?: any) => {
     if (!user) {
       console.error('❌ No user found for personalized questions');
-      // Use passed scores or current state scores
-      const finalScores = scores || gameState.scores;
-      completeGame(finalScores);
+      completeGame();
       return;
     }
 
@@ -922,30 +731,28 @@ export default function FilipinoDiscGame() {
           setShowAchievement(null);
         } else {
           console.error('❌ No personalized questions in response:', data);
-          completeGame(currentScores);
+          completeGame();
         }
       } else {
         const errorText = await response.text();
         console.error('❌ API call failed:', response.status, errorText);
         // Complete game without personalized questions
-        completeGame(currentScores);
+        completeGame();
       }
     } catch (error) {
       console.error('❌ Error generating personalized questions:', error);
       // Complete game without personalized questions
-      completeGame(currentScores);
+      completeGame();
     }
   };
 
-  const completeGame = (scores?: { D: number; I: number; S: number; C: number }) => {
+  const completeGame = () => {
     setGameState(prev => ({
       ...prev,
       gameCompleted: true,
       isGeneratingPersonalized: false
     }));
-    // Use provided scores or fallback to current state scores
-    const finalScores = scores || gameState.scores;
-    calculateResults(finalScores);
+    calculateResults(gameState.scores);
   };
 
 	// Safety check after functions are defined
@@ -1538,12 +1345,12 @@ Make it deeply personal and actionable based on their actual choices.`;
 							totalResponses: gameState.responses.length,
 							completionTime: Math.floor((Date.now() - (gameState.sessionStartTime?.getTime() || Date.now())) / 1000),
 							culturalContexts: ['FAMILY', 'WORK', 'SOCIAL', 'TRAFFIC', 'MONEY', 'CRISIS'],
-							personalizedQuestionsUsed: gameState.personalizedQuestions?.length || 0
+							personalizedQuestionsUsed: gameState.personalizedQuestions.length
             },
             coreResponses: gameState.responses.slice(0, 30),
             coreScores: gameState.scores,
             personalizedResponses: gameState.responses.slice(30),
-            personalizedQuestions: gameState.personalizedQuestions || [],
+            personalizedQuestions: gameState.personalizedQuestions,
 						finalResults: results,
 						aiAssessment: generatedAssessment,
 						aiBpoRoles: generatedBpoRoles,
@@ -1814,8 +1621,7 @@ Make it deeply personal and actionable based on their actual choices.`;
                               .replace(/Actionoriented/g, 'Action-oriented')
                               .replace(/Relationshipconscious/g, 'Relationship-conscious')
                               .replace(/Strategicrelationship/g, 'Strategic relationship')
-                              .replace(/Adaptablecommunicator/g, 'Adaptable communicator')
-                              .replace(/\*\*/g, ''); // Remove markdown bold markers
+                              .replace(/Adaptablecommunicator/g, 'Adaptable communicator');
                             
                             return (
                               <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-300 rounded-full text-sm">
@@ -1849,7 +1655,6 @@ Make it deeply personal and actionable based on their actual choices.`;
                             // Clean up the content and display as bullet points
                             const cleanCultural = culturalSection
                               .replace(/^[^:]*:\s*/, '') // Remove everything before the first colon
-                              .replace(/\*\*/g, '') // Remove markdown bold markers
                               .trim();
                             
                             // Split by numbered items or bullet points and display each as a separate line
@@ -2384,121 +2189,56 @@ Make it deeply personal and actionable based on their actual choices.`;
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   Back to Games
                 </Button>
-                <div className="relative" ref={shareRef}>
-                  <Button
-                    onClick={() => setIsShareOpen(!isShareOpen)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg w-full"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Share Results
-                  </Button>
-                  
-                  {isShareOpen && user && (
-                    <div className="absolute bottom-full left-0 right-0 mb-2 bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-[60]">
-                      <div className="py-2">
-                        {/* Facebook Share */}
-                        <button
-                          onClick={async () => {
-                            const currentUrl = new URL(window.location.href);
-                            const baseUrl = currentUrl.origin;
-                            const resultUrl = `${baseUrl}/results/bpoc-disc/${user.username || user.slug}`;
-                            const animalEmojis: {[key: string]: string} = {
-                              'EAGLE': '🦅',
-                              'PEACOCK': '🦚',
-                              'TURTLE': '🐢',
-                              'OWL': '🦉'
-                            };
-                            const animalEmoji = animalEmojis[personalityType.animal] || '🎯';
-                            const shareText = `${animalEmoji} I'm a ${personalityType.animal} on BPOC DISC! 🎯\n\n📊 My Personality Profile:\n🦅 Dominance: ${gameState.scores.D}%\n🦚 Influence: ${gameState.scores.I}%\n🐢 Steadiness: ${gameState.scores.S}%\n🦉 Conscientiousness: ${gameState.scores.C}%\n\n✨ What's your personality type?\n\n🎮 Discover your animal personality on BPOC.IO and unlock insights for your BPO career!\n\n${resultUrl}`;
-                            
-                            try {
-                              await navigator.clipboard.writeText(shareText);
-                              setShareModalData({ platform: 'Facebook', text: shareText, url: resultUrl });
-                              setShowShareModal(true);
-                              setTimeout(() => {
-                                const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
-                                window.open(facebookUrl, '_blank', 'width=600,height=400');
-                              }, 1500);
-                            } catch (err) {
-                              const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultUrl)}`;
-                              window.open(facebookUrl, '_blank', 'width=600,height=400');
-                            }
-                            setIsShareOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
-                        >
-                          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
-                          <span className="font-medium">Share on Facebook</span>
-                        </button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      // Create a results-only shareable link
+                      const resultsData = {
+                        game: 'BPOC DISC Personality',
+                        personalityType: personalityType.animal,
+                        animal: personalityType.animal,
+                        title: personalityType.title,
+                        description: personalityType.description,
+                        bpoRoles: personalityType.bpoRoles,
+                        traits: personalityType.traits,
+                        timestamp: new Date().toISOString()
+                      };
+                      
+                      // Encode results in URL parameters
+                      const encodedResults = encodeURIComponent(JSON.stringify(resultsData));
+                      const shareableUrl = `${window.location.origin}/career-tools/games/disc-personality?results=${encodedResults}`;
+                      
+                      const shareText = `I'm a ${personalityType.animal}! ${personalityType.title} 🎯 Perfect for ${personalityType.bpoRoles[0]} roles! What's your BPO animal?\n\nView my results: ${shareableUrl}`;
+                      
+                      if (navigator.share) {
+                        navigator.share({
+                          title: 'My BPOC DISC Personality Results!',
+                          text: shareText,
+                          url: shareableUrl
+                        });
+                      } else {
+                        // Fallback: copy to clipboard
+                        await navigator.clipboard.writeText(shareText);
                         
-                        {/* LinkedIn Share */}
-                        <button
-                          onClick={async () => {
-                            const currentUrl = new URL(window.location.href);
-                            const baseUrl = currentUrl.origin;
-                            const resultUrl = `${baseUrl}/results/bpoc-disc/${user.username || user.slug}`;
-                            const animalEmojis: {[key: string]: string} = {
-                              'EAGLE': '🦅',
-                              'PEACOCK': '🦚',
-                              'TURTLE': '🐢',
-                              'OWL': '🦉'
-                            };
-                            const animalEmoji = animalEmojis[personalityType.animal] || '🎯';
-                            const shareText = `${animalEmoji} I'm a ${personalityType.animal} on BPOC DISC! 🎯\n\n📊 My Personality Profile:\n🦅 Dominance: ${gameState.scores.D}%\n🦚 Influence: ${gameState.scores.I}%\n🐢 Steadiness: ${gameState.scores.S}%\n🦉 Conscientiousness: ${gameState.scores.C}%\n\n✨ What's your personality type?\n\n🎮 Discover your animal personality on BPOC.IO and unlock insights for your BPO career!\n\n${resultUrl}`;
-                            
-                            try {
-                              await navigator.clipboard.writeText(shareText);
-                              setShareModalData({ platform: 'LinkedIn', text: shareText, url: resultUrl });
-                              setShowShareModal(true);
-                              setTimeout(() => {
-                                const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
-                                window.open(linkedInUrl, '_blank', 'width=600,height=400');
-                              }, 1500);
-                            } catch (err) {
-                              const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resultUrl)}`;
-                              window.open(linkedInUrl, '_blank', 'width=600,height=400');
-                            }
-                            setIsShareOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
-                        >
-                          <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
-                          <span className="font-medium">Share on LinkedIn</span>
-                        </button>
-                        
-                        {/* Copy Link */}
-                        <button
-                          onClick={async () => {
-                            const currentUrl = new URL(window.location.href);
-                            const baseUrl = currentUrl.origin;
-                            const resultUrl = `${baseUrl}/results/bpoc-disc/${user.username || user.slug}`;
-                            const animalEmojis: {[key: string]: string} = {
-                              'EAGLE': '🦅',
-                              'PEACOCK': '🦚',
-                              'TURTLE': '🐢',
-                              'OWL': '🦉'
-                            };
-                            const animalEmoji = animalEmojis[personalityType.animal] || '🎯';
-                            const shareText = `${animalEmoji} I'm a ${personalityType.animal} on BPOC DISC! 🎯\n\n📊 My Personality Profile:\n🦅 Dominance: ${gameState.scores.D}%\n🦚 Influence: ${gameState.scores.I}%\n🐢 Steadiness: ${gameState.scores.S}%\n🦉 Conscientiousness: ${gameState.scores.C}%\n\n✨ What's your personality type?\n\n🎮 Discover your animal personality on BPOC.IO and unlock insights for your BPO career!\n\n${resultUrl}`;
-                            
-                            try {
-                              await navigator.clipboard.writeText(shareText);
-                              setShareModalData({ platform: 'Copied', text: shareText, url: resultUrl });
-                              setShowShareModal(true);
-                            } catch (err) {
-                              console.error('Failed to copy:', err);
-                            }
-                            setIsShareOpen(false);
-                          }}
-                          className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
-                        >
-                          <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center text-sm font-bold">🔗</div>
-                          <span className="font-medium">Copy Link</span>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                        // Show success feedback
+                        const button = event?.target as HTMLButtonElement;
+                        if (button) {
+                          const originalText = button.innerHTML;
+                          button.innerHTML = '<div class="flex items-center"><span class="w-4 h-4 mr-2">✓</span>Results Copied!</div>';
+                          setTimeout(() => {
+                            button.innerHTML = originalText;
+                          }, 2000);
+                        }
+                      }
+                    } catch (error) {
+                      console.error('Failed to share results:', error);
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg w-full"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Share Results
+                </Button>
                 <Button
                   onClick={resetGame}
                   className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg w-full"
@@ -3432,215 +3172,6 @@ Make it deeply personal and actionable based on their actual choices.`;
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
-      {/* Share Modal */}
-      <AnimatePresence>
-        {showShareModal && shareModalData && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4"
-            onClick={() => setShowShareModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring", duration: 0.5 }}
-              className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-8 max-w-md w-full border border-blue-500/30 shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-4xl">✓</span>
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {shareModalData.platform === 'Copied' ? 'Link Copied!' : `Opening ${shareModalData.platform}...`}
-                </h3>
-                <p className="text-gray-400 text-sm">
-                  {shareModalData.platform === 'Copied' 
-                    ? 'Share text has been copied to your clipboard! Paste it anywhere you like.'
-                    : 'We\'ve copied the share text to your clipboard. Paste it in your post!'}
-                </p>
-              </div>
-
-              <div className="bg-gray-800/50 rounded-lg p-4 mb-6 max-h-48 overflow-y-auto">
-                <p className="text-gray-300 text-sm whitespace-pre-wrap font-mono">
-                  {shareModalData.text}
-                </p>
-              </div>
-
-              <Button
-                onClick={() => setShowShareModal(false)}
-                className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold"
-              >
-                Got it! ✨
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Share Modal - Rendered via Portal */}
-      {typeof document !== 'undefined' && createPortal(
-        <AnimatePresence>
-          {showShareModal && (
-            <div 
-              className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) {
-                  setShowShareModal(false);
-                }
-              }}
-            >
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                transition={{ duration: 0.3 }}
-                className="relative w-full max-w-2xl"
-                onClick={(e) => e.stopPropagation()}
-              >
-            {/* Glow Effects */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
-            
-            {/* Modal Content */}
-            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl border-2 border-cyan-400/30 shadow-2xl overflow-hidden">
-              {/* Header with Gradient */}
-              <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-6 relative overflow-hidden">
-                <div className="absolute inset-0 bg-black/10"></div>
-                <div className="relative flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                      <span className="text-3xl">✓</span>
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-white">
-                        {shareModalData.platform === 'Clipboard' ? 'Link Copied Successfully!' : 'Text Copied Successfully!'}
-                      </h3>
-                      <p className="text-cyan-100 text-sm">
-                        {shareModalData.platform === 'Clipboard' ? 'The link is ready to share!' : `Ready to share on ${shareModalData.platform}`}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowShareModal(false)}
-                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
-                  >
-                    <X className="w-5 h-5 text-white" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="p-6 space-y-6">
-                {/* Instructions */}
-                <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-xl p-5 border border-cyan-400/20">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-xl">💡</span>
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
-                      {shareModalData.platform === 'Clipboard' ? (
-                        <ol className="space-y-2 text-gray-300">
-                          <li className="flex items-start gap-2">
-                            <span className="text-cyan-400 font-bold mt-0.5">1.</span>
-                            <span>The link has been copied to your clipboard</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-cyan-400 font-bold mt-0.5">2.</span>
-                            <span>Paste the link (Ctrl+V or Cmd+V) wherever you want to share it</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-cyan-400 font-bold mt-0.5">3.</span>
-                            <span>The DISC results image will appear automatically when the link is shared!</span>
-                          </li>
-                        </ol>
-                      ) : (
-                        <ol className="space-y-2 text-gray-300">
-                          <li className="flex items-start gap-2">
-                            <span className="text-cyan-400 font-bold mt-0.5">1.</span>
-                            <span>The {shareModalData.platform} share dialog will open in 2 seconds</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-cyan-400 font-bold mt-0.5">2.</span>
-                            <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-cyan-400 font-bold mt-0.5">3.</span>
-                            <span>Your DISC results image will appear automatically - just hit Share!</span>
-                          </li>
-                        </ol>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Text Preview */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
-                      {shareModalData.platform === 'Clipboard' ? 'Copied Link' : 'Post Text Preview'}
-                    </label>
-                    <button
-                      onClick={async () => {
-                        try {
-                          await navigator.clipboard.writeText(shareModalData.text);
-                          const btn = document.getElementById('copy-again-btn-disc');
-                          if (btn) {
-                            btn.textContent = '✓ Copied!';
-                            setTimeout(() => {
-                              btn.textContent = 'Copy Again';
-                            }, 2000);
-                          }
-                        } catch (err) {
-                          console.error('Failed to copy:', err);
-                        }
-                      }}
-                      id="copy-again-btn-disc"
-                      className="text-xs px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-400/30 transition-all duration-200 hover:scale-105 font-medium"
-                    >
-                      Copy Again
-                    </button>
-                  </div>
-                  <div className="bg-gray-800/50 rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto">
-                    <p className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
-                      {shareModalData.text}
-                    </p>
-                  </div>
-                </div>
-
-                {/* BPOC Branding Footer */}
-                <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
-                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">B</span>
-                  </div>
-                  <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-                    BPOC.IO
-                  </span>
-                  <span className="text-gray-500">•</span>
-                  <span className="text-gray-400 text-sm">Where BPO Careers Begin</span>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => setShowShareModal(false)}
-                    className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
-                  >
-                    Got It! 👍
-                  </Button>
-                </div>
-              </div>
-            </div>
-            </motion.div>
-          </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
 
     </div>
   );
