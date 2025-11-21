@@ -1,6 +1,7 @@
 ﻿'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
@@ -284,6 +285,10 @@ export default function FilipinoDiscGame() {
   const [revealStep, setRevealStep] = useState(0);
   const [isInsightsExpanded, setIsInsightsExpanded] = useState(false);
   const [userUsername, setUserUsername] = useState<string | null>(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string } | null>(null);
+  const shareRef = useRef<HTMLDivElement>(null);
   
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
   
