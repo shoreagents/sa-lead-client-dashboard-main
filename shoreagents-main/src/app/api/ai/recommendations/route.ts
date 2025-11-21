@@ -110,13 +110,13 @@ async function getUserContext(userId: string): Promise<UserContext> {
     pricingQuotes
   ] = await Promise.all([
     // Lead progress (stage)
-    prisma.lead_progress.findFirst({
+    prisma.leadProgress.findFirst({
       where: { user_id: userId },
       orderBy: { created_at: 'desc' }
     }),
     
     // User profile
-    prisma.users.findFirst({
+    prisma.user.findFirst({
       where: { user_id: userId }
     }),
     
@@ -186,12 +186,12 @@ async function getUserContext(userId: string): Promise<UserContext> {
     stage: leadProgress?.status || 'new_lead',
     industry: user?.industry_name || undefined,
     companyName: user?.company || undefined,
-    teamSize: user?.desired_team_size || undefined,
+    teamSize: latestQuote?.member_count || undefined, // Use quote member count as team size
     candidatesViewed: candidateViews.length,
     topCandidates,
     pagesViewed,
     hasQuote: pricingQuotes.length > 0,
-    quoteBudget: latestQuote?.total_monthly_cost || undefined,
+    quoteBudget: latestQuote?.total_monthly_cost ? Number(latestQuote.total_monthly_cost) : undefined,
     quoteRoles: latestQuote ? ['Virtual Assistant'] : undefined, // Simplified
     behaviorSummary
   };
