@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.bpoc.io');
   
   const profile = await getTypingHeroResults(username);
-  const ogImageUrl = `${baseUrl}/api/og/typing-hero?username=${username}`;
+  const ogImageUrl = `${baseUrl}/api/og/typing-hero?username=${username}&v=2`;
   
   const fullName = profile?.full_name || profile?.first_name || username;
   const bestWpm = profile?.game_stats?.typing_hero_stats?.best_wpm || 0;

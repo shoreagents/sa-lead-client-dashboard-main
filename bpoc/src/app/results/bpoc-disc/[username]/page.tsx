@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.bpoc.io');
   
   const profile = await getBpocDiscResults(username);
-  const ogImageUrl = `${baseUrl}/api/og/bpoc-disc?username=${username}`;
+  const ogImageUrl = `${baseUrl}/api/og/bpoc-disc?username=${username}&v=2`;
   
   const fullName = profile?.full_name || profile?.first_name || username;
   const primaryType = profile?.game_stats?.disc_personality_stats?.primary_type || 'D';
