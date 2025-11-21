@@ -16,7 +16,8 @@ import {
   Users, 
   Target,
   TrendingUp,
-  BookOpen
+  BookOpen,
+  Sparkles
 } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 // import { useEngagementTracking } from '@/lib/useEngagementTracking'
@@ -61,6 +62,7 @@ export function BottomNav() {
   
   // NEW: AI-powered recommendations
   const [aiRecommendations, setAiRecommendations] = useState<any[]>([])
+  const [aiInsight, setAiInsight] = useState<any>(null)
   const [isLoadingAI, setIsLoadingAI] = useState(false)
   const [userStage, setUserStage] = useState<string>('new_lead')
   
@@ -379,7 +381,8 @@ export function BottomNav() {
       console.log('✅ AI Recommendations received:', data)
       
       setAiRecommendations(data.recommendations || [])
-      setUserStage(data.context?.stage || 'new_lead')
+      setAiInsight(data.insight || null)
+      setUserStage(data.userStage || 'new_lead')
       
     } catch (error) {
       console.error('❌ Error fetching AI recommendations:', error)
@@ -388,34 +391,13 @@ export function BottomNav() {
     }
   }, [appUser?.user_id])
 
-  // Fetch data when drawer opens
+  // Fetch 100% AI data when drawer opens
   useEffect(() => {
     if (isDrawerOpen) {
-      // Fetch AI recommendations first
       fetchAIRecommendations()
-      // Then fetch traditional data as fallback
-      fetchTopCandidate()
-      fetchRecommendedCandidates()
-      fetchRecentQuotes()
     }
-  }, [isDrawerOpen, fetchAIRecommendations, fetchTopCandidate, fetchRecommendedCandidates, fetchRecentQuotes])
+  }, [isDrawerOpen, fetchAIRecommendations])
 
-  // Auto-rotate AI matched candidates with animation
-  useEffect(() => {
-    if (isDrawerOpen && recommendedCandidates.length > 1) {
-      const interval = setInterval(() => {
-        setIsAnimating(true)
-        setTimeout(() => {
-          setCurrentCandidateIndex((prevIndex) => 
-            (prevIndex + 1) % recommendedCandidates.length
-          )
-          setIsAnimating(false)
-        }, 250) // Half of the animation duration
-      }, 3000) // Change every 3 seconds
-
-      return () => clearInterval(interval)
-    }
-  }, [isDrawerOpen, recommendedCandidates.length])
 
   const handleChatWithClaude = () => {
     // recordInteraction('chat')
@@ -558,7 +540,7 @@ export function BottomNav() {
             <DrawerTitle className="text-lime-50">AI Recommendations</DrawerTitle>
           </DrawerHeader>
           
-          {/* AI Recommendations Content - 2x8 Grid Layout */}
+          {/* 100% AI-POWERED RECOMMENDATIONS */}
           <div className="px-6 py-6 bg-gradient-to-br from-lime-50 via-lime-100 to-lime-200 drawer-content-scrollable relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
@@ -579,9 +561,108 @@ export function BottomNav() {
             
             {/* Content positioned above background elements */}
             <div className="relative z-10 max-w-6xl mx-auto">
-              {/* 4x2 Grid Layout - All components visible without scrolling */}
-              <div className="grid grid-cols-4 gap-3 h-full">
-                {/* Top Left: Top Candidate */}
+              
+              {/* 🤖 100% AI-POWERED RECOMMENDATIONS - NO OLD CODE */}
+              
+              {/* Loading State */}
+              {isLoadingAI && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center space-y-4">
+                    <div className="animate-spin rounded-full border-4 border-lime-600 border-t-transparent w-16 h-16 mx-auto" />
+                    <div>
+                      <p className="text-lg text-gray-800 font-bold">AI is analyzing your journey...</p>
+                      <p className="text-sm text-gray-600 mt-1">Claude is crafting personalized recommendations</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* AI Insight Banner (Full Width Hero) */}
+              {!isLoadingAI && aiInsight && (
+                <div className="mb-4">
+                  <Card className="overflow-hidden border-2 border-purple-300 shadow-xl hover:shadow-2xl transition-all duration-300">
+                    <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 p-6 text-white">
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                            <Target className="w-6 h-6 text-white" />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h2 className="text-2xl font-bold mb-2">{aiInsight.title}</h2>
+                          <p className="text-purple-100 text-base mb-4">{aiInsight.description}</p>
+                          <div className="flex items-center space-x-3">
+                            <Button
+                              onClick={() => router.push(aiInsight.actionUrl)}
+                              size="lg"
+                              className="bg-white text-purple-600 hover:bg-purple-50 font-semibold"
+                            >
+                              {aiInsight.action}
+                            </Button>
+                            <span className="text-sm text-purple-200">
+                              💡 {aiInsight.reason}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              )}
+
+              {/* AI Recommendations Grid (6 cards) */}
+              {!isLoadingAI && aiRecommendations.length > 0 && (
+                <div className="grid grid-cols-3 gap-4">
+                  {aiRecommendations.map((rec, index) => (
+                    <ResourceCard key={index} recommendation={rec} />
+                  ))}
+                </div>
+              )}
+
+              {/* Empty State (No AI Data Yet) */}
+              {!isLoadingAI && aiRecommendations.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-lime-100 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-8 h-8 text-lime-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Welcome to ShoreAgents!</h3>
+                  <p className="text-sm text-gray-600 mb-4">Start exploring to get personalized AI recommendations</p>
+                  <Button
+                    onClick={() => router.push('/how-it-works')}
+                    className="bg-lime-600 hover:bg-lime-700 text-white"
+                  >
+                    Get Started
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+      
+      {/* AI Chat Console */}
+      <ChatConsole 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
+
+      {/* Interview Request Modal */}
+        <InterviewRequestModal
+          isOpen={isInterviewModalOpen}
+        onClose={handleInterviewCancel}
+          onSubmit={handleInterviewSubmit}
+        candidateName="Selected Candidate"
+        candidatePosition="Position"
+        />
+
+      {/* Pricing Calculator Modal */}
+      <PricingCalculatorModal
+        isOpen={showPricingModal}
+        onClose={handleClosePricingModal}
+      />
+    </>
+  )
+}
                 <div className="col-span-1 row-span-1">
                   <Card className="hover:shadow-md transition-shadow h-full overflow-hidden p-0">
                     <div className="px-3 py-2 bg-lime-600">
