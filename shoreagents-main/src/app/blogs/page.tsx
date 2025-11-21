@@ -3,12 +3,14 @@
 import { useState, useMemo, useRef } from 'react';
 import { SideNav } from "@/components/layout/SideNav";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Search, Calendar, Clock, ArrowRight, ChevronDown } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { cn } from "@/lib/utils";
 
 interface BlogPost {
   id: string;
@@ -103,18 +105,52 @@ const blogPosts: BlogPost[] = [
   }
 ];
 
+// --- Shared Styles ---
+const cardHoverStyle = "hover:shadow-xl hover:-translate-y-1 transition-all duration-300";
+const sectionSpacing = "my-16 md:my-24";
+
+const CustomBackgroundLines = () => {
+  const paths = [
+    "M720 450C720 450 742.459 440.315 755.249 425.626C768.039 410.937 778.88 418.741 789.478 401.499",
+    "M720 450C720 450 741.044 435.759 753.062 410.636C765.079 385.514 770.541 386.148 782.73 370.489",
+    "M720 450C720 450 712.336 437.768 690.248 407.156C668.161 376.544 672.543 394.253 665.951 365.784",
+    "M720 450C720 450 738.983 448.651 790.209 446.852C841.436 445.052 816.31 441.421 861.866 437.296",
+    "M720 450C720 450 696.366 458.841 682.407 472.967C668.448 487.093 673.23 487.471 647.919 492.882",
+  ];
+
+  const colors = ["#65a30d", "#4d7c0f", "#84cc16", "#3f6212", "#a3e635"];
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+      <svg className="w-full h-full" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {paths.map((path, i) => (
+          <motion.path
+            key={i}
+            d={path}
+            stroke={colors[i % colors.length]}
+            strokeWidth="2"
+            strokeLinecap="round"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ 
+              duration: 3 + i, 
+              repeat: Infinity, 
+              repeatType: "reverse",
+              ease: "easeInOut" 
+            }}
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
 export default function BlogsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const heroRef = useRef(null);
-
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"]
-  });
-
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 0.5], ["0%", "20%"]);
+  const { scrollYProgress } = useScroll();
+  const headerY = useTransform(scrollYProgress, [0, 0.2], [0, -50]);
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   const categories = ['All', ...Array.from(new Set(blogPosts.map(post => post.category)))];
 
@@ -132,84 +168,56 @@ export default function BlogsPage() {
   }, [searchTerm, selectedCategory]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white font-sans selection:bg-lime-200 selection:text-lime-900">
       <SideNav />
-      
-      <style jsx global>{`
-        @keyframes gradient {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        .animate-gradient {
-          background-size: 200% 200%;
-          animation: gradient 8s ease infinite;
-        }
-      `}</style>
 
-      <div ref={heroRef} className="relative h-screen w-full overflow-hidden flex items-center justify-center bg-white">
-        <div className="absolute inset-0 bg-gradient-to-br from-lime-50 via-white to-lime-100 animate-gradient opacity-80"></div>
+      {/* --- Hero Section --- */}
+      <div className="relative min-h-[60vh] md:min-h-[70vh] flex items-center justify-center overflow-hidden bg-slate-950 pt-20">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(101,163,13,0.15),_rgba(15,23,42,1))]"></div>
+        <CustomBackgroundLines />
         
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], x: [0, 50, 0], y: [0, 30, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-20 left-10 w-96 h-96 bg-lime-200/20 rounded-full blur-[100px]"
-        />
-        <motion.div 
-          animate={{ scale: [1, 1.3, 1], x: [0, -50, 0], y: [0, -30, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-green-100/30 rounded-full blur-[120px]"
-        />
-
-        <motion.div 
-          style={{ opacity: heroOpacity, y: heroY }}
-          className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center space-y-8"
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <Badge variant="outline" className="border-lime-500 text-lime-700 bg-white/50 backdrop-blur-sm px-4 py-1.5 rounded-full text-sm font-medium tracking-wide uppercase mb-6 shadow-sm">
-              Resources & Insights
-            </Badge>
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1] mb-6">
-              Knowledge to <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-600 to-green-600">Scale Your Business</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-slate-600 leading-relaxed max-w-2xl mx-auto mb-10">
-              Expert advice, industry trends, and strategic guides on outsourcing, virtual assistants, and team expansion.
-            </p>
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div style={{ y: headerY, opacity: headerOpacity }} className="space-y-8">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+              <Badge className="bg-lime-500/10 text-lime-400 hover:bg-lime-500/20 border-lime-500/20 px-6 py-2 text-sm font-bold uppercase tracking-widest backdrop-blur-md rounded-full">
+                Resources & Insights
+              </Badge>
+            </motion.div>
+            <motion.h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-[1.1]" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
+              Knowledge to <br className="hidden md:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-green-500">Scale Your Business</span>
+            </motion.h1>
+            <motion.p className="max-w-2xl mx-auto text-xl text-slate-400 leading-relaxed font-light" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.4 }}>
+               Expert advice, industry trends, and strategic guides on outsourcing, virtual assistants, and team expansion.
+            </motion.p>
             
-            <div className="max-w-2xl mx-auto relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-lime-400 to-green-400 rounded-full opacity-30 group-hover:opacity-50 blur transition duration-300"></div>
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="max-w-xl mx-auto relative group mt-8"
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-lime-400 to-green-500 rounded-full opacity-20 group-hover:opacity-40 blur transition duration-500"></div>
               <div className="relative">
-                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-slate-400 w-6 h-6" />
+                <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-lime-500 transition-colors" />
                 <Input
                   type="text"
                   placeholder="Search for topics, strategies, or guides..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-16 pr-6 py-8 rounded-full border-slate-100 focus:border-lime-500 focus:ring-lime-500 shadow-xl text-lg bg-white/90 backdrop-blur-md w-full transition-all duration-300 group-hover:bg-white"
+                  className="pl-14 pr-6 py-7 rounded-full border-white/10 bg-slate-900/80 text-white placeholder:text-slate-500 focus:border-lime-500 focus:ring-lime-500/20 shadow-2xl text-base backdrop-blur-xl w-full transition-all duration-300"
                 />
               </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
-          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 text-lime-600/70 cursor-pointer"
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-        >
-          <ChevronDown className="w-10 h-10" />
-        </motion.div>
+        </div>
+        <motion.div className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-600" animate={{ y: [0, 10, 0] }} transition={{ duration: 2, repeat: Infinity }}><ChevronDown className="w-8 h-8" /></motion.div>
       </div>
 
-      <div className="relative z-20 bg-gray-50 min-h-screen">
+      <div className="relative z-20 bg-white min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          
+          {/* Filter Buttons */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -218,89 +226,96 @@ export default function BlogsPage() {
             className="flex flex-wrap justify-center gap-3 mb-16"
           >
             {categories.map((category) => (
-              <button
+              <Button
                 key={category}
+                variant="ghost"
                 onClick={() => setSelectedCategory(category)}
-                className={`px-5 py-2 rounded-full text-xs font-semibold transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-lime-600 text-white shadow-md shadow-lime-200 scale-105'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-lime-300 hover:bg-lime-50 hover:shadow-sm'
-                }`}
+                className={cn(
+                    "px-6 py-6 rounded-full text-sm font-bold transition-all duration-300",
+                    selectedCategory === category 
+                        ? "bg-lime-600 text-white shadow-lg shadow-lime-200 hover:bg-lime-500 scale-105" 
+                        : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 shadow-sm"
+                )}
               >
                 {category}
-              </button>
+              </Button>
             ))}
           </motion.div>
 
+          {/* Results Count */}
           <motion.div 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="mb-8 flex justify-between items-center border-b border-gray-200 pb-4"
+            className="mb-8 flex justify-between items-center border-b border-slate-100 pb-4"
           >
-            <h2 className="text-xl font-bold text-gray-800">Latest Articles</h2>
-            <p className="text-gray-500 text-xs font-medium">
+            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Latest Articles</h2>
+            <p className="text-slate-500 text-sm font-medium">
               Showing {filteredBlogs.length} {filteredBlogs.length === 1 ? 'article' : 'articles'}
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Blog Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatePresence mode="popLayout">
             {filteredBlogs.map((blog, index) => (
               <motion.div
                 key={blog.id}
+                layout
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
               >
                 <Link href={blog.url} className="group block h-full">
-                  <Card className="h-full border-0 shadow-md shadow-gray-200/50 hover:shadow-xl hover:shadow-lime-100/50 transition-all duration-300 overflow-hidden flex flex-col bg-white rounded-xl hover:-translate-y-1">
-                    <div className="relative h-40 overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+                  <Card className={cn("h-full bg-white border-slate-100 overflow-hidden flex flex-col rounded-3xl shadow-lg", cardHoverStyle)}>
+                    <div className="relative h-52 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10"></div>
                       <Image
                         src={blog.thumbnail}
                         alt={blog.title}
                         fill
-                        className="object-cover transform group-hover:scale-105 transition-transform duration-500"
+                        className="object-cover transform group-hover:scale-110 transition-transform duration-700"
                       />
-                      <div className="absolute top-3 left-3 z-20">
-                        <Badge className="bg-white/95 text-gray-800 hover:bg-white shadow-sm backdrop-blur-md border-0 px-2.5 py-0.5 text-[10px] font-bold tracking-wide">
+                      <div className="absolute top-4 left-4 z-20">
+                        <Badge className="bg-white/90 text-slate-900 hover:bg-white shadow-sm backdrop-blur-md border-0 px-4 py-1.5 text-xs font-bold tracking-wide uppercase rounded-full">
                           {blog.category}
                         </Badge>
                       </div>
                     </div>
                     
-                    <CardContent className="flex-grow p-5">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2.5 group-hover:text-lime-600 transition-colors duration-200 line-clamp-2 leading-snug">
-                        {blog.title}
-                      </h3>
-                      
-                      <p className="text-gray-600 mb-4 line-clamp-2 text-xs leading-relaxed font-medium">
-                        {blog.description}
-                      </p>
-                      
-                      <div className="flex items-center text-[10px] text-gray-400 font-semibold space-x-3 pt-3 border-t border-gray-50">
+                    <CardContent className="flex-grow p-8">
+                      <div className="flex items-center text-xs text-slate-400 font-bold space-x-3 mb-4 uppercase tracking-wider">
                         <div className="flex items-center">
-                          <Calendar className="w-3 h-3 mr-1" />
+                          <Calendar className="w-3.5 h-3.5 mr-1.5 text-lime-500" />
                           {new Date(blog.publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                         </div>
+                        <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                         <div className="flex items-center">
-                          <Clock className="w-3 h-3 mr-1" />
+                          <Clock className="w-3.5 h-3.5 mr-1.5 text-lime-500" />
                           {blog.readTime}
                         </div>
                       </div>
+
+                      <h3 className="text-xl font-black text-slate-900 mb-3 group-hover:text-lime-600 transition-colors duration-300 line-clamp-2 leading-tight tracking-tight">
+                        {blog.title}
+                      </h3>
+                      
+                      <p className="text-slate-500 mb-6 line-clamp-3 text-sm leading-relaxed font-medium">
+                        {blog.description}
+                      </p>
                     </CardContent>
 
-                    <CardFooter className="p-5 pt-0 mt-auto">
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center space-x-2 group-hover:opacity-80 transition-opacity">
-                           <div className="w-6 h-6 rounded-full bg-lime-100 flex items-center justify-center text-lime-700 font-bold text-[10px] ring-2 ring-white">
+                    <CardFooter className="p-8 pt-0 mt-auto border-t border-slate-100">
+                      <div className="flex items-center justify-between w-full pt-6">
+                        <div className="flex items-center space-x-3">
+                           <div className="w-8 h-8 rounded-full bg-lime-100 flex items-center justify-center text-lime-700 font-bold text-xs ring-2 ring-white shadow-sm">
                               SA
                            </div>
-                           <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{blog.author}</span>
+                           <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{blog.author}</span>
                         </div>
-                        <div className="flex items-center text-lime-600 font-bold text-xs group-hover:translate-x-1 transition-transform duration-300">
-                          Read <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                        <div className="flex items-center text-lime-600 font-bold text-sm group-hover:translate-x-2 transition-transform duration-300">
+                          Read Article <ArrowRight className="w-4 h-4 ml-2" />
                         </div>
                       </div>
                     </CardFooter>
@@ -308,30 +323,56 @@ export default function BlogsPage() {
                 </Link>
               </motion.div>
             ))}
+            </AnimatePresence>
           </div>
 
+          {/* Empty State */}
           {filteredBlogs.length === 0 && (
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }}
-              className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200 shadow-sm"
+              className="text-center py-32 bg-slate-50 rounded-3xl border border-dashed border-slate-200"
             >
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                <Search className="w-8 h-8 text-gray-400" />
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm">
+                <Search className="w-8 h-8 text-slate-300" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">No articles found</h3>
-              <p className="text-gray-500 max-w-md mx-auto mb-6 text-sm">
-                We couldn't find any articles matching "{searchTerm}".
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">No articles found</h3>
+              <p className="text-slate-500 max-w-md mx-auto mb-8">
+                We couldn't find any articles matching "{searchTerm}". Try searching for something else.
               </p>
-              <button 
+              <Button 
                 onClick={() => {setSearchTerm(''); setSelectedCategory('All');}}
-                className="px-6 py-2 bg-lime-600 text-white text-sm font-bold rounded-full hover:bg-lime-700 transition-colors shadow-md"
+                className="px-8 py-6 bg-lime-600 text-white text-sm font-bold rounded-full hover:bg-lime-500 transition-all shadow-lg shadow-lime-900/20 hover:shadow-lime-900/30"
               >
-                Clear filters
-              </button>
+                Clear Filters
+              </Button>
             </motion.div>
           )}
         </div>
+
+        {/* --- Final CTA --- */}
+        <section className="py-32 bg-slate-50 relative overflow-hidden border-t border-slate-200">
+          <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight">
+               Ready to Build Your Team?
+            </h2>
+            <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+              You've read the insights. Now take the next step. We help 500K+ agencies build high-performing offshore teams that actually work.
+            </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link href="/pricing">
+                <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white px-12 py-8 text-xl font-bold rounded-2xl shadow-2xl hover:shadow-xl transition-all">
+                  View Pricing Models
+                </Button>
+              </Link>
+               <Link href="/contact">
+                <Button size="lg" variant="outline" className="px-12 py-8 text-xl font-bold rounded-2xl border-slate-300 hover:bg-white text-slate-700">
+                  Book Strategy Call
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
