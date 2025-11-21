@@ -205,12 +205,12 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       setCurrenciesState(fallbackCurrencies)
       
       // Update selected currency with fallback rate (without triggering localStorage save)
-      const currentSelected = fallbackCurrencies.find(c => c.code === selectedCurrencyRef.current.code)
-      if (currentSelected) {
+        const currentSelected = fallbackCurrencies.find(c => c.code === selectedCurrencyRef.current.code)
+        if (currentSelected) {
         setSelectedCurrencyState(currentSelected) // Use state setter directly to avoid re-saving to localStorage
-        // Clear price cache when fallback rates are used
-        clearPriceCache()
-      }
+          // Clear price cache when fallback rates are used
+          clearPriceCache()
+        }
       
       console.log('✅ Using fallback exchange rates due to API error:', fallbackRates)
       console.log('Updated currencies with fallback rates:', fallbackCurrencies)

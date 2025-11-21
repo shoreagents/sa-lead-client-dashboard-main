@@ -36,8 +36,54 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "ShoreAgents - Professional Offshore Solutions",
-  description: "Leading provider of offshore talent solutions and business process outsourcing services",
+  metadataBase: new URL('https://www.shoreagents.com'),
+  title: {
+    default: "ShoreAgents - Professional Filipino Staff Leasing & BPO Services",
+    template: "%s | ShoreAgents"
+  },
+  description: "Professional offshore staffing for Real Estate, Construction, Accounting & more. 500+ successful placements. $8-15/hr university-educated Filipino professionals. Enterprise-grade BPO infrastructure.",
+  keywords: ["offshore staffing", "BPO services", "virtual assistant", "Filipino staff", "real estate outsourcing", "construction outsourcing", "ShoreAgents"],
+  authors: [{ name: "Stephen Atcheler" }],
+  creator: "ShoreAgents",
+  publisher: "ShoreAgents",
+  
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://www.shoreagents.com",
+    siteName: "ShoreAgents",
+    title: "ShoreAgents - Professional Filipino Staff Leasing & BPO Services",
+    description: "Professional offshore staffing for Real Estate, Construction, Accounting & more. 500+ successful placements.",
+    images: [{
+      url: "/og-image.jpg",
+      width: 1200,
+      height: 630,
+      alt: "ShoreAgents - Professional Offshore Staffing"
+    }]
+  },
+  
+  twitter: {
+    card: "summary_large_image",
+    title: "ShoreAgents - Professional Filipino Staff Leasing",
+    description: "Professional offshore staffing. 500+ successful placements. Enterprise-grade BPO infrastructure.",
+    images: ["/twitter-image.jpg"],
+  },
+  
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  
+  verification: {
+    google: "your-google-verification-code",
+  },
 };
 
 export default function RootLayout({
@@ -45,10 +91,42 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Organization Schema for LLMs and Search Engines
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ShoreAgents",
+    "url": "https://www.shoreagents.com",
+    "logo": "https://www.shoreagents.com/ShoreAgents-Logo.png",
+    "description": "Professional offshore staffing and BPO services. 500+ successful placements across real estate, construction, accounting, and more.",
+    "foundingDate": "2010",
+    "founder": {
+      "@type": "Person",
+      "name": "Stephen Atcheler",
+      "jobTitle": "Founder & CEO"
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Cebu",
+      "addressCountry": "Philippines"
+    },
+    "areaServed": ["United States", "Australia", "New Zealand", "Canada"],
+    "sameAs": [
+      "https://www.linkedin.com/company/shoreagents",
+      "https://www.facebook.com/shoreagents"
+    ],
+    "serviceType": ["Offshore Staffing", "BPO Services", "Virtual Assistant Services", "Staff Leasing"],
+    "knowsAbout": ["Real Estate Outsourcing", "Construction Outsourcing", "Accounting Outsourcing", "Virtual Assistants"]
+  };
+
   return (
     <html lang="en">
       <head>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
       </head>
       <body
         className={`${poppins.variable} ${roboto.variable} font-sans antialiased`}

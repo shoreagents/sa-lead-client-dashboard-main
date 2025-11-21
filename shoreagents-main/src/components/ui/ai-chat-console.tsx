@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Send, ChevronDown, ChevronUp, ExternalLink, Sparkles, MoreVertical, Pin, PinOff } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useChatContext, Message } from '@/lib/chat-context';
 import { MayaTextField, MayaNameFields, MayaAnonymousUserForm, MayaTalentSearchModal, MayaPricingCalculatorModal, MayaPricingForm } from '@/components/maya';
 import { generateUserId } from '@/lib/userEngagementService';
@@ -279,8 +281,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
         }]
       });
       
-      // Direct team creation - immediately trigger pricing calculator
-      if (isDirectTeamCreation && !isCollectingPricing) {
+      // ❌ DISABLED: Direct team creation - Maya now handles conversationally
+      if (false && isDirectTeamCreation && !isCollectingPricing) {
         console.log('🎯 Direct team creation detected, starting pricing calculator immediately');
         setIsDirectTeamCreation(true);
         setIsCollectingPricing(true);
@@ -337,7 +339,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
          isCollectingContact: isCollectingContact
        });
        
-       if (isAskingForContact && !isCollectingContact && !isSimpleGreeting && !isCollectingPricing && !isDirectTeamCreation) {
+       // ❌ DISABLED: Old modal-based contact form - Maya now asks conversationally
+       if (false && isAskingForContact && !isCollectingContact && !isSimpleGreeting && !isCollectingPricing && !isDirectTeamCreation) {
          console.log('🎯 Triggering contact collection form!');
          console.log('🔍 User data check:', userData);
          
@@ -400,7 +403,9 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
          (inputValue.toLowerCase().includes('candidate') && 
           (inputValue.toLowerCase().includes('about') || inputValue.toLowerCase().includes('?')));
        
-       if ((isSuggestingPricingForTalent || hasPricingCalculatorSuggestion) && 
+       // ❌ DISABLED: Old modal-based pricing form - Maya now uses ONLY conversational chat
+       // The API handles all data extraction and saving automatically in the background
+       if (false && (isSuggestingPricingForTalent || hasPricingCalculatorSuggestion) && 
            !isCollectingPricing && 
            !candidatesRecentlyShown && 
            !isAskingAboutCandidates) {
@@ -432,7 +437,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
          isDirectTeamCreation: isDirectTeamCreation
        });
        
-       if (isAskingForIndustry && !isCollectingIndustry && !isCollectingContact && !isCollectingPricing && !isDirectTeamCreation && !isSimpleGreeting) {
+       // ❌ DISABLED: Old modal-based industry form - Maya now asks conversationally
+       if (false && isAskingForIndustry && !isCollectingIndustry && !isCollectingContact && !isCollectingPricing && !isDirectTeamCreation && !isSimpleGreeting) {
          console.log('🎯 Triggering industry collection form!');
          console.log('🔍 User data check:', userData);
          
@@ -489,8 +495,54 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                 : 'bg-white text-gray-800 border border-gray-100'
             }`}
           >
-            <div className="text-sm leading-relaxed font-normal whitespace-pre-wrap">
-              {message.content}
+            <div className="text-sm leading-relaxed font-normal prose prose-sm max-w-none">
+              {isUser ? (
+                <div className="whitespace-pre-wrap">{message.content}</div>
+              ) : (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    // Paragraphs
+                    p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                    // Bold text
+                    strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />,
+                    // Italic text
+                    em: ({node, ...props}) => <em className="italic" {...props} />,
+                    // Unordered lists
+                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-2 space-y-1" {...props} />,
+                    // Ordered lists
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-2 space-y-1" {...props} />,
+                    // List items
+                    li: ({node, ...props}) => <li className="text-gray-800" {...props} />,
+                    // Links
+                    a: ({node, ...props}) => (
+                      <a 
+                        className="text-lime-600 hover:text-lime-700 underline font-medium" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        {...props} 
+                      />
+                    ),
+                    // Headings
+                    h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2 text-gray-900" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2 text-gray-900" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-1 text-gray-900" {...props} />,
+                    // Code blocks
+                    code: ({node, inline, ...props}: any) => 
+                      inline ? (
+                        <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono text-gray-800" {...props} />
+                      ) : (
+                        <code className="block bg-gray-100 p-2 rounded text-xs font-mono text-gray-800 overflow-x-auto mb-2" {...props} />
+                      ),
+                    // Blockquotes
+                    blockquote: ({node, ...props}) => (
+                      <blockquote className="border-l-4 border-lime-500 pl-3 italic text-gray-700 my-2" {...props} />
+                    ),
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              )}
             </div>
             
             {message.relatedContent && message.relatedContent.length > 0 && (
