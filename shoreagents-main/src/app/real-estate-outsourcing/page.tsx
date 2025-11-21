@@ -279,11 +279,14 @@ const ServiceExplorer = () => {
   return (
     <div className={cn("bg-slate-50 p-6 md:p-10 rounded-3xl border border-slate-100", sectionSpacing)}>
       <div className="flex justify-center gap-3 flex-wrap mb-10">
-        {categories.map((cat) => (
-          <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={cn("flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 shadow-sm", activeCategory === cat.id ? "bg-lime-600 text-white shadow-lg shadow-lime-200 scale-105 ring-2 ring-lime-600 ring-offset-2" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200")}>
-            <cat.icon className="w-4 h-4" /> {cat.label}
-          </button>
-        ))}
+        {categories.map((cat) => {
+          const IconComponent = cat.icon;
+          return (
+            <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={cn("flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all duration-300 shadow-sm", activeCategory === cat.id ? "bg-lime-600 text-white shadow-lg shadow-lime-200 scale-105 ring-2 ring-lime-600 ring-offset-2" : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200")}>
+              <IconComponent className="w-4 h-4" /> {cat.label}
+            </button>
+          );
+        })}
       </div>
       <div className="grid md:grid-cols-3 gap-6">
         <AnimatePresence mode="popLayout">

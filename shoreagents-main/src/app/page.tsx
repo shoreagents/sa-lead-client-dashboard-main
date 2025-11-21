@@ -88,7 +88,7 @@ const ServiceTab = () => {
 
       <div className="relative">
         <AnimatePresence mode="wait">
-          <TabsContent value="real-estate" className="mt-0">
+          <TabsContent key="real-estate" value="real-estate" className="mt-0">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="order-2 md:order-1 space-y-6">
                 <Badge className="bg-lime-100 text-lime-800 hover:bg-lime-200 px-4 py-1 rounded-full">Most Popular</Badge>
@@ -130,7 +130,7 @@ const ServiceTab = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="construction" className="mt-0">
+          <TabsContent key="construction" value="construction" className="mt-0">
              <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="order-2 md:order-1 space-y-6">
                 <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-200 px-4 py-1 rounded-full">High Demand</Badge>
@@ -162,7 +162,7 @@ const ServiceTab = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="finance" className="mt-0">
+          <TabsContent key="finance" value="finance" className="mt-0">
              <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="order-2 md:order-1 space-y-6">
                 <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-1 rounded-full">CPA Qualified</Badge>
@@ -194,7 +194,7 @@ const ServiceTab = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="support" className="mt-0">
+          <TabsContent key="support" value="support" className="mt-0">
              <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="order-2 md:order-1 space-y-6">
                 <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200 px-4 py-1 rounded-full">24/7 Coverage</Badge>
