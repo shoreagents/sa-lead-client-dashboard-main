@@ -36,7 +36,7 @@ export default function MortgageOutsourcingPage() {
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Mortgage Outsourcing:<br />
               <span className="text-lime-600">When $5,000 Daily Fines Meet Your $15/Hour VA</span>
-            </h1>
+        </h1>
             <p className="text-xl text-gray-700 leading-relaxed mb-8">
               RESPA violations carry penalties of <strong>$5,000 to $25,000 per day</strong>. Your lender remains 100% liable even if your 
               outsourced processor makes the mistake. That's the reality every mortgage BPO provider conveniently forgets to mention until 

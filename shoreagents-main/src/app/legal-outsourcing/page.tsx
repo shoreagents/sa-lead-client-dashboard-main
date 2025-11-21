@@ -37,7 +37,7 @@ export default function LegalOutsourcingPage() {
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Legal Outsourcing:<br />
               <span className="text-lime-600">September's Search Spike Just Changed Everything</span>
-            </h1>
+        </h1>
             <p className="text-xl text-gray-700 leading-relaxed mb-8">
               Something happened in September 2025 that legal outsourcing providers aren't talking about yet. Search interest for "legal 
               outsourcing" in the United States hit 100 on the Google Trends index—the highest point in over a year. In Australia, the 
