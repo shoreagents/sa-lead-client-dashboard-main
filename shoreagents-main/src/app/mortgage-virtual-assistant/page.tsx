@@ -1,857 +1,790 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import { 
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
-  ArrowRight,
+  CheckCircle2,
+  XCircle,
   DollarSign,
-  Target,
-  Zap,
-  Award,
-  Phone,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
   AlertCircle,
-  BarChart,
-  HelpCircle,
-  Briefcase,
-  FileText,
-  Settings,
-  ClipboardList,
-  Calendar,
-  FileCheck,
-  Lightbulb,
-  Monitor,
-  Database,
-  MessageCircle,
-  Home,
+  ArrowRight,
   Building2,
-  Cpu,
-  Globe
-} from 'lucide-react';
-import Image from 'next/image';
+  FileText,
+  Users,
+  Globe,
+  Calculator,
+  Target,
+  Shield,
+  Scale,
+  Phone,
+  Monitor
+} from "lucide-react";
+import Link from "next/link";
 
 export default function MortgageVirtualAssistantPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-red-600 text-white mb-4 text-sm px-3 py-1">
+              For 15+ Loans Monthly Brokers
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Mortgage Virtual Assistant:<br />
+              <span className="text-red-600">Why Most Offshore Arrangements Are Technically Illegal in 25 States</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Every mortgage VA company except one is selling you an illegal employment arrangement. They just don't know it yet—or worse, they do and aren't telling you.
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              Here's what I mean: in Alabama, Arizona, Arkansas, California, Colorado, Florida, Georgia, Idaho, Illinois, Louisiana, Michigan, Minnesota, Missouri, Montana, Nebraska, New Mexico, New Jersey, Nevada, Ohio, Oregon, Pennsylvania, South Carolina, Tennessee, Texas, Virginia, and Washington, contract mortgage processors must be licensed as loan originators under the SAFE Act. That $15/hour Filipino VA you're hiring as an independent contractor? Legally, they need a loan originator licence in most of these states—which costs $1,500-2,500 per state, requires passing an exam, and demands ongoing continuing education.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <Badge variant="destructive" className="mb-4 bg-red-600 text-white px-4 py-2 text-sm font-semibold flex items-center justify-center w-fit mx-auto">
-            <AlertCircle className="w-4 h-4 mr-2" />
-            CRITICAL: Mortgage Companies Losing $85,000+ Annually on Processing Bottlenecks & Borrower Communication Chaos
-          </Badge>
-          <p className="text-lg text-gray-600 mb-6">
-            While smart lenders scale with systematic mortgage virtual assistant solutions, others get trapped by expensive local hiring, extended processing times, and borrower satisfaction disasters. Don't become another statistic.
-          </p>
-
-          <h1 className="text-5xl font-bold text-gray-900 mb-8">
-            Mortgage Virtual Assistant: Complete Guide to Lending Operations Support
-          </h1>
-
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&h=600&fit=crop"
-              alt="Professional mortgage virtual assistant reviewing loan documents and processing applications"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Book a Strategy Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              How It Works
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              See Pricing
-              <DollarSign className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Stephen's Story */}
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 flex items-center">
-            <AlertCircle className="w-10 h-10 text-red-600 mr-3" />
-            The Costly Mortgage Staffing Mistake
-          </h2>
-          <div className="space-y-4">
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold">
-              After 500+ offshore placements across industries, I've watched mortgage companies make the same expensive mistake repeatedly.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              They think they can just hire local processors and somehow scale from 10 to 50+ loans per month without drowning in documentation chaos, borrower communication disasters, and compliance nightmares. What they get instead is mounting overhead, extended processing times, and loan officers burning out on paperwork instead of building relationships and closing deals.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              But here's what I discovered through our systematic approach to mortgage company staffing…
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold italic">
-              A mortgage virtual assistant transforms lending operations by handling loan processing, borrower communication, and compliance coordination while delivering 65-70% cost savings compared to local hiring.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Whether you need a loan processing assistant for end-to-end loan coordination, a mortgage broker assistant for broker operations, a lending assistant for specialized loan products, or a mortgage support staff member for comprehensive administrative coordination – modern mortgage virtual assistants provide systematic solutions that traditional hiring simply cannot match.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Mortgage companies face unprecedented challenges in 2025—regulatory complexity, borrower expectations, competitive pressure, and technology demands. These pressures make mortgage lending ideal for virtual assistant implementation, which has evolved from basic administrative support to comprehensive loan processing partnerships.
-            </p>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">70%</div>
-              <div className="text-gray-600 font-medium">Cost Savings vs Local Processors</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">150%</div>
-              <div className="text-gray-600 font-medium">Loan Processing Capacity</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">45%</div>
-              <div className="text-gray-600 font-medium">Faster Processing Times</div>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200 bg-white shadow-md">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">24/7</div>
-              <div className="text-gray-600 font-medium">Pipeline Monitoring</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Strategic Case */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Target className="w-8 h-8 text-lime-600 mr-3" />
-            The Strategic Case for Mortgage Virtual Assistants in 2025
-          </h2>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            Mortgage virtual assistants have transformed from cost-cutting measures to competitive advantages that leading lenders leverage to outpace competitors. Unlike generic virtual assistant services, mortgage admin assistants specialize in loan processing workflows, regulatory compliance, and borrower communication specific to mortgage lending.
-          </p>
-
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Based on our 500+ placements, mortgage companies implementing structured strategies report:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">65-70% reduction in processing overhead costs</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">150% increase in loan processing capacity</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">45% faster loan processing times</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">60% improvement in borrower communication consistency</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">80% more time for relationship building and business development</span>
-            </div>
-          </div>
-
-          <div className="text-center mt-6">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Schedule Your Free Mortgage VA Strategy Call
-            </Button>
-          </div>
-        </div>
-
-        {/* Cost Analysis */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <BarChart className="w-8 h-8 text-lime-600 mr-3" />
-            Real-World Impact: Mortgage Company Cost Analysis
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            For a concrete picture of potential savings, consider this comparison for a mid-sized mortgage company processing 50-100 loans monthly:
-          </p>
-
-          <div className="overflow-x-auto">
-            <table className="w-full bg-white rounded-lg shadow-md">
-              <thead className="bg-lime-600 text-white">
-                <tr>
-                  <th className="px-6 py-4 text-left font-semibold">Role</th>
-                  <th className="px-6 py-4 text-right font-semibold">Local Cost (Annual)</th>
-                  <th className="px-6 py-4 text-right font-semibold">VA Cost (Annual)</th>
-                  <th className="px-6 py-4 text-right font-semibold">Savings</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Loan Processor</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$65,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$19,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">71%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Loan Coordinator</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$55,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$17,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">69%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Customer Service Rep</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$45,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$15,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">67%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Administrative Assistant</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$48,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$16,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">67%</td>
-                </tr>
-                <tr className="bg-lime-100 font-bold">
-                  <td className="px-6 py-4 text-gray-900">Total Annual Savings</td>
-                  <td className="px-6 py-4 text-right text-gray-900">$213,000</td>
-                  <td className="px-6 py-4 text-right text-gray-900">$67,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 text-xl">$146,000</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p className="text-gray-700 leading-relaxed mt-6 font-semibold">
-            Beyond direct savings, the strategic advantage comes from redirecting loan officers to high-value activities like relationship building, referral partner development, and business growth initiatives.
-          </p>
-
-          <div className="text-center mt-6">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <DollarSign className="mr-2 h-5 w-5" />
-              See Complete Mortgage ROI Analysis & Projections
-            </Button>
-          </div>
-        </div>
-
-        {/* Stephen's Take on Systematic Solution */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Lightbulb className="w-8 h-8 text-lime-600 mr-3" />
-            Stephen's Take: The Systematic Mortgage Staffing Solution
-          </h2>
-          <div className="space-y-4">
-            <p className="text-gray-700 leading-relaxed">
-              Through 500+ offshore placements since 2012, I've developed a systematic approach to helping mortgage companies scale their processing capacity without the traditional hiring nightmares. The pattern I see repeatedly is mortgage companies that excel at originating loans but struggle with the systematic processing workflows needed to handle 50, 100, or 200+ loans monthly.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              What separates successful mortgage companies from struggling ones is their ability to systematize loan processing, borrower communication, and compliance management. When I work with mortgage companies to implement specialized mortgage virtual assistants, the transformation isn't just about cost savings – it's about creating systematic excellence that enables sustainable growth and superior borrower experiences.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              The systematic approach we've developed ensures that mortgage admin assistants understand loan processing workflows, can navigate LOS platforms like Encompass and Calyx Point, and maintain the detailed documentation that mortgage lending requires. This isn't generic administrative support – it's mortgage-specific systematic solutions.
-            </p>
-            <p className="text-gray-700 leading-relaxed font-semibold italic">
-              When mortgage companies can focus on originating while their loan processing assistants handle the systematic workflows, that's when exponential growth becomes possible.
-            </p>
-          </div>
-        </div>
-
-        {/* Comprehensive Services */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <ClipboardList className="w-8 h-8 text-lime-600 mr-3" />
-            Comprehensive Mortgage Virtual Assistant Services
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-8">
-            Mortgage lending requires systematic coordination across multiple loan phases and compliance requirements. Here are the core functions where specialized mortgage virtual assistants deliver exceptional ROI and enable loan officers to focus on relationship building and business development:
-          </p>
-
-          <div className="space-y-8">
-            {/* Loan Processing */}
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <FileCheck className="w-6 h-6 text-lime-600 mr-2" />
-                  1. Complete Loan Processing & Coordination
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  Professional loan processing assistants and mortgage broker assistants handle the systematic workflows that move loans from application to closing:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Application to Clear-to-Close</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Complete 1003 application review and verification</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Income, asset, and employment verification coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Credit report analysis and rapid rescore coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Condition clearance and underwriting coordination</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Third-Party Coordination</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Appraisal ordering and management</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Title and escrow coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Insurance verification and coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">HOA and flood certification management</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Quality Control & Compliance</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Pre-submission file audit and quality review</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">TRID and compliance timeline management</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Investor guideline adherence verification</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Loan file documentation and organization</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Borrower Communication */}
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <MessageCircle className="w-6 h-6 text-lime-600 mr-2" />
-                  2. Borrower Communication & Customer Service
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  Exceptional borrower communication through dedicated mortgage customer service assistants:
-                </p>
-
-                <div>
-                  <h4 className="font-bold text-gray-900 mb-3">Professional Borrower Support</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Initial application assistance and guidance</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Regular loan status updates and milestone communication</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Document request coordination and explanation</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Condition clearance assistance and education</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">Closing coordination and preparation support</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Pipeline Management */}
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Settings className="w-6 h-6 text-lime-600 mr-2" />
-                  3. Pipeline Management & Administrative Support
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  Comprehensive administrative coordination through specialized lending assistants:
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Pipeline & Data Management</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Loan pipeline updates and maintenance</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Production reporting and analytics</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">CRM management and lead follow-up</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Database maintenance and organization</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Compliance & Documentation</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Disclosure preparation and delivery</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Audit trail documentation and maintenance</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Regulatory timeline monitoring</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">File compliance verification and organization</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-8">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <Target className="mr-2 h-5 w-5" />
-              Discover Our Mortgage VA Implementation Process
-            </Button>
-          </div>
-        </div>
-
-        {/* Philippines Advantage */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Globe className="w-8 h-8 text-lime-600 mr-3" />
-            Stephen's Take: The Philippines Advantage for Mortgage Lending
-          </h2>
-          <div className="space-y-4 mb-6">
-            <p className="text-gray-700 leading-relaxed">
-              Through our systematic approach to mortgage company staffing, I've discovered that Filipino professionals excel in mortgage support roles for several key reasons. First, their strong business education and technical training background means they understand financial processes and can work effectively with LOS platforms like Encompass, Calyx Point, and compliance systems.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              Most importantly, Filipino mortgage virtual assistants understand the importance of systematic processes and attention to detail that mortgage lending requires. When we recruit mortgage admin assistants in the Philippines, we specifically look for professionals who have banking or financial services experience and can demonstrate systematic thinking and compliance adherence.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              The combination of financial education, English proficiency, and systematic thinking means faster implementation and better results for mortgage companies. Our systematic approach ensures they understand loan processing workflows and compliance requirements from day one.
-            </p>
-          </div>
-
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Key Philippines Advantages for Mortgage:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <Building2 className="w-5 h-5 text-lime-600 mr-2" />
-                  Financial Education
-                </h4>
-                <p className="text-gray-700 text-sm">Strong banking and financial services education foundation</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <BarChart className="w-5 h-5 text-lime-600 mr-2" />
-                  Process Excellence
-                </h4>
-                <p className="text-gray-700 text-sm">Natural understanding of compliance and systematic workflows</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <Globe className="w-5 h-5 text-lime-600 mr-2" />
-                  US Market Knowledge
-                </h4>
-                <p className="text-gray-700 text-sm">Familiarity with US banking and mortgage practices</p>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-4">
-                <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-                  <Clock className="w-5 h-5 text-lime-600 mr-2" />
-                  Time Zone Benefits
-                </h4>
-                <p className="text-gray-700 text-sm">Perfect alignment with Australian and New Zealand business hours</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Service Options */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Mortgage Virtual Assistant Service Options
-          </h2>
-          <p className="text-gray-700 text-center mb-8 leading-relaxed">
-            ShoreAgents offers flexible mortgage virtual assistant solutions tailored to your loan volume and operational complexity:
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Start Strategic</h3>
-                <div className="text-4xl font-bold text-lime-600 mb-3">One Agent</div>
-                <p className="text-gray-700 mb-6 flex-grow">
-                  Perfect for loan officers processing 10-25 loans monthly. Test our systematic approach with a single dedicated loan processing assistant.
-                </p>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white font-semibold mt-auto">
-                  Start with One Mortgage VA
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white h-full flex flex-col relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-lime-600 text-white px-4 py-1 font-semibold">Most Popular</Badge>
-              </div>
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Scale Smart</h3>
-                <div className="text-4xl font-bold text-lime-600 mb-3">Team</div>
-                <p className="text-gray-700 mb-6 flex-grow">
-                  Ideal for growing mortgage companies with 25-75 loans monthly. Specialized roles including processors, coordinators, and customer service.
-                </p>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white font-semibold mt-auto">
-                  Build Your Mortgage Team
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">Enterprise Scale</h3>
-                <div className="text-4xl font-bold text-lime-600 mb-3">Workforce</div>
-                <p className="text-gray-700 mb-6 flex-grow">
-                  For large mortgage companies with 75+ monthly loans. Complete departmental coverage with specialized mortgage virtual assistants across all functions.
-                </p>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white font-semibold mt-auto">
-                  Scale Your Mortgage Workforce
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* AI Future */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Cpu className="w-8 h-8 text-lime-600 mr-3" />
-            The Future: AI-Enhanced Mortgage Virtual Assistants
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            Mortgage lending is evolving rapidly with AI integration. While we don't offer AI-powered mortgage virtual assistants yet, the industry is moving toward hybrid human-AI models that will revolutionize loan processing:
-          </p>
-
-          <Card className="border-lime-200 bg-lime-50 mb-6">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Stephen's Vision: AI + Systematic Mortgage Excellence</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                My entire operations team now uses Claude projects for recruitment, operations, and systematic process documentation. Our development team codes using Cursor with Claude – they're building systematic loan processing workflows instead of basic database systems.
-              </p>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                The future mortgage virtual assistant will combine Filipino systematic excellence with AI automation. Imagine income calculations that auto-verify across multiple sources, compliance timelines that track themselves, and borrower communication that anticipates questions before they're asked.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                Every mortgage function can have an element of AI enhancement. What we're building now is the systematic foundation for that AI-enabled lending future.
-              </p>
-            </CardContent>
-          </Card>
-
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Current AI Integration Opportunities</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h4 className="font-bold text-gray-900 mb-3 flex items-center">
-                  <Cpu className="w-5 h-5 text-lime-600 mr-2" />
-                  Automated Processing Intelligence
-                </h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="text-gray-700">• AI-powered income and asset calculation verification</li>
-                  <li className="text-gray-700">• Smart document classification and organization</li>
-                  <li className="text-gray-700">• Automated condition clearance tracking</li>
-                  <li className="text-gray-700">• Predictive timeline management and delay prevention</li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h4 className="font-bold text-gray-900 mb-3 flex items-center">
-                  <MessageCircle className="w-5 h-5 text-lime-600 mr-2" />
-                  Intelligent Communication Systems
-                </h4>
-                <ul className="space-y-2 text-sm">
-                  <li className="text-gray-700">• AI-driven borrower communication and education</li>
-                  <li className="text-gray-700">• Automated status updates and milestone notifications</li>
-                  <li className="text-gray-700">• Smart question anticipation and response preparation</li>
-                  <li className="text-gray-700">• Intelligent escalation and priority management</li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-6">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 font-semibold">
-              <Cpu className="mr-2 h-5 w-5" />
-              Explore AI Virtual Assistant Future
-            </Button>
-          </div>
-        </div>
-
-        {/* Related Solutions */}
+        {/* Intro */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Explore Related Virtual Assistant Solutions
-          </h2>
-          <p className="text-gray-700 text-center mb-8">
-            Expand your offshore team capabilities with specialized virtual assistants across multiple financial and real estate functions:
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Nobody's telling you this. I've reviewed a dozen mortgage VA providers, and exactly one—BrokerVA—explicitly addresses state licensing requirements. The rest? They're positioning "trained mortgage VAs" without mentioning that most offshore arrangements violate federal SAFE Act provisions and state regulations.
           </p>
+          
+          <Card className="bg-red-50 border-l-4 border-red-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                I've been placing offshore staff with businesses across the USA, Australia, and New Zealand for 15 years. I've seen mortgage companies achieve genuine efficiency gains through compliant structures. I've also watched brokers discover their VA arrangements were technically illegal after six months of operations.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-amber-50 border-l-4 border-amber-500 mt-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>This guide is for USA mortgage brokers and lenders processing 15+ loans monthly who need legitimate offshore support without risking their licences.</strong> If you're in Australia or New Zealand, stop reading now—offshore mortgage processing faces nearly insurmountable regulatory barriers in both markets, making this primarily a USA conversation.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Separator className="my-12" />
+
+        {/* Licensing Trap Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <Scale className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Licensing Trap Every Competitor Ignores</h2>
+              <p className="text-lg text-gray-600">The SAFE Act requirements that make most arrangements illegal</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The federal SAFE Act defines loan originator activities as taking applications, offering or negotiating loan terms, or representing to the public that you can perform these activities. Independent contractors performing these tasks must be licensed. The only exception? W-2 employees working under direct supervision of a licensed MLO.
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">
+                Here's the problem: most mortgage VA arrangements operate through contract labour. You hire a VA through an agency, they work as a contractor, you pay monthly fees. Seems fine, right? Except in 25+ states, that structure requires the processor to hold individual state licensing—which almost certainly they don't have.
+              </p>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">What tasks trigger licensing requirements:</h3>
+                <div className="space-y-2">
+                  {[
+                    "Taking loan applications (even basic data entry)",
+                    "Discussing loan products or terms with borrowers",
+                    "Providing credit or income advice",
+                    "Negotiating rates or fees",
+                    "Making decisions about loan structure",
+                    "Pre-qualification conversations"
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">What's actually delegatable without licensing:</h3>
+                <div className="space-y-2">
+                  {[
+                    "Document gathering and organisation",
+                    "File status updates to internal team",
+                    "Scheduling (non-borrower facing)",
+                    "Post-closing file organisation",
+                    "CRM data entry",
+                    "Marketing material creation"
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-amber-300 bg-amber-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The gap between what VAs actually do and what's legally delegatable is massive. Most offshore arrangements have VAs performing tasks that technically require licensing because brokers don't understand the SAFE Act definition of "origination activities."
+              </p>
+              <p className="text-gray-800 font-semibold">
+                The compliant solution: Work with a company that operates as a licensed mortgage entity with direct W-2 employees overseas (like the BrokerVA model), or hire your VA as a W-2 employee through your own licensed entity. Generic VA agencies arranging contract labour? That's the licensing trap waiting to happen.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 15-Loan Volume Rule Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <Calculator className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 15-Loan Volume Rule</h2>
+              <p className="text-lg text-gray-600">Let me give you the honest math on when mortgage VAs make financial sense</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Small broker processing 10 loans/month:</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">VA base cost:</span>
+                  <span className="font-semibold">$18,000/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">LOS software access:</span>
+                  <span className="font-semibold">$1,200/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your training time (40 hrs @ $200/hr):</span>
+                  <span className="font-semibold">$8,000 first year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Ongoing management (5 hrs/wk × 52 × $200/hr):</span>
+                  <span className="font-semibold">$52,000/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Compliance setup:</span>
+                  <span className="font-semibold">$2,000-5,000 first year</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Total first-year cost:</span>
+                  <span className="font-bold text-red-600 text-xl">$81,200-84,200</span>
+                </div>
+                <p className="text-red-700 font-semibold mt-2">Cost per loan: $6,767-7,017 per loan</p>
+              </div>
+              <p className="text-gray-800 leading-relaxed mt-4">
+                Compare that to per-loan processors at $350-500 per file, and you're looking at $42,000-60,000 annually for 10 loans monthly. The VA costs more once you factor in your time.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-bold text-lg mb-4">
+                The break-even point: 15-20 loans per month minimum.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Below that threshold, per-loan processors make more economic sense. Above it, full-time VAs start delivering genuine ROI—but only if you've got documented processes and can commit 10+ hours weekly to management initially.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                This isn't what providers want to hear, but it's the reality. If you're processing 8-12 loans monthly, you're not ready for a full-time mortgage VA. Wait until you hit consistent 15+ monthly volume.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What Mortgage-Trained Actually Means Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-amber-100 rounded-full p-3">
+              <AlertTriangle className="w-8 h-8 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Mortgage-Trained Actually Means</h2>
+              <p className="text-lg text-gray-600">Every provider promises "mortgage-trained VAs ready day one." Here's what that training actually includes</p>
+            </div>
+          </div>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Their 2-4 week "mortgage training":</h3>
+              <ul className="space-y-1 text-sm text-gray-700">
+                <li>• Basic loan types (conventional, FHA, VA, USDA)</li>
+                <li>• Generic compliance awareness</li>
+                <li>• Maybe one LOS system (usually Encompass)</li>
+                <li>• General mortgage terminology</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What they DON'T learn:</h3>
+              <ul className="space-y-1 text-sm text-gray-700">
+                <li>• Your specific LOS configuration</li>
+                <li>• Your lender relationships and requirements</li>
+                <li>• Your state regulations</li>
+                <li>• Your actual workflow and procedures</li>
+                <li>• Your client communication standards</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">The real timeline to productivity:</h3>
+              <div className="space-y-4">
+                <div>
+                  <Badge className="bg-blue-600 text-white mb-2">Weeks 1-4</Badge>
+                  <p className="text-gray-800 font-semibold mb-1">Learning your systems (10-20% productivity)</p>
+                  <p className="text-gray-700 text-sm">Your VA is watching, asking questions, making mistakes. You're spending 2-3 hours daily on training and oversight. They can handle basic document organisation but nothing substantive.</p>
+                </div>
+                <div>
+                  <Badge className="bg-blue-600 text-white mb-2">Weeks 5-8</Badge>
+                  <p className="text-gray-800 font-semibold mb-1">Starting simple tasks (30-40% productivity)</p>
+                  <p className="text-gray-700 text-sm">They can process straightforward conventional loans with heavy supervision. Complex scenarios still require your direct involvement. You're spending 1-2 hours daily answering questions.</p>
+                </div>
+                <div>
+                  <Badge className="bg-blue-600 text-white mb-2">Weeks 9-12</Badge>
+                  <p className="text-gray-800 font-semibold mb-1">Moderate usefulness (50-60% productivity)</p>
+                  <p className="text-gray-700 text-sm">Handling routine processing with less oversight. Still needs guidance on complicated files. Government loans (FHA/VA) require significant support.</p>
+                </div>
+                <div>
+                  <Badge className="bg-green-600 text-white mb-2">Months 4-6</Badge>
+                  <p className="text-gray-800 font-semibold mb-1">Actually valuable (70-80% productivity)</p>
+                  <p className="text-gray-700 text-sm">Can manage most files independently. Still escalates complex issues but handles standard processing competently. Your management time drops to 5-10 hours weekly.</p>
+                </div>
+                <div>
+                  <Badge className="bg-lime-600 text-white mb-2">Months 6+</Badge>
+                  <p className="text-gray-800 font-semibold mb-1">Full productivity (85-95% productivity)</p>
+                  <p className="text-gray-700 text-sm">Confidently processes most loan types, understands your systems, requires minimal oversight. This is when ROI actually starts.</p>
+                </div>
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                Nobody breaks even on time investment for the first six months. That's the reality "mortgage-trained" providers don't mention in their sales pitches.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Case Study Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <Building2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Real-World Success: Gelt Financial Case Study</h2>
+              <p className="text-lg text-gray-600">How compliant mortgage VA implementation actually works</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Jack Miller at Gelt Financial started conservatively with one ShoreAgents specialist. His VA now handles YouTube marketing video transcription, follows up on sales leads (converting them to loan originations), and processes mortgage satisfactions.
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">
+                Jack's assessment: "Our VA has been a wonderful addition to our team. She is very reliable and her contributions have helped free up other staff here to tackle projects."
+              </p>
+              <div className="bg-white rounded-lg p-4 mb-4">
+                <h4 className="font-bold text-gray-900 mb-2">Performance Ratings:</h4>
+                <p className="text-gray-700 text-sm mb-2">Perfect 5/5 across every category:</p>
+                <ul className="space-y-1 text-sm text-gray-700">
+                  <li>• Work quality</li>
+                  <li>• Continuous improvement</li>
+                  <li>• Job knowledge</li>
+                  <li>• Communication</li>
+                  <li>• Reliability</li>
+                  <li>• Teamwork</li>
+                </ul>
+              </div>
+              <p className="text-gray-800 font-semibold mb-4">
+                More importantly, Jack's VA generates direct revenue through lead conversion whilst saving Gelt Financial approximately $40,000 annually (69% cost reduction compared to USA-based staff).
+              </p>
+              <p className="text-gray-800 leading-relaxed">
+                But notice the specifics: Jack took months to properly train his VA, maintains clear supervision, and uses her for tasks that don't trigger licensing requirements (marketing support, lead follow-up, documentation). This is compliant, effective mortgage VA implementation.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Software Cost Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <Monitor className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Software Cost Nobody Mentions</h2>
+              <p className="text-lg text-gray-600">Your mortgage VA needs access to your tech stack. Most brokers forget this in their ROI calculations</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Monthly software costs per VA:</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">LOS (Encompass, Calyx Point, etc.):</span>
+                  <span className="font-semibold">$75-150/month</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">CRM:</span>
+                  <span className="font-semibold">$50-100/month</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Document management:</span>
+                  <span className="font-semibold">$30-60/month</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Credit reporting:</span>
+                  <span className="font-semibold">$25-50/month</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Communication tools:</span>
+                  <span className="font-semibold">$20/month</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Project management:</span>
+                  <span className="font-semibold">$15/month</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Total:</span>
+                  <span className="font-bold text-red-600 text-xl">$215-395/month ($2,580-4,740/year)</span>
+                </div>
+              </div>
+              <p className="text-gray-800 font-semibold">
+                Add this to your $18,000-24,000 annual VA cost, and you're looking at $20,580-28,740 all-in before factoring management time. Still cheaper than USA-based staff ($60,000-85,000/year), but not the "$15/hour" fantasy providers advertise.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Tasks You Can't Delegate Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <Shield className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Tasks You Can't Legally Delegate</h2>
+              <p className="text-lg text-gray-600">The SAFE Act is very clear about what requires licensing</p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Home className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Real Estate</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Transaction coordination and client support</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Never delegate without licensing:</h3>
+                <div className="space-y-2">
+                  {[
+                    "Taking loan applications",
+                    "Discussing loan products or terms",
+                    "Advising on credit or income issues",
+                    "Negotiating interest rates or fees",
+                    "Pre-qualification/pre-approval conversations",
+                    "Any substantive borrower responses about loan approval"
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-xs">{item}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Building2 className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Property Management</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Rental property and tenant coordination</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Safe to delegate (clerical duties):</h3>
+                <div className="space-y-2">
+                  {[
+                    "Document gathering and organisation",
+                    "File status updates to internal team",
+                    "Scheduling non-borrower meetings",
+                    "Post-closing organisation",
+                    "CRM data entry",
+                    "Marketing content creation"
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-xs">{item}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Shield className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Insurance</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Policy administration and claims support</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <FileText className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Bookkeeping</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Financial record management and support</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Briefcase className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Administrative</h3>
-                <p className="text-gray-700 mb-4 flex-grow">General administrative and office support</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white h-full flex flex-col">
-              <CardContent className="p-6 flex flex-col flex-grow">
-                <Cpu className="w-12 h-12 text-lime-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">AI Assistants</h3>
-                <p className="text-gray-700 mb-4 flex-grow">Future AI-powered virtual assistant solutions</p>
-                <Button variant="outline" className="w-full border-lime-600 text-lime-600 hover:bg-lime-50 font-semibold mt-auto">
-                  Learn More
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Grey area (requires oversight):</h3>
+                <div className="space-y-2">
+                  {[
+                    "Borrower communication (status updates only)",
+                    "Initial disclosure preparation (MLO must review/send)",
+                    "Conditions tracking and requests",
+                    "Third-party vendor coordination"
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700 text-xs">{item}</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <HelpCircle className="w-10 h-10 text-lime-600 mr-3" />
-            Frequently Asked Questions: Mortgage Virtual Assistants
-          </h2>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What specific tasks can a mortgage virtual assistant handle?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Mortgage virtual assistants handle comprehensive loan processing including application review, document collection, income verification, credit analysis, condition clearance, third-party coordination, borrower communication, and compliance management. They work with all major LOS platforms like Encompass and Calyx Point and can manage systematic workflows from application through closing while maintaining regulatory compliance and borrower satisfaction.
-                </AccordionContent>
-              </AccordionItem>
+          <Card className="border-red-300 bg-red-50 mt-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                The problem? Most VAs end up doing grey area and restricted tasks because brokers don't understand the legal boundaries. That's when you're operating outside licensing requirements—even if unintentionally.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
-              <AccordionItem value="item-2" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How much can mortgage companies save with virtual assistants?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Mortgage companies typically achieve 65-70% cost savings through mortgage virtual assistant implementation. A loan processor role that costs $60,000-$65,000 annually locally generally costs $18,000-$22,000 when supported by a Filipino mortgage admin assistant, including all management fees. Beyond direct savings, companies eliminate recruitment, office space, equipment, and benefit costs while gaining systematic loan processing capabilities.
-                </AccordionContent>
-              </AccordionItem>
+        <Separator className="my-12" />
 
-              <AccordionItem value="item-3" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What mortgage software platforms do virtual assistants work with?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Mortgage virtual assistants are proficient in all major platforms including Encompass, Calyx Point, Mortgage Builder, BytePro, and other LOS systems. They also work with document management platforms like eFolder and DocMagic, CRM systems, and compliance software. They access your existing software licenses through secure VPN connections and can become proficient with company-specific workflows within 1-2 weeks of proper systematic training.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do mortgage virtual assistants handle compliance and regulatory requirements?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Mortgage virtual assistants follow your established procedures for TRID compliance, disclosure delivery, and regulatory timeline management. They coordinate with automated underwriting systems, maintain compliance documentation, and ensure adherence to investor guidelines according to your systematic processes. Experienced loan processing assistants often bring knowledge of mortgage regulations and compliance requirements from their financial services education and professional experience.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How long does it take to implement a mortgage virtual assistant?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Implementation typically takes 30-60 days from start to full productivity. This includes 1-2 weeks for recruitment and selection, 1-2 weeks for onboarding and software setup, and 2-4 weeks to reach full productivity with your specific mortgage workflows. Success depends on having documented procedures, proper LOS access, and clear communication protocols established through our systematic approach.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What's the difference between a mortgage virtual assistant and a general administrative assistant?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Mortgage virtual assistants specialize specifically in mortgage lending workflows, compliance requirements, and industry-specific software platforms. They understand loan processing procedures, borrower communication protocols, and regulatory timelines specific to mortgage lending. General administrative assistants typically handle broader office support tasks but lack the specialized knowledge of mortgage processes, compliance requirements, and industry-specific systematic procedures required for effective loan processing.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+        {/* Time Zone Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Time Zone Reality for USA Brokers</h2>
+              <p className="text-lg text-gray-600">Here's what providers don't explain about Philippines-based VAs</p>
+            </div>
           </div>
-        </div>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Here's what providers don't explain about Philippines-based VAs: they're working your business hours in real-time. When you're operational 9am-5pm USA time, your Filipino VA is working 9pm-5am Manila time. There's no communication delay—they're responding to your Slack messages, answering your calls, processing files whilst you're simultaneously working.
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">
+                This isn't "overnight work that's ready in the morning." This is real-time collaboration during your business day. Filipino VAs work night shifts to match USA business hours. Some brokers see this as a limitation; others recognise it as professional service delivery by dedicated overnight professionals.
+              </p>
+              <p className="text-gray-800 leading-relaxed">
+                The trade-off: you get real-time support during USA hours, but management conversations outside normal business hours become challenging. Most successful arrangements establish clear communication windows and project management systems that work asynchronously when needed.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When You're NOT Ready Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When You're NOT Ready for a Mortgage VA</h2>
+              <p className="text-lg text-gray-600">Most mortgage brokers aren't ready for full-time VAs. Here's when to wait</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-4">Don't hire if you're:</p>
+              <div className="space-y-3">
+                {[
+                  "Processing under 15 loans monthly (economics don't work)",
+                  "Operating without documented SOPs (VA will flounder)",
+                  "Unable to commit 10+ hours weekly for training initially (they need guidance)",
+                  "Mixing delegated and non-delegated lending (compliance nightmare)",
+                  "Expecting them to 'figure it out' (they won't without direction)",
+                  "Heavy into government lending (FHA/VA complexity requires deep experience)"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-800 font-semibold mt-6">
+                The honest truth? If you're reading this guide hoping for an immediate solution to understaffing, you're probably not ready. Mortgage VAs require preparation, training commitment, and realistic expectations. Done properly, they deliver genuine value. Done hastily, they create compliance risks and operational headaches.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Compliant Hiring Options Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Getting It Right: Compliant Hiring Options</h2>
+              <p className="text-lg text-gray-600">If you've hit the 15-loan threshold and have documented processes, here are your compliant paths forward</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Option 1: Licensed mortgage companies (BrokerVA model)</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Companies that operate as licensed mortgage entities in multiple states with direct W-2 employees overseas. More expensive ($2,000-3,500/month typically) but genuinely compliant. This is the only fully legal third-party arrangement.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Option 2: Direct W-2 employment through your licensed entity</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Hire your VA as a W-2 employee through your own broker or lender licence. Requires more setup but avoids contractor licensing requirements. ShoreAgents can facilitate this structure at $1,200-2,500/month.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Option 3: State-specific licensing for contractors</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                If using contractors, obtain state licensing for each state you operate in. Expensive ($1,500-2,500 per state plus ongoing education) and complex, but technically compliant.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What NOT to do:</h3>
+              <p className="text-gray-800 font-semibold">
+                Generic VA companies offering "contract mortgage processors" without addressing licensing. This is the most common arrangement and the most legally problematic—even though providers aren't explicitly telling you about the licensing requirements.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 90-Day Reality Check Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 90-Day Reality Check</h2>
+              <p className="text-lg text-gray-600">Set realistic expectations for your first three months</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <Badge className="bg-red-600 text-white mb-3">Month 1</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">You're slower, not faster</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Your VA is learning everything. You're explaining processes, reviewing work, answering questions constantly. Productivity drops before it rises. Plan for this.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <Badge className="bg-amber-600 text-white mb-3">Month 2</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Still heavily managed</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  They can handle basic tasks but need oversight on anything complex. Government loans require significant hand-holding. You're still investing serious training time.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <Badge className="bg-blue-600 text-white mb-3">Month 3</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Starting to help</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Real contribution begins. They can process straightforward files with less supervision. You're seeing glimpses of the ROI, but not there yet.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <Badge className="bg-green-600 text-white mb-3">Months 4-6</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Payoff period</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  This is when it clicks. They know your systems, understand your standards, require minimal oversight. The time investment starts paying dividends.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <Badge className="bg-lime-600 text-white mb-3">Months 6+</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Full value</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  Confident processing, proactive problem-solving, genuine productivity gains. This is what the providers promise day one—but it takes six months to achieve.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Real Pricing Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Real Pricing: USA Market All-In Costs</h2>
+              <p className="text-lg text-gray-600">Full-time mortgage VA (ShoreAgents pricing)</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">First-Year Costs:</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Base cost:</span>
+                  <span className="font-semibold">$14,400-30,000/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Software access:</span>
+                  <span className="font-semibold">$2,580-4,740/year</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Training time investment (Year 1):</span>
+                  <span className="font-semibold">$8,000-12,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Management overhead (Year 1):</span>
+                  <span className="font-semibold">$25,000-50,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Compliance setup (Year 1):</span>
+                  <span className="font-semibold">$2,000-5,000</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">First-year total:</span>
+                  <span className="font-bold text-red-600 text-xl">$51,980-101,740</span>
+                </div>
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Ongoing years:</span>
+                  <span className="font-bold text-blue-600 text-xl">$16,980-34,740</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Compare to USA-based processor at $60,000-85,000 annually plus benefits ($75,000-105,000 all-in), and the ROI becomes clear—but only after surviving the first-year investment period.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                The honest assessment: You'll save $30,000-70,000 annually starting Year 2, but Year 1 is break-even at best when factoring true costs. Anyone promising immediate savings is selling fantasies.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Final CTA */}
-        <div className="bg-gradient-to-br from-lime-600 to-green-600 rounded-2xl shadow-xl p-12 text-center text-white mb-16">
-          <h2 className="text-4xl font-bold mb-4 flex items-center justify-center">
-            <Zap className="w-10 h-10 text-white mr-3" />
-            Ready to Transform Your Mortgage Operations?
-          </h2>
-          <p className="text-xl mb-6 opacity-90">
-            Don't let processing bottlenecks limit your mortgage growth. Join the forward-thinking lenders leveraging systematic mortgage virtual assistant solutions to scale efficiently and profitably.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 text-white">
-              <div className="text-4xl font-bold mb-2 text-white">500+</div>
-              <div className="text-sm opacity-90 text-white">Successful Placements</div>
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready for an Honest Assessment?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              If you're processing 15+ loans monthly, have documented procedures, and can commit to 6+ months for full ROI, mortgage VAs can deliver genuine value—but only through compliant structures that address licensing requirements.
+            </p>
+            <p className="text-lg mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Schedule a consultation where we'll honestly assess whether you're ready, explain compliant hiring structures, and walk through realistic timelines. We place full-time Filipino mortgage support at $1,200-2,500/month, but we'll tell you frankly if you're not ready yet or if per-loan processors make more sense for your current volume.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 text-white">
-              <div className="text-4xl font-bold mb-2 text-white">70%</div>
-              <div className="text-sm opacity-90 text-white">Average Cost Savings</div>
-            </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 text-white">
-              <div className="text-4xl font-bold mb-2 text-white">30-60</div>
-              <div className="text-sm opacity-90 text-white">Days to Full Productivity</div>
-            </div>
-          </div>
+          </CardContent>
+        </Card>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Schedule Your Free Mortgage VA Strategy Call
-            </Button>
-            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-semibold">
-              View Investment & ROI Details
-              <DollarSign className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-
-          <p className="text-lg font-semibold opacity-90">
-            Transform your mortgage operations with systematic offshore excellence.
-          </p>
-          <p className="text-sm opacity-75 mt-2">
-            Join mortgage companies already saving $146,000+ annually while scaling to 150% more loan processing capacity.
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            Mortgage VAs work brilliantly when implemented properly by ready brokers with realistic expectations and compliant structures. The question is whether that describes your situation right now—and we're happy to help you figure that out honestly before you spend a dollar.
           </p>
         </div>
-
       </div>
     </div>
   );

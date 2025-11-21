@@ -1,709 +1,677 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import { 
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
-  ArrowRight,
+  CheckCircle2,
+  XCircle,
   DollarSign,
-  Target,
-  Zap,
-  Award,
-  Phone,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
   AlertCircle,
-  BarChart,
-  HelpCircle,
-  Briefcase,
-  FileText,
-  HardHat,
+  ArrowRight,
   Building2,
-  Settings,
-  ClipboardList,
-  Calendar,
-  FileCheck,
-  Lightbulb,
-  Monitor,
-  Database,
-  MessageCircle,
-  TrendingDown,
-  Globe
-} from 'lucide-react';
-import Image from 'next/image';
+  FileText,
+  Users,
+  Globe,
+  Calculator,
+  Target,
+  Shield,
+  HardHat,
+  Phone,
+  Mail,
+  Calendar
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ConstructionVirtualAssistantPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-red-600 text-white mb-4 text-sm px-3 py-1">
+              For $2M+ Annual Revenue Builders
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Construction Virtual Assistant:<br />
+              <span className="text-lime-600">The $2M Revenue Rule Nobody Mentions</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              I watched a Sydney builder nearly lose his contractor's licence last year. Not because of shoddy work or unpaid subcontractors—because his virtual assistant in Manila approved a structural modification without realising it needed an engineer's stamp. The client's solicitor noticed. The building certifier noticed. And suddenly, a simple cost-saving measure turned into a $47,000 legal mess.
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              Here's what that taught me: construction isn't like real estate or bookkeeping where admin mistakes just cost time. In construction, delegation mistakes can cost you your business licence, your professional insurance, and in worst cases, your company entirely.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Construction Virtual Assistants: Your Secret Weapon for Project Domination
-          </h1>
-
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=1200&h=600&fit=crop"
-              alt="Construction virtual assistant helping project manager with blueprints and construction coordination"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
-
-          <p className="text-lg text-gray-700 leading-relaxed mb-8 max-w-4xl mx-auto">
-            A construction virtual assistant transforms construction operations by handling project coordination, document management, and administrative tasks while delivering 60-70% cost savings compared to local hiring. As construction projects become increasingly complex and competitive pressures intensify, forward-thinking construction companies are leveraging specialized virtual assistants to streamline workflows, improve project delivery, and enable project managers to focus on critical on-site activities and client relationships.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Book a Strategy Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              How It Works
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              See Pricing
-              <DollarSign className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* What is a Construction VA */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <HardHat className="w-8 h-8 text-lime-600 mr-3" />
-            What is a Construction Virtual Assistant?
-          </h2>
-          <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            A construction virtual assistant is a skilled remote professional who specializes in supporting construction companies through comprehensive project coordination, administrative management, and operational support. Unlike general virtual assistants, construction VAs possess specialized knowledge of construction terminology, project management software, building codes, and industry workflows essential for successful construction operations.
-          </p>
-          <p className="text-gray-700 leading-relaxed">
-            These dedicated professionals serve as extensions of your construction team, handling time-intensive administrative and coordination tasks that are critical to project success but don't require physical presence on job sites. From initial project setup to final completion documentation, construction virtual assistants ensure smooth project progression while enabling project managers and site supervisors to focus on quality control, safety, and client satisfaction.
-          </p>
-        </div>
-
-        {/* Evolution Section */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <TrendingUp className="w-8 h-8 text-lime-600 mr-3" />
-            The Evolution of Construction Virtual Assistance
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            The construction industry has undergone significant transformation driven by technology adoption, regulatory complexity, and changing client expectations. Modern construction virtual assistants have evolved to meet these challenges through:
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-gray-900">Project Management Software Proficiency:</strong>
-                <span className="text-gray-700"> Mastery of Procore, PlanGrid, CoConstruct, and other platforms</span>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-gray-900">Regulatory Compliance Knowledge:</strong>
-                <span className="text-gray-700"> Understanding of building codes, permit processes, and safety regulations</span>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-gray-900">Digital Documentation Systems:</strong>
-                <span className="text-gray-700"> Expertise in cloud-based document management and collaboration</span>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-gray-900">Communication Coordination:</strong>
-                <span className="text-gray-700"> Systematic management of stakeholder communication</span>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-gray-900">Quality Control Support:</strong>
-                <span className="text-gray-700"> Systematic tracking and reporting of project milestones</span>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <div>
-                <strong className="text-gray-900">Cost Management Assistance:</strong>
-                <span className="text-gray-700"> Budget tracking and expense management support</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Core Competencies */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Settings className="w-8 h-8 text-lime-600 mr-3" />
-            Core Competencies of Construction Virtual Assistants
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-8">
-            Professional construction virtual assistants possess specialized skills that directly impact project efficiency, quality control, and successful completion:
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Monitor className="w-6 h-6 text-lime-600 mr-2" />
-                  Technical Proficiency
-                </h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Project Management Software:</strong> Procore, PlanGrid, CoConstruct, BuilderTrend</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Document Management:</strong> Box, Dropbox, SharePoint, Google Workspace</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Communication Tools:</strong> Slack, Microsoft Teams, Zoom, WhatsApp</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Scheduling Software:</strong> Microsoft Project, Primavera P6, Smartsheet</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Financial Management:</strong> QuickBooks, Sage, FreshBooks</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>CAD Software:</strong> Basic AutoCAD, SketchUp, Revit proficiency</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Building2 className="w-6 h-6 text-lime-600 mr-2" />
-                  Industry Knowledge
-                </h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Construction Processes:</strong> Understanding of construction phases and workflows</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Building Codes:</strong> Knowledge of local building requirements and compliance</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Safety Standards:</strong> OSHA requirements and construction safety protocols</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Quality Control:</strong> Construction quality standards and inspection processes</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm"><strong>Vendor Management:</strong> Construction supply chain coordination</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Comprehensive Services */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <ClipboardList className="w-8 h-8 text-lime-600 mr-3" />
-            Comprehensive Construction Virtual Assistant Services
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-8">
-            Professional construction virtual assistants provide diverse services across the entire project lifecycle, from initial planning and permitting through construction execution and project closeout.
-          </p>
-
-          <div className="space-y-8">
-            {/* Project Coordination */}
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <Calendar className="w-6 h-6 text-lime-600 mr-2" />
-                  Project Coordination and Management
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  The foundation of construction virtual assistant services centers on project coordination that ensures timely completion, quality standards, and effective communication among all stakeholders.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Project Planning and Scheduling</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Master schedule development and maintenance</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Resource allocation planning</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Milestone tracking and monitoring</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Critical path management</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Progress reporting and performance analysis</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Stakeholder Communication</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Client communication and progress updates</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Subcontractor coordination and task assignment</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Supplier management and delivery coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Team meeting facilitation and coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Issue resolution support and documentation</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Document Management */}
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <FileText className="w-6 h-6 text-lime-600 mr-2" />
-                  Document Management and Administrative Support
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  Professional document management and administrative coordination ensure compliance, quality control, and efficient project execution.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Blueprint and Plan Management</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Drawing distribution and coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Revision control and tracking</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Document organization and filing</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Version management and updates</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Digital archive creation and backup</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Permit and Compliance Tracking</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Permit application management</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Compliance monitoring and tracking</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Inspection scheduling and coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Regulatory communication and liaison</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Compliance documentation maintenance</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Financial Support */}
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 flex items-center">
-                  <DollarSign className="w-6 h-6 text-lime-600 mr-2" />
-                  Financial and Cost Management Support
-                </h3>
-                <p className="text-gray-700 mb-4">
-                  Construction virtual assistants provide essential financial coordination and cost management support to maintain project budgets and profitability.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Budget Tracking and Cost Control</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Daily expense monitoring and tracking</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Budget variance analysis</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Change order management</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Vendor invoice processing</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Regular cost reporting</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-3">Procurement and Supply Chain</h4>
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Material ordering coordination</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Vendor management and tracking</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Delivery scheduling and tracking</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Inventory management support</span>
-                      </li>
-                      <li className="flex items-start">
-                        <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-700 text-sm">Purchase order processing</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Stephen's Take */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Lightbulb className="w-8 h-8 text-lime-600 mr-3" />
-            Stephen's Take: The Construction Virtual Assistant Advantage
-          </h2>
-          <div className="space-y-4">
-            <p className="text-gray-700 leading-relaxed">
-              Having worked with construction companies since 2012, I've witnessed how the right virtual assistant can transform project management capabilities and company profitability. The most successful construction companies I've partnered with understand that virtual assistants aren't just about reducing administrative costs—they're about creating systematic excellence that enables growth.
-            </p>
-            <p className="text-gray-700 leading-relaxed font-semibold italic">
-              When project managers can focus on quality control, safety, and problem-solving while their virtual assistant handles documentation, coordination, and communication, that's when you see dramatic improvements in project delivery and client satisfaction.
-            </p>
-            <p className="text-gray-700 leading-relaxed">
-              The companies that implement construction virtual assistants strategically don't just save money—they position themselves to take on more complex projects and build stronger client relationships.
-            </p>
-          </div>
-        </div>
-
-        {/* Benefits and Cost Analysis */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <BarChart className="w-8 h-8 text-lime-600 mr-3" />
-            Benefits and Cost Analysis
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            Construction virtual assistants deliver significant advantages that directly impact operational efficiency, project quality, and business growth for construction companies of all sizes.
-          </p>
-
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Direct Cost Comparison</h3>
-          <div className="overflow-x-auto mb-8">
-            <table className="w-full bg-white rounded-lg shadow-md">
-              <thead className="bg-lime-600 text-white">
-                <tr>
-                  <th className="px-6 py-4 text-left font-semibold">Role</th>
-                  <th className="px-6 py-4 text-right font-semibold">Local Annual Cost</th>
-                  <th className="px-6 py-4 text-right font-semibold">VA Cost (Annual)</th>
-                  <th className="px-6 py-4 text-right font-semibold">Annual Savings</th>
-                  <th className="px-6 py-4 text-right font-semibold">Savings %</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Project Coordinator</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$50,000 – $70,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$15,000 – $22,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$28,000 – $48,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">65-70%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Administrative Assistant</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$35,000 – $50,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$12,000 – $18,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$17,000 – $32,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">64-71%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Document Controller</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$45,000 – $60,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$14,000 – $20,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$25,000 – $40,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">66-72%</td>
-                </tr>
-                <tr className="hover:bg-lime-50">
-                  <td className="px-6 py-4 font-medium text-gray-900">Estimator Assistant</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$40,000 – $55,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$13,000 – $19,000</td>
-                  <td className="px-6 py-4 text-right text-gray-700">$21,000 – $36,000</td>
-                  <td className="px-6 py-4 text-right text-lime-600 font-bold">65-70%</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">Additional Financial Advantages</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700"><strong>No Employee Benefits:</strong> Elimination of health insurance, retirement, and benefit costs</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700"><strong>Reduced Office Overhead:</strong> No additional workspace or equipment expenses</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700"><strong>Lower Recruitment Costs:</strong> Reduced hiring and onboarding expenses</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700"><strong>Flexible Scaling:</strong> Pay only for needed capacity without long-term commitments</span>
-            </div>
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700"><strong>Increased Project Capacity:</strong> Manage more projects without overhead increases</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Philippines Advantage */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Globe className="w-8 h-8 text-lime-600 mr-3" />
-            Why Choose Philippines-Based Construction Virtual Assistants
-          </h2>
-          <p className="text-gray-700 leading-relaxed mb-6">
-            The Philippines has emerged as the premier destination for construction virtual assistants due to excellent technical education, English proficiency, and strong work ethic aligned with international construction standards.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Construction Industry Expertise</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">Engineering and construction programs through accredited universities</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">Professional development in construction management</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">International standards knowledge and familiarity</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">Technology proficiency in construction management software</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-lime-50">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Cultural and Professional Advantages</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">Excellent written and verbal English communication</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">Understanding of Western business practices</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">Service orientation and commitment to quality</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700 text-sm">Time zone flexibility for global project support</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* FAQ Section */}
+        {/* Intro */}
         <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <HelpCircle className="w-10 h-10 text-lime-600 mr-3" />
-            Frequently Asked Questions
-          </h2>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            I've spent 15 years placing offshore staff with construction companies across the USA, Australia, and New Zealand. The companies that succeed with construction VAs have three things in common: they're doing over $2 million in annual revenue, they know exactly what tasks are legally delegable, and they've accepted that the first 120 days will make them slower, not faster.
+          </p>
           
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What specific tasks can a construction virtual assistant handle?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Construction virtual assistants handle comprehensive project support including project coordination, document management, permit tracking, subcontractor coordination, progress reporting, budget tracking, material ordering, quality control documentation, client communication, and regulatory compliance. They work with all major construction management software platforms and can manage systematic workflows from project initiation through closeout while maintaining professional standards.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How much can construction companies save with virtual assistants?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Construction companies typically achieve 60-70% cost savings through virtual assistant implementation. A role that costs $50,000-$70,000 annually locally generally costs $15,000-$22,000 when supported by a Filipino construction virtual assistant, including all management fees. Beyond direct savings, companies eliminate recruitment, office space, equipment, and benefit costs while gaining specialized construction coordination capabilities.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What construction management software do virtual assistants work with?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Construction virtual assistants are proficient in all major platforms including Procore, PlanGrid, CoConstruct, BuilderTrend, JobNimbus, Microsoft Project, Primavera P6, AutoCAD, SketchUp, and QuickBooks. They work within your existing software licenses through secure VPN connections and can become proficient with company-specific templates and workflows within 1-2 weeks of proper training.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How long does it take to implement a construction virtual assistant?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Implementation typically takes 30-60 days from start to full productivity. This includes 1-2 weeks for recruitment and selection, 1-2 weeks for onboarding and software setup, and 2-4 weeks to reach full productivity with your specific construction workflows and standards. Success depends on having documented processes, proper software access, and clear quality control protocols.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Can construction virtual assistants handle urgent project issues?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Yes, construction virtual assistants can provide extended support hours and time zone flexibility to address urgent project coordination needs. While they cannot physically visit job sites, they can coordinate emergency responses, contact subcontractors, communicate with suppliers, update project stakeholders, and escalate critical issues to on-site managers according to established protocols.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do construction virtual assistants ensure quality and accuracy?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Professional construction virtual assistants follow systematic quality control procedures including peer review, checklist verification, standardized templates, regular quality audits, and continuous feedback loops with project managers. They are trained in construction industry standards and work within established quality management systems to ensure accuracy and consistency across all project documentation and coordination activities.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
+          <Card className="bg-red-50 border-l-4 border-red-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>If you're under $2M revenue, running residential projects with thin margins, or looking for someone to "handle everything" while you're on site—stop reading now.</strong> You're not ready, and hiring anyway will cost you roughly $46,000 in year-one expenses you can't recoup.
+              </p>
+            </CardContent>
+          </Card>
         </div>
+
+        <Separator className="my-12" />
+
+        {/* Why Most Can't Afford Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Why Most Construction Companies Can't Afford a Full-Time VA</h2>
+              <p className="text-lg text-gray-600">The construction VA industry sells a fantasy. Here's the mathematics</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The construction VA industry sells a fantasy: "Hire a construction-trained assistant for $8/hour and reclaim 40 hours every month!" It sounds brilliant until you do the mathematics.
+              </p>
+              <div className="bg-white rounded-lg p-4 mb-4">
+                <h3 className="font-bold text-gray-900 mb-3">The average small construction company in the USA:</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Grosses annually:</span>
+                    <span className="font-semibold">$842,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Net profit margin:</span>
+                    <span className="font-semibold">1%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Actual profit:</span>
+                    <span className="font-semibold">$8,420</span>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4 mb-4">
+                <h3 className="font-bold text-gray-900 mb-3">A full-time VA costs roughly in Year 1:</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">VA salary:</span>
+                    <span className="font-semibold">$18,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Software subscriptions:</span>
+                    <span className="font-semibold">$5,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Training time (40 hrs × $75/hr):</span>
+                    <span className="font-semibold">$3,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Ongoing management (5 hrs/wk × 52 × $75):</span>
+                    <span className="font-semibold">$19,500</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Mistakes (first 90 days):</span>
+                    <span className="font-semibold">$3,000</span>
+                  </div>
+                  <Separator className="my-2" />
+                  <div className="flex justify-between pt-2">
+                    <span className="font-bold text-gray-900">Total Year 1:</span>
+                    <span className="font-bold text-red-600 text-xl">$48,500</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-red-700 font-bold text-lg">
+                Your VA would cost 545% of your entire annual profit.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Even at healthier 3-5% margins typical of mid-sized builders, you need $900,000 to $1.5 million in revenue just to break even on the investment. This is why I tell most builders under $2M revenue: you're not ready yet.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                The revenue threshold isn't arbitrary. It's about having enough administrative volume to keep a full-time person genuinely busy, enough profit margin to absorb the learning curve, and enough management capacity to properly train and supervise someone who's never walked your job sites.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed">
+                Australian and New Zealand builders face similar mathematics, though your numbers look different. In Australia, comparable small builders average $1.1-1.4M AUD revenue with margins between 2-4%. In New Zealand, smaller residential builders typically sit around $900K-1.2M NZD. Same principle applies: you need substantial revenue to justify the investment.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What VA Legally Cannot Do Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <Shield className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Your Construction VA Legally Cannot Do</h2>
+              <p className="text-lg text-gray-600">This is the bit that nearly cost that Sydney builder everything, so pay attention</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Your VA cannot make any decisions requiring a contractor's licence, engineering judgement, or safety certification. In most US states, that means they absolutely cannot:
+              </p>
+              <div className="space-y-2">
+                {[
+                  "Sign off on permit applications (requires your licensed signature)",
+                  "Approve structural modifications or material substitutions (engineering judgement)",
+                  "Make final decisions on building code interpretations (liability issue)",
+                  "Handle OSHA safety plan development (requires qualified person designation)",
+                  "Sign contracts or change orders on your behalf (licensing requirement)",
+                  "Conduct quality control inspections (requires field expertise)"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                In Australia, similar restrictions apply under state-based licensing laws. Your VA cannot perform any work requiring a building licence, cannot sign off on compliance certificates, and cannot make decisions affecting structural integrity or safety.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                The licensed builder or contractor must maintain direct responsibility for these tasks. No exceptions.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What VAs excel at:</h3>
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Document organisation, submittal tracking, RFI logging, scheduling coordination, vendor communication, invoice processing, meeting minutes, permit renewal reminders, and project closeout documentation.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                Notice the pattern? Administrative tracking and coordination—not decision-making on technical or legal matters. This distinction matters enormously. Delegate the wrong task and you're personally liable for whatever goes wrong.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Procore vs Buildertrend Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Building2 className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Procore vs Buildertrend Decision That Determines Everything</h2>
+              <p className="text-lg text-gray-600">Here's something nobody mentions: your choice of construction management software determines whether a VA can actually help you</p>
+            </div>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Procore (Large Commercial Contractors):</h3>
+              <ul className="space-y-2 text-sm text-gray-700 mb-4">
+                <li>• Targets large commercial contractors</li>
+                <li>• Powerful, modular, and expensive ($375/month minimum, often $2,000+ for larger operations)</li>
+                <li>• Requires 2-3 months of training before someone becomes productive</li>
+                <li>• Built for complexity: multi-million dollar projects, dozens of subcontractors, union labour, extensive compliance documentation</li>
+                <li>• <strong>If you're running commercial projects over $5M, Procore makes sense</strong></li>
+                <li>• Your VA will need 90-120 days minimum to become genuinely useful</li>
+                <li>• You'll need documented processes for every workflow</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Buildertrend (Residential Builders):</h3>
+              <ul className="space-y-2 text-sm text-gray-700 mb-4">
+                <li>• Focuses on residential builders and remodellers</li>
+                <li>• More intuitive, with pricing from $299-799/month depending on features</li>
+                <li>• VAs typically reach basic competency in 60-90 days</li>
+                <li>• Interface is simpler, workflows are more straightforward</li>
+                <li>• Designed for the chaos of residential construction where clients change their minds and schedules shift weekly</li>
+                <li>• <strong>For residential builders doing $1-5M annually, Buildertrend is usually the better fit</strong></li>
+                <li>• Your VA can actually learn it in a reasonable timeframe</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">CoConstruct (Custom Home Builders):</h3>
+              <ul className="space-y-2 text-sm text-gray-700 mb-4">
+                <li>• Serves custom home builders with even simpler pricing ($99-299/month)</li>
+                <li>• Smallest learning curve of the three</li>
+                <li>• Also most limited in features</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The construction VA companies advertising "construction-trained assistants" mean they've had 4-6 weeks of general platform overview. They don't know your custom fields, project templates, naming conventions, client-specific workflows, or integration setups. That's another 60-80 hours of company-specific training you'll provide.
+              </p>
+              <div className="space-y-2 text-sm text-gray-700">
+                <p><strong>For US builders:</strong> Expect to spend $5,000-10,000 annually on software subscriptions once you add communication tools, cloud storage, time tracking, and project management platforms your VA needs access to.</p>
+                <p><strong>Australian builders:</strong> Budget $6,500-13,000 AUD for comparable software stack.</p>
+                <p><strong>New Zealand builders:</strong> Roughly $7,000-14,000 NZD.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Residential vs Commercial Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <HardHat className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Residential vs Commercial: Completely Different VA Strategies</h2>
+              <p className="text-lg text-gray-600">Residential builders can successfully hire VAs earlier than commercial contractors</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Residential Builders:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Residential builders doing $1-3M annually can successfully hire VAs earlier than commercial contractors. Why? Simpler software (Buildertrend), shorter project timelines (months not years), fewer regulatory hoops, and more client communication needs where VAs add immediate value.
+              </p>
+              <div className="bg-white rounded-lg p-4">
+                <p className="text-gray-800 font-semibold mb-2">Residential VA sweet spot:</p>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  <li>• $1.5-5M revenue</li>
+                  <li>• Using Buildertrend or CoConstruct</li>
+                  <li>• Running 10-20 concurrent projects</li>
+                  <li>• Profit margins 4%+</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Commercial Contractors:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Commercial contractors need $5-10M revenue minimum before a VA makes financial sense. You're dealing with Procore's complexity, longer project timelines, heavier compliance requirements, union considerations, and more stakeholders. The VA learning curve is substantially longer—120-180 days versus 60-90 for residential.
+              </p>
+              <div className="bg-white rounded-lg p-4">
+                <p className="text-gray-800 font-semibold mb-2">Commercial VA sweet spot:</p>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  <li>• $10M+ revenue</li>
+                  <li>• Established processes</li>
+                  <li>• Dedicated project managers already in place</li>
+                  <li>• Using Procore or similar enterprise platforms</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed">
+                If you're a commercial contractor under $5M doing tenant improvements or small retail build-outs, you're in an awkward middle ground. You might get value from a part-time VA (20 hours weekly) focused purely on document management and RFI tracking, but full-time is probably overkill.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 120-Day Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 120-Day Reality for Construction Companies</h2>
+              <p className="text-lg text-gray-600">Here's what your first four months actually look like</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-red-600 text-white">Days 1-45</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Your Productivity Drops</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      The VA is learning Procore or Buildertrend, asking constant questions about construction terminology they've never heard, making mistakes on submittal logs, and requiring 6-8 hours of your time weekly for training and corrections. You're slower than before you hired them. Every builder I know considers quitting during this phase.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-amber-600 text-white">Days 45-90</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Small Improvements Appear</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      They're handling basic document filing, tracking some deadlines, maybe managing the submittal log adequately. You're still spending 4-5 hours weekly on management. Break-even point on time investment, but no real ROI yet.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-blue-600 text-white">Days 90-120</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Turning Point</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      They're proactively following up on RFIs, tracking permit renewals, coordinating delivery schedules without prompting. Management drops to 2-3 hours weekly. You're starting to reclaim meaningful time.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-green-600 text-white">Month 5-6</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Actual Payoff Begins</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      They're handling 20-25 hours of legitimate administrative work weekly, you've reclaimed 15+ hours of your time, and management is down to 2 hours. Real ROI emerges.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-lime-600 text-white">Month 6+</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">If You've Done This Right</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      They're independently managing most project documentation, you're considering a second VA for growth, and you're finally experiencing what the marketing promised 6 months ago.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600 mt-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                This timeline is longer than real estate or accounting VAs because construction software is more complex and the technical terminology is extensive. Anyone promising "immediate productivity" is lying.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Time Zone Realities Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">USA, Australia, and New Zealand: Time Zone Realities</h2>
+              <p className="text-lg text-gray-600">How time zones actually work for construction companies</p>
+            </div>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">For US Builders:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                For US builders working with Filipino VAs, here's how the time zones actually work: when you're at your desk at 9am in New York or Los Angeles, your VA in Manila is working at exactly the same moment—it just happens to be 9pm or 10pm their time. You ask a question at 2pm your time, they respond immediately because they're working at 2am their time. There's no delay, no "overnight work gets done while you sleep" situation. You're working together in real-time.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                The trade-off: your VA is working night shift in Manila to match your daytime hours. This creates perfect communication—immediate responses, real-time collaboration, instant problem-solving. But it also means they're maintaining a graveyard shift schedule long-term, which increases burnout and turnover risk if not managed properly.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">For Australian and New Zealand Builders:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                For Australian and New Zealand builders, you have a significant advantage: minimal time zone difference with the Philippines. When you're working 9am-5pm in Sydney or Auckland, your VA is working roughly 7am-3pm or 9am-5pm Manila time—normal daytime hours for both of you. You get the same real-time communication benefits as US clients, but without asking your VA to work nights permanently.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                This is one reason Australian builders often report better long-term retention with Filipino staff compared to US companies—the working arrangement is more sustainable for everyone involved.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What This Actually Costs Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <Calculator className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What This Actually Costs (Real Numbers)</h2>
+              <p className="text-lg text-gray-600">Forget the "$8/hour" nonsense. Here's your real first-year investment</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">First-Year Investment:</h3>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">VA salary:</span>
+                  <span className="font-semibold">$18,000 USD ($24,000 AUD / $26,000 NZD)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Software subscriptions:</span>
+                  <span className="font-semibold">$5,000 USD ($6,500 AUD / $7,000 NZD)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your training time (40 hrs × $75):</span>
+                  <span className="font-semibold">$3,000 USD</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Ongoing management (5 hrs/wk × 52 × $75):</span>
+                  <span className="font-semibold">$19,500 USD</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Mistakes and rework (first 90 days):</span>
+                  <span className="font-semibold">~$3,000 USD</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Total first year:</span>
+                  <span className="font-bold text-red-600 text-xl">$48,500 USD ($64,000 AUD / $69,000 NZD)</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Year two onwards drops significantly because training is complete and management reduces to 2 hours weekly: roughly $28,000 USD ($37,000 AUD / $40,000 NZD) annually.
+              </p>
+              <p className="text-gray-900 font-bold text-xl text-center">
+                That's your real investment. If you can't afford to lose that money in year one, you're not ready.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When This Doesn't Work Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When This Doesn't Work (Save Yourself $48,000)</h2>
+              <p className="text-lg text-gray-600">Don't hire a construction VA if:</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <div className="space-y-3">
+                {[
+                  "Your annual revenue is under $2M (USA) or comparable in AUD/NZD",
+                  "Profit margins are below 3%",
+                  "You're running fewer than 10 projects annually",
+                  "You have no documented processes or SOPs",
+                  "You're a new company (under 3 years)",
+                  "Your work is highly specialised requiring constant licensed decisions",
+                  "You don't have 5+ hours weekly for training and management",
+                  "You're primarily doing fieldwork with minimal admin"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-800 font-semibold mt-6 text-center">
+                I've watched too many builders ignore these warnings and waste $48,000 proving I was right. Don't be that person.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Next Steps Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <Target className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Next Steps (If You're Actually Ready)</h2>
+              <p className="text-lg text-gray-600">You need three things before hiring</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                You need three things before hiring: documented processes for key workflows, construction management software properly configured with templates, and realistic expectations about the 120-day ramp-up period.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                At ShoreAgents, we place Filipino construction staff with builders across the USA, Australia, and New Zealand. Our pricing is $1,500-2,500 monthly depending on experience and specialisation—not $8/hour, because that's not realistic once you include our recruitment, training, and support infrastructure.
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">
+                We're selective about who we work with. If you're under $2M revenue, we'll tell you to wait. If you have no systems in place, we'll tell you to document your processes first. If you're looking for someone to make licensed decisions on your behalf, we'll decline the engagement.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                This approach pisses off people who want to hear "yes" regardless of readiness. But it keeps our clients successful and our reputation intact.
+              </p>
+              <p className="text-gray-900 font-bold text-xl text-center mt-4">
+                If you're doing $2M+ revenue, have systems documented, understand the 120-day reality, and know exactly which tasks are safely delegable—let's have a conversation about whether offshore staff makes sense for your specific situation.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Final CTA */}
-        <div className="bg-gradient-to-br from-lime-600 to-green-600 rounded-2xl shadow-xl p-12 text-center text-white mb-16">
-          <h2 className="text-4xl font-bold mb-4 flex items-center justify-center">
-            <Zap className="w-10 h-10 text-white mr-3" />
-            Ready to Transform Your Construction Operations?
-          </h2>
-          <p className="text-xl mb-6 opacity-90">
-            The most successful construction companies are those that view virtual assistants as strategic partners rather than just cost-saving measures.
-          </p>
-          <p className="text-lg mb-8 opacity-90">
-            When you can manage more projects simultaneously, maintain better communication with stakeholders, and ensure consistent quality documentation while focusing your time on critical field activities and client relationships, you create sustainable competitive advantages that drive long-term business growth.
-          </p>
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready for an Honest Assessment?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              If you're doing $2M+ revenue, have systems documented, and understand the 120-day reality, let's have a conversation about whether offshore staff makes sense for your specific situation.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Book Your Strategy Call
-            </Button>
-            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-semibold">
-              View ROI Calculator
-              <DollarSign className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-
-          <p className="text-sm opacity-75">
-            Discover how skilled virtual assistants can help you scale your construction operations, reduce administrative overhead, and build the foundation for significant business growth in the competitive construction industry.
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            Construction isn't like real estate or bookkeeping where admin mistakes just cost time. In construction, delegation mistakes can cost you your business licence. Know exactly what tasks are legally delegable before you hire.
           </p>
         </div>
-
       </div>
     </div>
   );

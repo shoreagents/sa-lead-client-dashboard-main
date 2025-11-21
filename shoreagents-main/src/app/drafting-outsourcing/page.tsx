@@ -1,733 +1,592 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
 import { 
-  Building2,
-  Users, 
-  TrendingUp, 
-  Shield, 
-  Clock, 
-  CheckCircle, 
-  ArrowRight,
+  CheckCircle2,
+  XCircle,
   DollarSign,
-  Target,
-  Zap,
-  Award,
-  Phone,
-  FileText,
+  Clock,
+  AlertTriangle,
   AlertCircle,
-  Calculator,
+  ArrowRight,
+  Building2,
+  TrendingUp,
+  FileText,
   Globe,
-  Server,
-  BarChart,
-  Box,
-  Layers,
-  PenTool,
-  Settings,
-  Lock
-} from 'lucide-react';
-import Image from 'next/image';
+  Users
+} from "lucide-react";
+import Link from "next/link";
 
 export default function DraftingOutsourcingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <div className="mb-6">
-            <Badge className="bg-red-600 text-white px-4 py-2 text-lg hover:bg-red-700">
-              🚨 CRITICAL: Engineering & Architecture Firms Hemorrhaging $75K+ Annually on Drafting Disasters
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For Firms Spending $50K+ Annually on CAD Drafting
             </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Drafting Outsourcing:<br />
+              <span className="text-lime-600">The $50,000 Decision Nobody Tells You About</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              I'm going to save some of you a lot of money right now. If your firm spends less than $50,000 a year on CAD drafting, close this 
+              page. Outsourcing offshore drafting services isn't for you, and anyone telling you otherwise is selling something. The maths 
+              doesn't work, the training investment won't pay off, and you'll waste six months discovering what I'm telling you now.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Drafting Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
           </div>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Drafting Outsourcing: The Ultimate 2025 Solution
-          </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-            While forward-thinking firms leverage systematic drafting outsourcing to slash costs and accelerate project delivery, others are drowning in recruitment nightmares, skill gaps, and CAD license expenses. Don't become another casualty of the talent crisis.
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Intro */}
+        <div className="mb-16">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Still here? Right, let's talk about when outsourcing your architectural drafting, engineering drawings, or BIM modeling actually 
+            makes sense—and the costs nobody mentions until you're already committed.
           </p>
           
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1200&h=600&fit=crop"
-              alt="CAD drafting outsourcing with technical drawings and engineering blueprints"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
-
-          <h2 className="text-2xl font-semibold text-gray-700 mb-8">
-            From Stephen Atcheler's 500+ successful offshore placements: The complete framework for transforming your CAD operations while your competitors struggle with talent shortages and exploding costs.
-          </h2>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg font-semibold">
-              <Phone className="w-5 h-5 mr-2" />
-              Book a Strategy Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              How It Works
-            </Button>
-            <Button size="lg" variant="outline" className="border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              <Calculator className="w-5 h-5 mr-2" />
-              See Pricing
-            </Button>
-          </div>
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            I'm Stephen Atcheler. Spent fifteen years watching Australian, American, and Kiwi firms either nail offshore staffing or completely 
+            cock it up. Most of the failures come down to unrealistic expectations and hidden costs that conveniently never make it into the 
+            sales pitch.
+          </p>
         </div>
 
-        {/* Key Stats Grid */}
-        <div className="bg-gradient-to-br from-lime-50 to-lime-100 rounded-2xl shadow-lg p-8 mb-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <TrendingUp className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">82%</span>
-              </div>
-              <p className="text-gray-700 font-medium">Cost Reduction vs Local Hiring</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Zap className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">3.2x</span>
-              </div>
-              <p className="text-gray-700 font-medium">Faster Project Turnaround</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Clock className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">24/7</span>
-              </div>
-              <p className="text-gray-700 font-medium">Philippines Time Zone Coverage</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center mb-4">
-                <Users className="w-8 h-8 text-lime-600 mr-2" />
-                <span className="text-4xl font-bold text-gray-900">150+</span>
-              </div>
-              <p className="text-gray-700 font-medium">Drafting Specialists Placed</p>
-            </div>
-          </div>
-        </div>
+        <Separator className="my-12" />
 
-        <div className="text-center mb-16">
-          <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white font-semibold">
-            <Phone className="w-5 h-5 mr-2" />
-            Schedule Your Consultation
-          </Button>
-        </div>
-
-        {/* Stephen's Insights */}
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-lg p-8 mb-16">
-          <div className="flex items-start space-x-4 mb-6">
-            <div className="w-16 h-16 bg-lime-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl font-bold text-white">S</span>
+        {/* Advertised Rate vs Actual Cost Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">What 150+ Drafting Placements Taught Me About Industry Quality</h3>
-              <p className="text-sm text-gray-600">Stephen Atcheler, CEO of ShoreAgents</p>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Advertised Rate vs. The Actual Cost</h2>
+              <p className="text-lg text-gray-600">Here's what every offshore CAD drafting provider tells you</p>
             </div>
           </div>
-          <div className="space-y-4">
-            <p className="text-lg text-gray-700 leading-relaxed">
-              After placing drafting specialists across Australia, New Zealand, and the USA, I've noticed a consistent pattern: firms struggle not because they can't find CAD operators, but because they're hiring for the wrong skillset entirely.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              The fundamental problem with traditional CAD hiring is that most firms treat drafting as a purely technical skill. They focus on software proficiency rather than <span className="font-bold">drafting intelligence</span> – the ability to understand why drawings matter and how they impact construction, fabrication, and project success.
-            </p>
-
-            <div className="bg-white rounded-lg p-6 my-6">
-              <h4 className="text-xl font-bold text-gray-900 mb-3">The Industry Reality I See Repeatedly:</h4>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Engineering and architecture firms hire people who can use AutoCAD or Revit, then spend months training them on industry standards, construction logic, and drawing conventions. Meanwhile, they're paying full local salaries for substandard work that requires constant revision.
-              </p>
-              <p className="text-gray-700 leading-relaxed">
-                This is where drafting outsourcing becomes strategically superior. Our Philippines specialists aren't just CAD operators – they're engineering graduates who understand the technical principles behind every line and dimension. They ask the right questions: "How will this be constructed?" and "What information does the contractor need?"
-              </p>
-            </div>
-
-            <div className="bg-lime-50 border-l-4 border-lime-600 p-6 rounded-lg">
-              <h4 className="font-bold text-gray-900 mb-2">Key Insight from 500+ Placements:</h4>
-              <p className="text-gray-700 leading-relaxed italic">
-                "The most successful firms have discovered that technical skills are common, but drafting judgment is rare. The Philippines combines both, with the added advantage of complementary time zones that effectively double your production capacity."
-              </p>
-            </div>
-
-            <p className="text-lg text-gray-700 leading-relaxed">
-              What separates successful CAD drafting outsourcing from failed attempts is understanding that you're not just hiring cheaper labor – you're accessing a talent pool that's been specifically trained for precision work and systematic documentation.
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed font-semibold">
-              This isn't about cutting costs – it's about building technical competence that lets you scale your capacity while maintaining quality standards that actually improve your professional reputation.
-            </p>
-          </div>
-        </div>
-
-        {/* Why Traditional Approaches Fail */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            Why Traditional Drafting Approaches Are Failing Engineering & Architecture Firms
-          </h2>
-          <p className="text-xl text-gray-700 mb-8">
-            After working with 500+ firms across three countries, I've identified the critical problems destroying profitability in technical drawing operations. Most firms are stuck in outdated hiring models that guarantee failure.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">The Local Talent Crisis: Why CAD Skills Are Disappearing</h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  Here's the brutal truth: The pool of skilled CAD operators in Australia, New Zealand, and the USA is shrinking fast. Universities are producing engineers who want to design, not draft. The old-school draftsmen are retiring, and nobody's replacing them.
-                </p>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  I've seen Sydney firms spend six months trying to fill a single CAD position. When they finally find someone, they're either overqualified and leave quickly, or underqualified and produce work that needs constant revision.
-                </p>
-                <div className="bg-white rounded-lg p-4">
-                  <h4 className="font-bold text-gray-900 mb-2">The Real Cost of Local Hiring Disasters:</h4>
-                  <ul className="space-y-1 text-gray-700 text-sm">
-                    <li>• Recruitment costs: $15K-25K per position</li>
-                    <li>• Training time: 3-6 months before productive</li>
-                    <li>• Salary inflation: CAD operators demanding $65K-85K</li>
-                    <li>• Turnover costs: 40% leave within 18 months</li>
-                    <li>• Revision cycles: Poor quality requiring 2-3 rounds</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-red-200 bg-red-50">
-              <CardContent className="p-6">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">The Software License Trap: When CAD Costs Spiral Out of Control</h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  AutoCAD, Revit, SolidWorks – these essential tools cost $2K-5K per seat annually. Add specialized plugins, training, and updates, and you're looking at $8K-12K per CAD operator before they even start working.
-                </p>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  An Auckland architecture firm told me they were spending $40K yearly on software licenses for four CAD operators. When two quit within six months, they were stuck paying for unused licenses while scrambling to find replacements. That's money down the drain that could have funded three offshore specialists.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border-red-200 bg-red-50 mb-8">
+          
+          <Card className="bg-amber-50 border-l-4 border-amber-500 mb-6">
             <CardContent className="p-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">The Deadline Pressure Cooker: When Projects Become Profit Killers</h3>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Engineering and architecture work comes in waves. One week you're scrambling to meet multiple deadlines, the next you're slow. Local staff costs are fixed whether you're busy or not. During peak periods, you're either paying overtime rates or missing deadlines. During slow periods, you're paying for idle time.
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Here's what every offshore CAD drafting provider tells you: <strong>"Our experienced drafters are just $15-20 per hour!"</strong>
               </p>
-              <p className="text-gray-700 leading-relaxed">
-                I've watched firms lose major contracts because they couldn't scale their drafting capacity quickly enough. A Denver engineering firm missed out on a $2M infrastructure project because they couldn't produce the required drawings within the bid timeframe. Their two local CAD operators were already maxed out on existing work.
+              <p className="text-gray-800 leading-relaxed">
+                Here's what they don't tell you: <strong>that $15/hour drafter costs you $32/hour in year one.</strong>
               </p>
             </CardContent>
           </Card>
 
-          <div className="bg-lime-50 border-l-4 border-lime-600 p-6 rounded-lg">
-            <h4 className="font-bold text-gray-900 mb-2">Industry Reality Check:</h4>
-            <p className="text-gray-700 leading-relaxed italic">
-              "The firms winning major contracts today have cracked the code on scalable drafting capacity. They can handle five projects simultaneously or focus all resources on one urgent deadline. That flexibility is impossible with traditional hiring models."
-            </p>
-          </div>
-        </div>
-
-        {/* ShoreAgents Solution */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-6">
-            The ShoreAgents Drafting Outsourcing Solution: Precision, Scale, and Profit
-          </h2>
-          <p className="text-xl text-gray-700 mb-8">
-            Our drafting outsourcing methodology isn't about finding cheap labor – it's about accessing a pool of specialists trained specifically for precision technical drawing. These aren't generalists trying to learn CAD; they're dedicated professionals who live and breathe technical documentation.
-          </p>
-
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">The Philippines Advantage: Why Our Drafting Specialists Excel</h3>
-            <p className="text-lg text-gray-700 mb-6">
-              The Philippines has emerged as the global center for technical drafting excellence. Their educational system produces engineers who are trained on the same software you use, follow international standards, and understand the precision requirements of engineering documentation.
-            </p>
-
-            <div className="bg-lime-50 rounded-lg p-6 mb-6">
-              <h4 className="text-xl font-bold text-gray-900 mb-4">Our Drafting Specialists Have Experience With:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">AutoCAD:</span>
-                    <span className="text-gray-700"> 2D technical drawings, construction documentation</span>
-                  </div>
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">The real cost breakdown for a full-time offshore drafter in their first year:</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Base salary:</span>
+                  <span className="font-semibold">$15/hour × 2,080 hours = $31,200 USD</span>
                 </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">Revit:</span>
-                    <span className="text-gray-700"> 3D BIM modeling, architectural coordination</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Platform/agency markup:</span>
+                  <span className="font-semibold">+20-30% = $6,240-9,360</span>
                 </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">SolidWorks:</span>
-                    <span className="text-gray-700"> Mechanical design, assembly drawings</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Your CAD software licenses:</span>
+                  <span className="font-semibold">$1,500-2,000</span>
                 </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">MicroStation:</span>
-                    <span className="text-gray-700"> Infrastructure projects, civil engineering</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Training time (60 hours of your senior drafter's time):</span>
+                  <span className="font-semibold">$4,500</span>
                 </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">Inventor:</span>
-                    <span className="text-gray-700"> 3D mechanical design, manufacturing drawings</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Management overhead (5 hours/week of your time):</span>
+                  <span className="font-semibold">$19,500</span>
                 </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">CATIA:</span>
-                    <span className="text-gray-700"> Complex surface modeling, aerospace applications</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">First 90 days of mistakes and rework:</span>
+                  <span className="font-semibold">$3,000-5,000</span>
                 </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">SketchUp:</span>
-                    <span className="text-gray-700"> Conceptual design, presentation drawings</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Project management tools, file sharing, communication:</span>
+                  <span className="font-semibold">$1,000</span>
                 </div>
-                <div className="flex items-start">
-                  <CheckCircle className="w-5 h-5 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <span className="font-semibold text-gray-900">Tekla:</span>
-                    <span className="text-gray-700"> Structural steel detailing, construction drawings</span>
-                  </div>
+                <Separator className="my-3" />
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Total year one:</span>
+                  <span className="font-bold text-blue-600">$66,940-70,560 USD</span>
+                </div>
+                <div className="flex justify-between pt-2">
+                  <span className="font-bold text-gray-900">Effective hourly rate:</span>
+                  <span className="font-bold text-blue-600">$32-34/hour</span>
                 </div>
               </div>
-              <p className="text-gray-700 mt-4 italic">
-                We match you with specialists who already have proficiency in your required software. Any additional training for specific workflows or standards would be provided by you based on your requirements.
-              </p>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-lg">
-              <h4 className="font-bold text-gray-900 mb-2">The Secret Weapon: Time Zones</h4>
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Compare that to hiring a local CAD drafter in the USA at $26.50/hour ($55,120/year), Australia at $50-60/hour, or New Zealand 
+                at similar rates to Australia—suddenly that 70% cost saving looks more like 30-40% in reality.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                By year two, once they're trained and productive, your costs drop to around $23-25/hour effective rate. That's when the savings 
+                actually materialise. But you've got to survive year one first.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 90-Day Training Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 90-Day Training Reality</h2>
+              <p className="text-lg text-gray-600">"Experienced CAD professionals" is the phrase every offshore drafting provider loves to use</p>
+            </div>
+          </div>
+
+          <Card className="bg-amber-50 border-l-4 border-amber-500 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                "Experienced CAD professionals" is the phrase every offshore drafting provider loves to use. And they're not lying—these drafters 
+                absolutely know AutoCAD, Revit, or whatever software you're using.
+              </p>
+              <p className="text-gray-800 leading-relaxed">
+                What they don't know is YOUR standards. Your layer naming conventions. Your template files. Your typical project types. How you 
+                like dimensions placed. Which details you always use. The quirks of your regular clients.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Here's the actual timeline I've seen work across firms in Brisbane, Denver, and Auckland:</h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    period: "Weeks 1-2",
+                    description: "Learning your file organisation, layer standards, and templates. They're producing work, but you're spending 2-3 hours daily reviewing and correcting."
+                  },
+                  {
+                    period: "Weeks 3-6",
+                    description: "Understanding your project types and standards. Output is acceptable but slow—about 40-50% of a local drafter's speed."
+                  },
+                  {
+                    period: "Weeks 7-12",
+                    description: "Building efficiency and confidence. You're still managing closely, 5-8 hours per week. Speed improves to 60-70%."
+                  },
+                  {
+                    period: "Month 4+",
+                    description: "Finally productive at 80-90% speed. Management time drops to 2-3 hours weekly. This is when ROI actually starts."
+                  }
+                ].map((phase, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <Badge className="bg-blue-600 text-white">{phase.period}</Badge>
+                    <p className="text-gray-700 flex-1">{phase.description}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50 mt-6">
+            <CardContent className="p-6">
               <p className="text-gray-700 leading-relaxed">
-                While your Australian or American team sleeps, your Philippines drafting specialists are working. Submit drawings for revision at 5 PM, and they're waiting in your inbox the next morning. This isn't just convenient – it's a competitive advantage.
+                I worked with a mid-sized architectural firm in Melbourne who hired an offshore team through one of the big Indian providers. 
+                Brilliant technical skills, proper training, good English. Still took three and a half months before they stopped needing daily 
+                video calls to clarify standards. The firm nearly gave up at week 10 when they were still doing extensive redlines on every 
+                drawing set.
               </p>
+              <p className="text-gray-800 font-semibold mt-4">
+                They stuck with it. Eighteen months later, they're saving $127,000 annually with a team of three offshore drafters. But that 
+                first year? Break-even at best.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Geography Matters Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Where Geography Actually Matters</h2>
+              <p className="text-lg text-gray-600">For American firms, the Philippines and India cost roughly the same</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card className="border-red-300 bg-red-50">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Quality Matching That Actually Works</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">For American Firms</h3>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  Most firms worry about quality when they hear "outsourcing." Here's how we eliminate that concern: Every drafting specialist we recommend goes through a rigorous screening process focused on technical competence and industry experience before we present them to you.
+                  The Philippines and India cost roughly the same—$15-25/hour all-in. The difference is the 12-16 hour time zone gap that cuts 
+                  both ways.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
-                  We don't just find people who can use software – we find specialists who understand drafting principles, construction logic, and quality documentation.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">Scalability That Matches Your Project Flow</h3>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  This is where technical drafting outsourcing becomes a strategic weapon. Need to double your CAD capacity for a major project? We can have additional specialists working within 48 hours. Project finished early? Scale back without layoffs or unused salary costs.
+                  The overnight work cycle sounds brilliant in theory: you send a project at 5pm Friday, wake up Monday to completed drawings. 
+                  In practice, you send the project Friday afternoon, they start Monday morning their time (your Sunday evening), and by the time 
+                  you review Tuesday, you've burned three days. Add a revision cycle and suddenly your "overnight turnaround" took a week.
                 </p>
-                <p className="text-gray-700 leading-relaxed italic text-sm">
-                  A Perth engineering firm recently won a massive mining infrastructure project that required 12 CAD operators for four months. Instead of hiring locally (which would have taken months and cost $400K+), they worked with us to identify 12 qualified specialists within a week.
+              </CardContent>
+            </Card>
+
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">For Australian and New Zealand Firms</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  The Philippines is only 2-4 hours different from Sydney or Auckland time zones. You can have actual real-time conversations. 
+                  Schedule a 2pm meeting and both sides are awake, alert, and collaborative.
+                </p>
+                <p className="text-gray-800 font-semibold">
+                  This is why Philippines-based drafting services work better for Aussie and Kiwi firms—not cheaper, just more practical.
                 </p>
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        <div className="text-center mb-16">
-          <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white font-semibold">
-            <Target className="w-5 h-5 mr-2" />
-            Get Your Custom Drafting Strategy
-          </Button>
-        </div>
-
-        {/* Service Options */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-            Drafting Outsourcing Service Options: Find Your Perfect Fit
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-12">
-            Whether you're a solo architect needing occasional CAD support or a major engineering firm requiring full-scale drafting outsourcing, we have solutions that scale with your needs.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Users className="w-8 h-8 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Entry-Level: Single CAD Specialist</h3>
-                  <p className="text-gray-600 mb-4">
-                    Perfect for smaller firms or specialized projects. Start with one agent who becomes an extension of your team.
-                  </p>
-                  <div className="space-y-2 text-sm text-gray-700 text-left mb-4">
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Dedicated resource: Same specialist on all projects</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Custom training: Learns your standards</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Cost predictability: Fixed monthly rate</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Direct communication: Work directly together</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Immediate availability: Ready within 48 hours</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Start with Single Specialist →
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow bg-lime-50 h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <Badge className="bg-lime-600 text-white mb-4">MOST POPULAR</Badge>
-                  <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Building2 className="w-8 h-8 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Growth-Stage: Multi-Specialist Teams</h3>
-                  <p className="text-gray-600 mb-4">
-                    For firms handling multiple projects simultaneously or requiring specialized expertise across different disciplines.
-                  </p>
-                  <p className="text-gray-700 text-sm mb-4">
-                    Instead of hiring generalists who are okay at everything, you get specialists who excel in their specific area. Your structural projects get handled by someone who lives and breathes steel detailing.
-                  </p>
-                </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Build Multi-Specialist Team →
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 hover:shadow-xl transition-shadow h-full flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="text-center mb-6 flex-grow">
-                  <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Globe className="w-8 h-8 text-lime-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise-Level: Complete Drafting Departments</h3>
-                  <p className="text-gray-600 mb-4">
-                    For major firms requiring full-scale drafting capacity with project management, quality control, and scalable resources.
-                  </p>
-                  <div className="space-y-2 text-sm text-gray-700 text-left mb-4">
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Dedicated project coordinators</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Quality assurance managers</span>
-                    </div>
-                    <div className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Scale from 5 to 50 specialists</span>
-                    </div>
-                  </div>
-                </div>
-                <Button className="w-full bg-lime-600 hover:bg-lime-700 text-white mt-auto font-semibold">
-                  Enterprise Workforce Solutions →
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Implementation Process */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-            Implementation: From Consultation to Production in 30 Days
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-12">
-            Our proven process eliminates the typical headaches of bringing new team members online. Within 30 days, your drafting specialists are producing work that matches your existing standards.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-lime-600">1</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Week 1: Strategy and Selection</h3>
-              <p className="text-gray-700 mb-3">
-                Comprehensive assessment of your current drafting needs, project types, and quality standards.
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Eastern European Option</h3>
+              <p className="text-gray-700 leading-relaxed">
+                Eastern European drafters—Ukraine, Poland—cost 30-40% more than Asian teams ($25-35/hour) but sit in a more manageable time zone 
+                for USA firms. Seven to nine hours' difference means some overlap for real-time collaboration. Higher cost, better communication, 
+                faster iterations. Sometimes worth it for complex projects where back-and-forth matters.
               </p>
-              <p className="text-gray-700 text-sm">
-                We present 3-5 pre-screened candidates with relevant experience in your industry. You review portfolios, technical assessments, and interview them directly.
-              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What Works vs What Doesn't Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-lime-600">2</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Week 2-3: Integration</h3>
-              <p className="text-gray-700 mb-3">
-                Your specialists familiarize themselves with your specific drawing standards, layer conventions, and quality expectations.
-              </p>
-              <p className="text-gray-700 text-sm">
-                Covers drawing standards, quality protocols, communication systems, industry standards, and workflow adaptation.
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-lime-600">3</span>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Week 4: Production & Quality</h3>
-              <p className="text-gray-700 mb-3">
-                Your specialists begin working on real projects under close supervision. Every drawing is reviewed before reaching you.
-              </p>
-              <p className="text-gray-700 text-sm">
-                By week 4, you're receiving production-quality work that meets your standards. Training period is complete.
-              </p>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Works Offshore vs. What Doesn't</h2>
+              <p className="text-lg text-gray-600">Not all drafting work should leave your office</p>
             </div>
           </div>
-        </div>
 
-        {/* Why Choose ShoreAgents */}
-        <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Why Choose ShoreAgents for Your Drafting Outsourcing
-          </h2>
-          <p className="text-lg text-gray-700 mb-6">
-            The difference between us and other BPO providers comes down to specialization and accountability. We don't just provide warm bodies – we provide carefully selected professionals who understand the precision requirements of engineering and architectural documentation.
-          </p>
-          <p className="text-lg text-gray-700 mb-6">
-            Our expertise lies in finding and matching you with specialists who have the right technical background and experience. We handle the sourcing, screening, and recommendation process, then present you with qualified candidates who meet your specific requirements.
-          </p>
-          <div className="bg-white rounded-lg p-6">
-            <h4 className="font-bold text-gray-900 mb-2 flex items-center">
-              <Globe className="w-6 h-6 text-lime-600 mr-2" />
-              Geographic Advantage:
-            </h4>
-            <p className="text-gray-700 leading-relaxed italic">
-              "Our Philippines-based specialists work during your night hours, effectively giving you 24/7 production capacity. Submit revisions at 5 PM, and they're ready by 8 AM the next morning. This time zone advantage alone can cut project delivery times by 30-50%."
-            </p>
-          </div>
-        </div>
-
-        <div className="text-center mb-16">
-          <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white font-semibold">
-            <DollarSign className="w-5 h-5 mr-2" />
-            See Investment Options
-          </Button>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">
-            Frequently Asked Questions About Drafting Outsourcing
-          </h2>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How much does drafting outsourcing cost compared to local hiring?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Our drafting outsourcing services start at $14,300 USD annually for a dedicated CAD specialist, compared to $65,000+ for local Australian staff. That's a 78% cost reduction while maintaining the same quality standards. When you factor in recruitment costs, training time, software licenses, and equipment, the savings often exceed $50K per specialist annually.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What happens if a drafting specialist doesn't meet our quality standards?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  If a specialist you've hired doesn't meet your quality expectations, we'll help you find a replacement candidate. Our screening process focuses on matching you with professionals who already demonstrate the precision and technical competence you need, reducing the likelihood of quality issues.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do we ensure data security and confidentiality with offshore drafting?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  All our specialists work from secure, monitored facilities with enterprise-grade security protocols. We use VPN connections, encrypted file transfers, and comprehensive non-disclosure agreements. Your project files are never stored locally and are automatically deleted after project completion. We maintain the same security standards as major international engineering firms.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What CAD software do your drafting specialists use?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Our specialists have experience with all major CAD platforms including AutoCAD, Revit, SolidWorks, Inventor, MicroStation, CATIA, Tekla, and SketchUp. You provide the software licenses as part of your existing setup, and our specialists work directly within your systems. They adapt to your specific software configuration and any specialized plugins you use.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How quickly can we scale up drafting capacity for large projects?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  We can typically add additional specialists within 48-72 hours for urgent projects. For planned expansions, we prefer 1-2 weeks notice to ensure proper integration with your systems and standards. The specialists come with existing CAD experience and adapt to your specific requirements and workflows.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-6" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Do you handle both 2D drafting and 3D modeling?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Yes, our specialists handle everything from basic 2D technical drawings to complex 3D BIM models. We have specialists trained in architectural documentation, structural steel detailing, mechanical assembly drawings, civil engineering plans, and electrical schematics. Whatever your drafting needs, we can match you with specialists who have specific experience in your area.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-7" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What time zones do your drafting specialists work in?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Our specialists work Philippines time, which overlaps perfectly with Australian business hours and provides overnight coverage for USA clients. This means you can submit projects at the end of your day and receive completed work the next morning. The time zone advantage alone can reduce project delivery times by 30-50% compared to traditional local hiring.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-8" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Can we integrate your drafting specialists with our existing project management systems?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Absolutely. Our specialists work within your existing systems and workflows. They can access your project management platforms, file servers, and communication tools. We don't require you to change your processes – we adapt to your way of working. This seamless integration is one of the key advantages of our approach to technical drafting outsourcing.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </div>
-
-        {/* Related Services */}
-        <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">
-            Complete Your Technical Team with Related Services
-          </h2>
-          <p className="text-xl text-gray-700 text-center mb-8">
-            Most firms that implement drafting outsourcing discover they can optimize their entire technical operation. Our integrated approach lets you build complete offshore teams that work seamlessly together.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card className="border-green-300 bg-green-50">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <Settings className="w-6 h-6 text-lime-600 mr-2" />
-                  Engineering Support
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Complement your CAD specialists with engineering virtual assistants for calculations, specifications, and project coordination.
-                </p>
-                <p className="text-sm text-gray-600 italic">
-                  Perfect for: Structural calculations, MEP coordination, project documentation, regulatory compliance.
-                </p>
+                <h3 className="text-xl font-bold text-green-900 mb-4">Perfect for outsourcing:</h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  {[
+                    "Repetitive floor plan variations (apartment buildings, tract housing)",
+                    "3D model creation from your approved 2D drawings",
+                    "Sheet set assembly and standardised annotation",
+                    "Drawing cleanup and file organisation",
+                    "Quantity takeoffs and schedules",
+                    "As-built updates from redlines you've marked up"
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
 
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
+            <Card className="border-red-300 bg-red-50">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <Building2 className="w-6 h-6 text-lime-600 mr-2" />
-                  Architectural Design
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Expand beyond technical drawings with architect virtual assistants for design development and construction documentation.
-                </p>
-                <p className="text-sm text-gray-600 italic">
-                  Perfect for: Design development, 3D modeling, rendering, permit submissions, construction administration.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <Users className="w-6 h-6 text-lime-600 mr-2" />
-                  Construction Support
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Integrate with construction virtual assistants for project management, scheduling, and field coordination.
-                </p>
-                <p className="text-sm text-gray-600 italic">
-                  Perfect for: Project scheduling, submittal tracking, RFI management, progress reporting.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-3 flex items-center">
-                  <Calculator className="w-6 h-6 text-lime-600 mr-2" />
-                  Cost Estimation
-                </h3>
-                <p className="text-gray-700 mb-3">
-                  Connect your drafting team with estimating virtual assistants for accurate quantity takeoffs and cost analysis.
-                </p>
-                <p className="text-sm text-gray-600 italic">
-                  Perfect for: Quantity surveying, material takeoffs, cost databases, bid preparation.
-                </p>
+                <h3 className="text-xl font-bold text-red-900 mb-4">Keep in-house:</h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  {[
+                    "Initial concept sketches (too collaborative, too iterative)",
+                    "Client-facing renderings where your brand reputation is on the line",
+                    "Permit-ready construction documents (your professional liability)",
+                    "Anything requiring site visits or local building code expertise",
+                    "Last-minute rush jobs where time zones kill your deadline",
+                    "Highly proprietary or sensitive designs"
+                  ].map((item, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                      <XCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           </div>
 
-          <div className="mt-8 bg-white rounded-lg p-6">
-            <h4 className="font-bold text-gray-900 mb-2">Integration Advantage:</h4>
-            <p className="text-gray-700 leading-relaxed italic">
-              "Most successful firms start with one service like drafting outsourcing, then expand to complete departments. The same training standards, quality control, and management systems work across all services, creating a seamless offshore operation."
-            </p>
+          <Card className="bg-gray-100 border-l-4 border-gray-600">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-2">⚠️ Real Example:</p>
+              <p className="text-gray-700 leading-relaxed">
+                A commercial construction firm in Texas tried outsourcing their permit drawings to save money. Three projects came back with 
+                code violations the offshore team missed—because they didn't know the specific county requirements for fire egress in that 
+                jurisdiction. Cost them $18,000 in resubmission fees and delayed starts. They now keep permit-ready docs in-house and outsource 
+                the background work.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Freelancer vs Agency Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-amber-100 rounded-full p-3">
+              <Users className="w-8 h-8 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Freelancer vs. Agency Question</h2>
+              <p className="text-lg text-gray-600">Upwork and Fiverr look tempting</p>
+            </div>
           </div>
-        </div>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                Upwork and Fiverr look tempting. $12/hour CAD freelancers with great portfolios and five-star reviews. Why pay an agency $25/hour 
+                when you can hire direct?
+              </p>
+              <p className="text-gray-800 font-semibold">
+                Because 70-80% of cheap freelancers fail within the first 2-3 projects.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">They're juggling five clients. Your project sits in a queue. Communication is 
+                sporadic. They ghost you mid-project because a better offer came along. You've got no backup, no quality control, no accountability.</p>
+              <p className="text-gray-800 font-semibold">
+                I've watched firms hire four consecutive Upwork freelancers before giving up and going with a proper agency. Total cost of those 
+                failed attempts: $4,800 plus four months of wasted time.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <p className="text-gray-700 leading-relaxed">
+                An agency charges more up-front but includes project management, quality control, backup resources, and someone to yell at when 
+                things go wrong.
+              </p>
+              <p className="text-gray-800 font-semibold mt-4">
+                That said, if you need a one-off project—a single 3D model or a set of shop drawings—a skilled freelancer can be brilliant. 
+                Just don't try building an ongoing relationship with someone who's incentivised to chase the next highest bidder.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Real Numbers Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <TrendingUp className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Real Numbers from Real Firms</h2>
+              <p className="text-lg text-gray-600">ShoreAgents places full-time offshore staff</p>
+            </div>
+          </div>
+
+          <Card className="border-lime-300 bg-lime-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                ShoreAgents places full-time offshore staff at $1,200-2,500/month depending on role complexity and experience level. For CAD 
+                drafters and BIM modelers, you're typically at the $1,400-1,800 range.
+              </p>
+              <h3 className="text-lg font-bold text-gray-900 mb-3">Compare to local costs:</h3>
+              <ul className="space-y-2 text-gray-700">
+                <li className="flex items-start gap-3">
+                  <span className="text-lime-600 font-bold mt-1">•</span>
+                  <span><strong>USA:</strong> $3,500-6,000/month for equivalent roles</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-lime-600 font-bold mt-1">•</span>
+                  <span><strong>Australia:</strong> $4,000-7,000/month</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-lime-600 font-bold mt-1">•</span>
+                  <span><strong>New Zealand:</strong> $3,800-6,500/month</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <p className="text-gray-700 leading-relaxed mb-4">
+                One Queensland construction company we work with—Gallery Group—hired a full-time estimator and drafting assistant through us. 
+                Annual savings of $73,000 AUD, with performance reviews consistently rating the offshore team member 5/5. But they came in knowing 
+                exactly what they needed, had documented processes, and committed to proper training time.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                That's the pattern I see work: firms that prepare properly, set realistic timelines, and treat offshore staff as actual team 
+                members rather than disposable vendors.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When This Doesn't Work Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When This Doesn't Work (And You Should Walk Away)</h2>
+              <p className="text-lg text-gray-600">If any of these apply to you, outsourcing offshore drafting will cost you more than it saves</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Annual drafting spend under $50,000",
+                    description: "The training investment won't pay back. Use project-based freelancers or hire part-time locally."
+                  },
+                  {
+                    title: "No documented CAD standards",
+                    description: "You can't outsource chaos. If your layer systems and templates aren't written down, you're not ready."
+                  },
+                  {
+                    title: "Under 10 employees total",
+                    description: "You don't have the management bandwidth. Someone needs to oversee offshore staff 5-10 hours weekly in the first six months."
+                  },
+                  {
+                    title: "Highly specialised or proprietary work",
+                    description: "Defence contractors with ITAR restrictions, pharmaceutical facilities, anything with serious IP concerns or regulatory complexity."
+                  },
+                  {
+                    title: "Project-based work with long gaps",
+                    description: "If you need drafters for three months, then nothing for four months, then two months, you'll spend all your savings on constant retraining."
+                  },
+                  {
+                    title: "No appetite for 90-day ramp-up",
+                    description: "If you need someone productive next week, hire locally. Offshore teams need proper onboarding."
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 mb-1">{item.title}</h4>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Honest Path Forward Section */}
+        <section className="mb-16">
+          <Card className="bg-gray-900 text-white">
+            <CardContent className="p-8">
+              <h2 className="text-3xl font-bold mb-6">The Honest Path Forward</h2>
+              <p className="text-lg leading-relaxed mb-6">
+                Look, offshore CAD drafting and BIM outsourcing works. I've seen it save Australian engineering firms $100,000+ annually. 
+                American architectural practices cutting overhead by 40%. New Zealand construction companies scaling up without adding local 
+                headcount.
+              </p>
+              <p className="text-gray-300 leading-relaxed mb-6">
+                But it's not magic, it's not instant, and it's definitely not as cheap as the hourly rate suggests.
+              </p>
+              <p className="text-gray-300 leading-relaxed mb-6">
+                You need consistent volume ($50,000+ annual spend), documented processes, realistic timelines (90 days to productivity), and 
+                genuine commitment to training and management. Get those right, and by year two you're seeing legitimate 40-50% cost savings 
+                with quality work.
+              </p>
+              <p className="text-gray-300 leading-relaxed">
+                Skip the preparation, expect immediate results, or treat offshore staff as disposable resources, and you'll burn $20,000-30,000 
+                discovering this doesn't work for you.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Final CTA */}
-        <div className="bg-gradient-to-br from-lime-600 to-green-600 rounded-2xl shadow-xl p-12 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4">
-            Ready to Transform Your Drafting Operations?
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Join the engineering and architecture firms that have already eliminated their drafting headaches and scaled their capacity beyond their competitors' reach.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-              <Target className="w-5 h-5 mr-2" />
-              Book Your Strategy Session
-            </Button>
-            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-semibold">
-              <DollarSign className="w-5 h-5 mr-2" />
-              View Investment Options
-            </Button>
-          </div>
-          <p className="mt-6 text-sm opacity-75">
-            Don't let outdated hiring models cost you another contract. The firms dominating their markets have already made this transition.
-          </p>
-        </div>
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready to Explore Drafting Outsourcing?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              If you're spending serious money on drafting, have your standards documented, and can commit to a proper 90-day onboarding 
+              process, offshore drafting services make excellent financial sense. We place CAD drafters, BIM modelers, and technical support 
+              staff for firms across the USA, Australia, and New Zealand at $1,200-2,500/month full-time.
+            </p>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              But if you're not ready—if your annual volume is too low, your processes aren't documented, or you need someone productive 
+              immediately—I'd rather tell you now than have you waste six months discovering it yourself. Sometimes the honest answer is: not yet.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Drafting Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
+            </div>
+            <p className="text-lime-100 mt-6 text-sm">
+              Get in touch if your numbers work and you're ready to do this properly. We'll talk you through what realistic success looks 
+              like—including the bits that aren't fun to hear.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

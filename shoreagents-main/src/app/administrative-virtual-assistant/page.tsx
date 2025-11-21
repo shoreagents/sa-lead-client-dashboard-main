@@ -1,436 +1,573 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
-  CheckCircle, 
-  ArrowRight,
+  CheckCircle2,
+  XCircle,
   DollarSign,
-  Zap,
-  Phone,
-  HelpCircle,
-  ClipboardList,
-  Calendar,
-  Mail,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
+  AlertCircle,
+  ArrowRight,
+  Building2,
   FileText,
   Users,
-  Settings,
-  Clock,
-  X
-} from 'lucide-react';
-import Image from 'next/image';
+  Globe,
+  Calculator,
+  Target,
+  Shield,
+  ClipboardList,
+  Monitor,
+  MessageCircle,
+  Calendar,
+  Mail
+} from "lucide-react";
+import Link from "next/link";
 
 export default function AdministrativeVirtualAssistantPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For $500K+ Annual Revenue Businesses
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              What Is an Administrative Virtual Assistant?<br />
+              <span className="text-lime-600">(And the Break-Even Math That'll Surprise You)</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Belay charges $42/hour for administrative VAs—that's $87,360 annually for full-time support. Local admin assistants cost $55,000-75,000 all-in. You're saving money, right? Not quite. Factor in three months training time, 20 hours weekly of your management during year one, and false starts before finding the right fit, and your break-even point isn't six months—it's closer to 18 months.
+            </p>
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              I've placed administrative virtual assistants across the USA, Australia, and New Zealand for 15 years. Companies that get it right save $35,000+ annually. Companies that get it wrong burn through four VAs in 14 months, spend $22,000, and end up doing the admin work themselves.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View Case Studies
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Administrative Virtual Assistant: Your Professional Support Partner
-          </h1>
-
-          {/* Hero Image */}
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&h=600&fit=crop"
-              alt="Professional administrative virtual assistant managing business operations and tasks"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          </div>
-
-          <p className="text-xl text-gray-700 mb-8 max-w-4xl mx-auto">
-            Skilled administrative professionals who handle scheduling, email management, data entry, customer service, and daily operations—freeing you to focus on growth while saving 72% on costs.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-lime-600 hover:bg-lime-700 text-white px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Book a Strategy Call
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              How It Works
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-2 border-lime-600 text-lime-600 hover:bg-lime-50 px-8 py-4 text-lg font-semibold">
-              See Pricing
-              <DollarSign className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Section */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">
-            <Zap className="w-8 h-8 text-lime-600 mr-3" />
-            Administrative Excellence Delivered
-          </h2>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <Card className="border-lime-200 bg-white shadow-md">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-lime-600 mb-2">15+</div>
-                <div className="text-gray-600 font-medium text-sm">Hours Saved Weekly</div>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white shadow-md">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-lime-600 mb-2">72%</div>
-                <div className="text-gray-600 font-medium text-sm">Cost Savings</div>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white shadow-md">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-lime-600 mb-2">99%</div>
-                <div className="text-gray-600 font-medium text-sm">Task Completion Rate</div>
-              </CardContent>
-            </Card>
-            <Card className="border-lime-200 bg-white shadow-md">
-              <CardContent className="p-6 text-center">
-                <div className="text-4xl font-bold text-lime-600 mb-2">24/7</div>
-                <div className="text-gray-600 font-medium text-sm">Admin Support</div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* What Is Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <ClipboardList className="w-8 h-8 text-lime-600 mr-3" />
-            What Is an Administrative Virtual Assistant?
-          </h2>
+        {/* Intro */}
+        <div className="mb-16">
           <p className="text-lg text-gray-700 leading-relaxed mb-6">
-            An administrative virtual assistant is a skilled professional who handles the day-to-day administrative tasks that keep your business running smoothly. From managing calendars and emails to data entry and customer communications, these VAs provide reliable, efficient support that allows you to focus on strategic priorities.
+            The difference? Most businesses hire administrative VAs before they're ready. They've got no documented processes, no clear job definition, and expect someone to "just figure it out." That's not how this works.
           </p>
-          <p className="text-gray-700 leading-relaxed">
-            Unlike traditional in-office assistants, administrative VAs work remotely with the same dedication and professionalism, using modern tools and technology to deliver seamless support. They become trusted partners who understand your business, anticipate needs, and maintain consistent quality across all administrative functions.
-          </p>
-        </div>
-
-        {/* Services Section */}
-        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Comprehensive Administrative Services
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <Calendar className="w-10 h-10 text-lime-600 mb-3" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Calendar & Scheduling</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Appointment scheduling</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Meeting coordination</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Calendar management</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Reminder & follow-ups</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <Mail className="w-10 h-10 text-lime-600 mb-3" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Email Management</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Inbox organization</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Email responses</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Priority sorting</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Newsletter management</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <FileText className="w-10 h-10 text-lime-600 mb-3" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Data Entry & Management</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Database updates</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Spreadsheet management</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>CRM data entry</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Record organization</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <Users className="w-10 h-10 text-lime-600 mb-3" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Customer Service</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Phone & email support</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Chat support</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Inquiry handling</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Issue escalation</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <Settings className="w-10 h-10 text-lime-600 mb-3" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Document Management</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>File organization</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Document formatting</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Template creation</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Cloud storage management</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-200 bg-white">
-              <CardContent className="p-6">
-                <Clock className="w-10 h-10 text-lime-600 mb-3" />
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Project Coordination</h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Task tracking</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Team coordination</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Deadline monitoring</span>
-                  </li>
-                  <li className="flex items-start">
-                    <CheckCircle className="w-4 h-4 text-lime-600 mr-2 flex-shrink-0 mt-0.5" />
-                    <span>Progress reporting</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Cost Comparison */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center">
-            <DollarSign className="w-8 h-8 text-lime-600 mr-3" />
-            The Cost Advantage
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-red-300 bg-red-50">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-4">
-                  <X className="w-8 h-8 text-red-600 mr-3" />
-                  <h3 className="text-2xl font-bold text-gray-900">Local Administrative Assistant</h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Annual Salary:</span>
-                    <span className="font-bold text-gray-900">$48,000</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Benefits (30%):</span>
-                    <span className="font-bold text-gray-900">$14,400</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Office Space & Equipment:</span>
-                    <span className="font-bold text-gray-900">$8,600</span>
-                  </div>
-                  <hr className="border-red-300" />
-                  <div className="flex justify-between text-xl">
-                    <span className="font-bold text-gray-900">Total Annual Cost:</span>
-                    <span className="font-bold text-red-600">$71,000</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-lime-300 bg-lime-50">
-              <CardContent className="p-8">
-                <div className="flex items-center mb-4">
-                  <CheckCircle className="w-8 h-8 text-lime-600 mr-3" />
-                  <h3 className="text-2xl font-bold text-gray-900">Administrative VA</h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Annual Cost:</span>
-                    <span className="font-bold text-gray-900">$20,000</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Equipment (included):</span>
-                    <span className="font-bold text-gray-900">$0</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Management (included):</span>
-                    <span className="font-bold text-gray-900">$0</span>
-                  </div>
-                  <hr className="border-lime-300" />
-                  <div className="flex justify-between text-xl">
-                    <span className="font-bold text-gray-900">Total Annual Cost:</span>
-                    <span className="font-bold text-lime-600">$20,000</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="border-lime-200 bg-lime-100 mt-8">
-            <CardContent className="p-6 text-center">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Annual Savings: $51,000</h3>
-              <p className="text-lg text-gray-700">That's a 72% cost reduction with reliable, professional support!</p>
+          
+          <Card className="bg-amber-50 border-l-4 border-amber-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>This guide is for businesses doing $500K+ annually with 25-30 hours of documented, repetitive administrative work weekly.</strong> If you're a solopreneur hoping a VA will solve your chaos, stop here. Come back when you've got actual systems.
+              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center flex items-center justify-center">
-            <HelpCircle className="w-10 h-10 text-lime-600 mr-3" />
-            Frequently Asked Questions
-          </h2>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What tasks can an administrative VA handle?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Administrative VAs handle a wide range of tasks including calendar management, email correspondence, data entry, customer service, document preparation, travel arrangements, research, and general administrative support. They adapt to your specific business needs.
-                </AccordionContent>
-              </AccordionItem>
+        <Separator className="my-12" />
 
-              <AccordionItem value="item-2" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do I communicate with my administrative VA?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Communication happens through your preferred channels—email, Slack, Microsoft Teams, Zoom calls, or project management tools. Most clients establish regular check-ins plus ongoing communication as needed throughout the day.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  Can an administrative VA use my existing software?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Yes! Our administrative VAs are proficient in common business tools including Microsoft Office, Google Workspace, CRM systems, project management tools, and communication platforms. They quickly adapt to any specialized software your business uses.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-4" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  How do you ensure quality and reliability?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  We carefully screen and train all VAs, establish clear processes and quality standards, provide ongoing supervision, and maintain backup coverage. You'll have consistent, reliable support with accountability at every level.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5" className="border-lime-200">
-                <AccordionTrigger className="text-left text-lg font-bold text-gray-900 hover:text-lime-600">
-                  What if my needs change or increase?
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 leading-relaxed">
-                  Scaling is easy. You can adjust hours, add additional VAs for specific projects, or expand services as your business grows. We provide flexible solutions that adapt to your changing needs without long-term commitments.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+        {/* What Admin VAs Actually Do Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <ClipboardList className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Administrative VAs Actually Do</h2>
+              <p className="text-lg text-gray-600">An administrative virtual assistant executes systematic, repetitive tasks—not strategic thinking</p>
+            </div>
           </div>
-        </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                An administrative virtual assistant executes systematic, repetitive tasks—not strategic thinking. They manage calendars, handle email triage, process invoices, maintain databases, coordinate meetings, prepare reports, manage travel, conduct research, and handle routine client communications.
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">
+                What they don't do: strategic planning, decision-making, complex problem-solving, or anything requiring deep business context. They're task executors, not business strategists.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The global VA market hit $25.63 billion in 2024, growing 30% annually with 40 million VAs worldwide. That growth comes from businesses understanding what admin VAs do well: execute clearly defined tasks whilst you handle revenue-generating activities.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Research shows 37.7% of businesses use VAs primarily for administrative work. Marketing comes second at 20.5%, sales at 14%. If you're hiring an admin VA expecting marketing genius, you're hiring the wrong role.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Success Story:</h3>
+              <p className="text-gray-800 leading-relaxed">
+                Jon at JBMP Group learned this after freelancers kept disappearing mid-project. His administrative specialist earned 5/5 ratings in month one: "Great work in the detail we need," "Always asking how to improve," "Always shows up early and gets everything done." The difference? Clarity. Jon knew exactly what he needed—no ambiguity about "figuring it out."
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* USA/Australia/NZ Split Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The USA/Australia/New Zealand Split</h2>
+              <p className="text-lg text-gray-600">"Administrative Virtual Assistant" is overwhelmingly USA terminology</p>
+            </div>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                "Administrative Virtual Assistant" is overwhelmingly USA terminology. Google Trends shows consistent USA search interest throughout 2025. Australia and New Zealand? Zero search volume. They search "admin staff" or "offshore admin support" instead.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                This reflects market maturity. USA businesses embraced remote admin support since the mid-2000s. Australian and New Zealand companies are 3-5 years behind, though catching up post-pandemic.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Australian Success Story:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Luke Newton at LockedOn (Australian PropTech) hesitated like many Australian owners. Two weeks after hiring through ShoreAgents: "We are loving our new VA, it's only been 2 weeks but we should have done it years ago." Perfect 5/5 ratings across quality, communication, reliability. One-year review: "Lovely to work with," "Excellent communicator," "Perfect." Overall satisfaction: 5/5.
+              </p>
+              <div className="bg-white rounded-lg p-4">
+                <p className="text-sm text-gray-700 mb-2"><strong>Australian financials:</strong> Local admin assistants cost $70,000+ annually (salary, super, WorkCover, leave, equipment, office). ShoreAgents' service: $21,600 annually—a $48,400+ saving (69% reduction). That's $242,000+ over five years.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                USA economics are similar: local admins cost $55,000-75,000 all-in. ShoreAgents runs $1,200-2,500 monthly ($14,400-30,000 annually), representing 60-74% savings.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Why 13% Filipino Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <Users className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Why 13% of World's VAs Are Filipino</h2>
+              <p className="text-lg text-gray-600">Philippines provides 13% of global VAs—not because they're "cheap labour" but due to systematic advantages</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">English proficiency:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Philippines ranks among Asia's highest English-speaking populations, with business English taught from primary school. Filipino admin professionals understand Western communication styles and corporate etiquette matching USA, Australian, and New Zealand expectations.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Education:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                60% of VAs globally have college degrees. Filipino admin assistants typically hold business administration or commerce degrees, arriving with foundational knowledge of business processes and professional communication.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real-time work:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Filipino admin assistants work during your business hours—not "overnight" with "next day" responses. USA 9am = Manila 9pm (same moment). Zero communication delay. Your admin answers emails and schedules meetings in real-time during your business day.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                For Australian/New Zealand businesses, it's even better. Brisbane 10am = Manila 8am. Sydney 11am = Manila 9am. Filipino assistants work during overlapping daylight hours, enabling seamless collaboration without night shifts.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Honest Pricing Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <Calculator className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Honest Pricing: What You'll Actually Pay</h2>
+              <p className="text-lg text-gray-600">The "$15/hour assistant" myth destroys most VA relationships</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                The "$15/hour assistant" myth destroys most VA relationships. Here's reality: you pay $15/hour, spend 12 hours finding candidates, interview six people, hire someone who quits after three weeks, repeat twice more, and spend $8,400 over four months with nothing to show.
+              </p>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Research says VAs cut costs by 78% theoretically—but that assumes perfect day-one implementation. Reality check: Belay charges $42.70/hour and still gets "hit or miss" Reddit reviews. One user: "Paying high price for basic tasks didn't feel justifiable."
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">ShoreAgents' Honest Pricing:</h3>
+              <div className="space-y-4">
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="font-bold text-gray-900 mb-2">Entry-Level ($1,200-1,500/month):</h4>
+                  <p className="text-sm text-gray-700 mb-2">Email, calendar, data entry, basic communications. Requires clear instructions. 2-3 weeks training.</p>
+                </div>
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="font-bold text-gray-900 mb-2">Mid-Level ($1,500-2,000/month):</h4>
+                  <p className="text-sm text-gray-700 mb-2">Complex scheduling, CRM management, reports, events, invoices, vendor relationships. Works independently. 3-4 weeks training.</p>
+                </div>
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="font-bold text-gray-900 mb-2">Senior-Level ($2,000-2,500/month):</h4>
+                  <p className="text-sm text-gray-700 mb-2">Executive admin functions, process optimisation, sensitive communications, multiple projects, trains juniors. Minimal supervision. 4-6 weeks training.</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                What's included? Everything: salary, management, equipment, office, HR, backup coverage, replacement if needed. No hidden costs.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                Even at senior pricing ($30,000 annually), you're saving $25,000-45,000 yearly versus local admin assistants whilst getting professional support during your business hours in real-time.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Delegate This, Not That Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <Target className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Delegate This, Not That</h2>
+              <p className="text-lg text-gray-600">Most businesses delegate wrong things, keep wrong things, then wonder why it fails</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Delegate:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li>• Email management</li>
+                  <li>• Calendar coordination</li>
+                  <li>• Data entry</li>
+                  <li>• Database management</li>
+                  <li>• Invoice processing</li>
+                  <li>• Travel coordination</li>
+                  <li>• Meeting scheduling</li>
+                </ul>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li>• Document formatting</li>
+                  <li>• Client communication via templates</li>
+                  <li>• Research with clear parameters</li>
+                  <li>• Social media scheduling</li>
+                  <li>• CRM updates</li>
+                  <li>• Appointment confirmations</li>
+                </ul>
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                These are repetitive, follow documented processes, have clear metrics, don't require deep business context. Executives spend 16 hours weekly on admin tasks—delegate these first.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Never Delegate:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li>• Strategic client relationships</li>
+                  <li>• Negotiations</li>
+                  <li>• Financial decisions</li>
+                  <li>• Brand positioning</li>
+                  <li>• Undefined problem-solving</li>
+                </ul>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li>• Crisis management</li>
+                  <li>• Sensitive HR matters</li>
+                  <li>• Legal documents</li>
+                  <li>• Original brand content</li>
+                  <li>• New client prospecting without processes</li>
+                </ul>
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                These require business context, strategic thinking, decision authority, or brand knowledge admin VAs don't have. They're task executors, not strategists.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-blue-300 bg-blue-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Success Story:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Jason Gard started with one Sales Admin specialist handling listing management, contracts, communications, system admin. He didn't ask her to develop strategies—he delegated execution whilst focusing on relationships and business development. By year three, she was implementing ClickUp, managing Pipeline Pro, overseeing contractors. That evolution came from delegating appropriately from day one.
+              </p>
+              <p className="text-gray-800 font-semibold">
+                Revenue threshold reality: under $500K annually, you don't have 25-30 hours of documented admin work weekly. You've got 10-15 hours of scattered tasks mixed with strategic work you shouldn't delegate. That's insufficient volume to justify full-time support. Part-time arrangements typically fail because training investment doesn't pay off.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* When Admin VAs Don't Work Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <XCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">When Admin VAs Don't Work</h2>
+              <p className="text-lg text-gray-600">Here's what every provider hates admitting: admin VAs aren't for everyone</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">When you should NOT hire:</h3>
+              <div className="space-y-3">
+                {[
+                  "Under $500K Revenue: Insufficient administrative volume for full-time support. The maths doesn't work.",
+                  "No Documented Processes: If you'll \"figure it out,\" you're not ready. Admin VAs need clear processes, not management consulting.",
+                  "Need Strategic Thinking: Admin VAs execute tasks, don't develop strategy. If you want \"initiative\" on undefined problems, hire an operations manager instead.",
+                  "Part-Time Needs (<20 Hours): Training requires 30-50 hours over 1-2 months. At 10-15 hours weekly, you'll spend three months training for minimal output. Economics don't work.",
+                  "Solopreneur/Side Hustle: Without consistent revenue, predictable workflow, and growth trajectory, you're not ready for systematic admin support.",
+                  "Expect Mind-Reading: If your style is \"they should just know,\" this won't work. Admin VAs need clear communication, documented preferences, systematic feedback.",
+                  "Looking for \"Cheap Labour\": Quality admin support isn't about finding cheapest option—it's about systematic efficiency. The \"cheapest VA\" becomes most expensive mistake when factoring turnover and quality issues."
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                Research validates this: whilst 59% report outsourcing savings, 41% don't achieve results. The difference isn't the VAs—it's whether businesses were actually ready.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 18-Month Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 18-Month Reality</h2>
+              <p className="text-lg text-gray-600">Here's the honest break-even timeline</p>
+            </div>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Here's the honest break-even timeline: Months 1-3 = investment (training, documenting, establishing systems). Months 4-12 = efficiency building (productivity gains, frequent management). Months 13-24 = real payoff (systematic execution, minimal oversight, full ROI).
+              </p>
+              <p className="text-gray-800 font-semibold mb-4">
+                That 18-24 month break-even isn't failure—it's reality. Providers promising "immediate ROI" are lying. Quality admin support requires systematic implementation, proper training, realistic timeframes.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Hidden costs nobody mentions:</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li>• 20-40 hours your time for onboarding (months 1-2)</li>
+                <li>• If you lack documented processes, add 40-80 hours creating them</li>
+                <li>• Tool licenses: $20-50/month</li>
+                <li>• Ongoing management: 2-5 hours monthly</li>
+                <li>• Replacement if VA leaves: 15-25 hours</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Add it all up: Month 1-6 is investment. Month 7-12 is break-even. Month 13-24 is where value compounds.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Success Story:</h3>
+              <p className="text-gray-800 leading-relaxed">
+                Arizto (New Zealand) started with two admin assistants, built trust over 12 months, then expanded to developers for technical projects. That admin-to-technical evolution took 18 months of systematic relationship building. By year two, they were expanding services to other companies in their network—ultimate validation of long-term value.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What ShoreAgents Does Differently Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <Building2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What ShoreAgents Does Differently</h2>
+              <p className="text-lg text-gray-600">Most providers: show resumes, help interview, collect payment, disappear whilst hoping it works</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Most providers: show resumes, help interview, collect payment, disappear whilst hoping it works. That's facilitated introductions with crossed fingers, not systematic support.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">ShoreAgents starts with honest assessment:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                We evaluate whether you're ready. Not ready? We'll say so directly. Rather lose a client upfront than have you fail later.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Candidate matching isn't resume shuffling:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Pre-vetted database filtered by experience, skills, personality, communication style. You see work samples, test scores, communication examples before first interview.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real-time onboarding tracking:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                Dashboard shows personal info submitted, IDs verified, contract signed, equipment setup, start date. You're not wondering "when do they start?"—you're watching progress updates.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Live productivity monitoring:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                60-second updates showing clock-in, tasks completed, productivity scores. Unlike providers asking you to "trust they're working," we give transparent data.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Backup coverage guaranteed:</h3>
+              <p className="text-gray-800 leading-relaxed mb-4">
+                VA takes holidays or gets sick? We provide trained backup so admin functions don't stop.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">We handle everything you hate:</h3>
+              <p className="text-gray-800 leading-relaxed">
+                HR admin, payroll, equipment, office, compliance, replacement if needed. You get exceptional admin support without employment headaches.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
 
         {/* Final CTA */}
-        <div className="bg-gradient-to-br from-lime-600 to-green-600 rounded-2xl shadow-xl p-12 text-center text-white">
-          <h2 className="text-4xl font-bold mb-4 flex items-center justify-center">
-            <Zap className="w-10 h-10 text-white mr-3" />
-            Ready for Professional Support?
-          </h2>
-          <p className="text-xl mb-8 opacity-90">
-            Get reliable administrative support with expert virtual assistants. Save 72% on costs while freeing 15+ hours weekly to focus on growth.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-              <Phone className="mr-2 h-5 w-5" />
-              Start Your Admin Journey
-            </Button>
-            <Button size="lg" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-semibold">
-              View Pricing Plans
-              <DollarSign className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready to Start?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              If you're doing $500K+ annually with documented, repetitive admin work consuming 25-30+ hours weekly, schedule a consultation. We'll evaluate readiness, review processes, discuss candidate matching.
+            </p>
+            <p className="text-lg mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Not ready yet—under revenue threshold, lacking processes, still building systems? Come back in 6-12 months when you've got operational infrastructure supporting systematic delegation.
+            </p>
+            <p className="text-lg mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              The 18-24 month break-even isn't weakness—it's realistic implementation creating long-term strategic value. Businesses succeeding with admin VAs don't expect magic. They expect systematic efficiency compounding over time through proper training investment, process development, and relationship building.
+            </p>
+            <p className="text-lg mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed font-semibold">
+              Are you one of them?
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

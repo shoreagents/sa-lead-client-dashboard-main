@@ -1,512 +1,945 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { Button } from '@/components/ui/button'
-import { ArrowRight, Calculator, BookOpen } from 'lucide-react'
-import { SideNav } from '@/components/layout/SideNav'
+import { SideNav } from "@/components/layout/SideNav";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { 
+  CheckCircle2,
+  XCircle,
+  DollarSign,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
+  AlertCircle,
+  ArrowRight,
+  Building2,
+  FileText,
+  Users,
+  Percent
+} from "lucide-react";
+import Link from "next/link";
 
 export default function AccountingOutsourcingPage() {
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="min-h-screen bg-gray-50">
-        {/* Hero Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Tag */}
-            <div className="inline-flex items-center gap-2 bg-lime-100 border border-lime-300 text-gray-700 px-4 py-2 rounded-full mb-6 shadow-sm">
-              <Calculator className="w-4 h-4 text-lime-600" />
-              <span className="font-semibold text-sm uppercase tracking-wide">ACCOUNTING OUTSOURCING</span>
-            </div>
-
-            {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              <span className="block">Professional Accounting</span>
-              <span className="block">
-                Without the{' '}
-                <span className="text-lime-600">Overhead</span>
-              </span>
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              For $500K+ Annual Revenue Businesses
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Accounting Outsourcing:<br />
+              <span className="text-lime-600">Why 60% of Contracts Fail by 2025</span>
             </h1>
-
-            {/* Description */}
-            <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Access qualified Filipino accountants who understand your business finances, tax compliance, and reporting needs - delivering professional financial management at{' '}
-              <span className="font-bold text-lime-600">$493/month all-inclusive.</span>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Here's a number that should terrify every accounting outsourcing provider: <strong>Gartner predicts 60% of finance and accounting outsourcing contracts won't be renewed by 2025.</strong>
             </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white px-8 py-3 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            <p className="text-lg text-gray-700 leading-relaxed mb-8">
+              Not because offshore accounting doesn't work—it does, when implemented properly. The problem is most companies are jumping into accounting outsourcing at exactly the wrong time, for exactly the wrong reasons, with completely unrealistic expectations about how it actually functions.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
               >
-                Get Accounting Support
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="border-2 border-lime-500 text-lime-600 hover:bg-lime-50 px-8 py-3 rounded-lg font-semibold text-lg transition-all duration-300"
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
               >
-                <BookOpen className="mr-2 h-5 w-5" />
                 View Case Studies
-              </Button>
+              </Link>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Why Businesses Trust Us Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Why Businesses Trust Shore Agents for Accounting
-              </h2>
-              <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-                From financial reporting to tax compliance, our accounting professionals provide the expertise and reliability your business needs for sound financial management.
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Intro */}
+        <div className="mb-16">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Meanwhile, the USA is facing a genuine accounting crisis. The accountant workforce declined 10% from 2019 to 2024. By 2025, there'll be an estimated 300,000 open accounting roles with nobody to fill them. Companies are desperate for solutions, which means they're vulnerable to providers selling fantasies instead of reality.
+          </p>
+          
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            I've been placing offshore accounting staff with businesses across the USA, Australia, and New Zealand for 15 years. The companies that succeed share one characteristic: they didn't outsource accounting because they were desperate. They outsourced because they were operationally mature, systematically ready, and crossed a specific revenue threshold where the maths actually worked.
+          </p>
+          
+          <Card className="bg-amber-50 border-l-4 border-amber-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-medium">
+                <strong>This guide is for:</strong> Established businesses doing $500,000+ in annual revenue with transaction volumes exceeding 150-300 monthly. If you're a startup processing 50 transactions monthly, accounting outsourcing will cost you more than keeping it in-house. Save this for later and come back when you've scaled.
               </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Separator className="my-12" />
+
+        {/* The $2,000/Month Lie Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-red-600" />
             </div>
-
-            {/* Two Column Layout */}
-            <div className="grid lg:grid-cols-2 gap-12 items-start">
-              {/* Left Column - Key Benefits */}
-              <div className="space-y-8">
-                {/* Professional Qualifications */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      Professional Qualifications
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      Certified accountants with strong understanding of accounting principles, tax regulations, and financial reporting standards.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Compliance Expertise */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      Compliance Expertise
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      Deep knowledge of tax laws and regulations ensuring your business stays compliant and optimizes financial opportunities.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Timely Reporting */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-5 h-5 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                      Timely Reporting
-                    </h3>
-                    <p className="text-gray-700 leading-relaxed">
-                      Consistent, accurate financial reporting that helps you make informed business decisions and meet all deadlines.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column - Testimonial Card */}
-              <div className="bg-white rounded-lg shadow-lg p-8 border border-gray-100">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                  Stephen's Accounting Reality
-                </h3>
-                <div className="space-y-6">
-                  <blockquote className="text-gray-700 leading-relaxed italic">
-                    "The thing is, when you're running multiple businesses, accurate books aren't optional. That disaster with the roosters taught me about unexpected expenses and proper record keeping!"
-                  </blockquote>
-                  <blockquote className="text-gray-700 leading-relaxed italic">
-                    "So basically, we needed accountants who understood both the technical side and the business implications. Our Filipino accounting team prevents those 'surprise' tax bills."
-                  </blockquote>
-                  <blockquote className="text-gray-700 leading-relaxed italic">
-                    "One client saved $40K in the first year just from proper tax planning and expense optimization. Their monthly financial clarity improved decision-making across all departments."
-                  </blockquote>
-                </div>
-              </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The $2,000/Month Lie: What Accounting Outsourcing Actually Costs</h2>
+              <p className="text-lg text-gray-600">Every provider loves to advertise "$2,000/month outsourced accounting!" Then you discover what they don't mention.</p>
             </div>
           </div>
-        </section>
 
-        {/* Comprehensive Accounting Services Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Comprehensive Accounting Services
-              </h2>
-              <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-                From day-to-day bookkeeping to strategic financial analysis, we provide full-spectrum accounting support for businesses of all sizes.
+          {/* Year One True Cost */}
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year One True Cost (USA Mid-Sized Business):</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Outsourcing Fee:</span>
+                  <span className="font-semibold text-gray-900">$30,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Your Management Time (5 hrs/week):</span>
+                  <span className="font-semibold text-gray-900">$39,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Software & Tools:</span>
+                  <span className="font-semibold text-gray-900">$2,400</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Training Investment:</span>
+                  <span className="font-semibold text-gray-900">$6,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Mistakes & Rework:</span>
+                  <span className="font-semibold text-gray-900">$8,000-15,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Transition Costs:</span>
+                  <span className="font-semibold text-gray-900">$3,000</span>
+                </div>
+                <Separator className="my-3" />
+                <div className="flex justify-between items-center pt-2">
+                  <span className="font-bold text-gray-900">Total Year One:</span>
+                  <span className="font-bold text-red-600 text-xl">$88,400-95,400</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-gray-700">Effective Monthly Cost:</span>
+                  <span className="font-bold text-red-600">$7,367-7,950 (not $2,000)</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-gray-700">Effective Hourly Rate:</span>
+                  <span className="font-bold text-red-600">$44-48/hour (not $15)</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Year Two+ Reality */}
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year Two+ Reality (Steady State):</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Outsourcing Fee:</span>
+                  <span className="font-semibold text-gray-900">$30,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Software:</span>
+                  <span className="font-semibold text-gray-900">$2,400</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Management (2 hrs/week):</span>
+                  <span className="font-semibold text-gray-900">$15,600</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-700">Mistakes:</span>
+                  <span className="font-semibold text-gray-900">$2,000-3,000</span>
+                </div>
+                <Separator className="my-3" />
+                <div className="flex justify-between items-center pt-2">
+                  <span className="font-bold text-gray-900">Total Year Two:</span>
+                  <span className="font-bold text-blue-600 text-xl">$50,000-51,000</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-gray-700">Effective Monthly Cost:</span>
+                  <span className="font-bold text-blue-600">$4,167</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-gray-700">Effective Hourly Rate:</span>
+                  <span className="font-bold text-blue-600">$24-25/hour</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-2">⚠️ Critical Reality:</p>
+              <p className="text-gray-700 leading-relaxed">
+                Notice something? <strong>Year One costs MORE than many in-house accountants.</strong> True ROI doesn't materialise until Month 18-24. This is why companies under $500,000 revenue typically lose money on accounting outsourcing—the break-even timeline exceeds their patience and cash flow tolerance.
               </p>
-            </div>
-
-            {/* Services Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Financial Reporting */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Reporting</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Monthly financial statements
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    P&L analysis
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Cash flow reports
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Budget vs actual analysis
-                  </li>
-                </ul>
-              </div>
-
-              {/* Tax Preparation */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Tax Preparation</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Corporate tax returns
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Tax planning strategies
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Quarterly estimates
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Compliance monitoring
-                  </li>
-                </ul>
-              </div>
-
-              {/* Accounts Management */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Accounts Management</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Accounts payable
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Accounts receivable
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Invoice processing
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Payment scheduling
-                  </li>
-                </ul>
-              </div>
-
-              {/* Financial Analysis */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Analysis</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Performance metrics
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Profitability analysis
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Cost center analysis
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Variance reporting
-                  </li>
-                </ul>
-              </div>
-
-              {/* Payroll Processing */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Payroll Processing</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Payroll calculations
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Tax withholdings
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Benefits administration
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Compliance reporting
-                  </li>
-                </ul>
-              </div>
-
-              {/* Business Advisory */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">Business Advisory</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Financial planning
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Business insights
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Growth strategies
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-lime-600 mr-2">•</span>
-                    Risk assessment
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </section>
 
-        {/* Professional Accounting Investment Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Professional Accounting Investment
-              </h2>
+        <Separator className="my-12" />
+
+        {/* Revenue Threshold Rule Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <TrendingUp className="w-8 h-8 text-lime-600" />
             </div>
-
-            {/* Investment Card */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 md:p-12">
-              {/* Metrics Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                {/* Cost */}
-                <div className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
-                    $493
-                  </div>
-                  <div className="text-gray-600 text-sm md:text-base">
-                    Per accountant/month
-                  </div>
-                </div>
-
-                {/* Savings */}
-                <div className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold text-lime-600 mb-2">
-                    $40K
-                  </div>
-                  <div className="text-gray-600 text-sm md:text-base">
-                    Average annual savings
-                  </div>
-                </div>
-
-                {/* Compliance */}
-                <div className="text-center">
-                  <div className="text-4xl md:text-5xl font-bold text-lime-600 mb-2">
-                    100%
-                  </div>
-                  <div className="text-gray-600 text-sm md:text-base">
-                    Tax compliance rate
-                  </div>
-                </div>
-              </div>
-
-              {/* Middle Text */}
-              <div className="text-center mb-8">
-                <p className="text-gray-700 text-lg leading-relaxed">
-                  All-inclusive: Salary, benefits, accounting software, workspace, and professional oversight
-                </p>
-              </div>
-
-              {/* CTA Button */}
-              <div className="text-center">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-600 hover:to-lime-700 text-white px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  Calculate Your Investment
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Revenue Threshold Rule: When You're Actually Ready</h2>
+              <p className="text-lg text-gray-600">Most small businesses lose money outsourcing accounting. Here's the uncomfortable truth.</p>
             </div>
           </div>
+
+          {/* Revenue Thresholds */}
+          <div className="space-y-6 mb-8">
+            {/* Under $500K */}
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Under $500,000 Annual Revenue:</h3>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-red-600 font-bold mt-1">•</span>
+                    <span>Monthly transactions: 50-150</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-red-600 font-bold mt-1">•</span>
+                    <span>Accounting time needed: 10-20 hours/month</span>
+                  </li>
+                </ul>
+                <p className="text-gray-800 font-semibold">
+                  Better solution: Part-time bookkeeper ($25-35/hour) + QuickBooks + quarterly CPA review
+                </p>
+                <p className="text-gray-700 mt-2">
+                  Why: Outsourcing overhead exceeds value at this scale
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* $500K-$1M */}
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">$500,000-1,000,000 Annual Revenue:</h3>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-amber-600 font-bold mt-1">•</span>
+                    <span>Monthly transactions: 150-300</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-amber-600 font-bold mt-1">•</span>
+                    <span>Accounting time needed: 20-40 hours/month</span>
+                  </li>
+                </ul>
+                <p className="text-gray-800 font-semibold">
+                  Tipping point: Outsourcing starts making financial sense
+                </p>
+                <p className="text-gray-700 mt-2">
+                  Consider: If transactions exceed 200/month consistently
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* $1M-$5M */}
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">$1,000,000-5,000,000 Annual Revenue:</h3>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-green-600 font-bold mt-1">•</span>
+                    <span>Monthly transactions: 300-1,000+</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-green-600 font-bold mt-1">•</span>
+                    <span>Accounting time needed: 40-80 hours/month</span>
+                  </li>
+                </ul>
+                <p className="text-gray-800 font-semibold">
+                  Sweet spot: Full outsourcing delivers clear ROI
+                </p>
+                <p className="text-gray-700 mt-2">
+                  Reality: This is where the maths genuinely works
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* $5M+ */}
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-3">$5,000,000+ Annual Revenue:</h3>
+                <ul className="space-y-2 mb-4">
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-lime-600 font-bold mt-1">•</span>
+                    <span>Complex operations, multiple entities</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-gray-800">
+                    <span className="text-lime-600 font-bold mt-1">•</span>
+                    <span>Full accounting team required (80+ hours/month)</span>
+                  </li>
+                </ul>
+                <p className="text-gray-800 font-semibold">
+                  Strong case: Outsourcing makes compelling financial sense
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* When NOT to Outsource */}
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">When NOT to Outsource Accounting (Regardless of Revenue):</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  "Startup in first 2 years - Systems aren't established",
+                  "Highly seasonal business (3+ months dormant)",
+                  "Industry-specific complexity (Construction AIA billing, healthcare medical coding, non-profit fund accounting)",
+                  "No documented processes - Everything's in your head",
+                  "Need strategic guidance - Outsourced teams execute, don't strategize",
+                  "Can't commit 5-10 hours/week management - First 90 days require minimum 10 hours/week"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </section>
 
-        {/* Related Financial Services Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                Related Financial Services
-              </h2>
+        <Separator className="my-12" />
+
+        {/* 90-Day Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-orange-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-orange-600" />
             </div>
-
-            {/* Service Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {/* Bookkeeping Outsourcing */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 group">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-lime-200 transition-colors duration-300">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Bookkeeping Outsourcing
-                </h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  Daily financial record keeping and transaction management.
-                </p>
-                <a href="/bookkeeping-outsourcing" className="inline-flex items-center text-lime-600 hover:text-lime-700 font-medium group-hover:translate-x-1 transition-transform duration-300">
-                  Learn More
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </a>
-              </div>
-
-              {/* Real Estate Outsourcing */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 group">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-lime-200 transition-colors duration-300">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Real Estate Outsourcing
-                </h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  Specialized accounting for real estate transactions and management.
-                </p>
-                <a href="/real-estate-outsourcing" className="inline-flex items-center text-lime-600 hover:text-lime-700 font-medium group-hover:translate-x-1 transition-transform duration-300">
-                  Learn More
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </a>
-              </div>
-
-              {/* Construction Outsourcing */}
-              <div className="bg-lime-50 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 group">
-                <div className="w-12 h-12 bg-lime-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-lime-200 transition-colors duration-300">
-                  <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                  Construction Outsourcing
-                </h3>
-                <p className="text-gray-700 leading-relaxed mb-4">
-                  Project-based accounting and cost management for construction.
-                </p>
-                <a href="/construction-outsourcing" className="inline-flex items-center text-lime-600 hover:text-lime-700 font-medium group-hover:translate-x-1 transition-transform duration-300">
-                  Learn More
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </a>
-              </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 90-Day Reality: Why You'll Be Slower Before You're Faster</h2>
+              <p className="text-lg text-gray-600">Here's what providers promise: "Save time immediately!" Here's what actually happens.</p>
             </div>
           </div>
+
+          {/* Timeline Cards */}
+          <div className="space-y-4">
+            {/* Days 1-30 */}
+            <Card className="border-red-300 bg-red-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-red-600 text-white">Days 1-30</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Disaster Phase</h3>
+                    <p className="text-gray-700 leading-relaxed mb-3">
+                      You're 20-30% slower, not faster. You're creating training materials, writing SOPs, documenting every process. Daily 60-minute check-in calls. Constant questions. Mistakes requiring immediate fixes. Your time investment: 15-20 hours weekly.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Days 30-60 */}
+            <Card className="border-amber-300 bg-amber-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-amber-600 text-white">Days 30-60</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Frustration Phase</h3>
+                    <p className="text-gray-700 leading-relaxed mb-3">
+                      Team contributing but needs heavy supervision. Quality inconsistent—some work excellent, some requires complete rework. You're spending 8-12 hours weekly managing. Small time savings emerging in certain areas. Break-even on time. Common thought: "Is this actually worth it?"
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Days 60-90 */}
+            <Card className="border-blue-300 bg-blue-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-blue-600 text-white">Days 60-90</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Turning Point</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Team becoming independent on routine tasks. Quality stabilising. Management time drops to 5-8 hours weekly. Small positive ROI starting—reclaiming 5-10 hours weekly. Can delegate more complex tasks.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Month 4-6 */}
+            <Card className="border-green-300 bg-green-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-green-600 text-white">Month 4-6</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Payoff Phase</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Team handling 30-40 hours weekly of work effectively. You've reclaimed 15-25 productive hours. Management down to 3-5 hours weekly. Visible ROI: 3-5x return on investment. Confidence to delegate more.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Month 6-12 */}
+            <Card className="border-lime-300 bg-lime-50">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <Badge className="bg-lime-600 text-white">Month 6-12</Badge>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">The Scaling Phase</h3>
+                    <p className="text-gray-700 leading-relaxed">
+                      Team mastered routine processes. Handling complex work with minimal oversight. Considering expanding scope. Full 20-30 hours weekly reclaimed. True cost savings realised.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600 mt-8">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold mb-2">⚠️ Why This Timeline Matters:</p>
+              <p className="text-gray-700 leading-relaxed">
+                This timeline is why the $500,000 revenue threshold matters—smaller companies don't have the cash flow or patience to survive the 90-day investment period before seeing returns.
+              </p>
+            </CardContent>
+          </Card>
         </section>
 
-        {/* Final CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-lime-600">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Main Heading */}
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
-              Ready to Optimize Your Financial Management?
-            </h2>
+        <Separator className="my-12" />
 
-            {/* Description */}
-            <p className="text-lg sm:text-xl text-white mb-12 max-w-3xl mx-auto leading-relaxed opacity-95">
-              Join businesses who've streamlined their accounting while saving thousands in taxes and penalties.
-            </p>
+        {/* What You Can Actually Outsource Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What You Can Actually Outsource (And What You Absolutely Cannot)</h2>
+              <p className="text-lg text-gray-600">Not all accounting tasks are created equal. Here's the honest breakdown.</p>
+            </div>
+          </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                size="lg" 
-                className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-white hover:border-gray-100"
-              >
-                Start Accounting Partnership
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+          {/* Perfect for Outsourcing */}
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-green-900 mb-6">Perfect for Outsourcing:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  "Accounts Payable Processing - Data entry, invoice coding, payment processing",
+                  "Accounts Receivable Data Entry - Invoice creation, payment application",
+                  "Bank Reconciliations - Time-consuming, rule-based, low complexity",
+                  "General Ledger Coding & Entry - Following predefined chart of accounts",
+                  "Fixed Asset Accounting - Depreciation calculations, asset tracking",
+                  "Expense Report Processing - Receipt verification, coding, reimbursement",
+                  "Financial Statement Preparation (Draft) - They prepare draft, you review",
+                  "Payroll Processing (Non-Executive) - Data entry, tax calculations, reporting"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Risky to Outsource */}
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-amber-900 mb-6">Risky to Outsource (Proceed with Extreme Caution):</h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Cash Management",
+                    description: "Never give offshore team direct bank account access; set up read-only or require dual authorization"
+                  },
+                  {
+                    title: "Customer-Facing Collections",
+                    description: "Cultural differences may harm customer relationships; works for internal AR, risky for direct contact"
+                  },
+                  {
+                    title: "Financial Close & Month-End (Initial Period)",
+                    description: "First 3-6 months keep in-house or heavily supervised; timing critical and mistakes visible company-wide"
+                  },
+                  {
+                    title: "Complex Revenue Recognition (ASC 606)",
+                    description: "Requires judgment calls, not just data entry; outsource execution after YOU determine treatment"
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Never Outsource */}
+          <Card className="border-red-300 bg-red-50">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold text-red-900 mb-6">Never Outsource:</h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Strategic Financial Planning",
+                    description: "Requires deep business context and vision; outsourced teams execute, don't strategize"
+                  },
+                  {
+                    title: "High-Stakes Client Relationships",
+                    description: "Key client financial reviews, investor relations, board-level presentations where trust matters"
+                  },
+                  {
+                    title: "Complex Negotiations",
+                    description: "Vendor negotiations requiring judgment, banking relationships, M&A due diligence"
+                  },
+                  {
+                    title: "Sensitive HR/Payroll Decisions",
+                    description: "Compensation strategy, executive payroll, termination-related financial matters"
+                  },
+                  {
+                    title: "Regulatory Filings Requiring Licensed Professional",
+                    description: "SEC filings, IRS representation (requires Enrolled Agent, CPA, or Attorney), state regulatory filings"
+                  },
+                  {
+                    title: "Legal/Compliance Gray Areas",
+                    description: "FCPA compliance, fraud investigations, whistleblower management, compliance decisions requiring legal judgment"
+                  }
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900">{item.title}</h4>
+                      <p className="text-gray-700">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-100 border-l-4 border-gray-600 mt-6">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                The decision framework: <strong>High risk + high judgment = keep in-house. Low risk + high volume = perfect for outsourcing.</strong>
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Quality Problem Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-red-100 rounded-full p-3">
+              <AlertTriangle className="w-8 h-8 text-red-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Quality Problem Everyone Whispers About</h2>
+              <p className="text-lg text-gray-600">There's a pattern in the complaints from companies using accounting outsourcing.</p>
+            </div>
+          </div>
+
+          <Card className="border-red-300 bg-red-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Common Quality Complaints:</h3>
+              <div className="space-y-4">
+                <blockquote className="text-gray-700 italic border-l-4 border-red-500 pl-4">
+                  "There is a strong push to offshore work to Manila and India. Unfortunately the quality we get in return just isn't there, and it takes more effort to QC the work... we end up upside on client budgets." - Glassdoor, Accounting Professional
+                </blockquote>
+                <blockquote className="text-gray-700 italic border-l-4 border-red-500 pl-4">
+                  "90% of the accounting team is in India and the team in America is like 5 people fixing India's mistakes." - Reddit comment
+                </blockquote>
+                <blockquote className="text-gray-700 italic border-l-4 border-red-500 pl-4">
+                  "The lack of detail, lack of foresight, lack of communication has nearly killed the company. So many client complaints and clients churning, so many US staff leaving." - Industry forum
+                </blockquote>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Why Quality Problems Happen:</h3>
+              <div className="space-y-3">
+                {[
+                  "The 'Trained Professional' Myth - 'US GAAP trained' means basic classroom theory, not practical application",
+                  "Communication Breakdown - Time zone challenges create 12-24 hour delays on urgent questions",
+                  "Skills Gap - 'Real estate accounting specialist' often means worked with 5 real estate clients, each completely different",
+                  "Insufficient Management - Companies underestimate supervision time required"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-green-300 bg-green-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">How Successful Companies Avoid Quality Issues:</h3>
+              <div className="space-y-3">
+                {[
+                  "Invest heavily in first 90 days of training",
+                  "Create comprehensive process documentation before hiring",
+                  "Implement quality control systems with regular audits",
+                  "Accept that offshore team executes YOUR systems, not their own",
+                  "Commit realistic management time (not 'hands-off' fantasy)"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                The quality problems are real, but they're largely preventable with proper implementation. Companies that fail typically underestimated the training and management investment required.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Market Reality Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-blue-100 rounded-full p-3">
+              <Users className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Market Reality: USA Accountant Shortage Driving Demand</h2>
+              <p className="text-lg text-gray-600">The numbers tell a stark story</p>
+            </div>
+          </div>
+
+          <Card className="border-blue-300 bg-blue-50 mb-6">
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">The Crisis:</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>USA accountant workforce: Down 10% from 2019-2024</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>Estimated open roles by 2025: 300,000</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>CPA exam pass rates: Declining</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>Young professionals entering accounting: Decreasing</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>Big 4 firms' response: Doubling offshore staff</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Outsourcing Adoption Rates (USA):</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>37% of small businesses (under 50 employees) outsource accounting</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>66% of businesses (50+ employees) outsource accounting</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>30% of CPA firms outsource domestically</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-800">
+                      <span className="text-blue-600 font-bold mt-1">•</span>
+                      <span>25% of CPA firms outsource to offshore workers</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-lime-50 border-l-4 border-lime-500">
+            <CardContent className="p-6">
+              <p className="text-gray-800 font-semibold">
+                Translation: Accounting outsourcing is mainstream in the USA. The question isn't "should I consider it?" but rather "am I ready for it?"
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* What Success Actually Looks Like Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-green-100 rounded-full p-3">
+              <CheckCircle2 className="w-8 h-8 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What Success Actually Looks Like</h2>
+              <p className="text-lg text-gray-600">When accounting outsourcing works properly, here's the reality</p>
+            </div>
+          </div>
+
+          <Card className="border-green-300 bg-green-50 mb-6">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Year Two+ Performance (After 18-Month Break-Even):</h3>
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-gray-800">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>30-40% genuine cost savings (not the advertised 70%)</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>15-25 hours weekly reclaimed by business owner</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>3-5 hours weekly ongoing management time</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Quality matching or exceeding previous in-house performance</span>
+                </li>
+                <li className="flex items-start gap-3 text-gray-800">
+                  <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                  <span>Scalability—can add second accountant for $30,000 vs $70,000 local hire</span>
+                </li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-lime-50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Real Success Indicators:</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {[
+                  "Offshore accountant working independently on routine tasks",
+                  "You reviewing their work, not doing it yourself",
+                  "Mistakes rare and quickly corrected",
+                  "Can take vacation without accounting grinding to halt",
+                  "Cash flow improved from cost savings",
+                  "Time reinvested in revenue-generating activities"
+                ].map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-gray-800 font-semibold mt-4">
+                The successful companies all share common traits: they crossed the revenue threshold before outsourcing, documented their processes first, committed realistic management time, and maintained patience through the 90-day ramp-up.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* Honest Assessment Section */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-amber-100 rounded-full p-3">
+              <FileText className="w-8 h-8 text-amber-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Honest Assessment: Are You Ready?</h2>
+              <p className="text-lg text-gray-600">Most businesses reading this aren't ready for accounting outsourcing. That's not an insult—it's reality.</p>
+            </div>
+          </div>
+
+          <Card className="border-amber-300 bg-amber-50 mb-6">
+            <CardContent className="p-8">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Self-Assessment Checklist:</h3>
               
-              <Button 
-                variant="default" 
-                size="lg"
-                className="border-2 border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300"
-              >
-                <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-                View Success Stories
-              </Button>
-            </div>
-          </div>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-3">Revenue Test:</h4>
+                  <div className="space-y-2">
+                    {[
+                      "Annual revenue exceeds $500,000",
+                      "Monthly transactions exceed 150-200",
+                      "Accounting needs 20+ hours weekly"
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <span className="text-amber-600 font-bold">☐</span>
+                        <span className="text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-3">Systems Test:</h4>
+                  <div className="space-y-2">
+                    {[
+                      "Processes documented (even rough SOPs)",
+                      "Using accounting software (QuickBooks, Xero, NetSuite)",
+                      "Chart of accounts established and organized",
+                      "Monthly close process defined"
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <span className="text-amber-600 font-bold">☐</span>
+                        <span className="text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-3">Management Test:</h4>
+                  <div className="space-y-2">
+                    {[
+                      "Can commit 10 hours/week for first 90 days",
+                      "Can commit 3-5 hours/week ongoing",
+                      "Have bandwidth to train and supervise"
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <span className="text-amber-600 font-bold">☐</span>
+                        <span className="text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-bold text-gray-900 mb-3">Financial Test:</h4>
+                  <div className="space-y-2">
+                    {[
+                      "Can budget $50,000-60,000 for Year One",
+                      "Can absorb 18-month break-even timeline",
+                      "Cash flow supports initial investment"
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-start gap-3">
+                        <span className="text-amber-600 font-bold">☐</span>
+                        <span className="text-gray-700">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <Card className="bg-white border-2 border-amber-400 mt-6">
+                <CardContent className="p-6">
+                  <p className="text-gray-800 font-semibold mb-2">
+                    If you checked fewer than 10 boxes, you're not ready yet.
+                  </p>
+                  <p className="text-gray-700">
+                    Focus on growing revenue, documenting systems, and building cash reserves. Come back to accounting outsourcing when you're operationally mature.
+                  </p>
+                  <p className="text-gray-800 font-semibold mt-4">
+                    If you checked 10+ boxes, outsourcing might make sense—but only with realistic expectations about costs, timeline, and management commitment.
+                  </p>
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
         </section>
+
+        <Separator className="my-12" />
+
+        {/* What Happens Next Section */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">What Happens Next</h2>
+          
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            I've given you the reality version—the 60% contract failure rate, the true costs, the 18-month break-even timeline. Most businesses aren't ready for accounting outsourcing, and that's perfectly fine. Better to know now than waste $50,000 learning the hard way.
+          </p>
+
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            But if you're doing $1 million+ revenue, drowning in accounting work, turning away growth opportunities because you're buried in bookkeeping, and you've got documented systems (even rough ones), outsourcing implemented properly can give you your business back.
+          </p>
+
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            Not immediately. Not magically. But by month six, you'll have reclaimed 15-20 hours weekly. By month twelve, you'll wonder how you managed without offshore accounting support.
+          </p>
+
+          <Card className="bg-gray-900 text-white mb-8">
+            <CardContent className="p-8">
+              <p className="text-lg leading-relaxed mb-6">
+                ShoreAgents works with established businesses across the USA, Australia, and New Zealand. Our pricing is <strong className="text-lime-400">$1,200-2,500/month for full-time accounting support</strong>—not fantasy rates, real costs for real results. We handle recruitment, training, and backup coverage.
+              </p>
+              <p className="text-gray-300 leading-relaxed">
+                If you're ready—actually ready, not just frustrated—schedule a consultation. We'll assess whether accounting outsourcing makes sense for your situation. If it doesn't, we'll tell you that too.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-lime-300 bg-gradient-to-br from-lime-50 to-green-50">
+            <CardContent className="p-8">
+              <p className="text-gray-800 text-lg leading-relaxed">
+                The 40% who succeed at accounting outsourcing don't do it because they found magic offshore accountants. They succeed because they were operationally ready, set realistic expectations, and committed to the 18-24 month timeline.
+              </p>
+              <p className="text-gray-900 font-bold text-xl mt-4 text-center">
+                Are you in that 40%?
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Final CTA */}
+        <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-6">Ready for an Honest Assessment?</h2>
+            <p className="text-xl mb-8 text-lime-50 max-w-2xl mx-auto leading-relaxed">
+              Schedule a consultation. We'll assess whether accounting outsourcing makes sense for your situation. If it doesn't, we'll tell you that too.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-lime-50 transition-colors shadow-lg"
+              >
+                Get Honest Quote
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link
+                href="/case-studies"
+                className="inline-flex items-center px-8 py-4 bg-lime-700 text-white font-bold text-lg rounded-lg hover:bg-lime-800 transition-colors border-2 border-white/20"
+              >
+                <Building2 className="mr-2 w-5 h-5" />
+                View Case Studies
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Final Note */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 italic">
+            Accounting outsourcing works brilliantly when done by properly-sized companies, at the right stage, with realistic expectations. Don't waste $50,000 rushing in unprepared.
+          </p>
+        </div>
       </div>
-    </>
-  )
+    </div>
+  );
 }
