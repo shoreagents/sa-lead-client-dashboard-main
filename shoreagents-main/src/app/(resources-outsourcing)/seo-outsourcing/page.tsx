@@ -23,6 +23,7 @@ import {
   Search
 } from "lucide-react";
 import Link from "next/link";
+import { Breadcrumb, BREADCRUMB_PATHS } from "@/components/ui/breadcrumb";
 
 export default function SeoOutsourcingPage() {
   return (
@@ -32,6 +33,9 @@ export default function SeoOutsourcingPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <Breadcrumb items={BREADCRUMB_PATHS['seo-outsourcing']} className="mb-6" />
+          
           <div className="max-w-4xl">
             <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
               For $300K+ Annual Revenue Businesses

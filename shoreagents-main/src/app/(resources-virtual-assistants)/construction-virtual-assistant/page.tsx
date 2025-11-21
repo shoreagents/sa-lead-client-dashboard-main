@@ -26,6 +26,7 @@ import {
   Calendar
 } from "lucide-react";
 import Link from "next/link";
+import { Breadcrumb, BREADCRUMB_PATHS } from "@/components/ui/breadcrumb";
 
 export default function ConstructionVirtualAssistantPage() {
   return (
@@ -35,6 +36,9 @@ export default function ConstructionVirtualAssistantPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <Breadcrumb items={BREADCRUMB_PATHS['construction-virtual-assistant']} className="mb-6" />
+          
           <div className="max-w-4xl">
             <Badge className="bg-red-600 text-white mb-4 text-sm px-3 py-1">
               For $2M+ Annual Revenue Builders

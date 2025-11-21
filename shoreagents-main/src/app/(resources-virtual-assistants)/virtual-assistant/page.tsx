@@ -26,6 +26,7 @@ import {
   User
 } from 'lucide-react';
 import Image from 'next/image';
+import { Breadcrumb, BREADCRUMB_PATHS } from "@/components/ui/breadcrumb";
 
 export default function VirtualAssistantPage() {
   return (
