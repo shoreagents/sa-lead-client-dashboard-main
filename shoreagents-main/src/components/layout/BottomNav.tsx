@@ -27,6 +27,9 @@ import { getEmployeeCardData } from '@/lib/api'
 import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
 import { useAuth } from '@/lib/auth-context'
 import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
+import { ProgressIndicatorCard } from '@/components/ui/progress-indicator-card'
+import { ResourceCard } from '@/components/ui/resource-card'
+import { InsightCard } from '@/components/ui/insight-card'
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -55,6 +58,11 @@ export function BottomNav() {
   const [isLoadingRecommended, setIsLoadingRecommended] = useState(false)
   const [currentCandidateIndex, setCurrentCandidateIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  
+  // NEW: AI-powered recommendations
+  const [aiRecommendations, setAiRecommendations] = useState<any[]>([])
+  const [isLoadingAI, setIsLoadingAI] = useState(false)
+  const [userStage, setUserStage] = useState<string>('new_lead')
   
   // Use the engagement tracking hook only on client side
   // const { // recordInteraction } = useEngagementTracking()
@@ -340,14 +348,57 @@ export function BottomNav() {
     }
   }, [appUser?.user_id])
 
+  // NEW: Fetch AI recommendations
+  const fetchAIRecommendations = useCallback(async () => {
+    try {
+      setIsLoadingAI(true)
+      console.log('🤖 Fetching AI recommendations...')
+      
+      let userId = appUser?.user_id
+      if (!userId && typeof window !== 'undefined') {
+        userId = localStorage.getItem('content_tracking_device_id') || undefined
+      }
+      
+      if (!userId) {
+        console.log('❌ No user ID available for AI recommendations')
+        setIsLoadingAI(false)
+        return
+      }
+      
+      const response = await fetch('/api/ai/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch AI recommendations')
+      }
+      
+      const data = await response.json()
+      console.log('✅ AI Recommendations received:', data)
+      
+      setAiRecommendations(data.recommendations || [])
+      setUserStage(data.context?.stage || 'new_lead')
+      
+    } catch (error) {
+      console.error('❌ Error fetching AI recommendations:', error)
+    } finally {
+      setIsLoadingAI(false)
+    }
+  }, [appUser?.user_id])
+
   // Fetch data when drawer opens
   useEffect(() => {
     if (isDrawerOpen) {
+      // Fetch AI recommendations first
+      fetchAIRecommendations()
+      // Then fetch traditional data as fallback
       fetchTopCandidate()
       fetchRecommendedCandidates()
       fetchRecentQuotes()
     }
-  }, [isDrawerOpen, fetchTopCandidate, fetchRecommendedCandidates, fetchRecentQuotes])
+  }, [isDrawerOpen, fetchAIRecommendations, fetchTopCandidate, fetchRecommendedCandidates, fetchRecentQuotes])
 
   // Auto-rotate AI matched candidates with animation
   useEffect(() => {
@@ -855,26 +906,84 @@ export function BottomNav() {
                   </Card>
                 </div>
 
-                {/* Bottom Right: Reserved for future content */}
+                {/* Bottom Right: AI-Powered Progress Indicator */}
                 <div className="col-span-1 row-span-1">
-                  <Card className="hover:shadow-md transition-shadow h-full overflow-hidden p-0">
-                    <div className="px-3 py-2 bg-lime-600">
-                      <div className="flex items-center space-x-2">
-                        <div className="w-4 h-4 bg-lime-300 rounded"></div>
-                        <h3 className="text-sm font-semibold text-lime-50">Coming Soon</h3>
-                      </div>
-                    </div>
-                    <CardContent className="p-3 h-full flex flex-col justify-center items-center">
-                      <div className="text-center">
-                        <div className="w-8 h-8 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-2">
-                          <div className="w-4 h-4 bg-gray-300 rounded"></div>
-                        </div>
-                        <p className="text-xs text-gray-500">More features</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {isLoadingAI ? (
+                    <Card className="hover:shadow-md transition-shadow h-full overflow-hidden p-0">
+                      <CardContent className="p-3 h-full flex flex-col justify-center items-center">
+                        <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-6 h-6 mb-2" />
+                        <p className="text-xs text-gray-500">Loading AI...</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <ProgressIndicatorCard currentStage={userStage} className="h-full" />
+                  )}
                 </div>
               </div>
+
+              {/* NEW: AI-Powered Recommendations Section */}
+              {aiRecommendations.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-lime-200">
+                  <h3 className="text-sm font-semibold text-lime-50 mb-3 px-1">
+                    🤖 AI-Powered Recommendations For You
+                  </h3>
+                  <div className="grid grid-cols-3 gap-3">
+                    {aiRecommendations.slice(0, 3).map((rec, index) => {
+                      // Render different card types
+                      if (rec.cardType === 'insight') {
+                        return (
+                          <div key={index} className="col-span-1">
+                            <InsightCard
+                              title={rec.title}
+                              description={rec.description}
+                              type="motivation"
+                            />
+                          </div>
+                        );
+                      }
+                      
+                      if (rec.cardType === 'blog' || rec.cardType === 'resource' || rec.cardType === 'case-study') {
+                        return (
+                          <div key={index} className="col-span-1">
+                            <ResourceCard
+                              title={rec.title}
+                              description={rec.description}
+                              url={rec.url || '#'}
+                              badge={rec.cardType === 'case-study' ? 'Success Story' : 'Recommended'}
+                              reason={rec.reason}
+                            />
+                          </div>
+                        );
+                      }
+                      
+                      if (rec.cardType === 'cta') {
+                        return (
+                          <div key={index} className="col-span-1">
+                            <Card className="hover:shadow-lg transition-all duration-300 hover:scale-[1.02] overflow-hidden group bg-gradient-to-br from-lime-500 to-lime-600">
+                              <CardContent className="p-4 text-center space-y-3">
+                                <h4 className="text-base font-bold text-white">
+                                  {rec.title}
+                                </h4>
+                                <p className="text-sm text-lime-50">
+                                  {rec.description}
+                                </p>
+                                <Button
+                                  onClick={() => router.push(rec.url || '#')}
+                                  className="w-full bg-white text-lime-600 hover:bg-lime-50"
+                                >
+                                  Get Started
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          </div>
+                        );
+                      }
+                      
+                      return null;
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </DrawerContent>
