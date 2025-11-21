@@ -283,8 +283,27 @@ export default function FilipinoDiscGame() {
   const [showSpiritReveal, setShowSpiritReveal] = useState(false);
   const [revealStep, setRevealStep] = useState(0);
   const [isInsightsExpanded, setIsInsightsExpanded] = useState(false);
+  const [userUsername, setUserUsername] = useState<string | null>(null);
   
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; right: number } | null>(null);
+  
+  // Fetch user's username/slug for share URLs
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user?.id) {
+        try {
+          const response = await fetch(`/api/public/user-by-id?id=${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setUserUsername(data.user?.username || data.user?.slug || null);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+        }
+      }
+    };
+    fetchUserProfile();
+  }, [user?.id]);
   
   // Music control state
   const [musicGender, setMusicGender] = useState<'male' | 'female'>('male');
@@ -2208,8 +2227,8 @@ Make it deeply personal and actionable based on their actual choices.`;
                           onClick={async () => {
                             const currentUrl = new URL(window.location.href);
                             const baseUrl = currentUrl.origin;
-                            const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-                            const resultUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
+                            const username = userUsername || user?.user_metadata?.username || user?.id;
+                            const resultUrl = `${baseUrl}/results/bpoc-disc/${username}`;
                             const animalEmojis: {[key: string]: string} = {
                               'EAGLE': '🦅',
                               'PEACOCK': '🦚',
@@ -2244,8 +2263,8 @@ Make it deeply personal and actionable based on their actual choices.`;
                           onClick={async () => {
                             const currentUrl = new URL(window.location.href);
                             const baseUrl = currentUrl.origin;
-                            const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-                            const resultUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
+                            const username = userUsername || user?.user_metadata?.username || user?.id;
+                            const resultUrl = `${baseUrl}/results/bpoc-disc/${username}`;
                             const animalEmojis: {[key: string]: string} = {
                               'EAGLE': '🦅',
                               'PEACOCK': '🦚',
@@ -2280,23 +2299,15 @@ Make it deeply personal and actionable based on their actual choices.`;
                           onClick={async () => {
                             const currentUrl = new URL(window.location.href);
                             const baseUrl = currentUrl.origin;
-                            const animalName = personalityType.animal.replace(/[🦅🦚🐢🦉]/g, '').trim();
-                            const resultUrl = `${baseUrl}/career-tools/games/disc-personality?userId=${user.id}&type=${discResult.primaryType}&animal=${animalName}`;
-                            const animalEmojis: {[key: string]: string} = {
-                              'EAGLE': '🦅',
-                              'PEACOCK': '🦚',
-                              'TURTLE': '🐢',
-                              'OWL': '🦉'
-                            };
-                            const animalEmoji = animalEmojis[personalityType.animal] || '🎯';
-                            const shareText = `${animalEmoji} I'm a ${personalityType.animal} on BPOC DISC! 🎯\n\n📊 My Personality Profile:\n🦅 Dominance: ${gameState.scores.D}%\n🦚 Influence: ${gameState.scores.I}%\n🐢 Steadiness: ${gameState.scores.S}%\n🦉 Conscientiousness: ${gameState.scores.C}%\n\n✨ What's your personality type?\n\n🎮 Discover your animal personality on BPOC.IO and unlock insights for your BPO career!\n\n${resultUrl}`;
+                            const username = userUsername || user?.user_metadata?.username || user?.id;
+                            const resultUrl = `${baseUrl}/results/bpoc-disc/${username}`;
                             
                             try {
-                              await navigator.clipboard.writeText(shareText);
-                              setShareModalData({ platform: 'Copied', text: shareText, url: resultUrl });
-                              setShowShareModal(true);
+                              await navigator.clipboard.writeText(resultUrl);
+                              alert('Result link copied to clipboard!');
                             } catch (err) {
                               console.error('Failed to copy:', err);
+                              alert('Failed to copy link. Please copy manually: ' + resultUrl);
                             }
                             setIsShareOpen(false);
                           }}

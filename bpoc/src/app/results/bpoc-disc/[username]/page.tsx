@@ -146,20 +146,30 @@ export default async function BpocDiscResultPage({ params }: PageProps) {
           </Button>
         </Link>
 
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4 text-white">
+            BPOC DISC Personality
+          </h1>
+          <p className="text-sm text-gray-300 mb-6">
+            {fullName}'s personality assessment results
+          </p>
+        </div>
+
         {/* Animal Display - matching profile page */}
         <div className="text-center mb-6">
           <div className="text-6xl mb-2">
             {primaryType === 'D' && (
-              <span className="inline-block text-6xl">🦅</span>
+              <span className="inline-block text-6xl animal-bounce">🦅</span>
             )}
             {primaryType === 'I' && (
-              <span className="inline-block text-6xl">🦚</span>
+              <span className="inline-block text-6xl animal-bounce">🦚</span>
             )}
             {primaryType === 'S' && (
-              <span className="inline-block text-6xl">🐢</span>
+              <span className="inline-block text-6xl animal-bounce">🐢</span>
             )}
             {primaryType === 'C' && (
-              <span className="inline-block text-6xl">🦉</span>
+              <span className="inline-block text-6xl animal-bounce">🦉</span>
             )}
           </div>
           <h4 className="text-xl font-bold text-white mb-2">
@@ -177,7 +187,7 @@ export default async function BpocDiscResultPage({ params }: PageProps) {
         </div>
 
         {/* DISC Scores - Grid Layout matching profile page */}
-        <div className="grid grid-cols-2 gap-3 mb-12">
+        <div className="grid grid-cols-2 gap-3 mb-8">
           {(() => {
             const scores = [
               { type: 'D', label: '🦅 Dominance', score: dScore, color: 'red' },
@@ -259,7 +269,7 @@ export default async function BpocDiscResultPage({ params }: PageProps) {
 
         {/* Detailed Analysis Section - matching profile page */}
         {aiAssessment && (
-          <div className="mb-12 space-y-4">
+          <div className="mb-8 space-y-4">
             {/* Detailed Analysis */}
             <div className="mt-4 p-4 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-400/30">
               <div className="w-full flex items-center justify-between text-sm font-semibold text-blue-300 mb-2">
