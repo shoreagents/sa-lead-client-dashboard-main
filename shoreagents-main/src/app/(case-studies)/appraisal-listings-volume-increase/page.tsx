@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function AppraisalListingsVolumeIncreasePage() {
   return (
@@ -38,6 +39,9 @@ export default function AppraisalListingsVolumeIncreasePage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <Breadcrumb items={[{"name":"Case Studies","url":"https://www.shoreagents.com/case-studies"},{"name":"Levi Turner","url":"https://www.shoreagents.com/appraisal-listings-volume-increase"}]} className="mb-6" />
+          
           <div className="max-w-4xl">
             <Badge className="bg-red-600 text-white mb-4 text-sm px-3 py-1">
               🚨 REVEALED: 25% Volume Increase Through One Strategic Hire

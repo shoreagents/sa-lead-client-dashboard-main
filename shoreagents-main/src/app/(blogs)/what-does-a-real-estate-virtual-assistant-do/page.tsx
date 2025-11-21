@@ -28,6 +28,7 @@ import {
   Phone
 } from "lucide-react";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function WhatDoesREVADoPage() {
   return (
@@ -37,6 +38,9 @@ export default function WhatDoesREVADoPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <Breadcrumb items={[{"name":"Virtual Assistants","url":"https://www.shoreagents.com/virtual-assistant"},{"name":"Real Estate Virtual Assistant","url":"https://www.shoreagents.com/real-estate-virtual-assistant"},{"name":"What Do They Do","url":"https://www.shoreagents.com/what-does-a-real-estate-virtual-assistant-do"}]} className="mb-6" />
+          
           <div className="max-w-4xl">
             <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
               Complete Guide - 15+ Essential Tasks

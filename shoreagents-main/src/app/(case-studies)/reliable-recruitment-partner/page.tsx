@@ -25,6 +25,7 @@ import {
   Sparkles
 } from "lucide-react";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function ReliableRecruitmentPartnerPage() {
   return (
@@ -34,6 +35,9 @@ export default function ReliableRecruitmentPartnerPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <Breadcrumb items={[{"name":"Case Studies","url":"https://www.shoreagents.com/case-studies"},{"name":"Tracey Foy","url":"https://www.shoreagents.com/reliable-recruitment-partner"}]} className="mb-6" />
+          
           <div className="max-w-4xl">
             <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
               Professionals Schultz Realty - Maungaturoto, New Zealand

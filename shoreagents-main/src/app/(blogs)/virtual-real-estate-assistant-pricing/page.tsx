@@ -31,6 +31,7 @@ import {
   Check
 } from "lucide-react";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function VirtualRealEstateAssistantPricingPage() {
   return (
@@ -40,6 +41,9 @@ export default function VirtualRealEstateAssistantPricingPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <Breadcrumb items={[{"name":"Virtual Assistants","url":"https://www.shoreagents.com/virtual-assistant"},{"name":"Real Estate Virtual Assistant","url":"https://www.shoreagents.com/real-estate-virtual-assistant"},{"name":"Pricing Guide","url":"https://www.shoreagents.com/virtual-real-estate-assistant-pricing"}]} className="mb-6" />
+          
           <div className="max-w-4xl">
             <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
               7 Countries Compared - Save 65% in 2025

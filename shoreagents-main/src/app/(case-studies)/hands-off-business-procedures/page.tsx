@@ -27,6 +27,7 @@ import {
   Play
 } from "lucide-react";
 import Link from "next/link";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export default function HandsOffBusinessProceduresPage() {
   return (
@@ -36,6 +37,9 @@ export default function HandsOffBusinessProceduresPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <Breadcrumb items={[{"name":"Case Studies","url":"https://www.shoreagents.com/case-studies"},{"name":"Kevin Turner","url":"https://www.shoreagents.com/hands-off-business-procedures"}]} className="mb-6" />
+          
           <div className="max-w-4xl">
             <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
               Kevin Turner - Australia's Leading Property Authority
