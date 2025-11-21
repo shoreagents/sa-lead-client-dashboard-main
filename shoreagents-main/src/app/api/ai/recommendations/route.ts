@@ -28,7 +28,12 @@ interface AIRecommendation {
 }
 
 // Cache recommendations for 5 minutes
-const cache = new Map<string, { data: AIRecommendation[]; timestamp: number }>();
+const cache = new Map<string, { 
+  recommendations: AIRecommendation[]; 
+  insight: any;
+  userStage: string;
+  timestamp: number;
+}>();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export async function POST(request: NextRequest) {
@@ -51,7 +56,9 @@ export async function POST(request: NextRequest) {
       console.log('✅ Returning cached recommendations');
       return NextResponse.json({
         success: true,
-        recommendations: cached.data,
+        recommendations: cached.recommendations,
+        insight: cached.insight,
+        userStage: cached.userStage,
         cached: true,
         userId
       });
@@ -66,23 +73,33 @@ export async function POST(request: NextRequest) {
     
     // Cache the results
     cache.set(userId, {
-      data: recommendations,
+      recommendations: recommendations.slice(1),
+      insight,
+      userStage: userContext.stage,
       timestamp: Date.now()
     });
 
     console.log('✅ AI Recommendations generated:', recommendations.length);
 
+    // Generate insight (main hero recommendation)
+    const insight = recommendations.length > 0 ? {
+      type: 'insight',
+      title: recommendations[0].title,
+      description: recommendations[0].description,
+      action: 'Take Action',
+      actionUrl: recommendations[0].url || '/how-it-works',
+      icon: 'Target',
+      priority: 100,
+      reason: recommendations[0].reason
+    } : null;
+
     return NextResponse.json({
       success: true,
-      recommendations,
+      recommendations: recommendations.slice(1), // Return remaining recommendations (skip first one used as insight)
+      insight, // Main hero banner
+      userStage: userContext.stage, // User journey stage
       cached: false,
-      userId,
-      context: {
-        stage: userContext.stage,
-        industry: userContext.industry,
-        candidatesViewed: userContext.candidatesViewed,
-        hasQuote: userContext.hasQuote
-      }
+      userId
     });
 
   } catch (error) {
