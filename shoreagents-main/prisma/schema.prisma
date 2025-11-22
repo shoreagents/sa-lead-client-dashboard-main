@@ -411,3 +411,28 @@ model ConversationMemory {
   @@map("conversation_memory")
   @@schema("public")
 }
+
+// Content Embeddings for AI Recommendation Engine
+model ContentEmbedding {
+  id                    String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  content_id            String                 @unique @map("content_id") @db.VarChar(255)
+  content_type          String                 @map("content_type") @db.VarChar(50)
+  title                 String
+  description           String?
+  full_content          String?                @map("full_content")
+  url_path              String                 @map("url_path") @db.VarChar(500)
+  embedding             Unsupported("vector")? // OpenAI text-embedding-3-small (1536 dimensions)
+  metadata              Json?                  @default("{}")
+  semantic_categories   String[]               @default([]) @map("semantic_categories")
+  view_count            Int?                   @default(0) @map("view_count")
+  recommendation_count  Int?                   @default(0) @map("recommendation_count")
+  created_at            DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at            DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@index([content_type], map: "content_embeddings_content_type_idx")
+  @@index([content_id], map: "content_embeddings_content_id_idx")
+  @@index([url_path], map: "content_embeddings_url_path_idx")
+  @@index([embedding], map: "content_embeddings_embedding_idx")
+  @@map("content_embeddings")
+  @@schema("public")
+}
