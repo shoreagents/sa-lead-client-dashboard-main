@@ -145,3 +145,72 @@ export function formatCurrency(amount: number, currency: string): string {
   const roundedAmount = Math.round(amount);
   return `${symbol}${roundedAmount.toLocaleString()}`;
 }
+
+// Get multiplier based on experience level (same as pricing calculator)
+export function getExperienceLevelMultiplier(level: 'entry' | 'mid' | 'senior'): number {
+  switch (level) {
+    case 'entry': return 1.7;
+    case 'mid': return 1.5;
+    case 'senior': return 1.4;
+    default: return 1.7;
+  }
+}
+
+/**
+ * Calculate the monthly cost to client based on candidate's expected salary
+ * Uses the SAME formula as the pricing calculator:
+ * Monthly Cost = (Salary * Multiplier) + Workspace Cost
+ * 
+ * @param expectedSalaryPhp - Candidate's expected salary in PHP from their BPOC profile
+ * @param level - Experience level ('entry', 'mid', or 'senior')
+ * @param workspace - Workspace type ('wfh', 'hybrid', or 'office')
+ * @param targetCurrency - Currency to display cost in (USD, AUD, GBP, etc.)
+ * @returns Monthly cost to client in the target currency
+ */
+export function calculateCandidateMonthlyCost(
+  expectedSalaryPhp: number,
+  level: 'entry' | 'mid' | 'senior' = 'mid',
+  workspace: 'wfh' | 'hybrid' | 'office' = 'wfh',
+  targetCurrency: string = 'USD'
+): number {
+  // IMPORTANT: Expected salary from BPOC is likely MONTHLY, not yearly
+  // But we need to make sure it's reasonable (between 20k-200k PHP/month)
+  
+  // Sanity check - if salary is absurdly high, it might be yearly, so divide by 12
+  let monthlySalaryPhp = expectedSalaryPhp;
+  if (expectedSalaryPhp > 300000) {
+    // Likely a yearly salary or bad data
+    console.warn('⚠️ Suspiciously high salary detected, assuming yearly:', expectedSalaryPhp);
+    monthlySalaryPhp = expectedSalaryPhp / 12;
+  }
+  
+  // Get the multiplier based on experience level
+  const multiplier = getExperienceLevelMultiplier(level);
+  
+  // Convert PHP MONTHLY salary to target currency
+  const monthlySalaryInTargetCurrency = convertSalaryToCurrency(monthlySalaryPhp, targetCurrency);
+  
+  // Calculate staff cost (monthly salary * multiplier)
+  const staffCost = monthlySalaryInTargetCurrency * multiplier;
+  
+  // Get workspace cost in target currency
+  const workspaceCost = getFixedWorkspaceCost(workspace, targetCurrency);
+  
+  // Total monthly cost = staff cost + workspace cost
+  const totalMonthlyCost = staffCost + workspaceCost;
+  
+  console.log('💰 Calculating candidate monthly cost:', {
+    originalSalaryPhp: expectedSalaryPhp,
+    monthlySalaryPhp,
+    monthlySalaryInTargetCurrency: Math.round(monthlySalaryInTargetCurrency),
+    level,
+    multiplier,
+    staffCost: Math.round(staffCost),
+    workspace,
+    workspaceCost,
+    totalMonthlyCost: Math.round(totalMonthlyCost),
+    currency: targetCurrency
+  });
+  
+  return totalMonthlyCost;
+}

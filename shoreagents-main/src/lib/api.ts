@@ -11,6 +11,8 @@ import {
 } from '@/types/api';
 import { BPOCUser, BPOCApiResponse } from './bpocApiService';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_BPOC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
+
 // Updated to use the local BPOC database API route
 export async function fetchAllUserData(): Promise<BPOCUser[]> {
   try {

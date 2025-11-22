@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal';
+import { PricingCalculatorModal } from '@/components/pricing-calculator';
 
 export function GlobalPricingModal() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);

@@ -197,25 +197,7 @@ export function ChartAreaInteractive({ totalVisitors = 0, uniqueVisitors = 0, re
       const cutoffDate = new Date()
       cutoffDate.setDate(cutoffDate.getDate() - daysToSubtract)
       
-      const filtered = realTimeSeriesData.filter(item => new Date(item.date) >= cutoffDate)
-      
-      // If data has 'total' field but no device breakdown, distribute it
-      return filtered.map(item => {
-        if ('total' in item && typeof (item as any).total === 'number') {
-          const total = (item as any).total
-          // If desktop is 0 but total exists, distribute the total
-          if (item.desktop === 0 && item.mobile === 0 && item.tablet === 0 && total > 0) {
-            // Distribute 60% desktop, 30% mobile, 10% tablet (typical distribution)
-            return {
-              ...item,
-              desktop: Math.round(total * 0.6),
-              mobile: Math.round(total * 0.3),
-              tablet: Math.round(total * 0.1)
-            }
-          }
-        }
-        return item
-      })
+      return realTimeSeriesData.filter(item => new Date(item.date) >= cutoffDate)
     }
     
     // If no real data, show empty state (flat line at zero)
@@ -240,7 +222,7 @@ export function ChartAreaInteractive({ totalVisitors = 0, uniqueVisitors = 0, re
 
   return (
     <Card className="@container/card">
-      <CardHeader className="pt-2">
+      <CardHeader>
         <CardTitle>Total Visitors</CardTitle>
         <CardDescription>
           <span className="hidden @[540px]/card:block">

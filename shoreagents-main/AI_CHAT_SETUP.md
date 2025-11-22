@@ -6,7 +6,7 @@ The AI Chat Console is now integrated into your ShoreAgents website! It provides
 ## Features Implemented
 
 ### ✅ What's Working Now
-- **Bottom Navigation Chat**: Accessible via bottom navigation bar
+- **Floating Chat Button**: Sticky button in the lower right corner
 - **Chat Interface**: Professional chat console with your brand styling
 - **Knowledge Base**: Local search through your website content
 - **Smart Responses**: AI-like responses based on your content
@@ -27,15 +27,10 @@ The AI Chat Console is now integrated into your ShoreAgents website! It provides
    - Related content display
    - Minimize/maximize functionality
 
-3. **Bottom Navigation** (`src/components/layout/BottomNav.tsx`)
-   - Mobile-optimized access
-   - Integrated with navigation
+3. **Floating Button** (`src/components/ui/floating-chat-button.tsx`)
+   - Sticky positioning
+   - Smooth animations
    - Brand-consistent styling
-
-4. **User Dashboard Chat** (`src/app/user-dashboard/chat/page.tsx`)
-   - Full-page chat interface for logged-in users
-   - Complete chat experience with Maya forms
-   - Integrated with user authentication
 
 ## How It Works
 

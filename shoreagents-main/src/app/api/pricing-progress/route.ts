@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
-import { generateUserId } from '@/lib/userEngagementService';
+
+interface PricingRoleInput {
+  title: string
+  description?: string
+  level: 'entry' | 'mid' | 'senior'
+  workspace?: string
+  baseSalary?: number
+  multiplier?: number
+  monthlyCost?: number
+  workspaceCost?: number
+  totalCost?: number
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -232,7 +243,12 @@ export async function POST(request: NextRequest) {
           }
         } else {
           // Update existing user - only update fields that have values
-          const updateData: any = { updated_at: new Date().toISOString() };
+          const updateData: {
+            updated_at: string
+            first_name?: string
+            last_name?: string
+            email?: string
+          } = { updated_at: new Date().toISOString() };
           
           if (firstName?.trim()) updateData.first_name = firstName;
           if (lastName?.trim()) updateData.last_name = lastName;
@@ -269,6 +285,7 @@ export async function POST(request: NextRequest) {
           } else {
             console.log('✅ Second lead capture tracked');
           }
+
         } catch (leadError) {
           console.error('❌ Error tracking second lead capture:', leadError);
         }
@@ -317,7 +334,8 @@ export async function POST(request: NextRequest) {
 
         // Insert new roles
         console.log('📝 Preparing roles to insert...');
-        const rolesToInsert = roles.map((role: any, index: number) => {
+        const typedRoles = roles as PricingRoleInput[];
+        const rolesToInsert = typedRoles.map((role, index: number) => {
           const roleData = {
             quote_id: quote_id,
             role_title: role.title,
@@ -351,7 +369,7 @@ export async function POST(request: NextRequest) {
         console.log('✅ Roles inserted successfully:', insertedRoles);
 
         // Update pricing_quotes with total cost
-        const totalCost = roles.reduce((sum: number, role: any) => sum + (role.totalCost || 0), 0);
+        const totalCost = typedRoles.reduce((sum: number, role) => sum + (role.totalCost || 0), 0);
         const { error: updateError } = await supabase
           .from('pricing_quotes')
           .update({ 
@@ -391,6 +409,31 @@ export async function POST(request: NextRequest) {
             { error: 'Failed to save final quote data' },
             { status: 500 }
           );
+        }
+
+        // ✅ UPDATE LEAD PROGRESS TO QUOTED (Full quote completed)
+        console.log('📊 Updating lead progress to quoted for user:', user_id);
+        try {
+          const { data: progressData, error: progressError } = await supabase
+            .from('lead_progress')
+            .upsert({
+              user_id: user_id,
+              status: 'quoted'
+            }, {
+              onConflict: 'user_id'
+            })
+            .select(); // ADD SELECT TO GET RESULT
+          
+          if (progressError) {
+            console.error('❌ Error updating lead progress to quoted:', progressError);
+            console.error('❌ Full error details:', JSON.stringify(progressError, null, 2));
+            console.error('❌ Attempted to insert user_id:', user_id);
+          } else {
+            console.log('✅ Lead progress updated to quoted (full quote completed)');
+            console.log('✅ Progress data:', progressData);
+          }
+        } catch (progressError) {
+          console.error('❌ Error updating lead progress:', progressError);
         }
 
         break;

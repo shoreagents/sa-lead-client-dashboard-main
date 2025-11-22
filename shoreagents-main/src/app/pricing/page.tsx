@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SideNav } from "@/components/layout/SideNav";
-import { PricingCalculatorModal } from "@/components/ui/pricing-calculator-modal";
+import { PricingCalculatorModal } from "@/components/pricing-calculator";
 import { Calculator, Users, Building, Clock, DollarSign, ArrowRight, Star, CheckCircle, Sparkles, Zap, Shield, TrendingUp } from "lucide-react";
 // import { useEngagementTracking } from "@/lib/useEngagementTracking"; // Removed - using GlobalEngagementTracker
 import { Button } from "@/components/ui/button";

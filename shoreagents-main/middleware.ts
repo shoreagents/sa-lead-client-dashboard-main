@@ -50,7 +50,6 @@ export async function middleware(req: NextRequest) {
   // User dashboard routes
   const userRoutes = [
     '/dashboard',
-    '/user-dashboard',
     '/employee',
     '/we-got-talent'
   ]

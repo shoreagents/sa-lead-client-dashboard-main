@@ -25,7 +25,7 @@ export const useAIAutocomplete = (options: UseAIAutocompleteOptions = {}) => {
   const [suggestions, setSuggestions] = useState<AutocompleteSuggestion[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const debounceRef = useRef<NodeJS.Timeout>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const fetchSuggestions = useCallback(async (input: string, context: string = '') => {
     if (input.length < minLength) {
@@ -116,6 +116,7 @@ export const useAIAutocomplete = (options: UseAIAutocompleteOptions = {}) => {
     setError(null)
     if (debounceRef.current) {
       clearTimeout(debounceRef.current)
+      debounceRef.current = null
     }
   }, [])
 

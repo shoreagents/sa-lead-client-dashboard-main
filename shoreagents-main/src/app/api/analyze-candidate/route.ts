@@ -22,13 +22,20 @@ interface CandidateData {
   location: string;
   bio: string | null;
   skills_snapshot: string[] | null;
-  experience_snapshot: any[] | null;
+  experience_snapshot: ExperienceSnapshot[] | null;
   overall_score: number | null;
   key_strengths: string[] | null;
   improvements: string[] | null;
   recommendations: string[] | null;
   improved_summary: string | null;
   work_status_completed: boolean | null;
+}
+
+interface ExperienceSnapshot {
+  position?: string
+  title?: string
+  company?: string
+  duration?: string
 }
 
 /**
@@ -55,8 +62,6 @@ async function fetchCandidateData(candidateId?: string, candidateName?: string):
       
       // If no exact match, try fuzzy matching on first name
       if (!candidate) {
-        const firstName = searchName.split(' ')[0]; // Get first word
-        
         // Calculate similarity score between names
         const calculateSimilarity = (str1: string, str2: string): number => {
           const longer = str1.length > str2.length ? str1 : str2;
@@ -92,17 +97,17 @@ async function fetchCandidateData(candidateId?: string, candidateName?: string):
         };
         
         const matches = allCandidates.map(c => {
-          const firstName = c.first_name?.toLowerCase() || '';
+          const firstNameValue = c.first_name?.toLowerCase() || '';
           const lastName = c.last_name?.toLowerCase() || '';
           const fullName = c.full_name.toLowerCase();
           
           // Calculate similarity scores
-          const firstNameScore = calculateSimilarity(firstName, searchName);
+          const firstNameScore = calculateSimilarity(firstNameValue, searchName);
           const lastNameScore = calculateSimilarity(lastName, searchName);
           const fullNameScore = calculateSimilarity(fullName, searchName);
           
           // Also check for partial matches
-          const firstNamePartial = firstName.includes(searchName) || searchName.includes(firstName);
+          const firstNamePartial = firstNameValue.includes(searchName) || searchName.includes(firstNameValue);
           const lastNamePartial = lastName.includes(searchName) || searchName.includes(lastName);
           
           const maxScore = Math.max(firstNameScore, lastNameScore, fullNameScore);
@@ -167,7 +172,7 @@ ${candidate.skills_snapshot && candidate.skills_snapshot.length > 0
 
 EXPERIENCE:
 ${candidate.experience_snapshot && candidate.experience_snapshot.length > 0
-  ? candidate.experience_snapshot.map((exp: any, idx: number) => 
+  ? candidate.experience_snapshot.map((exp: ExperienceSnapshot, idx: number) => 
       `${idx + 1}. ${exp.position || exp.title || 'Position'} at ${exp.company || 'Company'} (${exp.duration || 'Duration not specified'})`
     ).join('\n')
   : 'No experience listed'}
@@ -216,7 +221,7 @@ Keep responses concise (2-3 paragraphs max) unless asked for detailed analysis.`
 
   try {
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20240620',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1024,
       messages: [
         {
@@ -346,4 +351,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
+interface PricingQuoteSummary {
+  id: string
+  quote_number: number
+  total_monthly_cost: string | number
+  currency_code: string
+  created_at: string
+}
+
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { userId: string } }
 ) {
   try {
@@ -22,7 +30,6 @@ export async function GET(
           quote_number,
           total_monthly_cost,
           currency_code,
-          member_count,
           created_at
         )
       `)
@@ -57,8 +64,12 @@ export async function GET(
       hasFilledForm: user.has_filled_form || false,
       pricingQuotes: user.pricing_quotes || [],
       totalQuotes: user.pricing_quotes?.length || 0,
-      totalValue: user.pricing_quotes?.reduce((sum: number, quote: any) => 
-        sum + (parseFloat(quote.total_monthly_cost) || 0), 0) || 0
+      totalValue: (user.pricing_quotes as PricingQuoteSummary[] | null)?.reduce((sum, quote) => {
+        const cost = typeof quote.total_monthly_cost === 'string'
+          ? parseFloat(quote.total_monthly_cost)
+          : quote.total_monthly_cost
+        return sum + (cost || 0)
+      }, 0) || 0
     }
 
     return NextResponse.json({ 
@@ -71,4 +82,3 @@ export async function GET(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { BPOCDatabaseUser } from '@/lib/bpoc-database';
 
 // Cache for individual BPOC users (in-memory cache)
-const userCache = new Map<string, { data: any; timestamp: number }>();
+const userCache = new Map<string, { data: BPOCDatabaseUser; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export async function GET(
@@ -9,6 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    void request
     const userId = params.id;
     
     if (!userId) {

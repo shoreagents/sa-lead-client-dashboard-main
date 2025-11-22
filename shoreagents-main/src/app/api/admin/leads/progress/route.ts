@@ -4,12 +4,15 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 // GET /api/admin/leads/progress - Get all users with their current lead status
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Get all users with their latest lead progress
     const usersWithProgress = await prisma.user.findMany({
       include: {
-        leadProgress: true, // One-to-one relationship, so no need for orderBy/take
+        leadProgress: {
+          orderBy: { created_at: 'desc' },
+          take: 1 // Get only the latest progress record
+        },
         pricingQuotes: {
           orderBy: { created_at: 'desc' },
           take: 3 // Get latest 3 quotes
@@ -20,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     // Transform data to match the expected format
     const leads = usersWithProgress.map(user => {
-      const currentProgress = user.leadProgress // Since it's one-to-one, access directly
+      const currentProgress = user.leadProgress[0]
       const currentStatus = currentProgress?.status || 'new_lead'
       
       // Determine status display name
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest) {
         'new_lead': 'New Lead',
         'stage_1': 'Stage 1',
         'stage_2': 'Stage 2',
-        'pending': 'Pending',
+        'quoted': 'Quoted',
         'meeting_booked': 'Meeting Booked',
         'signed_up': 'Signed Up',
         'closed_won': 'Closed Won'
@@ -69,7 +72,7 @@ export async function GET(request: NextRequest) {
       new: leads.filter(lead => lead.column === 'new_lead').length,
       stage1: leads.filter(lead => lead.column === 'stage_1').length,
       stage2: leads.filter(lead => lead.column === 'stage_2').length,
-      pending: leads.filter(lead => lead.column === 'pending').length,
+      quoted: leads.filter(lead => lead.column === 'quoted').length,
       meeting_booked: leads.filter(lead => lead.column === 'meeting_booked').length,
       signed_up: leads.filter(lead => lead.column === 'signed_up').length,
       closed_won: leads.filter(lead => lead.column === 'closed_won').length
@@ -103,42 +106,28 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Check if user already has a progress record (one-to-one relationship)
-    const existingProgress = await prisma.leadProgress.findFirst({
-      where: { user_id: userId }
+    // Get the current status for this user
+    const currentProgress = await prisma.leadProgress.findFirst({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' }
     })
 
-    let updatedProgress
+    const previousStatus = currentProgress?.status || null
 
-    if (existingProgress) {
-      // Update existing record
-      updatedProgress = await prisma.leadProgress.update({
-        where: { id: existingProgress.id },
-        data: {
-          previous_status: existingProgress.status, // Store old status as previous
-          status, // Update to new status
-          changed_by: changedBy || null,
-          change_reason: changeReason || null
-        }
-      })
-      console.log('✅ Updated existing lead status:', updatedProgress)
-    } else {
-      // Create new record only if none exists
-      updatedProgress = await prisma.leadProgress.create({
-        data: {
-          user_id: userId,
-          status,
-          previous_status: null,
-          changed_by: changedBy || null,
-          change_reason: changeReason || null
-        }
-      })
-      console.log('✅ Created new lead status:', updatedProgress)
-    }
+    // Create new progress record
+    const newProgress = await prisma.leadProgress.create({
+      data: {
+        user_id: userId,
+        status,
+        previous_status: previousStatus,
+        changed_by: changedBy || null,
+        change_reason: changeReason || null
+      }
+    })
 
     return NextResponse.json({
       success: true,
-      data: updatedProgress,
+      data: newProgress,
       message: 'Lead status updated successfully'
     })
 
@@ -150,9 +139,3 @@ export async function POST(request: NextRequest) {
     }, { status: 500 })
   }
 }
-
-
-
-
-
-

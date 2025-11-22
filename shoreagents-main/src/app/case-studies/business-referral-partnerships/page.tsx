@@ -1,266 +1,350 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, TrendingUp, Users, Target, Mic, Globe, DollarSign, Clock, Award, Lightbulb, Zap, FileText, Phone, Bot, Shield, TrendingDown, MapPin, Calendar, Building, Briefcase } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { Separator } from "@/components/ui/separator";
+import { 
+  Target,
+  Award,
+  TrendingUp,
+  Star,
+  Users,
+  Building2,
+  ArrowRight,
+  Globe,
+  CheckCircle2,
+  Lightbulb,
+  Zap,
+  Mic,
+  DollarSign,
+  Clock,
+  Handshake,
+  TrendingDown,
+  Video,
+  Play,
+  Briefcase,
+  FileCheck
+} from "lucide-react";
+import Link from "next/link";
 
 export default function BusinessReferralPartnershipsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <Badge className="bg-lime-600 text-white px-4 py-2 text-lg mb-6">
-            Top Agents Playbook Feature
-          </Badge>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            How a Top Agents Playbook Feature Validates 12+ Years of Proven Client Referrals
-          </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-            Exploring the professional relationship, client referrals, and podcast interview that validates systematic offshore staffing expertise
-          </p>
-          
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&h=600&fit=crop"
-              alt="Professional partnership and collaboration"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              Top Agents Playbook Feature - Ray Wood Partnership
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              12+ Years of Professional Referrals:<br />
+              <span className="text-lime-600">Featured on Top Agents Playbook</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              Stephen Atcheler's Top Agents Playbook feature represents more than media recognition—it validates a 12+ 
+              year referral relationship with respected real estate coach Ray Wood that has consistently delivered client 
+              success. When industry leaders feature your methodology, it demonstrates proven results that withstand scrutiny.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/sales" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Schedule Your Consultation
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View More Case Studies
+              </Link>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Ray Wood Testimonial */}
-        <div className="mb-16">
-          <Card className="border-lime-200 bg-gradient-to-br from-lime-50 to-white">
-            <CardContent className="p-8">
-              <div className="flex items-start gap-6">
-                <div className="flex-shrink-0">
-                  <div className="w-20 h-20 bg-lime-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-                    RW
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <p className="text-xl text-gray-700 italic mb-6 leading-relaxed">
-                    "I've been referring my real estate friends to ShoreAgents for many years now with great success. Their systems and real estate industry experience set them apart from the rest. Plus recent advances in new technology and AI make things even better."
-                  </p>
-                  <div className="border-t border-lime-200 pt-4">
-                    <p className="font-bold text-gray-900 text-lg">Ray Wood</p>
-                    <p className="text-gray-600">Bestagents Group, CA</p>
-                    <p className="text-lime-600 font-medium">Referral Partner • Canada</p>
-                  </div>
-                </div>
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Partnership Stats */}
+        <Card className="bg-gradient-to-br from-lime-50 to-lime-100 border-lime-200 mb-16">
+          <CardContent className="p-8">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Professional Partnership Excellence</h3>
+              <p className="text-gray-700">Validated expertise across three continents</p>
+            </div>
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <Clock className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">12+</div>
+                <div className="text-gray-900 font-semibold">Years Partnership</div>
               </div>
-            </CardContent>
-          </Card>
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <Users className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">500+</div>
+                <div className="text-gray-900 font-semibold">Placements</div>
+              </div>
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <Globe className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">3</div>
+                <div className="text-gray-900 font-semibold">Core Markets</div>
+              </div>
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <Award className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">100%</div>
+                <div className="text-gray-900 font-semibold">Referral Success</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Overview */}
+        <div className="mb-12">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            This Top Agents Playbook feature isn't manufactured credibility or promotional content. Ray Wood's Top Agents 
+            Playbook showcase highlights systematic business improvement methodologies that have delivered measurable results 
+            through 500+ successful placements across Australia, Canada, and the USA.
+          </p>
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">12+</div>
-              <p className="text-gray-700">Years Professional Relationship</p>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">Multiple</div>
-              <p className="text-gray-700">Successful Client Referrals</p>
-            </CardContent>
-          </Card>
-          <Card className="border-lime-200">
-            <CardContent className="p-6 text-center">
-              <div className="text-4xl font-bold text-lime-600 mb-2">3</div>
-              <p className="text-gray-700">Core Markets (AUS/CAN/USA)</p>
-            </CardContent>
-          </Card>
-        </div>
+        <Separator className="my-12" />
 
         {/* Top Agents Playbook Feature */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Award className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">The Top Agents Playbook Feature</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-6">
-                  Stephen Atcheler's Top Agents Playbook feature represents more than media recognition—it validates a 12+ year referral relationship that has consistently delivered client success. When respected real estate coach Ray Wood features your methodology on his Top Agents Playbook platform, it demonstrates proven results that withstand industry scrutiny.
-                </p>
-                <p className="mb-6">
-                  This Top Agents Playbook feature isn't manufactured credibility or promotional content. Ray Wood's showcase highlights systematic business improvement methodologies that have delivered measurable results through comprehensive virtual assistant solutions across 500+ successful placements.
-                </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Mic className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Top Agents Playbook Feature</h2>
+              <p className="text-lg text-gray-600">Industry recognition that validates proven expertise</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              When respected real estate coach Ray Wood features your methodology on his Top Agents Playbook platform, it 
+              demonstrates proven results that withstand industry scrutiny. This isn't a casual interview—it's Ray Wood 
+              recognizing Stephen's systematic approach to offshore staffing as fundamentally different from the typical BPO model.
+            </p>
 
-                {/* Podcast Interview Card */}
-                <div className="bg-gradient-to-br from-lime-600 to-lime-700 rounded-2xl p-8 text-white mb-6">
-                  <div className="flex items-center mb-4">
-                    <Mic className="w-8 h-8 mr-3" />
-                    <h3 className="text-2xl font-bold">Full Interview Available</h3>
+            <Card className="bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+              <CardContent className="p-8">
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Mic className="w-8 h-8 text-lime-400" />
+                    <h3 className="text-2xl font-bold">TAP 153: How to tell if you're ready for a Virtual Assistant</h3>
                   </div>
-                  <h4 className="text-xl font-semibold mb-4">
-                    TAP 153: How to tell if you're ready for a Virtual Assistant
-                  </h4>
-                  <p className="mb-6 opacity-90">
-                    An in-depth conversation with Stephen Atcheler about virtual assistant readiness indicators and implementation strategies
+                  <p className="text-gray-300 mb-6">
+                    An in-depth conversation with Stephen Atcheler about virtual assistant readiness indicators and 
+                    implementation strategies
                   </p>
-                  <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100">
-                    🎙️ View Full Episode Page
-                  </Button>
                 </div>
+                <div className="text-center">
+                  <a 
+                    href="https://www.topagentsplaybook.com/podcast/tap-153-tell-youre-ready-virtual-assistant-interview-stephen-atcheler/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+                  >
+                    <Play className="w-5 h-5 mr-2" />
+                    View Full Episode Page
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
 
-                {/* What You'll Learn */}
-                <div className="bg-lime-50 rounded-lg p-6 mb-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                    <Lightbulb className="w-6 h-6 text-lime-600 mr-2" />
-                    What You'll Learn from This Interview
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-lime-50 border-lime-200 mt-8">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">What You'll Learn from This Interview</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <DollarSign className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
                     <div>
-                      <div className="flex items-center mb-2">
-                        <FileText className="w-5 h-5 text-lime-600 mr-2" />
-                        <h4 className="font-bold text-gray-900">The $70/Hour Reality</h4>
-                      </div>
+                      <h4 className="font-bold text-gray-900 mb-1">The $70/Hour Reality</h4>
                       <p className="text-gray-700 text-sm">How administrative tasks give agents a 60% pay cut</p>
                     </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <Target className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
                     <div>
-                      <div className="flex items-center mb-2">
-                        <Target className="w-5 h-5 text-lime-600 mr-2" />
-                        <h4 className="font-bold text-gray-900">5 Dollar-Productive Activities</h4>
-                      </div>
+                      <h4 className="font-bold text-gray-900 mb-1">5 Dollar-Productive Activities</h4>
                       <p className="text-gray-700 text-sm">The only tasks that directly generate income for agents</p>
                     </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <CheckCircle2 className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
                     <div>
-                      <div className="flex items-center mb-2">
-                        <Zap className="w-5 h-5 text-lime-600 mr-2" />
-                        <h4 className="font-bold text-gray-900">Readiness Indicators</h4>
-                      </div>
+                      <h4 className="font-bold text-gray-900 mb-1">Readiness Indicators</h4>
                       <p className="text-gray-700 text-sm">How to determine if you're prepared for VA implementation</p>
                     </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <Globe className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
                     <div>
-                      <div className="flex items-center mb-2">
-                        <Globe className="w-5 h-5 text-lime-600 mr-2" />
-                        <h4 className="font-bold text-gray-900">Offshore Advantages</h4>
-                      </div>
+                      <h4 className="font-bold text-gray-900 mb-1">Offshore Advantages</h4>
                       <p className="text-gray-700 text-sm">Why Philippines-based VAs deliver superior results</p>
                     </div>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
-                <p className="mb-4">
-                  The interview wasn't a casual conversation—it was Ray Wood recognizing Stephen's systematic approach to offshore staffing as fundamentally different from the typical BPO model. When a coach who's helped thousands of agents chooses to feature your methodology, it validates years of refining processes that actually work.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Separator className="my-12" />
 
         {/* The $70/Hour Reality Check */}
-        <div className="mb-16">
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <DollarSign className="w-8 h-8 text-red-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">The $70/Hour Reality Check</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  If your annual income is $180,000 and you work 6 days a week, your hourly rate is approximately $70.
-                </p>
-                <p className="mb-4">
-                  <strong>When you switch to administrative tasks, you've just given yourself a 60% pay cut</strong>—working at $30/hour instead of your $70 rate.
-                </p>
-                <p className="mb-4">
-                  This is why coaches like Ray Wood recommend systematic delegation: it's not about convenience, it's about protecting your income potential.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The $70/Hour Reality Check</h2>
+              <p className="text-lg text-gray-600">Understanding the mathematics of productivity</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              There's a fundamental reason why successful real estate coaches like Ray Wood consistently recommend virtual 
+              assistants to their clients: they understand the mathematics of productivity that most agents never calculate. 
+              When your hourly rate is $70 but you're spending time on $30/hour tasks, you've just given yourself a 60% pay cut.
+            </p>
 
-        {/* 5 Dollar-Productive Activities */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <FileText className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">
-                  The 5 Dollar-Productive Activities Framework
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">1. Open Homes</h3>
-                  <p className="text-gray-700">Direct client interaction, immediate feedback, lead generation</p>
+            <Card className="bg-red-50 border-red-200">
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <TrendingDown className="w-16 h-16 text-red-600 mx-auto mb-4" />
+                  <h3 className="text-3xl font-bold text-gray-900 mb-4">The 60% Pay Cut Reality</h3>
                 </div>
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">2. Prospecting</h3>
-                  <p className="text-gray-700">Cold calling, networking, referral development</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">3. Price Reductions</h3>
-                  <p className="text-gray-700">Strategic market positioning, vendor management</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">4. Listing Presentations</h3>
-                  <p className="text-gray-700">Converting prospects to clients, relationship building</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">5. Contract Negotiation</h3>
-                  <p className="text-gray-700">Deal closure, value creation, commission protection</p>
-                </div>
-              </div>
-              <p className="text-gray-700 mb-4">
-                Everything else—listing uploads, contract processing, client follow-up emails, appointment scheduling, database management—can be systematized and delegated. This isn't about being lazy; it's about protecting your income potential and focusing on activities that only you can perform.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 12+ Year Partnership Evolution */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Users className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">12+ Year Professional Referral Partnership Evolution</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <div className="bg-lime-50 rounded-lg p-6 mb-6 border-l-4 border-lime-600">
-                  <div className="flex items-center mb-4">
-                    <FileText className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-xl font-bold text-gray-900">Stephen's Perspective: How It All Started</h3>
-                  </div>
-                  <p className="mb-4 italic">
-                    "I first met Ray Wood over 12 years ago at a real estate seminar in Australia. Even then, his insights into agent productivity and business systems impressed me. Ray had this systematic approach to breaking down what actually made agents successful versus what they thought made them successful."
-                  </p>
-                  <p className="mb-4 italic">
-                    "What struck me wasn't just his coaching philosophy, but how he approached problems. Ray didn't just tell agents to 'work smarter'—he gave them specific frameworks and processes. When I started developing ShoreAgents years later, I realized we were both solving the same fundamental problem: how to systematize success rather than leaving it to chance."
-                  </p>
-                  <p className="italic">
-                    "Ray was one of the first industry leaders to understand what we were building. Most people saw 'cheap overseas labor.' Ray saw systematic business process improvement with geographic arbitrage. That's why his referrals have been so successful—he understood the methodology from day one."
-                  </p>
-                </div>
-
-                <p className="mb-6">
-                  The timing of their initial meeting was significant. Stephen was still developing his real estate business in Australia, eventually scaling to 14 salespeople and 400 rental properties with a team of 5 offshore staff. Ray Wood was establishing himself as one of Australia's leading real estate coaches, helping agents understand the systematic approaches that separate top performers from everyone else.
-                </p>
-
-                {/* Parallel Evolution */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-blue-50 rounded-lg p-6">
-                    <div className="flex items-center mb-4">
-                      <TrendingUp className="w-5 h-5 text-lime-600 mr-2" />
-                      <h4 className="font-bold text-gray-900">Stephen's Journey</h4>
+                <div className="space-y-4 bg-white rounded-lg p-6">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
+                      ✓
                     </div>
-                    <ul className="space-y-2 text-sm">
+                    <div>
+                      <p className="text-gray-900 font-bold mb-1">Your Actual Hourly Rate: $70</p>
+                      <p className="text-gray-700 text-sm">
+                        If your annual income is $180,000 and you work 6 days a week, your hourly rate is approximately $70.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
+                      ✗
+                    </div>
+                    <div>
+                      <p className="text-gray-900 font-bold mb-1">Administrative Tasks: $30/hour</p>
+                      <p className="text-gray-700 text-sm">
+                        When you switch to administrative tasks, you've just given yourself a 60% pay cut—working at 
+                        $30/hour instead of your $70 rate.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-white border-l-4 border-lime-600 rounded">
+                  <p className="text-gray-900 font-semibold">
+                    This is why coaches like Ray Wood recommend systematic delegation: it's not about convenience, it's 
+                    about protecting your income potential.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-blue-50 border-blue-200 mt-8">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">The 5 Dollar-Productive Activities Framework</h3>
+                <p className="text-gray-700 mb-6">
+                  Ray Wood has been coaching real estate professionals for over 15 years, helping them understand that 
+                  there are really only 5 dollar-productive activities that generate income:
+                </p>
+                <div className="space-y-3">
+                  {[
+                    { num: '1', title: 'Open Homes', desc: 'Direct client interaction, immediate feedback, lead generation' },
+                    { num: '2', title: 'Prospecting', desc: 'Cold calling, networking, referral development' },
+                    { num: '3', title: 'Price Reductions', desc: 'Strategic market positioning, vendor management' },
+                    { num: '4', title: 'Listing Presentations', desc: 'Converting prospects to clients, relationship building' },
+                    { num: '5', title: 'Contract Negotiation', desc: 'Deal closure, value creation, commission protection' }
+                  ].map(item => (
+                    <div key={item.num} className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                      <div className="bg-lime-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
+                        {item.num}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900 mb-1">{item.title}</h4>
+                        <p className="text-gray-700 text-sm">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-6 p-4 bg-white border-l-4 border-blue-600 rounded">
+                  <p className="text-gray-900 font-semibold text-sm">
+                    Everything else—listing uploads, contract processing, client follow-up emails, appointment scheduling, 
+                    database management—can be systematized and delegated. This isn't about being lazy; it's about 
+                    protecting your income potential.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* 12+ Year Professional Partnership */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Handshake className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">12+ Year Professional Partnership Evolution</h2>
+              <p className="text-lg text-gray-600">Built on proven results and mutual respect</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <Card className="bg-gradient-to-br from-gray-50 to-white border-lime-200 shadow-lg mb-8">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Stephen's Perspective: How It All Started</h3>
+                <div className="space-y-4 text-gray-700 italic">
+                  <p>
+                    "I first met Ray Wood over 12 years ago at a real estate seminar in Australia. Even then, his insights 
+                    into agent productivity and business systems impressed me. Ray had this systematic approach to breaking 
+                    down what actually made agents successful versus what they thought made them successful."
+                  </p>
+                  <p>
+                    "What struck me wasn't just his coaching philosophy, but how he approached problems. Ray didn't just 
+                    tell agents to 'work smarter'—he gave them specific frameworks and processes. When I started developing 
+                    ShoreAgents years later, I realized we were both solving the same fundamental problem: how to systematize 
+                    success rather than leaving it to chance."
+                  </p>
+                  <p>
+                    "Ray was one of the first industry leaders to understand what we were building. Most people saw 'cheap 
+                    overseas labor.' Ray saw systematic business process improvement with geographic arbitrage. That's why 
+                    his referrals have been so successful—he understood the methodology from day one."
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-lime-50 border-lime-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Parallel Business Evolution</h3>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="bg-white rounded-lg p-6 border-l-4 border-lime-600">
+                    <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <Briefcase className="w-5 h-5 text-lime-600" />
+                      Stephen's Journey
+                    </h4>
+                    <ul className="space-y-2 text-sm text-gray-700">
                       <li>• 2012: Started offshore staffing experiments</li>
                       <li>• Built real estate business to 14 salespeople, 400 rentals</li>
                       <li>• Scaled with team of 5 offshore staff</li>
@@ -268,12 +352,12 @@ export default function BusinessReferralPartnershipsPage() {
                       <li>• 500+ successful placements across AUS/NZ/USA</li>
                     </ul>
                   </div>
-                  <div className="bg-blue-50 rounded-lg p-6">
-                    <div className="flex items-center mb-4">
-                      <TrendingUp className="w-5 h-5 text-blue-600 mr-2" />
-                      <h4 className="font-bold text-gray-900">Ray's Evolution</h4>
-                    </div>
-                    <ul className="space-y-2 text-sm">
+                  <div className="bg-white rounded-lg p-6 border-l-4 border-green-600">
+                    <h4 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <Award className="w-5 h-5 text-green-600" />
+                      Ray's Evolution
+                    </h4>
+                    <ul className="space-y-2 text-sm text-gray-700">
                       <li>• Established in Australian real estate coaching</li>
                       <li>• Expanded to Canada market</li>
                       <li>• Launched Top Agents Playbook platform</li>
@@ -282,389 +366,338 @@ export default function BusinessReferralPartnershipsPage() {
                     </ul>
                   </div>
                 </div>
+                <div className="mt-6 p-4 bg-white border-l-4 border-lime-600 rounded">
+                  <p className="text-gray-900 font-semibold">
+                    Shared Focus: Systematic approaches to business scaling across Australia, Canada, and USA markets
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-                <p className="mb-4">
-                  <strong>Shared Focus:</strong> Systematic approaches to business scaling across Australia, Canada, and USA markets
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <p className="mt-8">
+              The longevity of their professional relationship demonstrates something crucial: mutual respect built on proven 
+              results. Ray Wood doesn't maintain 12+ year relationships with service providers who don't deliver. Stephen 
+              doesn't earn ongoing referrals from industry leaders without consistently exceeding expectations.
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
 
         {/* Cross-Market Expertise */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Globe className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Cross-Market Expertise: Australia, Canada, USA</h2>
-              </div>
-              <p className="text-gray-700 mb-6">
-                One of the most valuable aspects of the Stephen-Ray relationship is their shared understanding of cross-border business dynamics. While many service providers claim "international experience," few actually understand the cultural, regulatory, and operational nuances that determine success in different English-speaking markets.
-              </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Globe className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Cross-Market Expertise</h2>
+              <p className="text-lg text-gray-600">Australia, Canada, and USA specialization</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              One of the most valuable aspects of the Stephen-Ray relationship is their shared understanding of cross-border 
+              business dynamics. While many service providers claim "international experience," few actually understand the 
+              cultural, regulatory, and operational nuances that determine success in different English-speaking markets.
+            </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-gradient-to-br from-lime-50 to-white rounded-lg p-6 border border-lime-200">
-                  <MapPin className="w-10 h-10 text-lime-600 mb-3" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Australia Market</h3>
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Business Culture:</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• Direct communication style</li>
-                      <li>• Structured regulatory environment</li>
-                      <li>• High labor costs driving offshore adoption</li>
-                    </ul>
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Australia */}
+              <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-orange-200">
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <div className="text-3xl mb-2">🇦🇺</div>
+                    <h3 className="text-xl font-bold text-gray-900">Australia Market</h3>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">VA Integration:</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• Perfect timezone alignment with Philippines</li>
-                      <li>• Strong process documentation culture</li>
-                      <li>• Established offshore business relationships</li>
-                    </ul>
+                  <div className="space-y-3 text-sm">
+                    <div className="bg-white rounded p-3">
+                      <h4 className="font-bold text-gray-900 mb-1">Business Culture</h4>
+                      <ul className="text-gray-700 space-y-1">
+                        <li>• Direct communication style</li>
+                        <li>• Structured regulatory environment</li>
+                        <li>• High labor costs driving adoption</li>
+                      </ul>
+                    </div>
+                    <div className="bg-white rounded p-3">
+                      <h4 className="font-bold text-gray-900 mb-1">VA Integration</h4>
+                      <ul className="text-gray-700 space-y-1">
+                        <li>• Perfect timezone alignment</li>
+                        <li>• Strong process documentation</li>
+                        <li>• Established offshore relationships</li>
+                      </ul>
+                    </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="bg-gradient-to-br from-red-50 to-white rounded-lg p-6 border border-red-200">
-                  <MapPin className="w-10 h-10 text-red-600 mb-3" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">Canada Market</h3>
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Business Culture:</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• Polite, relationship-focused approach</li>
-                      <li>• Provincial regulatory variations</li>
-                      <li>• Growing acceptance of offshore solutions</li>
-                    </ul>
+              {/* Canada */}
+              <Card className="bg-gradient-to-br from-red-50 to-pink-50 border-red-200">
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <div className="text-3xl mb-2">🇨🇦</div>
+                    <h3 className="text-xl font-bold text-gray-900">Canada Market</h3>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">VA Integration:</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• Manageable timezone differences</li>
-                      <li>• Emphasis on cultural sensitivity training</li>
-                      <li>• Collaborative implementation approach</li>
-                    </ul>
+                  <div className="space-y-3 text-sm">
+                    <div className="bg-white rounded p-3">
+                      <h4 className="font-bold text-gray-900 mb-1">Business Culture</h4>
+                      <ul className="text-gray-700 space-y-1">
+                        <li>• Polite, relationship-focused</li>
+                        <li>• Provincial regulatory variations</li>
+                        <li>• Growing offshore acceptance</li>
+                      </ul>
+                    </div>
+                    <div className="bg-white rounded p-3">
+                      <h4 className="font-bold text-gray-900 mb-1">VA Integration</h4>
+                      <ul className="text-gray-700 space-y-1">
+                        <li>• Manageable timezone differences</li>
+                        <li>• Cultural sensitivity training</li>
+                        <li>• Collaborative implementation</li>
+                      </ul>
+                    </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="bg-gradient-to-br from-blue-50 to-white rounded-lg p-6 border border-blue-200">
-                  <MapPin className="w-10 h-10 text-blue-600 mb-3" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">USA Market</h3>
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">Business Culture:</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• Results-driven, efficiency focused</li>
-                      <li>• State-by-state regulatory complexity</li>
-                      <li>• Established offshore industry presence</li>
-                    </ul>
+              {/* USA */}
+              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <div className="text-3xl mb-2">🇺🇸</div>
+                    <h3 className="text-xl font-bold text-gray-900">USA Market</h3>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">VA Integration:</h4>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• Significant timezone challenges</li>
-                      <li>• ROI-focused implementation</li>
-                      <li>• Scalable process requirements</li>
-                    </ul>
+                  <div className="space-y-3 text-sm">
+                    <div className="bg-white rounded p-3">
+                      <h4 className="font-bold text-gray-900 mb-1">Business Culture</h4>
+                      <ul className="text-gray-700 space-y-1">
+                        <li>• Results-driven, efficiency focused</li>
+                        <li>• State-by-state complexity</li>
+                        <li>• Established offshore presence</li>
+                      </ul>
+                    </div>
+                    <div className="bg-white rounded p-3">
+                      <h4 className="font-bold text-gray-900 mb-1">VA Integration</h4>
+                      <ul className="text-gray-700 space-y-1">
+                        <li>• Significant timezone challenges</li>
+                        <li>• ROI-focused implementation</li>
+                        <li>• Scalable process requirements</li>
+                      </ul>
+                    </div>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card className="bg-lime-50 border-lime-200 mt-8">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Why Geographic Alignment Matters</h3>
+                <p className="text-gray-700 mb-4">
+                  When a coach operating across Australia, Canada, and the USA consistently refers clients to an offshore 
+                  staffing provider, it validates something crucial: the provider understands the specific cultural and 
+                  operational requirements of these markets.
+                </p>
+                <div className="bg-white border-l-4 border-lime-600 p-4 rounded">
+                  <p className="text-gray-900 font-semibold text-sm">
+                    Ray Wood's business expansion parallels ShoreAgents' geographic specialization—not by coincidence, but 
+                    because both understand that successful international business requires deep market knowledge, not just 
+                    service delivery capability.
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
 
         {/* Proven Referral Results */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <TrendingUp className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Proven Referral Results</h2>
-              </div>
-              <p className="text-gray-700 mb-6">
-                The true validation of any professional relationship isn't the initial referral—it's the continued success of those referrals over time. Ray Wood's clients who've implemented ShoreAgents' offshore staffing solutions have consistently achieved measurable improvements in productivity and cost efficiency.
-              </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <TrendingUp className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Proven Referral Results</h2>
+              <p className="text-lg text-gray-600">Consistent client success across all markets</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              The true validation of any professional relationship isn't the initial referral—it's the continued success of 
+              those referrals over time. Ray Wood's clients who've implemented ShoreAgents' offshore staffing solutions have 
+              consistently achieved measurable improvements in productivity and cost efficiency.
+            </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <div className="flex items-center mb-3">
-                    <Building className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-lg font-bold text-gray-900">Property Management Success</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Property Management Success */}
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="p-6">
+                  <Building2 className="w-10 h-10 text-green-600 mb-4" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Property Management Success</h3>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>340%</strong> increase in lease renewals processed</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>78%</strong> reduction in administrative costs</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>24/7</strong> tenant communication capability</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>15+</strong> hours weekly recovered for business development</span>
+                    </div>
                   </div>
-                  <p className="text-sm font-semibold text-gray-900 mb-3">Sydney Agency Transformation:</p>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span><strong>340% increase</strong> in lease renewals processed</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span><strong>78% reduction</strong> in administrative costs</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span><strong>24/7 tenant</strong> communication capability</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Principal recovered <strong>15+ hours weekly</strong> for business development</span>
-                    </li>
-                  </ul>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <div className="flex items-center mb-3">
-                    <Users className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-lg font-bold text-gray-900">Sales Team Scaling</h3>
-                  </div>
-                  <p className="text-sm font-semibold text-gray-900 mb-3">Melbourne Team Implementation:</p>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Supported expansion from <strong>3 to 8 agents</strong></span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
+              {/* Sales Team Scaling */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardContent className="p-6">
+                  <Users className="w-10 h-10 text-blue-600 mb-4" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Sales Team Scaling</h3>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <span>Expansion from <strong>3 to 8</strong> agents supported</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                       <span>Listing processing time reduced by <strong>60%</strong></span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
                       <span>Database management <strong>fully systematized</strong></span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Commission tracking automated with <strong>99.9% accuracy</strong></span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-lime-50 rounded-lg p-6 border-l-4 border-lime-600">
-                  <div className="flex items-center mb-3">
-                    <FileText className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-lg font-bold text-gray-900">ROI Optimization</h3>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <span>Commission tracking with <strong>99.9%</strong> accuracy</span>
+                    </div>
                   </div>
-                  <p className="text-sm font-semibold text-gray-900 mb-3">Cross-Market Implementation:</p>
-                  <ul className="space-y-2 text-sm text-gray-700">
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
+                </CardContent>
+              </Card>
+
+              {/* ROI Optimization */}
+              <Card className="bg-purple-50 border-purple-200">
+                <CardContent className="p-6">
+                  <DollarSign className="w-10 h-10 text-purple-600 mb-4" />
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">ROI Optimization</h3>
+                  <div className="space-y-2 text-sm text-gray-700">
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
                       <span>Average 12-month ROI of <strong>340%</strong></span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Implementation completed within <strong>2-4 weeks</strong></span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span><strong>Zero failed</strong> implementations from Ray's referrals</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                      <span>Continued relationship expansion after initial success</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <span>Implementation within <strong>2-4 weeks</strong></span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <span><strong>Zero</strong> failed implementations</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <span>Continued relationship <strong>expansion</strong></span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-              <div className="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-600">
-                <div className="flex items-center mb-3">
-                  <Target className="w-6 h-6 text-blue-600 mr-2" />
-                  <h3 className="text-lg font-bold text-gray-900">Why Ray's Referrals Consistently Succeed</h3>
-                </div>
-                <p className="text-gray-700 mb-3">
-                  Ray Wood's clients come to ShoreAgents pre-qualified with the right mindset and realistic expectations. His coaching has already addressed the fundamental productivity challenges that make virtual assistant implementation successful.
+            <Card className="bg-lime-50 border-lime-200 mt-8">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Why Ray's Referrals Consistently Succeed</h3>
+                <p className="text-gray-700 mb-6">
+                  Ray Wood's clients come to ShoreAgents pre-qualified with the right mindset and realistic expectations. 
+                  His coaching has already addressed the fundamental productivity challenges that make virtual assistant 
+                  implementation successful.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <div className="flex items-center mb-1">
-                      <FileText className="w-4 h-4 text-blue-600 mr-2" />
-                      <p className="font-semibold text-gray-900">Process Documentation</p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {[
+                    { icon: FileCheck, title: 'Process Documentation', desc: 'Clients understand the importance of documented procedures' },
+                    { icon: Target, title: 'Focus Clarity', desc: 'Already trained on dollar-productive vs administrative activities' },
+                    { icon: DollarSign, title: 'ROI Expectations', desc: 'Realistic timeline and outcome expectations established' },
+                    { icon: Award, title: 'Higher Success Rates', desc: 'Faster implementation and sustained long-term relationships' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                      <item.icon className="w-5 h-5 text-lime-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-bold text-gray-900 text-sm mb-1">{item.title}</h4>
+                        <p className="text-gray-700 text-xs">{item.desc}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-700">Clients understand the importance of documented procedures</p>
-                  </div>
-                  <div>
-                    <div className="flex items-center mb-1">
-                      <Target className="w-4 h-4 text-blue-600 mr-2" />
-                      <p className="font-semibold text-gray-900">Focus Clarity</p>
-                    </div>
-                    <p className="text-sm text-gray-700">Already trained on dollar-productive vs administrative activities</p>
-                  </div>
-                  <div>
-                    <div className="flex items-center mb-1">
-                      <TrendingUp className="w-4 h-4 text-blue-600 mr-2" />
-                      <p className="font-semibold text-gray-900">ROI Expectations</p>
-                    </div>
-                    <p className="text-sm text-gray-700">Realistic timeline and outcome expectations established</p>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
-        {/* Industry Insights */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
+        <Separator className="my-12" />
+
+        {/* Ray Wood Endorsement */}
+        <section className="mb-16">
+          <Card className="bg-gradient-to-br from-gray-50 to-white border-lime-200 shadow-lg">
             <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Target className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Industry Insights: What Most BPO Companies Get Wrong</h2>
-              </div>
-              <p className="text-gray-700 mb-6">
-                Stephen's recognition by industry leaders like Ray Wood stems from a fundamental difference in approach. While most BPO companies focus on cheap labor arbitrage, ShoreAgents built a methodology around systematic business process improvement that happens to use geographic arbitrage for cost efficiency.
-              </p>
-
-              <div className="bg-red-50 rounded-lg p-6 mb-6 border-l-4 border-red-600">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">🚨 Stephen's Controversial Industry Takes</h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-2">Training Guarantees are BS</h4>
-                    <p className="text-gray-700 italic">"Companies that guarantee training generally can't deliver it. Too many business variations exist. You'll end up training them yourself anyway."</p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-2">Home-Based Workers Don't Work</h4>
-                    <p className="text-gray-700 italic">"Rain on tin roofs, power outages, chickens in the background. Philippines infrastructure isn't ready for home-based professional services."</p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gray-900 mb-2">Freelancer Platforms are Risky</h4>
-                    <p className="text-gray-700 italic">"Independent contractors are hard to manage and track. I've seen clients lose computers, data, and money on these platforms."</p>
+              <div className="flex flex-col items-center text-center">
+                <div className="mb-4">
+                  <div className="w-20 h-20 bg-gradient-to-br from-lime-400 to-lime-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                    RW
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-lime-50 rounded-lg p-6">
-                  <div className="flex items-center mb-4">
-                    <Target className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-xl font-bold text-gray-900">The ShoreAgents Methodology Difference</h3>
-                  </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Office-Based Professional Environment</h4>
-                    <p className="text-sm text-gray-700">Biometric security, enterprise-grade equipment, backup power systems, professional supervision</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Staff Leasing vs Freelancing</h4>
-                    <p className="text-sm text-gray-700">Employees under Philippines law, managed by ShoreAgents, dedicated to your business exclusively</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Honest Training Approach</h4>
-                    <p className="text-sm text-gray-700">No false training promises. Support for YOUR process documentation and implementation</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Geographic Specialization</h4>
-                    <p className="text-sm text-gray-700">Deep understanding of AUS/NZ/USA business cultures and regulatory requirements</p>
-                  </div>
+                <blockquote className="text-xl md:text-2xl text-gray-700 mb-6 italic leading-relaxed">
+                  "Stephen's expertise in offshore staffing has been invaluable to the agents I've referred to him over 
+                  the years. His hands-on approach in the Philippines ensures quality results that traditional BPO companies 
+                  simply can't match."
+                </blockquote>
+                <div className="text-lg font-bold text-gray-900">Ray Wood</div>
+                <div className="text-gray-600 mb-2">Real Estate Coach & Host</div>
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Mic className="w-4 h-4" />
+                  <span>Top Agents Playbook</span>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </section>
 
-        {/* Ray Wood Quote */}
-        <div className="mb-16">
-          <Card className="border-lime-200 bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-            <CardContent className="p-8">
-              <blockquote className="text-2xl italic mb-6 leading-relaxed">
-                "Stephen's expertise in offshore staffing has been invaluable to the agents I've referred to him over the years. His hands-on approach in the Philippines ensures quality results that traditional BPO companies simply can't match."
-              </blockquote>
-              <p className="text-xl font-semibold">— Ray Wood</p>
-              <p className="text-lime-400">Real Estate Coach & Host of Top Agents Playbook</p>
-            </CardContent>
-          </Card>
-        </div>
+      </div>
 
-        {/* Future Partnership */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Lightbulb className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">
-                  Top Agents Playbook Partnership: Future Referral Opportunities
-                </h2>
-              </div>
-              <p className="text-gray-700 mb-6">
-                The offshore staffing industry continues evolving rapidly, particularly with AI integration and changing business models. Stephen's recognition by industry leaders like Ray Wood positions ShoreAgents at the forefront of these developments, combining proven systematic approaches with emerging technologies.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="bg-lime-50 rounded-lg p-6">
-                  <div className="flex items-center mb-3">
-                    <Bot className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-lg font-bold text-gray-900">AI Integration</h3>
-                  </div>
-                  <p className="text-sm text-gray-700">Virtual assistants enhanced with AI tools for improved productivity and expanded capability sets</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6">
-                  <div className="flex items-center mb-3">
-                    <Globe className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-lg font-bold text-gray-900">Remote Work Normalization</h3>
-                  </div>
-                  <p className="text-sm text-gray-700">Accelerated adoption of offshore staffing as remote work becomes standard business practice</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6">
-                  <div className="flex items-center mb-3">
-                    <FileText className="w-6 h-6 text-lime-600 mr-2" />
-                    <h3 className="text-lg font-bold text-gray-900">Performance Analytics</h3>
-                  </div>
-                  <p className="text-sm text-gray-700">Advanced tracking and optimization tools for measuring and improving offshore team performance</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Why This Validates Excellence */}
-        <div className="mb-16">
-          <Card className="border-lime-200">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Award className="w-8 h-8 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">
-                  Why Top Agents Playbook Feature Validates Business Excellence
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-lime-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Peer Validation</h3>
-                  <p className="text-gray-700">Recognition from established industry leaders who understand the challenges of building and scaling service businesses</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Proven Results</h3>
-                  <p className="text-gray-700">Multiple successful client referrals over 12+ years demonstrate consistent quality and measurable outcomes</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Market Credibility</h3>
-                  <p className="text-gray-700">Cross-border expertise validated by coaches operating in our core geographic markets</p>
-                </div>
-                <div className="bg-lime-50 rounded-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3">Methodology Validation</h3>
-                  <p className="text-gray-700">Systematic approaches that deliver results worth featuring on respected industry platforms</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* CTA */}
-        <div className="text-center bg-lime-600 rounded-2xl p-12 text-white">
-          <h2 className="text-4xl font-bold mb-6">Ready to Experience Top Agents Playbook Featured Expertise?</h2>
+      {/* Final CTA */}
+      <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white mx-4 mb-8">
+        <CardContent className="p-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Ready to Experience Top Agents Playbook Featured Expertise?
+          </h2>
           <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
-            Join the successful businesses from Ray Wood's referral network who have transformed their operations with our proven methodology featured on Top Agents Playbook.
+            Join the successful businesses from Ray Wood's referral network who have transformed their operations with our 
+            proven methodology. When industry leaders feature your approach, it validates 12+ years of systematic excellence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/contact">
-              <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg">
-                <Phone className="w-5 h-5 mr-2" />
-                Schedule Your Consultation
-              </Button>
+            <Link
+              href="/sales"
+              className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Schedule Your Consultation
+              <ArrowRight className="ml-2 w-5 h-5" />
             </Link>
-            <Link href="/about">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg">
-                <Briefcase className="w-5 h-5 mr-2" />
-                Learn More About Us
-              </Button>
+            <Link
+              href="/case-studies"
+              className="inline-flex items-center px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-lime-600 font-bold text-lg rounded-lg transition-colors"
+            >
+              <Building2 className="w-5 h-5 mr-2" />
+              View More Case Studies
             </Link>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }
