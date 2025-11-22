@@ -160,7 +160,7 @@ export default function EmployeesPage() {
                  title="Refresh List"
                >
                  <RefreshCw className="w-5 h-5" />
-               </Button>
+            </Button>
             </div>
           </div>
 
@@ -182,18 +182,18 @@ export default function EmployeesPage() {
               />
             </div>
             
-            <Button
+              <Button
               onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-              variant={showFavoritesOnly ? "default" : "outline"}
+                variant={showFavoritesOnly ? "default" : "outline"}
               className={`h-14 px-6 rounded-xl border-0 shadow-sm font-semibold transition-all ${
-                showFavoritesOnly 
+                  showFavoritesOnly 
                   ? 'bg-red-500 hover:bg-red-600 text-white' 
                   : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-red-500'
-              }`}
-            >
+                }`}
+              >
               <Heart className={`w-5 h-5 mr-2 ${showFavoritesOnly ? 'fill-current' : ''}`} />
               {showFavoritesOnly ? 'Show All' : `Favorites (${favorites.size})`}
-            </Button>
+              </Button>
           </motion.div>
         </div>
       </div>
@@ -224,7 +224,7 @@ export default function EmployeesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             <AnimatePresence mode="popLayout">
-              {filteredEmployees.map((employee, index) => (
+            {filteredEmployees.map((employee, index) => (
                 <motion.div
                   key={employee.user.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -232,16 +232,16 @@ export default function EmployeesPage() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: index * 0.05 }}
                 >
-                  <TalentCard
-                    data={employee}
-                    onAskForInterview={() => {
-                      console.log('Interview requested for:', employee.user.name);
-                      setSelectedCandidate(employee);
-                      setIsInterviewModalOpen(true);
-                    }}
-                  />
+              <TalentCard
+                data={employee}
+                onAskForInterview={() => {
+                  console.log('Interview requested for:', employee.user.name);
+                  setSelectedCandidate(employee);
+                  setIsInterviewModalOpen(true);
+                }}
+              />
                 </motion.div>
-              ))}
+            ))}
             </AnimatePresence>
           </div>
         )}

@@ -379,6 +379,9 @@ export function BottomNav() {
       
       const data = await response.json()
       console.log('✅ AI Recommendations received:', data)
+      console.log('📊 Recommendations count:', data.recommendations?.length || 0)
+      console.log('🎯 Insight:', data.insight)
+      console.log('👤 User stage:', data.userStage)
       
       setAiRecommendations(data.recommendations || [])
       setAiInsight(data.insight || null)
@@ -614,7 +617,14 @@ export function BottomNav() {
               {!isLoadingAI && aiRecommendations.length > 0 && (
                 <div className="grid grid-cols-3 gap-4">
                   {aiRecommendations.map((rec, index) => (
-                    <ResourceCard key={index} recommendation={rec} />
+                    <ResourceCard 
+                      key={index} 
+                      title={rec.title}
+                      description={rec.description}
+                      url={rec.actionUrl}
+                      badge="AI Recommended"
+                      reason={rec.reason}
+                    />
                   ))}
                 </div>
               )}

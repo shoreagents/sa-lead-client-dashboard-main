@@ -158,8 +158,8 @@ const ServiceTab = () => {
                  <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-slate-200 flex items-center justify-center">
                     <TrendingUp className="w-32 h-32 text-orange-200" />
                  </div>
-              </div>
-            </div>
+          </div>
+          </div>
           </TabsContent>
 
           <TabsContent key="finance" value="finance" className="mt-0">
@@ -183,7 +183,7 @@ const ServiceTab = () => {
                       Explore Finance
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
-                  </Link>
+    </Link>
                 </div>
               </div>
               <div className="order-1 md:order-2 relative h-[400px] bg-slate-100 rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-200">
@@ -223,12 +223,12 @@ const ServiceTab = () => {
                     <Headphones className="w-32 h-32 text-purple-200" />
                  </div>
               </div>
-            </div>
+    </div>
           </TabsContent>
         </AnimatePresence>
-      </div>
+  </div>
     </Tabs>
-  );
+);
 };
 
 export default function Home() {
@@ -279,7 +279,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(101,163,13,0.12),_rgba(2,6,23,1))] z-10 pointer-events-none"></div>
           
           <div className="absolute inset-0 z-10 pointer-events-none">
-             <CustomBackgroundLines />
+          <CustomBackgroundLines />
           </div>
           
           <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -304,7 +304,7 @@ export default function Home() {
                 Staff Leasing <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 via-lime-200 to-lime-500">
                   Reimagined.
-                </span>
+                  </span>
               </motion.h1>
               
               <motion.p 
@@ -342,7 +342,7 @@ export default function Home() {
                 </Link>
               </motion.div>
             </motion.div>
-          </div>
+                </div>
 
           <motion.div 
             className="absolute bottom-10 left-1/2 -translate-x-1/2 text-slate-600"
@@ -363,8 +363,8 @@ export default function Home() {
               </div>
             ))}
           </Marquee>
-        </div>
-
+              </div>
+              
         {/* --- The Problem / Solution (Interactive Comparison) --- */}
         <section className={sectionSpacing}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -381,19 +381,19 @@ export default function Home() {
                 <div className="absolute -top-5 left-8 bg-red-50 text-red-600 px-6 py-2 rounded-full font-bold text-sm border border-red-100">Freelancer Chaos</div>
                 <CardContent className="pt-8">
                   <ul className="space-y-6">
-                    {[
+                  {[
                       "Works from home (unreliable power/internet)",
                       "High ghosting risk (zero accountability)",
-                      "No data security or monitoring",
+                    "No data security or monitoring",
                       "You handle all HR, payroll, and legal",
                       "Zero management support when things break"
-                    ].map((item, i) => (
+                  ].map((item, i) => (
                       <li key={i} className="flex items-start text-slate-500 group-hover:text-slate-700 transition-colors">
                         <div className="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center mr-4 shrink-0 text-sm font-bold border border-red-100">✕</div>
                         <span className="mt-1">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                    </li>
+                  ))}
+                </ul>
                 </CardContent>
               </Card>
 
@@ -403,26 +403,26 @@ export default function Home() {
                 <div className="absolute top-0 right-0 w-96 h-96 bg-lime-500/10 rounded-full blur-3xl -mr-20 -mt-20 z-0"></div>
                 
                 <CardContent className="relative z-10 pt-8">
-                  <h3 className="text-3xl font-bold mb-8 flex items-center text-white">
+                <h3 className="text-3xl font-bold mb-8 flex items-center text-white">
                     <Shield className="w-8 h-8 text-lime-400 mr-4" />
-                    Enterprise Grade
-                  </h3>
+                  Enterprise Grade
+                </h3>
                   <ul className="space-y-6">
-                    {[
+                  {[
                       "100% Office-Based (Enterprise Fiber + Backup Power)",
                       "Dedicated HR, IT, and Success Managers",
                       "Biometric Security & Data Protection Protocols",
                       "We handle all Legal, Payroll, Taxes & Benefits",
                       "University-Educated Professionals Only"
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-center text-lg">
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center text-lg">
                         <div className="w-8 h-8 rounded-full bg-lime-500 flex items-center justify-center mr-4 shrink-0 border border-lime-400 shadow-[0_0_15px_rgba(132,204,22,0.4)]">
                           <Check className="w-4 h-4 text-slate-900 stroke-[3]" />
-                        </div>
+                      </div>
                         <span className="text-slate-200 font-medium">{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                    </li>
+                  ))}
+                </ul>
                 </CardContent>
               </Card>
             </div>
@@ -441,8 +441,8 @@ export default function Home() {
             </div>
 
             <ServiceTab />
-          </div>
-        </section>
+              </div>
+            </section>
 
         {/* --- The 7-Day Hiring Sprint --- */}
         <section className={cn(sectionSpacing, "bg-white relative overflow-hidden")}>
@@ -451,8 +451,8 @@ export default function Home() {
               <div>
                 <h2 className={headingStyle}>The <span className="text-lime-600">7-Day</span> Sprint</h2>
                 <p className="text-xl text-slate-600 mb-10 leading-relaxed">
-                  We've stripped away the fluff. Here is the exact process to get your new team member live in under a week.
-                </p>
+                We've stripped away the fluff. Here is the exact process to get your new team member live in under a week.
+                    </p>
                 
                 <div className="space-y-8">
                   {[
@@ -467,21 +467,21 @@ export default function Home() {
                           {i + 1}
                         </div>
                         {i !== 3 && <div className="w-0.5 h-full bg-slate-200 my-2"></div>}
-                      </div>
+                  </div>
                       <div className="pb-8">
                         <h3 className="text-xl font-bold text-slate-900 mb-2">{step.title}</h3>
                         <p className="text-slate-600">{step.desc}</p>
-                      </div>
+              </div>
                     </div>
                   ))}
-                </div>
-                
+                  </div>
+
                 <div className="mt-8">
-                  <Link href="/how-it-works">
+              <Link href="/how-it-works">
                     <Button size="lg" variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 h-14 rounded-xl text-lg">
-                      See Detailed Process
+                  See Detailed Process
                     </Button>
-                  </Link>
+              </Link>
                 </div>
               </div>
 
@@ -509,7 +509,7 @@ export default function Home() {
                  </div>
               </div>
             </div>
-          </div>
+                  </div>
         </section>
 
         {/* --- Founder / Authority Section --- */}
@@ -526,43 +526,43 @@ export default function Home() {
               <div className="relative z-10 grid md:grid-cols-12 gap-12 items-center">
                 <div className="md:col-span-4">
                   <div className="w-full aspect-[4/5] rounded-[2rem] bg-slate-200 overflow-hidden shadow-lg relative group">
-                    <Image
+                            <Image
                       src="/Stephen-Atcheler.jpg" 
                       alt="Stephen Atcheler" 
                       fill
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   </div>
-                </div>
+              </div>
                 <div className="md:col-span-8">
                   <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-8">From One Business Owner to Another</h3>
                   <div className="space-y-6 text-lg text-slate-600 leading-relaxed">
                     <p>
-                      "I didn't start a BPO because I wanted to run a call center. I started it because I was running a Real Estate agency in Australia and I was <strong>drowning</strong> in admin work.
-                    </p>
+                    "I didn't start a BPO because I wanted to run a call center. I started it because I was running a Real Estate agency in Australia and I was <strong>drowning</strong> in admin work.
+                  </p>
                     <p>
-                      I moved to the Philippines to solve my own problem. What I built—the office, the systems, the training—became ShoreAgents. We don't sell 'cheap labor'. We sell the exact same system I used to scale my own business."
-                    </p>
+                    I moved to the Philippines to solve my own problem. What I built—the office, the systems, the training—became ShoreAgents. We don't sell 'cheap labor'. We sell the exact same system I used to scale my own business."
+                  </p>
                   </div>
                   <div className="mt-8 flex items-center gap-4">
-                    <div>
+                  <div>
                       <p className="font-bold text-slate-900 text-xl">Stephen Atcheler</p>
                       <p className="text-lime-600 font-medium">Founder & CEO</p>
                     </div>
                     <div className="h-10 w-px bg-slate-200 mx-2"></div>
                     <Image src="/ShoreAgents-Logo.png" alt="ShoreAgents" width={120} height={30} className="h-8 w-auto opacity-50 grayscale" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                            </div>
+                          </div>
+                          </div>
+                            </div>
+                          </div>
         </section>
 
         {/* --- Final CTA --- */}
         <section className="py-32 bg-slate-900 text-white relative overflow-hidden">
           <div className="absolute inset-0">
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,_rgba(132,204,22,0.15),_rgba(15,23,42,0))]"></div>
-          </div>
+                            </div>
           <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
             <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tight leading-tight">
               Ready to <span className="text-lime-500">Scale?</span>
@@ -582,11 +582,11 @@ export default function Home() {
                   Book Strategy Call
                 </Button>
               </Link>
-            </div>
-          </div>
-        </section>
-        
-      </ContentTracker>
-    </div>
-  );
-}
+                              </div>
+                   </div>
+               </section>
+            
+          </ContentTracker>
+        </div>
+      );
+    }

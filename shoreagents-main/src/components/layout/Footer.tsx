@@ -53,11 +53,11 @@ export function Footer() {
                 height={45}
                 className="h-12 w-auto brightness-0 invert"
               />
-            </Link>
+              </Link>
             <p className="text-slate-400 leading-relaxed text-sm max-w-sm">
               Stephen Atcheler, founder of Shore Agents, scaled his own agency before building the gold standard in Philippine outsourcing. We don't just hire staff; we build assets for your business.
             </p>
-            
+
             {/* Trust Badges */}
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-lime-500/10 rounded-full border border-lime-500/20">
@@ -140,7 +140,7 @@ export function Footer() {
                   <p className="text-xs text-slate-400">Angeles City, Pampanga, Philippines</p>
                 </div>
               </div>
-
+              
               <div className="flex gap-4">
                 <div className="w-10 h-10 rounded-full bg-lime-500/10 flex items-center justify-center shrink-0">
                   <Mail className="w-5 h-5 text-lime-400" />
@@ -150,7 +150,7 @@ export function Footer() {
                   <p className="text-xs text-slate-400">Response within 2 hours</p>
                 </div>
               </div>
-
+              
               <div className="flex gap-4">
                 <div className="w-10 h-10 rounded-full bg-lime-500/10 flex items-center justify-center shrink-0">
                   <Clock className="w-5 h-5 text-lime-400" />
@@ -158,15 +158,15 @@ export function Footer() {
                 <div>
                   <p className="text-sm font-medium text-white">Mon-Fri: 8AM-6PM PHT</p>
                   <p className="text-xs text-slate-400">We work on your timezone</p>
-                </div>
               </div>
-              
+            </div>
+
               <Button className="w-full bg-lime-600 hover:bg-lime-500 text-white font-bold">
                 Book Strategy Call
               </Button>
-            </div>
           </div>
         </div>
+      </div>
 
         <Separator className="bg-slate-800 mb-8" />
 

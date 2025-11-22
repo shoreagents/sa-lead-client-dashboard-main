@@ -95,7 +95,7 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
 
   const gradualScore = calculateGradualPopularity(hotnessScore);
   const hotness = getHotnessLevel(gradualScore);
-  
+
   return (
     <Card className="group relative w-full bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
       {/* Selection Overlay */}
@@ -114,8 +114,8 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
            {/* Score Badge */}
            <div className="flex items-center gap-1.5 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold border border-yellow-100">
               <Trophy className="w-3 h-3" />
-              {score}
-           </div>
+        {score}
+      </div>
         </div>
 
         {/* Avatar Section */}
@@ -123,68 +123,68 @@ export function TalentCard({ data, onAskForInterview }: TalentCardProps) {
           <div className="relative mb-4">
             <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-br from-slate-100 to-slate-200 group-hover:from-lime-400 group-hover:to-lime-600 transition-colors duration-500">
                <div className="w-full h-full rounded-full overflow-hidden bg-white relative">
-                  {data.user.avatar ? (
-                    <Image
-                      src={data.user.avatar}
-                      alt={data.user.name}
+            {data.user.avatar ? (
+              <Image
+                src={data.user.avatar}
+                alt={data.user.name}
                       fill
                       className="object-cover"
-                    />
-                  ) : (
+              />
+            ) : (
                     <div className="w-full h-full flex items-center justify-center bg-slate-50">
                       <User className="w-10 h-10 text-slate-300" />
                     </div>
-                  )}
-               </div>
+            )}
+          </div>
             </div>
             {/* Favorite Button Absolute */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFavorite(data.user.id);
-              }}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(data.user.id);
+                }}
               className="absolute -right-1 bottom-0 p-2 bg-white rounded-full shadow-md border border-slate-100 hover:scale-110 transition-transform z-20"
-            >
-              <Heart 
+              >
+                <Heart 
                 className={cn("w-4 h-4 transition-colors", isFavorite(data.user.id) ? 'text-red-500 fill-red-500' : 'text-slate-400 hover:text-red-500')} 
-              />
-            </button>
-          </div>
+                />
+              </button>
+            </div>
 
           <h3 className="text-xl font-bold text-slate-900 text-center mb-1 group-hover:text-lime-700 transition-colors">
             {data.user.name}
           </h3>
           <p className="text-sm text-slate-500 text-center font-medium uppercase tracking-wide">
-            {(() => {
+              {(() => {
                 const position = hasWorkStatus && data.workStatus?.currentPosition 
                   ? data.workStatus.currentPosition 
                   : (data.user.position || 'Talent');
                 return position?.split(',')[0]?.trim() || 'Talent';
-            })()}
-          </p>
-        </div>
+              })()}
+            </p>
+          </div>
 
         {/* Divider */}
         <div className="w-full h-px bg-slate-100 mb-6"></div>
 
         {/* Stats / Info */}
         <div className="space-y-4 flex-1">
-           {/* Hotness Bar */}
+        {/* Hotness Bar */}
            {!isLoadingHotness && hotnessScore > 0 && (
              <div className="space-y-1.5">
                <div className="flex justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
                  <span>Demand</span>
                  <span className={hotness.textColor}>{Math.min(Math.round(gradualScore), 100)}%</span>
-               </div>
+            </div>
                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                 <div 
+              <div 
                    className={cn("h-full rounded-full transition-all duration-1000", hotness.color)}
                    style={{ width: `${Math.min(gradualScore, 100)}%` }}
-                 ></div>
-               </div>
-             </div>
-           )}
-           
+              ></div>
+            </div>
+          </div>
+        )}
+
            {/* Placeholder for pills/skills if we had them */}
            <div className="flex flex-wrap gap-2 justify-center">
               {data.user.location && (
