@@ -26,7 +26,7 @@ import {
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
-import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
+import { PricingCalculatorModal } from '@/components/pricing-calculator'
 import { QuoteSummaryModal } from '@/components/ui/quote-summary-modal'
 import { useCurrency } from '@/lib/currencyContext'
 import { RefreshCw } from 'lucide-react'

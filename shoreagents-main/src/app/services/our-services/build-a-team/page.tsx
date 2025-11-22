@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PricingCalculatorModal } from "@/components/ui/pricing-calculator-modal";
+import { PricingCalculatorModal } from "@/components/pricing-calculator";
 import Link from "next/link";
 import { useState } from "react";
 import { SideNav } from "@/components/layout/SideNav";

@@ -85,6 +85,7 @@ export async function semanticContentSearch(
       : '';
 
     // Perform vector similarity search
+    const embeddingStr = JSON.stringify(queryEmbedding);
     const results = await prisma.$queryRawUnsafe<ContentMatch[]>(`
       SELECT 
         content_id,
@@ -94,12 +95,12 @@ export async function semanticContentSearch(
         content_type,
         semantic_categories,
         metadata,
-        1 - (embedding <=> $1::vector) AS similarity
+        1 - (embedding <=> '${embeddingStr}'::vector) AS similarity
       FROM content_embeddings
       ${whereClause}
-      ORDER BY embedding <=> $1::vector
-      LIMIT $2
-    `, queryEmbedding, limit);
+      ORDER BY embedding <=> '${embeddingStr}'::vector
+      LIMIT ${limit}
+    `);
 
     console.log(`✅ Found ${results.length} semantic matches`);
     results.forEach((r, i) => {
@@ -115,57 +116,83 @@ export async function semanticContentSearch(
 }
 
 /**
- * Find similar content based on user's viewed content
+ * Find similar content based on user's viewing history and context
  * 
- * @param viewedContentIds - Array of content IDs user has viewed
- * @param limit - Maximum number of recommendations
- * @returns Array of similar content not yet viewed
+ * @param userId - User ID to find content for
+ * @param options - Search options (industry, user stage, limit)
+ * @returns Array of relevant content recommendations
  */
 export async function findSimilarContent(
-  viewedContentIds: string[],
-  limit: number = 6
-): Promise<ContentMatch[]> {
-  if (viewedContentIds.length === 0) {
-    // If no history, return popular content
-    return await getPopularContent(limit);
+  userId: string,
+  options?: {
+    industry?: string;
+    userStage?: string;
+    limit?: number;
   }
+): Promise<Array<{
+  title: string;
+  url: string;
+  type: string;
+  categories: string[];
+  score: number;
+}>> {
+  const limit = options?.limit || 20;
 
   try {
-    // Get embeddings of viewed content
-    const viewedContent = await prisma.$queryRawUnsafe<any[]>(`
-      SELECT embedding, semantic_categories
-      FROM content_embeddings
-      WHERE content_id = ANY($1::text[])
-    `, viewedContentIds);
+    // Build search query based on user context
+    let searchQuery = '';
+    const categories: string[] = [];
 
-    if (viewedContent.length === 0) {
-      return await getPopularContent(limit);
+    if (options?.industry) {
+      searchQuery += ` ${options.industry}`;
+      categories.push(options.industry.toLowerCase().replace(/\s+/g, '-'));
     }
 
-    // Average the embeddings to get user's interest vector
-    // (Simple approach - could be more sophisticated)
-    const avgEmbedding = averageEmbeddings(
-      viewedContent.map(c => c.embedding)
-    );
+    if (options?.userStage) {
+      if (options.userStage === 'new_lead') {
+        searchQuery += ' getting started outsourcing guide introduction';
+        categories.push('guide', 'blog');
+      } else if (options.userStage === 'quoted' || options.userStage === 'stage_2') {
+        searchQuery += ' success story case study ROI results';
+        categories.push('case-study');
+      }
+    }
 
-    // Get all categories from viewed content
-    const categories = Array.from(
-      new Set(viewedContent.flatMap(c => c.semantic_categories || []))
-    );
+    // If no specific query, use general search
+    if (!searchQuery) {
+      searchQuery = 'outsourcing virtual assistant offshore staffing BPO';
+    }
 
-    // Search for similar content, excluding already viewed
-    return await semanticContentSearch(
-      categories.join(' '), // Use categories as search hint
+    // Perform semantic search
+    const results = await semanticContentSearch(
+      searchQuery.trim(),
       {
-        excludeUrls: viewedContentIds,
-        categories: categories.length > 0 ? categories : undefined,
+        categories: categories.length > 0 ? categories : undefined
       },
       limit
     );
 
+    // Transform to expected format
+    return results.map(r => ({
+      title: r.title,
+      url: r.url_path,
+      type: r.content_type,
+      categories: r.semantic_categories || [],
+      score: r.similarity
+    }));
+
   } catch (error) {
     console.error('❌ Error finding similar content:', error);
-    return await getPopularContent(limit);
+    
+    // Return popular content as fallback
+    const popular = await getPopularContent(limit);
+    return popular.map(r => ({
+      title: r.title,
+      url: r.url_path,
+      type: r.content_type,
+      categories: r.semantic_categories || [],
+      score: 1.0
+    }));
   }
 }
 
@@ -188,8 +215,8 @@ async function getPopularContent(limit: number = 6): Promise<ContentMatch[]> {
       view_count DESC NULLS LAST,
       recommendation_count DESC NULLS LAST,
       created_at DESC
-    LIMIT $1
-  `, limit);
+    LIMIT ${limit}
+  `);
 
   console.log(`📊 Returning ${results.length} popular content items as fallback`);
   return results;

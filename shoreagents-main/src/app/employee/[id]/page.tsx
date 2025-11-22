@@ -108,6 +108,26 @@ export default function EmployeeProfilePage() {
     }
   }, [employee, appUser?.user_id]);
 
+  // Track scroll percentage
+  useEffect(() => {
+    if (!employee) return;
+
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      
+      const scrollPercentage = Math.round((scrollTop / (documentHeight - windowHeight)) * 100);
+      candidateTracker.recordScrollPercentage(Math.min(scrollPercentage, 100));
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [employee]);
+
   // Cleanup tracking when component unmounts or user navigates away
   useEffect(() => {
     const handleBeforeUnload = () => {

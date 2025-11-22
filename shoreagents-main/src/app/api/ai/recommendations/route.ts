@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { prisma } from '@/lib/prisma';
+import { semanticContentSearch, findSimilarContent } from '@/lib/contentVectorService';
 
 interface UserContext {
   userId: string;
@@ -13,7 +14,23 @@ interface UserContext {
   pagesViewed: Array<{ path: string; timeSpent: number }>;
   hasQuote: boolean;
   quoteBudget?: number;
-  quoteRoles?: string[];
+  quoteRoles?: Array<{
+    title: string;
+    experienceLevel: string;
+    workspaceType: string;
+    cost: number;
+  }>;
+  conversationTopics: string[];
+  conversationSentiment: string;
+  recentQuestions: string[];
+  painPoints: string[];
+  relevantContent: Array<{
+    title: string;
+    url: string;
+    type: string;
+    categories: string[];
+    score: number;
+  }>;
   behaviorSummary: string;
 }
 
@@ -64,6 +81,9 @@ export async function POST(request: NextRequest) {
     // Generate AI recommendations
     const recommendations = await generateAIRecommendations(userContext);
     
+    // Generate hero insight (the "WOW" moment)
+    const heroInsight = generateHeroInsight(userContext);
+    
     // Cache the results
     cache.set(userId, {
       data: recommendations,
@@ -75,13 +95,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       recommendations,
+      heroInsight, // 🔥 The mind-blowing insight!
       cached: false,
       userId,
       context: {
         stage: userContext.stage,
         industry: userContext.industry,
         candidatesViewed: userContext.candidatesViewed,
-        hasQuote: userContext.hasQuote
+        hasQuote: userContext.hasQuote,
+        quoteRoles: userContext.quoteRoles?.length || 0,
+        conversationTopics: userContext.conversationTopics.length,
+        painPoints: userContext.painPoints.length,
+        relevantContentCount: userContext.relevantContent.length
       }
     });
 
@@ -107,7 +132,8 @@ async function getUserContext(userId: string): Promise<UserContext> {
     contentViews,
     pageVisits,
     candidateViews,
-    pricingQuotes
+    pricingQuotes,
+    conversationMemories
   ] = await Promise.all([
     // Lead progress (stage)
     prisma.leadProgress.findFirst({
@@ -146,11 +172,24 @@ async function getUserContext(userId: string): Promise<UserContext> {
       take: 10
     }),
     
-    // Pricing quotes
+    // Pricing quotes WITH roles
     prisma.pricingQuote.findMany({
       where: { user_id: userId },
       orderBy: { created_at: 'desc' },
-      take: 5
+      take: 5,
+      include: {
+        pricingQuoteRoles: true // 🔥 GET THE ACTUAL ROLES!
+      }
+    }),
+
+    // Conversation memory from Maya chat
+    prisma.conversationMemory.findMany({
+      where: { 
+        user_id: userId,
+        importance_score: { gte: 5 } // Only important memories
+      },
+      orderBy: { importance_score: 'desc' },
+      take: 10
     })
   ]);
 
@@ -170,29 +209,78 @@ async function getUserContext(userId: string): Promise<UserContext> {
     timeSpent: pv.time_spent_seconds || 0
   }));
 
-  // Create behavior summary
+  // 🔥 EXTRACT QUOTE ROLES (the actual positions they need!)
+  const latestQuote = pricingQuotes[0];
+  const quoteRoles = latestQuote?.pricingQuoteRoles?.map(role => ({
+    title: role.role_title,
+    experienceLevel: role.experience_level,
+    workspaceType: role.workspace_type,
+    cost: Number(role.total_cost)
+  })) || [];
+
+  // 🔥 EXTRACT CONVERSATION INSIGHTS from Maya chat
+  const conversationTopics: string[] = [];
+  const painPoints: string[] = [];
+  const recentQuestions: string[] = [];
+  let conversationSentiment = 'neutral';
+
+  conversationMemories.forEach(memory => {
+    const content = memory.content as any;
+    
+    if (memory.memory_type === 'topic' && content.topic) {
+      conversationTopics.push(content.topic);
+    }
+    
+    if (memory.memory_type === 'pain_point' && content.pain_point) {
+      painPoints.push(content.pain_point);
+    }
+    
+    if (memory.memory_type === 'question' && content.question) {
+      recentQuestions.push(content.question);
+    }
+    
+    if (memory.memory_type === 'sentiment' && content.sentiment) {
+      conversationSentiment = content.sentiment;
+    }
+  });
+
+  // 🔥 GET RELEVANT CONTENT FROM VECTOR DATABASE
+  const relevantContent = await findSimilarContent(
+    userId,
+    {
+      industry: user?.industry_name,
+      userStage: leadProgress?.status || 'new_lead',
+      limit: 20
+    }
+  );
+
+  // Create enhanced behavior summary
   const behaviorSummary = createBehaviorSummary(
     contentViews,
     pageVisits,
     candidateViews,
-    pricingQuotes
+    pricingQuotes,
+    conversationTopics,
+    painPoints
   );
-
-  // Get latest quote info
-  const latestQuote = pricingQuotes[0];
 
   return {
     userId,
     stage: leadProgress?.status || 'new_lead',
     industry: user?.industry_name || undefined,
     companyName: user?.company || undefined,
-    teamSize: latestQuote?.member_count || undefined, // Use quote member count as team size
+    teamSize: latestQuote?.member_count || undefined,
     candidatesViewed: candidateViews.length,
     topCandidates,
     pagesViewed,
     hasQuote: pricingQuotes.length > 0,
     quoteBudget: latestQuote?.total_monthly_cost ? Number(latestQuote.total_monthly_cost) : undefined,
-    quoteRoles: latestQuote ? ['Virtual Assistant'] : undefined, // Simplified
+    quoteRoles, // 🔥 REAL roles with details!
+    conversationTopics,
+    conversationSentiment,
+    recentQuestions,
+    painPoints,
+    relevantContent, // 🔥 From vector database!
     behaviorSummary
   };
 }
@@ -201,7 +289,9 @@ function createBehaviorSummary(
   contentViews: any[],
   pageVisits: any[],
   candidateViews: any[],
-  pricingQuotes: any[]
+  pricingQuotes: any[],
+  conversationTopics: string[],
+  painPoints: string[]
 ): string {
   const parts: string[] = [];
 
@@ -230,6 +320,15 @@ function createBehaviorSummary(
   // Quote behavior
   if (pricingQuotes.length > 0) {
     parts.push(`Created ${pricingQuotes.length} pricing quote(s)`);
+  }
+
+  // Conversation insights
+  if (conversationTopics.length > 0) {
+    parts.push(`Discussed: ${conversationTopics.slice(0, 3).join(', ')}`);
+  }
+
+  if (painPoints.length > 0) {
+    parts.push(`Pain points: ${painPoints.slice(0, 2).join(', ')}`);
   }
 
   return parts.join('. ');
@@ -278,86 +377,115 @@ async function generateAIRecommendations(context: UserContext): Promise<AIRecomm
 }
 
 function buildAIPrompt(context: UserContext): string {
-  return `You are an AI recommendation engine for ShoreAgents, a BPO staffing company specializing in Filipino offshore talent.
+  // Format quote roles for display
+  const rolesText = context.quoteRoles && context.quoteRoles.length > 0
+    ? context.quoteRoles.map(r => 
+        `${r.title} (${r.experienceLevel}, ${r.workspaceType}) - $${r.cost}/month`
+      ).join('\n  ')
+    : 'None yet';
 
-USER CONTEXT:
-- User ID: ${context.userId}
-- Journey Stage: ${context.stage}
-- Industry: ${context.industry || 'Unknown'}
-- Company: ${context.companyName || 'Unknown'}
-- Team Size: ${context.teamSize || 'Unknown'}
-- Behavior: ${context.behaviorSummary}
-- Candidates Viewed: ${context.candidatesViewed}
-- Has Quote: ${context.hasQuote ? 'Yes' : 'No'}
-${context.hasQuote ? `- Quote Budget: $${context.quoteBudget}/month` : ''}
+  // Format relevant content from vector database
+  const contentText = context.relevantContent
+    .map(c => `- ${c.title} (${c.type}) - ${c.url} [Score: ${c.score.toFixed(2)}]`)
+    .join('\n');
 
-STAGE DEFINITIONS:
-- new_lead: Just arrived, browsing
-- stage_1: Filled 45s form (industry, company, team size)
-- stage_2: Gave contact info (name, email)
-- quoted: Completed pricing calculator
-- meeting_booked: Scheduled consultation
-- signed_up: Created account
+  return `You are Claude, the AI recommendation engine for ShoreAgents - a premium BPO staffing company.
 
-AVAILABLE CONTENT (ShoreAgents):
+Your mission: Generate 6 MIND-BLOWINGLY personalized recommendations that make users think "Holy shit, they GET ME!"
 
-CASE STUDIES (24 total):
-- Real Estate: business-referral-partnerships (Ray Wood), gradual-team-scaling-success (Barry Plant), appraisal-listings-volume-increase (Levi Turner)
-- Construction: construction-cost-reduction (Gallery Group), team-expansion-success (Ballast)
-- Mortgage: mortgage-industry-transformation (Gelt Financial)
-- Property Management: streamline-back-office (Jason Gard), quick-staff-onboarding (Harcourts Dapto)
-- General Success: long-term-partnership-success, exceptional-team-performance, hiring-success-after-failures
+═══════════════════════════════════════════════════════════════════════════
+🧠 USER INTELLIGENCE FILE
+═══════════════════════════════════════════════════════════════════════════
 
-BLOG POSTS (7 total):
-- what-is-outsourcing: Complete guide for beginners
-- outsourcing-philippines: Why Philippines is #1 BPO destination
-- virtual-real-estate-assistant-pricing: Pricing guide 2025
-- what-does-a-real-estate-virtual-assistant-do: Role breakdown
-- outsourcing-vs-offshoring: Key differences explained
-- outsourcing-to-india: India BPO guide
-- outsourcing-to-vietnam: Vietnam BPO guide
+USER ID: ${context.userId}
+JOURNEY STAGE: ${context.stage}
+INDUSTRY: ${context.industry || 'Unknown'}
+COMPANY: ${context.companyName || 'Unknown'}
+TEAM SIZE: ${context.teamSize || 'Unknown'}
 
-RESOURCE PAGES (68 total, organized by industry):
-- Real Estate: /real-estate-outsourcing, /real-estate-virtual-assistant
-- Construction: /construction-outsourcing, /construction-virtual-assistant
-- Property Management: /property-management-outsourcing, /property-management-virtual-assistant
-- Mortgage: /mortgage-outsourcing, /mortgage-virtual-assistant
-- Legal: /legal-outsourcing, /legal-virtual-assistant
-- And more for accounting, SEO, graphic design, etc.
+───────────────────────────────────────────────────────────────────────────
+📊 BEHAVIORAL ANALYSIS
+───────────────────────────────────────────────────────────────────────────
+${context.behaviorSummary}
 
-YOUR TASK:
-Generate 6 personalized card recommendations for this user's AI drawer based on their stage and behavior.
+CANDIDATES VIEWED: ${context.candidatesViewed} profiles
+${context.topCandidates.length > 0 ? `TOP CANDIDATES:\n${context.topCandidates.map(c => `  - ${c.name} (${c.views} views)`).join('\n')}` : ''}
+
+───────────────────────────────────────────────────────────────────────────
+💰 PRICING INTELLIGENCE
+───────────────────────────────────────────────────────────────────────────
+HAS QUOTE: ${context.hasQuote ? 'YES' : 'NO'}
+${context.hasQuote ? `BUDGET: $${context.quoteBudget}/month` : ''}
+${context.hasQuote ? `ROLES QUOTED:\n  ${rolesText}` : ''}
+
+───────────────────────────────────────────────────────────────────────────
+💬 CONVERSATION INSIGHTS (from Maya AI Chat)
+───────────────────────────────────────────────────────────────────────────
+SENTIMENT: ${context.conversationSentiment}
+${context.conversationTopics.length > 0 ? `TOPICS DISCUSSED:\n${context.conversationTopics.map(t => `  - ${t}`).join('\n')}` : 'No chat history yet'}
+${context.painPoints.length > 0 ? `PAIN POINTS:\n${context.painPoints.map(p => `  - ${p}`).join('\n')}` : ''}
+${context.recentQuestions.length > 0 ? `RECENT QUESTIONS:\n${context.recentQuestions.map(q => `  - ${q}`).join('\n')}` : ''}
+
+───────────────────────────────────────────────────────────────────────────
+📚 RELEVANT CONTENT (Vector Database - Semantic Match)
+───────────────────────────────────────────────────────────────────────────
+These are REAL pages that exist, ranked by relevance to this user:
+
+${contentText}
+
+═══════════════════════════════════════════════════════════════════════════
+🎯 YOUR MISSION
+═══════════════════════════════════════════════════════════════════════════
+
+Generate 6 cards that are SO on-point the user thinks you're reading their mind.
+
+STAGE GUIDE:
+- new_lead: Educate, build trust, show value
+- stage_1: They gave industry/company - show industry-specific wins
+- stage_2: They gave contact info - they're serious, push to quote
+- quoted: They HAVE a quote - push to book consultation NOW
+- meeting_booked: Keep momentum, share similar success stories
+- signed_up: Welcome them, set expectations, onboarding content
 
 CARD TYPES:
-1. "candidate" - Featured or matched candidate profiles
-2. "case-study" - Success stories relevant to their industry
-3. "blog" - Educational content matching their research phase
-4. "resource" - Resource pages for their industry
-5. "cta" - Next step call-to-action
-6. "insight" - Personalized insight about their journey
+1. "case-study" - Client success stories (use EXACT URLs from content list)
+2. "blog" - Educational content (use EXACT URLs from content list)
+3. "resource" - Service pages (use EXACT URLs from content list)
+4. "candidate" - Recommend candidates they viewed or similar ones
+5. "cta" - Action prompts (quote, consultation, contact)
+6. "insight" - Personal insights about their journey
 
-RULES:
-- Match content to their industry (if known)
-- Prioritize based on their stage
-- Use behavior signals (pages viewed, candidates viewed)
-- Always provide a clear reason for each recommendation
-- Make CTAs stage-appropriate
-- Be encouraging but not pushy
+CRITICAL RULES:
+✅ ONLY use URLs from the "RELEVANT CONTENT" list above - NO HALLUCINATIONS!
+✅ Match content to their INDUSTRY (Real Estate, Construction, etc.)
+✅ Reference their PAIN POINTS from conversations
+✅ Acknowledge their QUOTE ROLES if they have any
+✅ Use BEHAVIORAL data to be hyper-specific
+✅ Make CTAs stage-appropriate (don't rush new leads)
+✅ Be confident, not pushy - like a trusted advisor
+✅ Use their conversation topics to show continuity
 
-Return ONLY valid JSON in this exact format:
+ADVANCED TACTICS:
+- If they viewed candidates multiple times → "You've been eyeing X, here's why they're perfect for your ${context.industry} team"
+- If they have a quote for "Transaction Coordinator" → Recommend case studies about TC success
+- If they discussed pain points → Address those DIRECTLY in insights
+- If sentiment is negative/frustrated → Empathize and show solutions
+- If they spent time on pricing pages → Show ROI case studies
+
+Return ONLY valid JSON (no markdown, no commentary):
+
 {
   "recommendations": [
     {
       "cardType": "case-study",
-      "title": "Ray Wood - Bestagents",
-      "description": "12+ years of professional referrals, featured on Top Agents Playbook",
-      "url": "/business-referral-partnerships",
-      "reason": "Matches your real estate industry and shows long-term success",
+      "title": "EXACT title from content list",
+      "description": "Compelling 1-2 sentence description that connects to THEIR situation",
+      "url": "EXACT URL from content list above",
+      "reason": "Ultra-specific reason based on their behavior/context",
       "priority": 95,
       "metadata": {
-        "industry": "Real Estate",
-        "client": "Ray Wood",
-        "yearsInBusiness": "12+"
+        "industry": "Their industry",
+        "relevanceScore": 0.95
       }
     }
   ]
@@ -369,37 +497,43 @@ function generateFallbackRecommendations(context: UserContext): AIRecommendation
   
   const recommendations: AIRecommendation[] = [];
 
-  // Stage-based recommendations
+  // Use vector database content instead of hardcoded URLs
+  const blogContent = context.relevantContent.filter(c => c.type === 'blog').slice(0, 2);
+  const caseStudies = context.relevantContent.filter(c => c.type === 'case-study').slice(0, 2);
+  const resources = context.relevantContent.filter(c => c.type === 'sub-pillar' || c.type === 'pillar').slice(0, 2);
+
+  // Stage-based recommendations using REAL content
   switch (context.stage) {
     case 'new_lead':
-      recommendations.push(
-        {
+      if (blogContent[0]) {
+        recommendations.push({
           cardType: 'blog',
-          title: 'What is Outsourcing?',
-          description: 'Complete guide to offshore staffing and why Philippines is the premier destination',
-          url: '/what-is-outsourcing',
+          title: blogContent[0].title,
+          description: 'Essential reading for understanding offshore staffing',
+          url: blogContent[0].url,
           reason: 'Perfect starting point for new visitors',
           priority: 90
-        },
-        {
-          cardType: 'cta',
-          title: 'See How It Works',
-          description: 'Learn our proven process for hiring offshore talent',
-          url: '/how-it-works',
-          reason: 'Understand the process before diving in',
-          priority: 85
-        }
-      );
+        });
+      }
+      
+      recommendations.push({
+        cardType: 'cta',
+        title: 'See How It Works',
+        description: 'Learn our proven process for hiring offshore talent',
+        url: '/how-it-works',
+        reason: 'Understand the process before diving in',
+        priority: 85
+      });
       break;
 
     case 'stage_1':
     case 'stage_2':
-      if (context.industry) {
+      if (context.industry && resources[0]) {
         recommendations.push({
           cardType: 'resource',
-          title: `${context.industry} Outsourcing`,
-          description: `Comprehensive guide to outsourcing for ${context.industry} companies`,
-          url: `/${context.industry.toLowerCase().replace(/\s+/g, '-')}-outsourcing`,
+          title: resources[0].title,
+          description: 'Comprehensive guide for your industry',
+          url: resources[0].url,
           reason: `Matched to your ${context.industry} industry`,
           priority: 95
         });
@@ -436,16 +570,72 @@ function generateFallbackRecommendations(context: UserContext): AIRecommendation
       break;
   }
 
-  // Always add a case study
-  recommendations.push({
-    cardType: 'case-study',
-    title: 'Gallery Group Success',
-    description: 'How this construction company reduced costs with offshore estimating',
-    url: '/construction-cost-reduction',
-    reason: 'Popular success story across all industries',
-    priority: 80
-  });
+  // Add case study if available
+  if (caseStudies[0]) {
+    recommendations.push({
+      cardType: 'case-study',
+      title: caseStudies[0].title,
+      description: 'See how we helped a company like yours',
+      url: caseStudies[0].url,
+      reason: 'Relevant success story',
+      priority: 80
+    });
+  }
 
   return recommendations.slice(0, 6);
+}
+
+/**
+ * Generate a "Holy Shit" Hero Insight
+ * This is the big personalized message that makes users feel SEEN
+ */
+function generateHeroInsight(context: UserContext): string {
+  const insights: string[] = [];
+
+  // Build contextual insight based on behavior
+  if (context.hasQuote && context.quoteRoles && context.quoteRoles.length > 0) {
+    const roles = context.quoteRoles.map(r => r.title).join(', ');
+    const budget = context.quoteBudget;
+    
+    if (context.conversationTopics.length > 0) {
+      insights.push(
+        `You've been researching ${context.conversationTopics[0]}, got a quote for ${roles} (${context.quoteRoles.length} ${context.quoteRoles.length === 1 ? 'role' : 'roles'}), and spent time reviewing candidates. You're ${context.stage === 'quoted' ? 'ONE conversation away' : 'getting close'} from building your offshore dream team at $${budget}/month. Let's make it happen.`
+      );
+    } else {
+      insights.push(
+        `You've quoted ${context.quoteRoles.length} ${context.quoteRoles.length === 1 ? 'position' : 'positions'} (${roles}) and ${context.candidatesViewed > 0 ? `already checked out ${context.candidatesViewed} candidates` : 'are ready to see some talent'}. Companies at your stage typically save $${Math.round((budget || 0) * 2.5)}/month vs. local hiring. Ready to lock this in?`
+      );
+    }
+  } else if (context.painPoints.length > 0) {
+    const mainPain = context.painPoints[0];
+    insights.push(
+      `I noticed you mentioned "${mainPain}" in your chat with Maya. ${context.industry ? `For ${context.industry} companies, this is exactly why` : 'This is exactly why'} our clients bring on offshore talent. ${context.candidatesViewed > 0 ? `You've already viewed ${context.candidatesViewed} candidates - let's find THE one who solves this.` : `Want to see candidates who've solved this exact problem?`}`
+    );
+  } else if (context.candidatesViewed >= 3) {
+    const topCandidate = context.topCandidates[0];
+    insights.push(
+      `You've viewed ${context.candidatesViewed} candidates${topCandidate ? `, with ${topCandidate.views} visits to ${topCandidate.name}'s profile` : ''}. When clients return to a candidate profile ${topCandidate && topCandidate.views >= 3 ? 'that many times' : 'multiple times'}, it usually means they've found "the one." ${context.hasQuote ? `You have a quote ready - want to move forward?` : `Ready to get a quote and see what this would cost?`}`
+    );
+  } else if (context.conversationTopics.length > 0) {
+    insights.push(
+      `Based on your conversations about ${context.conversationTopics.slice(0, 2).join(' and ')}, ${context.industry ? `and your ${context.industry} industry` : 'I can tell'} you're doing your homework. ${context.stage === 'new_lead' ? `Most people at your stage spend 3-5 days researching before getting a quote. Skip ahead?` : `You're further along than 80% of people who visit. Let's get you matched with the right talent.`}`
+    );
+  } else if (context.pagesViewed.length > 5) {
+    const totalTime = context.pagesViewed.reduce((sum, p) => sum + p.timeSpent, 0);
+    const minutes = Math.round(totalTime / 60);
+    insights.push(
+      `You've spent ${minutes} minutes across ${context.pagesViewed.length} pages. ${context.industry ? `For ${context.industry}` : 'For most'} companies, the next logical step is ${context.hasQuote ? 'booking a consultation to discuss your quote' : 'getting a custom quote to see real numbers'}. ${context.stage === 'stage_2' ? `You're already in our system - let's finish this.` : `Want to see what this would actually cost?`}`
+    );
+  } else if (context.stage === 'new_lead') {
+    insights.push(
+      `Welcome! ${context.industry ? `As a ${context.industry} company,` : 'Most of our clients'} typically start by exploring case studies and pricing. I've curated exactly what you need to see below. No pressure - just the right info at the right time.`
+    );
+  } else {
+    insights.push(
+      `You're ${context.stage === 'stage_1' ? 'making progress' : context.stage === 'stage_2' ? 'almost there' : 'on your journey'}. ${context.industry ? `Other ${context.industry} companies` : 'Companies'} at your stage usually ${context.hasQuote ? 'book a quick call within 48 hours' : 'get a quote to see real numbers'}. I've lined up some ${context.candidatesViewed > 0 ? 'more' : ''} personalized recommendations below.`
+    );
+  }
+
+  return insights[0] || "Let's find you the perfect offshore team.";
 }
 

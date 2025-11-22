@@ -25,6 +25,7 @@ model User {
   first_lead_capture  Boolean?           @default(false) @map("first_lead_capture")
   second_lead_capture Boolean?           @default(false) @map("second_lead_capture")
   third_lead_capture  Boolean?           @default(false) @map("third_lead_capture")
+  desired_team_size   Int?
   candidateViews      CandidateView[]    @relation("UserCandidateViews")
   interviewRequests   InterviewRequest[] @relation("UserInterviewRequests")
   leadProgress        LeadProgress?      @relation("UserLeadProgress")
@@ -39,6 +40,7 @@ model User {
   @@index([second_lead_capture], map: "idx_users_second_lead_capture")
   @@index([third_lead_capture], map: "idx_users_third_lead_capture")
   @@index([user_id], map: "idx_users_user_id")
+  @@index([desired_team_size], map: "idx_users_desired_team_size")
   @@map("users")
   @@schema("public")
 }
@@ -88,83 +90,6 @@ model CandidateView {
   @@index([user_id, created_at], map: "idx_candidate_views_user_created")
   @@index([user_id], map: "idx_candidate_views_user_id")
   @@map("candidate_views")
-  @@schema("public")
-}
-
-model AiAnalysis {
-  id                              Int          @id @default(autoincrement())
-  user_id                         String       @map("user_id") @db.VarChar(255)
-  analysis_id                     String?      @unique @map("analysis_id") @db.VarChar(255)
-  session_id                      String?      @map("session_id") @db.VarChar(255)
-  overall_score                   Int?         @map("overall_score")
-  ats_compatibility_score         Int?         @map("ats_compatibility_score")
-  content_quality_score           Int?         @map("content_quality_score")
-  professional_presentation_score Int?         @map("professional_presentation_score")
-  skills_alignment_score          Int?         @map("skills_alignment_score")
-  key_strengths                   Json?        @default("[]") @map("key_strengths")
-  improvements                    Json?        @default("[]")
-  recommendations                 Json?        @default("[]")
-  improved_summary                String?      @map("improved_summary")
-  strengths_analysis              Json?        @map("strengths_analysis")
-  salary_analysis                 Json?        @map("salary_analysis")
-  career_path                     Json?        @map("career_path")
-  section_analysis                Json?        @map("section_analysis")
-  candidate_profile               Json?        @map("candidate_profile")
-  skills_snapshot                 Json?        @default("[]") @map("skills_snapshot")
-  experience_snapshot             Json?        @map("experience_snapshot")
-  education_snapshot              Json?        @map("education_snapshot")
-  portfolio_links                 Json?        @default("[]") @map("portfolio_links")
-  analysis_created_at             DateTime?    @map("analysis_created_at") @db.Timestamptz(6)
-  analysis_updated_at             DateTime?    @map("analysis_updated_at") @db.Timestamptz(6)
-  created_at                      DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at                      DateTime?    @default(now()) @map("updated_at") @db.Timestamptz(6)
-  user                            BpocEmployee @relation("UserAiAnalysis", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([analysis_id], map: "idx_ai_analysis_analysis_id")
-  @@index([created_at], map: "idx_ai_analysis_created_at")
-  @@index([overall_score], map: "idx_ai_analysis_overall_score")
-  @@index([updated_at], map: "idx_ai_analysis_updated_at")
-  @@index([user_id], map: "idx_ai_analysis_user_id")
-  @@map("ai_analysis")
-  @@schema("public")
-}
-
-model BpocEmployee {
-  id                    Int          @id @default(autoincrement())
-  user_id               String       @unique @map("user_id") @db.VarChar(255)
-  full_name             String       @map("full_name") @db.VarChar(255)
-  first_name            String       @map("first_name") @db.VarChar(100)
-  last_name             String       @map("last_name") @db.VarChar(100)
-  current_position      String?      @map("current_position") @db.VarChar(255)
-  position              String?      @db.VarChar(255)
-  location              String?      @db.VarChar(255)
-  avatar_url            String?      @map("avatar_url")
-  bio                   String?
-  overall_score         Int?         @default(0) @map("overall_score")
-  skills_snapshot       Json?        @default("[]") @map("skills_snapshot")
-  experience_snapshot   Json?        @map("experience_snapshot")
-  expected_salary       Decimal?     @map("expected_salary") @db.Decimal(10, 2)
-  work_status           String?      @map("work_status") @db.VarChar(100)
-  user_created_at       DateTime?    @default(now()) @map("user_created_at") @db.Timestamptz(6)
-  created_at            DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at            DateTime?    @default(now()) @map("updated_at") @db.Timestamptz(6)
-  key_strengths         Json?        @default("[]") @map("key_strengths")
-  improvements          Json?        @default("[]")
-  recommendations       Json?        @default("[]")
-  improved_summary      String?      @map("improved_summary")
-  strengths_analysis    Json?        @map("strengths_analysis")
-  work_status_completed Boolean?     @default(false) @map("work_status_completed")
-  aiAnalysis            AiAnalysis[] @relation("UserAiAnalysis")
-
-  @@index([created_at], map: "idx_bpoc_employees_created_at")
-  @@index([full_name], map: "idx_bpoc_employees_full_name")
-  @@index([location], map: "idx_bpoc_employees_location")
-  @@index([overall_score], map: "idx_bpoc_employees_overall_score")
-  @@index([position], map: "idx_bpoc_employees_position")
-  @@index([user_id], map: "idx_bpoc_employees_user_id")
-  @@index([work_status], map: "idx_bpoc_employees_work_status")
-  @@index([work_status_completed], map: "idx_bpoc_employees_work_status_completed")
-  @@map("bpoc_employees")
   @@schema("public")
 }
 
@@ -263,8 +188,8 @@ model LeadProgress {
   previous_status String?  @map("previous_status") @db.VarChar(50)
   changed_by      String?  @map("changed_by") @db.VarChar(255)
   change_reason   String?  @map("change_reason") @db.VarChar(500)
-  notes           String?  @map("notes") @db.Text
   created_at      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  notes           String?  @map("notes")
   user            User     @relation("UserLeadProgress", fields: [user_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([status], map: "idx_lead_progress_status")
@@ -348,6 +273,69 @@ model Message {
   @@schema("public")
 }
 
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model KnowledgeEmbedding {
+  id         String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  content    String
+  title      String?
+  url        String?
+  embedding  Unsupported("vector")?
+  metadata   Json?
+  created_at DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@index([embedding])
+  @@map("knowledge_embeddings")
+  @@schema("public")
+}
+
+model ConversationMemory {
+  id               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  user_id          String                 @map("user_id")
+  conversation_id  String?                @map("conversation_id") @db.Uuid
+  memory_type      String                 @map("memory_type")
+  content          Json
+  embedding        Unsupported("vector")?
+  importance_score Int?                   @default(5) @map("importance_score")
+  created_at       DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  expires_at       DateTime?              @map("expires_at") @db.Timestamptz(6)
+  metadata         Json?
+  conversations    Conversation?          @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "conversation_memory_user_idx")
+  @@index([conversation_id], map: "conversation_memory_conversation_idx")
+  @@index([memory_type], map: "conversation_memory_type_idx")
+  @@index([importance_score(sort: Desc)], map: "conversation_memory_importance_idx")
+  @@index([embedding])
+  @@map("conversation_memory")
+  @@schema("public")
+}
+
+model ContentEmbedding {
+  id                   String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  content_id           String                 @unique @map("content_id") @db.VarChar(255)
+  content_type         String                 @map("content_type") @db.VarChar(50)
+  title                String
+  description          String?
+  full_content         String?                @map("full_content")
+  url_path             String                 @map("url_path") @db.VarChar(500)
+  embedding            Unsupported("vector")?
+  metadata             Json?                  @default("{}")
+  semantic_categories  String[]               @default([]) @map("semantic_categories")
+  view_count           Int?                   @default(0) @map("view_count")
+  recommendation_count Int?                   @default(0) @map("recommendation_count")
+  created_at           DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at           DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@index([content_type])
+  @@index([content_id])
+  @@index([url_path])
+  @@index([embedding])
+  @@index([semantic_categories], map: "content_embeddings_categories_idx", type: Gin)
+  @@map("content_embeddings")
+  @@schema("public")
+}
+
 enum UserType {
   Anonymous
   Regular
@@ -370,69 +358,5 @@ enum MessageRole {
   Assistant
 
   @@map("message_role_enum")
-  @@schema("public")
-}
-
-// Vector Embeddings for Knowledge Base (AI Agent - Phase 1)
-model KnowledgeEmbedding {
-  id         String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  content    String
-  title      String?
-  url        String?
-  embedding  Unsupported("vector")? // OpenAI text-embedding-3-small (1536 dimensions)
-  metadata   Json?
-  created_at DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
-
-  @@index([embedding])
-  @@map("knowledge_embeddings")
-  @@schema("public")
-}
-
-// Conversation Memory for AI Agent (AI Agent - Phase 2)
-model ConversationMemory {
-  id               String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  user_id          String                 @map("user_id")
-  conversation_id  String?                @map("conversation_id") @db.Uuid
-  memory_type      String                 @map("memory_type")
-  content          Json
-  embedding        Unsupported("vector")? // For semantic memory search (1536 dimensions)
-  importance_score Int?                   @default(5) @map("importance_score")
-  created_at       DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
-  expires_at       DateTime?              @map("expires_at") @db.Timestamptz(6)
-  metadata         Json?
-  conversations    Conversation?          @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([user_id], map: "conversation_memory_user_idx")
-  @@index([conversation_id], map: "conversation_memory_conversation_idx")
-  @@index([memory_type], map: "conversation_memory_type_idx")
-  @@index([importance_score(sort: Desc)], map: "conversation_memory_importance_idx")
-  @@index([embedding])
-  @@map("conversation_memory")
-  @@schema("public")
-}
-
-// Content Embeddings for AI Recommendation Engine
-model ContentEmbedding {
-  id                    String                 @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  content_id            String                 @unique @map("content_id") @db.VarChar(255)
-  content_type          String                 @map("content_type") @db.VarChar(50)
-  title                 String
-  description           String?
-  full_content          String?                @map("full_content")
-  url_path              String                 @map("url_path") @db.VarChar(500)
-  embedding             Unsupported("vector")? // OpenAI text-embedding-3-small (1536 dimensions)
-  metadata              Json?                  @default("{}")
-  semantic_categories   String[]               @default([]) @map("semantic_categories")
-  view_count            Int?                   @default(0) @map("view_count")
-  recommendation_count  Int?                   @default(0) @map("recommendation_count")
-  created_at            DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
-  updated_at            DateTime?              @default(now()) @map("updated_at") @db.Timestamptz(6)
-
-  @@index([content_type], map: "content_embeddings_content_type_idx")
-  @@index([content_id], map: "content_embeddings_content_id_idx")
-  @@index([url_path], map: "content_embeddings_url_path_idx")
-  @@index([embedding], map: "content_embeddings_embedding_idx")
-  @@map("content_embeddings")
   @@schema("public")
 }

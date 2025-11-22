@@ -27,7 +27,7 @@ import { candidateTracker } from '@/lib/candidateTrackingService'
 import { getEmployeeCardData } from '@/lib/api'
 import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
 import { useAuth } from '@/lib/auth-context'
-import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
+import { PricingCalculatorModal } from '@/components/pricing-calculator'
 import { ProgressIndicatorCard } from '@/components/ui/progress-indicator-card'
 import { ResourceCard } from '@/components/ui/resource-card'
 import { InsightCard } from '@/components/ui/insight-card'
@@ -380,12 +380,15 @@ export function BottomNav() {
       const data = await response.json()
       console.log('✅ AI Recommendations received:', data)
       console.log('📊 Recommendations count:', data.recommendations?.length || 0)
-      console.log('🎯 Insight:', data.insight)
-      console.log('👤 User stage:', data.userStage)
+      console.log('🔥 Hero Insight:', data.heroInsight)
+      console.log('🎯 User stage:', data.context?.stage)
+      console.log('💰 Has quote:', data.context?.hasQuote)
+      console.log('🧠 Quote roles:', data.context?.quoteRoles)
+      console.log('💬 Conversation topics:', data.context?.conversationTopics)
       
       setAiRecommendations(data.recommendations || [])
-      setAiInsight(data.insight || null)
-      setUserStage(data.userStage || 'new_lead')
+      setAiInsight(data.heroInsight || null) // 🔥 Using the new heroInsight!
+      setUserStage(data.context?.stage || 'new_lead')
       
     } catch (error) {
       console.error('❌ Error fetching AI recommendations:', error)

@@ -142,62 +142,29 @@ export function detectDeviceType(): 'desktop' | 'mobile' | 'tablet' {
 
 // Ensure anonymous user exists in users table
 async function ensureAnonymousUser(userId: string): Promise<void> {
-  if (!supabase) {
-    console.warn('Supabase not available for ensureAnonymousUser')
-    return
-  }
-
   try {
-    console.log('🔍 ensureAnonymousUser called with userId:', userId)
+    console.log('🔍 ensureAnonymousUser: Calling server-side API to create user:', userId)
     
-    // Check if user already exists
-    const { data: existingUser, error: checkError } = await supabase
-      .from('users')
-      .select('user_id')
-      .eq('user_id', userId)
-      .single()
-
-    console.log('🔍 User check result:', { existingUser, checkError })
-
-    // If user doesn't exist, create anonymous user record
-    if (!existingUser) {
-      console.log('🆕 Creating anonymous user record for:', userId)
-      const { data: insertData, error: insertError } = await supabase
-        .from('users')
-        .insert({
-          user_id: userId,
-          auth_user_id: null, // Anonymous user
-          user_type: UserType.ANONYMOUS, // Set as anonymous user
-          first_name: null,
-          last_name: null,
-          email: null,
-          phone_number: null,
-          company: null,
-          country: null,
-        })
-        .select()
-
-      if (insertError) {
-        console.error('❌ Failed to create anonymous user:', insertError)
-        console.error('❌ Insert data that failed:', {
-          user_id: userId,
-          auth_user_id: null,
-          user_type: UserType.ANONYMOUS,
-          first_name: null,
-          last_name: null,
-          email: null,
-          phone_number: null,
-          company: null,
-          country: null,
-        })
-      } else {
-        console.log('✅ Anonymous user created successfully:', insertData)
+    // Use the working server-side API instead of broken client-side Supabase
+    const response = await fetch('/api/test-user-creation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: userId })
+    })
+    
+    const result = await response.json()
+    
+    if (result.success) {
+      if (result.created) {
+        console.log('✅ User created via API:', result.user?.user_id)
+      } else if (result.exists) {
+        console.log('✅ User already exists:', userId)
       }
     } else {
-      console.log('✅ Anonymous user already exists:', existingUser)
+      console.error('❌ API error:', result.error)
     }
   } catch (error) {
-    console.error('❌ Failed to ensure anonymous user exists:', error)
+    console.error('❌ Failed to ensure user via API:', error)
   }
 }
 
@@ -208,90 +175,39 @@ export async function savePageVisit(
   currentSessionTimeSeconds: number = 0
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Check if Supabase is available
-    if (!supabase) {
-      console.warn('Supabase client not available. Skipping page visit save.')
-      return { success: false, error: 'Supabase client not configured' }
-    }
-
-    console.log('🔍 savePageVisit called with:', { pagePath, ipAddress, currentSessionTimeSeconds })
-
     const userId = generateUserId()
-    const now = new Date().toISOString()
     
-    // Ensure anonymous user exists in users table
+    console.log(`📄 [savePageVisit] User: ${userId}, Page: ${pagePath}, Time: ${currentSessionTimeSeconds}s`)
+    
+    // Ensure anonymous user exists in users table (via API)
     await ensureAnonymousUser(userId)
     
-    // First, check if this user has visited this page before
-    // Get the most recent visit for this user and page
-    const { data: existingVisits, error: checkError } = await supabase
-      .from('user_page_visits')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('page_path', pagePath)
-      .order('last_visit_timestamp', { ascending: false })
-      .limit(1)
+    // Use server-side tracking API instead of broken client-side Supabase
+    const response = await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'page_visit',
+        data: {
+          userId,
+          pagePath,
+          ipAddress,
+          timeSpentSeconds: currentSessionTimeSeconds
+        }
+      })
+    })
 
-    if (checkError) {
-      console.error('Error checking for existing visit:', checkError)
-      return { success: false, error: checkError.message }
-    }
+    const result = await response.json()
 
-    const existingVisit = existingVisits && existingVisits.length > 0 ? existingVisits[0] : null
-
-    console.log('🔍 Existing visit found:', existingVisit)
-
-    if (existingVisit) {
-      // Update existing visit - increment count and add current session time
-      const updatedVisit = {
-        visit_count: existingVisit.visit_count + 1,
-        time_spent_seconds: existingVisit.time_spent_seconds + currentSessionTimeSeconds,
-        last_visit_timestamp: now,
-        ip_address: ipAddress || existingVisit.ip_address
-      }
-
-      console.log('🔍 Updating visit with:', updatedVisit)
-
-      const { error: updateError } = await supabase
-        .from('user_page_visits')
-        .update(updatedVisit)
-        .eq('id', existingVisit.id)
-
-      if (updateError) {
-        console.error('Error updating page visit:', updateError)
-        return { success: false, error: updateError.message }
-      }
-
-      console.log('✅ Page visit updated:', pagePath, 'Total visits:', updatedVisit.visit_count, 'Total time:', updatedVisit.time_spent_seconds, 'Added time:', currentSessionTimeSeconds)
+    if (result.success) {
+      console.log(`✅ [savePageVisit] ${result.action}: ${pagePath}`)
+      return { success: true }
     } else {
-      // Insert new visit
-      const newVisit: Omit<UserPageVisit, 'id' | 'created_at'> = {
-        user_id: userId,
-        page_path: pagePath,
-        ip_address: ipAddress,
-        visit_timestamp: now,
-        visit_count: 1,
-        time_spent_seconds: currentSessionTimeSeconds,
-        last_visit_timestamp: now
-      }
-
-      console.log('🔍 Creating new visit with:', newVisit)
-
-      const { error: insertError } = await supabase
-        .from('user_page_visits')
-        .insert([newVisit])
-
-      if (insertError) {
-        console.error('Error inserting page visit:', insertError)
-        return { success: false, error: insertError.message }
-      }
-
-      console.log('✅ New page visit created:', pagePath, 'Time spent:', currentSessionTimeSeconds)
+      console.error('❌ [savePageVisit] API error:', result.error)
+      return { success: false, error: result.error }
     }
-
-    return { success: true }
   } catch (error) {
-    console.error('Error in savePageVisit:', error)
+    console.error('❌ [savePageVisit] Exception:', error)
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error' 

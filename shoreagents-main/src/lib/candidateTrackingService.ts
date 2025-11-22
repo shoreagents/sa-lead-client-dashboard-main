@@ -14,6 +14,7 @@ export class CandidateTrackingService {
   private currentCandidateId: string | null = null;
   private currentUserId: string | null = null;
   private startTime: number = 0;
+  private maxScrollPercentage: number = 0; // Track max scroll reached
 
   private constructor() {}
 
@@ -107,49 +108,27 @@ export class CandidateTrackingService {
   // Ensure user exists in users table (create if needed)
   private async ensureUserExists(userId: string): Promise<string | null> {
     try {
-      const supabase = createClient();
+      console.log('🔍 ensureUserExists: Using API to create/check user:', userId);
       
-      // First check if user already exists
-      const { data: existingUser, error: checkError } = await supabase
-        .from('users')
-        .select('user_id')
-        .eq('user_id', userId)
-        .single();
-
-      // If user exists, return it
-      if (!checkError && existingUser) {
-        console.log('✅ User already exists:', userId);
+      // Use the working server-side API instead of broken client-side Supabase
+      const response = await fetch('/api/test-user-creation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deviceId: userId })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        console.log('✅ User exists or created via API:', userId);
         return userId;
-      }
-
-      // If user doesn't exist (checkError.code === 'PGRST116' means no rows found)
-      if (checkError && checkError.code === 'PGRST116') {
-        console.log('🔧 User does not exist, creating new user:', userId);
-        
-        const { data: newUser, error: createError } = await supabase
-          .from('users')
-          .insert({
-            user_id: userId,
-            user_type: 'Anonymous'
-          })
-          .select('user_id')
-          .single();
-
-        if (createError) {
-          console.error('❌ Error creating user:', createError);
-          return null;
-        }
-
-        console.log('✅ Created new user:', newUser.user_id);
-        return newUser.user_id;
       } else {
-        // Some other error occurred
-        console.error('❌ Error checking user existence:', checkError);
-        return null;
+        console.error('❌ API error creating user:', result.error);
+        return userId; // Return userId anyway, database might have user already
       }
     } catch (error) {
-      console.error('❌ Error in ensureUserExists:', error);
-      return null;
+      console.error('❌ Failed to ensure user via API:', error);
+      return userId; // Return userId anyway to not block tracking
     }
   }
 
@@ -255,96 +234,35 @@ export class CandidateTrackingService {
   // Record interaction directly with actual user_id from frontend
   public async recordInteractionDirect(data: CandidateViewData): Promise<void> {
     try {
-      console.log('🔍 Attempting to record interaction directly:', {
+      console.log('🔍 Recording candidate view via API:', {
         user_id: data.user_id,
         candidate_id: data.candidate_id,
         candidate_name: data.candidate_name,
         scroll_percentage: data.scroll_percentage
       });
 
-      const supabase = createClient();
-      
-      // Try the new database function first
-      try {
-        const { data: result, error } = await supabase.rpc('record_candidate_view_simple', {
-          p_user_id: data.user_id,
-          p_candidate_id: data.candidate_id,
-          p_candidate_name: data.candidate_name,
-          p_view_duration: data.view_duration,
-          p_scroll_percentage: data.scroll_percentage
-        });
-
-        if (error) {
-          console.warn('⚠️ RPC function failed, falling back to direct table operations:', error);
-          throw error; // This will trigger the fallback
-        }
-
-        console.log(`✅ Successfully recorded view using RPC for candidate: ${data.candidate_name || data.candidate_id}`, result);
-        return;
-      } catch (rpcError) {
-        console.log('🔄 RPC function not available, using fallback method...');
-        
-        // Fallback: Use direct table operations with duplicate prevention
-        const { data: existingView, error: findError } = await supabase
-          .from('candidate_views')
-          .select('id, view_duration, scroll_percentage')
-          .eq('user_id', data.user_id)
-          .eq('candidate_id', data.candidate_id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (findError && findError.code !== 'PGRST116') {
-          console.error('❌ Error checking for existing view:', findError);
-          return;
-        }
-
-        if (existingView) {
-          // Update existing record instead of creating new one
-          console.log('🔄 Updating existing view record instead of creating duplicate');
-          const { error: updateError } = await supabase
-            .from('candidate_views')
-            .update({
-              candidate_name: data.candidate_name,
-              view_duration: (existingView.view_duration || 0) + (data.view_duration || 0),
-              scroll_percentage: Math.max(existingView.scroll_percentage || 0, data.scroll_percentage || 0),
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', existingView.id);
-
-          if (updateError) {
-            console.error('❌ Error updating existing view:', updateError);
-          } else {
-            console.log('✅ Existing view record updated successfully');
+      // Use server-side tracking API instead of broken client-side Supabase
+      const response = await fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'candidate_view',
+          data: {
+            userId: data.user_id,
+            candidateId: data.candidate_id,
+            candidateName: data.candidate_name,
+            viewDuration: data.view_duration || 0,
+            scrollPercentage: data.scroll_percentage || 0
           }
-        } else {
-          // Insert new record when no existing record found
-          const { data: result, error } = await supabase
-            .from('candidate_views')
-            .insert({
-              user_id: data.user_id,
-              candidate_id: data.candidate_id,
-              candidate_name: data.candidate_name,
-              view_duration: data.view_duration,
-              scroll_percentage: data.scroll_percentage,
-              page_views: 1
-            })
-            .select('id')
-            .single();
+        })
+      });
 
-          if (error) {
-            console.error('❌ Error recording candidate interaction:', {
-              error: error,
-              message: error.message,
-              details: error.details,
-              hint: error.hint,
-              code: error.code
-            });
-            return;
-          }
+      const result = await response.json();
 
-          console.log(`✅ Successfully recorded view for candidate: ${data.candidate_name || data.candidate_id}`, result);
-        }
+      if (result.success) {
+        console.log(`✅ [recordInteractionDirect] ${result.action}: ${data.candidate_id}`);
+      } else {
+        console.error('❌ [recordInteractionDirect] API error:', result.error);
       }
     } catch (error) {
       console.error('❌ Exception in recordInteractionDirect:', error);
@@ -352,29 +270,12 @@ export class CandidateTrackingService {
   }
 
   // Record scroll percentage during viewing
-  public async recordScrollPercentage(scrollPercentage: number): Promise<void> {
+  public recordScrollPercentage(scrollPercentage: number): void {
     if (!this.currentUserId || !this.currentCandidateId) return;
 
-    try {
-      const supabase = createClient();
-      
-      // Use the new database function to update scroll percentage
-      const { error } = await supabase.rpc('record_candidate_view_simple', {
-        p_user_id: this.currentUserId,
-        p_candidate_id: this.currentCandidateId,
-        p_candidate_name: null, // Keep existing name
-        p_view_duration: null, // Keep existing duration
-        p_scroll_percentage: scrollPercentage
-      });
-
-      if (error) {
-        console.error('❌ Error updating scroll percentage:', error);
-      } else {
-        console.log(`✅ Updated scroll percentage: ${scrollPercentage}%`);
-      }
-    } catch (error) {
-      console.error('❌ Exception in recordScrollPercentage:', error);
-    }
+    // Just update max scroll - we'll send it to the API on endTracking()
+    this.maxScrollPercentage = Math.max(this.maxScrollPercentage, scrollPercentage);
+    console.log(`📜 Scroll tracked: ${scrollPercentage}% (max: ${this.maxScrollPercentage}%)`);
   }
 
   // End tracking with duration calculation
@@ -387,15 +288,22 @@ export class CandidateTrackingService {
 
       // Calculate view duration in seconds
       const viewDuration = Math.round((Date.now() - this.startTime) / 1000);
-      console.log(`📊 Ending tracking session - Duration: ${viewDuration} seconds`);
+      console.log(`📊 Ending tracking session - Duration: ${viewDuration}s, Scroll: ${this.maxScrollPercentage}%`);
 
-      // Update the candidate view record with the calculated duration
-      await this.updateViewDuration(this.currentUserId, this.currentCandidateId, viewDuration);
+      // Send final update to API with duration AND scroll percentage
+      await this.recordInteractionDirect({
+        user_id: this.currentUserId,
+        candidate_id: this.currentCandidateId,
+        candidate_name: undefined, // Keep existing
+        view_duration: viewDuration,
+        scroll_percentage: this.maxScrollPercentage
+      });
 
       // Reset tracking state
       this.currentCandidateId = null;
       this.currentUserId = null;
       this.startTime = 0;
+      this.maxScrollPercentage = 0;
     } catch (error) {
       console.error('Error ending candidate tracking:', error);
     }

@@ -139,7 +139,7 @@ export default function RootLayout({
                   <AdminAuthProvider>
                     <FavoritesProvider>
                       <ChatProvider>
-                      {/* <AnonymousUserInitializer /> */}
+                      <AnonymousUserInitializer />
                       <GlobalEngagementTracker />
                       <ScrollToTop />
                       <Navbar />

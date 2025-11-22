@@ -8,14 +8,71 @@
  * 4. Stores in content_embeddings table
  */
 
+import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import OpenAI from 'openai';
-import { allPages } from '../src/lib/page-metadata-config';
+import { PAGE_METADATA } from '../src/lib/page-metadata-config.js';
+
+// Load environment variables from .env.local
+dotenv.config({ path: '.env.local' });
 
 const prisma = new PrismaClient();
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Convert PAGE_METADATA to array format
+const allPages = Object.entries(PAGE_METADATA).map(([key, meta]) => ({
+  path: meta.canonicalUrl || `/${key}`,
+  title: meta.title,
+  description: meta.description,
+  keywords: meta.keywords || [],
+  type: determineContentType(key, meta.title),
+}));
+
+// Determine content type from key and title
+function determineContentType(key: string, title: string): string {
+  // Check if it's a case study (has client name pattern or success story keywords)
+  const caseStudyKeywords = [
+    'case study', 'success story', 'client success', 'transformation',
+    'partnership', 'validation', 'growth', 'scaling', 'implementation',
+    'onboarding', 'recruitment', 'expansion'
+  ];
+  
+  const hasClientPattern = title.includes('|') && title.includes('-'); // "Title | Client - Company" pattern
+  const hasCaseStudyKeyword = caseStudyKeywords.some(keyword => 
+    title.toLowerCase().includes(keyword) || key.toLowerCase().includes(keyword)
+  );
+  
+  if (hasClientPattern || hasCaseStudyKeyword) {
+    return 'case-study';
+  }
+  
+  // Main pillar pages
+  if (key === 'outsourcing' || key === 'virtual-assistant') return 'pillar';
+  
+  // Blog posts (explicitly defined blog slugs or has guide/how-to in title)
+  const blogSlugs = [
+    'outsourcing-philippines',
+    'outsourcing-to-india',
+    'outsourcing-to-vietnam',
+    'outsourcing-vs-offshoring',
+    'virtual-real-estate-assistant-pricing',
+    'what-does-a-real-estate-virtual-assistant-do',
+    'what-is-outsourcing',
+  ];
+  
+  if (blogSlugs.includes(key) || 
+      title.toLowerCase().includes('guide') || 
+      title.toLowerCase().includes('how to')) {
+    return 'blog';
+  }
+  
+  // Service pages
+  if (key.includes('outsourcing') || key.includes('virtual-assistant')) return 'sub-pillar';
+  
+  return 'blog';
+}
 
 // Semantic category mappings
 const SEMANTIC_CATEGORIES = {
@@ -58,11 +115,15 @@ const SEMANTIC_CATEGORIES = {
 function categorizeContent(page: typeof allPages[0]): string[] {
   const categories: Set<string> = new Set();
   const searchText = `${page.title} ${page.description} ${page.path}`.toLowerCase();
+  const keywords = page.keywords?.join(' ').toLowerCase() || '';
 
   // Check all category groups
   Object.entries(SEMANTIC_CATEGORIES).forEach(([groupName, categoryMap]) => {
-    Object.entries(categoryMap).forEach(([categoryKey, keywords]) => {
-      if (keywords.some(keyword => searchText.includes(keyword.toLowerCase()))) {
+    Object.entries(categoryMap).forEach(([categoryKey, categoryKeywords]) => {
+      if (categoryKeywords.some(keyword => 
+        searchText.includes(keyword.toLowerCase()) || 
+        keywords.includes(keyword.toLowerCase())
+      )) {
         categories.add(categoryKey);
       }
     });
@@ -71,7 +132,7 @@ function categorizeContent(page: typeof allPages[0]): string[] {
   // Add content type
   categories.add(page.type);
 
-  // Add industry if present in breadcrumb or path
+  // Add industry if present in path
   if (page.path.includes('real-estate')) categories.add('real-estate');
   if (page.path.includes('construction')) categories.add('construction');
   if (page.path.includes('property-management')) categories.add('property-management');
@@ -153,7 +214,7 @@ async function main() {
           ${embeddingText},
           ${page.path},
           ${embedding}::vector,
-          ${JSON.stringify({ breadcrumb: page.breadcrumb, keywords: page.keywords })}::jsonb,
+          ${JSON.stringify({ keywords: page.keywords })}::jsonb,
           ${categories}::text[]
         )
         ON CONFLICT (content_id) 

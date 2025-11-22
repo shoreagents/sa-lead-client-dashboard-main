@@ -264,6 +264,225 @@ export const PAGE_METADATA = {
     keywords: ["accounting virtual assistant", "accounting VA", "financial assistant"],
     canonicalUrl: "/accounting-virtual-assistant",
   },
+
+  // Case Studies
+  'appraisal-listings-volume-increase': {
+    title: "Appraisal & Listings Volume Increase: Bellarine Property | Levi Turner - Bellarine Property",
+    description: "How Bellarine Property increased appraisal and listings volume with VA support. More deals, same hours.",
+    keywords: ["case study", "Bellarine Property", "Levi Turner", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/appraisal-listings-volume-increase",
+  },
+
+  'business-growth-through-offshore-staffing': {
+    title: "Business Growth Through Offshore Staffing: Arizto Real Estate | Pernell Callaghan - Arizto Real Estate",
+    description: "How Arizto Real Estate achieved business growth through strategic offshore staffing. Professional Filipino support team.",
+    keywords: ["case study", "Arizto Real Estate", "Pernell Callaghan", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/business-growth-through-offshore-staffing",
+  },
+
+  'business-referral-partnerships': {
+    title: "12+ Years of Professional Referrals: Featured on Top Agents Playbook | Ray Wood - Bestagents",
+    description: "How Ray Wood, respected real estate coach, has referred clients to ShoreAgents for 12+ years. Featured on Top Agents Playbook podcast discussing virtual assistant readiness.",
+    keywords: ["case study", "Bestagents", "Ray Wood", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/business-referral-partnerships",
+  },
+
+  'business-systems-implementation-success': {
+    title: "Business Systems Implementation: Mi Property Group | Christel Renton - Mi Property Group",
+    description: "How Mi Property Group successfully implemented business systems with offshore support. Documentation and process.",
+    keywords: ["case study", "Mi Property Group", "Christel Renton", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/business-systems-implementation-success",
+  },
+
+  'construction-cost-reduction': {
+    title: "Construction Cost Reduction: Gallery Group Success Story | Iain Neilson - Gallery Group",
+    description: "How Gallery Group reduced construction costs with offshore estimating and project admin support. Real savings, real results.",
+    keywords: ["case study", "Gallery Group", "Iain Neilson", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/construction-cost-reduction",
+  },
+
+  'customer-service-scaling': {
+    title: "Customer Service Scaling: BoxBrownie Success Story | Tash Poole - BoxBrownie",
+    description: "How BoxBrownie scaled customer service operations with Filipino support staff. 24/7 coverage without burnout.",
+    keywords: ["case study", "BoxBrownie", "Tash Poole", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/customer-service-scaling",
+  },
+
+  'easy-business-process-implementation': {
+    title: "Easy Business Process Implementation: AGENT in a Box | Phil Knight - AGENT in a Box",
+    description: "How AGENT in a Box made business process implementation easy. Systems thinking meets execution.",
+    keywords: ["case study", "AGENT in a Box", "Phil Knight", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/easy-business-process-implementation",
+  },
+
+  'exceptional-team-performance': {
+    title: "Exceptional Team Performance: Century 21 Rich River | Andrew Lochhead - Century 21",
+    description: "How Century 21 achieved exceptional team performance with offshore support. Management excellence.",
+    keywords: ["case study", "Century 21", "Andrew Lochhead", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/exceptional-team-performance",
+  },
+
+  'gradual-team-scaling-success': {
+    title: "Gradual Team Scaling Success: Barry Plant Property Management | Marinella Sortino - Barry Plant",
+    description: "How Barry Plant successfully scaled their property management team gradually. Conservative, measured growth strategy.",
+    keywords: ["case study", "Barry Plant", "Marinella Sortino", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/gradual-team-scaling-success",
+  },
+
+  'hands-off-business-procedures': {
+    title: "Hands-off Business Procedures: Kevin Turner | Kevin Turner - Real Estate Talk",
+    description: "How Kevin Turner created hands-off business procedures. Systematic delegation for freedom.",
+    keywords: ["case study", "Real Estate Talk", "Kevin Turner", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/hands-off-business-procedures",
+  },
+
+  'hiring-success-after-failures': {
+    title: "Hiring Success After Failures: Better Homes and Gardens | Cindy Armour Helm - Better Homes and Gardens",
+    description: "How Cindy Armour Helm found hiring success with ShoreAgents after previous freelancer failures. Reliable, consistent support.",
+    keywords: ["case study", "Better Homes and Gardens", "Cindy Armour Helm", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/hiring-success-after-failures",
+  },
+
+  'immediate-business-transformation': {
+    title: "Immediate Business Transformation: LockedOn | Luke Newton - LockedOn",
+    description: "How LockedOn experienced immediate business transformation with offshore support. Quick wins, lasting results.",
+    keywords: ["case study", "LockedOn", "Luke Newton", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/immediate-business-transformation",
+  },
+
+  'industry-expert-validation': {
+    title: "Industry Expert Validation: Derek Gallimore Recognition | Derek Gallimore - Outsource Accelerator",
+    description: "Recognition from Derek Gallimore, CEO of Outsource Accelerator. Industry expert validation of our methodology.",
+    keywords: ["case study", "Outsource Accelerator", "Derek Gallimore", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/industry-expert-validation",
+  },
+
+  'long-term-partnership-success': {
+    title: "Long-term Partnership Success: Professionals McDowell | Steve Lovegrove - Professionals McDowell",
+    description: "Multi-year partnership with Professionals McDowell. Perfect 5/5 performance ratings.",
+    keywords: ["case study", "Professionals McDowell", "Steve Lovegrove", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/long-term-partnership-success",
+  },
+
+  'marketing-automation-implementation': {
+    title: "Marketing Automation Implementation: Mark Dwyer | Mark Dwyer - Sales Trainer",
+    description: "How sales trainer Mark Dwyer implemented marketing automation with VA support. Consistent outreach at scale.",
+    keywords: ["case study", "Sales Trainer", "Mark Dwyer", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/marketing-automation-implementation",
+  },
+
+  'mobile-business-solutions': {
+    title: "Mobile Business Solutions: Peter Forbes | Peter Forbes - #1 Property Centre",
+    description: "How Peter Forbes built mobile business solutions with remote support. Business flexibility without compromise.",
+    keywords: ["case study", "#1 Property Centre", "Peter Forbes", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/mobile-business-solutions",
+  },
+
+  'mortgage-industry-transformation': {
+    title: "Mortgage Industry Transformation: Gelt Financial | Jack Miller - Gelt Financial",
+    description: "How Gelt Financial transformed their mortgage operations with Filipino loan processing support. Faster turnarounds, better service.",
+    keywords: ["case study", "Gelt Financial", "Jack Miller", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/mortgage-industry-transformation",
+  },
+
+  'offshore-staffing-success': {
+    title: "Offshore Staffing Success: Reside Real Estate | Brett Ayles - Reside Real Estate",
+    description: "How Reside Real Estate achieved offshore staffing success. Building a sustainable remote team.",
+    keywords: ["case study", "Reside Real Estate", "Brett Ayles", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/offshore-staffing-success",
+  },
+
+  'quick-staff-onboarding': {
+    title: "Quick Staff Onboarding: Harcourts Dapto | Michael Garside - Harcourts Dapto",
+    description: "How Harcourts Dapto achieved quick staff onboarding. From interview to productive in 7 days.",
+    keywords: ["case study", "Harcourts Dapto", "Michael Garside", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/quick-staff-onboarding",
+  },
+
+  'reliable-recruitment-partner': {
+    title: "Reliable Recruitment Partner: Professionals Schultz | Tracey Foy - Professionals Schultz",
+    description: "How Professionals Schultz found a reliable recruitment partner. Consistent placements, quality candidates.",
+    keywords: ["case study", "Professionals Schultz", "Tracey Foy", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/reliable-recruitment-partner",
+  },
+
+  'smooth-recruitment-process': {
+    title: "Smooth Recruitment Process: JBMP Group | Jon Beaulieu - JBMP Group",
+    description: "How JBMP Group experienced a smooth recruitment process. 7-day sprint from need to hire.",
+    keywords: ["case study", "JBMP Group", "Jon Beaulieu", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/smooth-recruitment-process",
+  },
+
+  'streamline-back-office': {
+    title: "Streamline Back Office: Jason Gard Real Estate | Jason Gard - Gard Real Estate",
+    description: "How Jason Gard streamlined back office operations. 3 years later: perfect performance reviews.",
+    keywords: ["case study", "Gard Real Estate", "Jason Gard", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/streamline-back-office",
+  },
+
+  'successful-trial-hiring': {
+    title: "Successful Trial Hiring: Crowdcopia | Jonathan Curreri - Crowdcopia",
+    description: "How Crowdcopia successfully trialed and hired Filipino staff. Low-risk testing before commitment.",
+    keywords: ["case study", "Crowdcopia", "Jonathan Curreri", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/successful-trial-hiring",
+  },
+
+  'team-expansion-success': {
+    title: "Team Expansion Success: Ballast Real Estate Growth | Kuahiwi Kahapea - Ballast",
+    description: "How Ballast Real Estate successfully expanded their team with Filipino virtual assistants. Scaling without overhead increase.",
+    keywords: ["case study", "Ballast", "Kuahiwi Kahapea", "offshore staffing", "ShoreAgents success story"],
+    canonicalUrl: "/team-expansion-success",
+  },
+
+  // Blog Posts
+  'outsourcing-philippines': {
+    title: "Outsourcing Philippines: Why It's the Premier Destination",
+    description: "Why Philippines is the premier outsourcing destination. English proficiency, cultural fit, time zones, costs, and infrastructure.",
+    keywords: ["outsourcing", "virtual assistant", "BPO", "offshore staffing", "Philippines"],
+    canonicalUrl: "/outsourcing-philippines",
+  },
+
+  'outsourcing-to-india': {
+    title: "Outsourcing to India: 2025 Guide",
+    description: "Complete guide to outsourcing to India. Costs, benefits, time zones, and why India is a leading BPO destination.",
+    keywords: ["outsourcing", "virtual assistant", "BPO", "offshore staffing", "India"],
+    canonicalUrl: "/outsourcing-to-india",
+  },
+
+  'outsourcing-to-vietnam': {
+    title: "Outsourcing to Vietnam: Complete 2025 Guide",
+    description: "Everything you need to know about outsourcing to Vietnam. Costs, benefits, challenges, and how it compares to Philippines.",
+    keywords: ["outsourcing", "virtual assistant", "BPO", "offshore staffing", "Vietnam"],
+    canonicalUrl: "/outsourcing-to-vietnam",
+  },
+
+  'outsourcing-vs-offshoring': {
+    title: "Outsourcing vs Offshoring: Key Differences Explained",
+    description: "Understanding the difference between outsourcing and offshoring. Which is right for your business? Complete comparison guide.",
+    keywords: ["outsourcing", "offshoring", "BPO", "offshore staffing", "comparison"],
+    canonicalUrl: "/outsourcing-vs-offshoring",
+  },
+
+  'virtual-real-estate-assistant-pricing': {
+    title: "Virtual Real Estate Assistant Pricing: Complete 2025 Guide",
+    description: "Real estate VA pricing guide. Hourly rates, hidden costs, real ROI calculations. What you actually pay vs what you get.",
+    keywords: ["virtual assistant", "real estate VA", "pricing", "costs", "ROI"],
+    canonicalUrl: "/virtual-real-estate-assistant-pricing",
+  },
+
+  'what-does-a-real-estate-virtual-assistant-do': {
+    title: "What Does a Real Estate Virtual Assistant Do? Complete Guide",
+    description: "Everything a real estate VA can handle: transaction coordination, ISA services, CRM management, listing admin. Complete role breakdown.",
+    keywords: ["virtual assistant", "real estate VA", "transaction coordinator", "ISA", "CRM"],
+    canonicalUrl: "/what-does-a-real-estate-virtual-assistant-do",
+  },
+
+  'what-is-outsourcing': {
+    title: "What is Outsourcing? Complete Guide for 2025",
+    description: "Understanding outsourcing: definitions, benefits, risks, and when it makes sense. Complete guide with real costs and ROI data.",
+    keywords: ["outsourcing", "BPO", "offshore staffing", "business process outsourcing", "guide"],
+    canonicalUrl: "/what-is-outsourcing",
+  },
 };
 
 export type PageKey = keyof typeof PAGE_METADATA;

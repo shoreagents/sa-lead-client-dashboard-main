@@ -48,7 +48,7 @@ export function Breadcrumb({ items, className = '' }: BreadcrumbProps) {
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           
-          return (
+  return (
             <div key={item.url} className="flex items-center space-x-2">
               <ChevronRight className="w-4 h-4 text-slate-300" />
               {isLast ? (
