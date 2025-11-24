@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import pool from '@/lib/database'
 import { capitalizeNames, capitalizeFullName } from '@/lib/name-utils'
+import { notifyN8nNewUser } from '@/lib/n8n'
 
 export async function GET(request: NextRequest) {
   try {
@@ -113,6 +114,16 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Recruiter created successfully:', result.rows[0])
     console.log('🔍 Final admin_level in database:', result.rows[0].admin_level)
+
+    // Send notification to n8n
+    notifyN8nNewUser({
+      id: result.rows[0].id,
+      email: result.rows[0].email,
+      first_name: result.rows[0].first_name,
+      last_name: result.rows[0].last_name,
+      admin_level: result.rows[0].admin_level,
+      created_at: new Date()
+    }).catch(err => console.error('❌ n8n notification error (background):', err))
 
     return NextResponse.json({ 
       success: true, 
