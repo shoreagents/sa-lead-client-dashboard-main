@@ -19,6 +19,8 @@ interface UserData {
   admin_level?: string
 }
 
+import { notifyN8nNewUser } from '@/lib/n8n'
+
 export async function syncUserToDatabaseServer(userData: UserData) {
   console.log('🔄 Starting server-side user sync for:', userData.email)
   
@@ -242,6 +244,17 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         last_name: insertResult.rows[0].last_name,
         admin_level: insertResult.rows[0].admin_level
       })
+
+      // Send notification to n8n
+      notifyN8nNewUser({
+        id: insertResult.rows[0].id,
+        email: insertResult.rows[0].email,
+        first_name: insertResult.rows[0].first_name,
+        last_name: insertResult.rows[0].last_name,
+        admin_level: insertResult.rows[0].admin_level,
+        created_at: new Date()
+      }).catch(err => console.error('❌ n8n notification error (background):', err))
+
       return {
         success: true,
         action: 'created',
