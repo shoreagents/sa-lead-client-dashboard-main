@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchBPOCUsersFromDatabase } from '@/lib/bpoc-database'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    void _request
     console.log('🔍 BPOC Users API: Fetching users from database...')
     
     const users = await fetchBPOCUsersFromDatabase()

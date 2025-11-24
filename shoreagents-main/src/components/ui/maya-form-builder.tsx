@@ -24,7 +24,8 @@ import {
   Briefcase,
   Users,
   Target,
-  Sparkles
+  Sparkles,
+  Lock
 } from 'lucide-react';
 
 // Form field types
@@ -70,7 +71,8 @@ const fieldIcons = {
   briefcase: Briefcase,
   users: Users,
   target: Target,
-  sparkles: Sparkles
+  sparkles: Sparkles,
+  lock: Lock
 };
 
 // Predefined form templates based on actual project components

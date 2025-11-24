@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    void _request
     if (!supabase) {
       return NextResponse.json({ error: 'Supabase not available' }, { status: 500 })
     }
@@ -24,7 +25,6 @@ export async function GET(request: NextRequest) {
         quote_number,
         candidate_recommendations
       `)
-      .order('updated_at', { ascending: false })
       .order('created_at', { ascending: false })
 
     if (error) {

@@ -1,5 +1,6 @@
 import { createClient } from './supabase/client';
-import { PricingQuoteServiceClient, SavedPricingQuote } from './pricingQuoteServiceClient';
+import { PricingQuoteServiceClient, SavedPricingQuote, QuoteCandidateRoleRecommendations } from './pricingQuoteServiceClient';
+import type { CandidateRecommendation } from './bpocPricingService';
 
 export interface UserQuoteSummary {
   id: string;
@@ -11,26 +12,10 @@ export interface UserQuoteSummary {
   roles_count: number;
   roles_preview: Array<{
     role_title: string;
-    role_description?: string;
     experience_level: string;
     workspace_type: string;
   }>;
-  candidate_recommendations?: Array<{
-    roleTitle: string;
-    totalCandidates: number;
-    recommendedCandidates: Array<{
-      id: string;
-      name: string;
-      position: string;
-      expectedSalary: number;
-      experience: string;
-      skills: string[];
-      overallScore: number;
-      matchScore: number;
-      isRecommended: boolean;
-      avatar?: string | null;
-    }>;
-  }>;
+  candidate_recommendations?: QuoteCandidateRoleRecommendations[];
 }
 
 export class UserQuoteService {
@@ -56,7 +41,6 @@ export class UserQuoteService {
           candidate_recommendations,
           roles:pricing_quote_roles(
             role_title,
-            role_description,
             experience_level,
             workspace_type
           )
@@ -75,8 +59,22 @@ export class UserQuoteService {
       }
 
       // Transform the data
-      const quoteSummaries: UserQuoteSummary[] = quotes.map(quote => {
+      const quoteSummaries: UserQuoteSummary[] = quotes.map((quote) => {
         const roles = quote.roles || [];
+
+        const candidateRecommendations: QuoteCandidateRoleRecommendations[] = Array.isArray(
+          quote.candidate_recommendations
+        )
+          ? quote.candidate_recommendations.map((recommendation: Record<string, unknown>) => ({
+              roleTitle: String(recommendation.roleTitle ?? ''),
+              roleLevel: (recommendation.roleLevel as 'entry' | 'mid' | 'senior') ?? 'entry',
+              totalCandidates: Number(recommendation.totalCandidates ?? 0),
+              recommendedCandidates: Array.isArray(recommendation.recommendedCandidates)
+                ? (recommendation.recommendedCandidates as CandidateRecommendation[])
+                : [],
+            }))
+          : [];
+
         return {
           id: quote.id,
           member_count: quote.member_count,
@@ -87,11 +85,10 @@ export class UserQuoteService {
           roles_count: roles.length,
           roles_preview: roles.map((role: Record<string, unknown>) => ({
             role_title: String(role.role_title),
-            role_description: role.role_description ? String(role.role_description) : undefined,
             experience_level: String(role.experience_level),
             workspace_type: String(role.workspace_type)
           })),
-          candidate_recommendations: quote.candidate_recommendations || []
+          candidate_recommendations: candidateRecommendations
         };
       });
 

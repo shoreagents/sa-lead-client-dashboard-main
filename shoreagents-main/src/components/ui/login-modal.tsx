@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog-videocall"
+} from "@/components/ui/dialog"
 import { LogIn, UserPlus, ChevronLeft, ChevronRight, User, Mail, Building, Lock, Eye, EyeOff, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
 import { useAuth } from "@/lib/auth-context"
@@ -51,6 +51,7 @@ type SignupFormData = z.infer<typeof signupSchema>
 interface LoginModalProps {
   children?: React.ReactNode
   onSuccess?: () => void
+  context?: string
   prefillData?: {
     firstName?: string
     lastName?: string

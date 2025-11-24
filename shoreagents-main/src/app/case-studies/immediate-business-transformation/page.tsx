@@ -1,576 +1,654 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
-  CheckCircle, 
-  TrendingUp, 
-  Users, 
-  Target, 
-  Building, 
-  Award, 
-  Globe, 
-  Clock,
-  Phone,
+  Target,
+  Award,
+  TrendingUp,
   Star,
-  Zap,
-  Home,
-  Shield,
-  FileText,
-  Video,
-  Handshake,
-  DollarSign,
-  Calendar,
-  Lightbulb,
+  Users,
+  Building2,
   ArrowRight,
-  AlertCircle,
+  Globe,
   CheckCircle2,
-  RefreshCw,
-  Headphones,
-  Settings,
-  PlayCircle,
-  XCircle,
-  BarChart3,
+  Lightbulb,
+  Zap,
+  Clock,
+  DollarSign,
+  AlertCircle,
+  Rocket,
+  ThumbsUp,
   MessageSquare,
-  HelpCircle,
-  TrendingDown
-} from 'lucide-react';
-import Image from 'next/image';
+  FileSpreadsheet,
+  Calendar
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ImmediateBusinessTransformationPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <Badge className="bg-red-600 text-white px-4 py-2 text-lg mb-6">
-            PROPTECH BREAKTHROUGH: &quot;Should Have Done This Years Ago&quot;
-          </Badge>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            The LockedOn Story: How 2 Weeks Changed Everything About Virtual Assistants
-          </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-            When Australian PropTech company LockedOn finally decided to try a virtual assistant, they discovered something that changed everything: &quot;We are loving our new VA, it&apos;s only been 2 weeks but we should have done it years ago.&quot; This LockedOn client success story reveals how one admin assistant transformed their entire operational mindset.
-          </p>
-          
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=600&fit=crop"
-              alt="LockedOn PropTech Operations"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              LockedOn PropTech Client Success - Australia
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              How 2 Weeks Changed Everything:<br />
+              <span className="text-lime-600">"We Should Have Done This Years Ago"</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              When Australian PropTech company LockedOn finally decided to try a virtual assistant, they discovered 
+              something that changed everything in just 2 weeks. This is how one admin assistant transformed their 
+              entire operational mindset—and why they wish they'd started years earlier.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/sales" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Schedule Your Consultation
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View More Case Studies
+              </Link>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Client Quote Card */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="text-center">
-                <div className="mb-6">
-                  <Image
-                    src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop"
-                    alt="Locked On Logo"
-                    width={100}
-                    height={100}
-                    className="mx-auto rounded-full"
-                  />
-                </div>
-                <blockquote className="text-xl text-gray-700 italic mb-6">
-                  &quot;We are loving our new VA its only been 2 weeks but we should have done it years ago.&quot;
-                </blockquote>
-                <div className="text-gray-900 font-bold">Luke Newton</div>
-                <div className="text-gray-600">LockedOn, AU</div>
-                <div className="text-gray-600">Hired One Agent</div>
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <Globe className="w-4 h-4 text-gray-600" />
-                  <span>Australia</span>
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Client Quote */}
+        <Card className="bg-gradient-to-br from-gray-50 to-white border-lime-200 shadow-lg mb-16">
+          <CardContent className="p-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-lime-400 to-lime-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  LN
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <blockquote className="text-xl md:text-2xl text-gray-700 mb-6 italic leading-relaxed">
+                "We are loving our new VA, it's only been 2 weeks but we should have done it years ago."
+              </blockquote>
+              <div className="text-lg font-bold text-gray-900">Luke Newton</div>
+              <div className="text-gray-600 mb-2">LockedOn PropTech</div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <Globe className="w-4 h-4" />
+                <span>Australia</span>
+                <span className="mx-2">•</span>
+                <span>Hired One Agent</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 2 Week Impact Stats */}
+        <Card className="bg-gradient-to-br from-lime-50 to-lime-100 border-lime-200 mb-16">
+          <CardContent className="p-8">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">The 2-Week Transformation</h3>
+              <p className="text-gray-700">What Luke discovered in just 14 days</p>
+            </div>
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <Calendar className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">2</div>
+                <div className="text-gray-900 font-semibold">Weeks to Love It</div>
+              </div>
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <Star className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">5/5</div>
+                <div className="text-gray-900 font-semibold">Perfect Scores</div>
+              </div>
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <DollarSign className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">74%</div>
+                <div className="text-gray-900 font-semibold">Cost Reduction</div>
+              </div>
+              <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+                <ThumbsUp className="w-8 h-8 text-lime-600 mx-auto mb-3" />
+                <div className="text-3xl font-bold text-lime-600 mb-2">100%</div>
+                <div className="text-gray-900 font-semibold">Satisfaction</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Overview */}
+        <div className="mb-12">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Picture this: You're running a growing PropTech company. You know you need help, but you're hesitant about 
+            offshore solutions. Then you take the plunge. Two weeks later, you're telling everyone: "We should have done 
+            this years ago." That's the LockedOn client success story.
+          </p>
         </div>
 
-        {/* Intro Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Building className="w-8 h-8 text-lime-600 mr-2" />
-            LockedOn Client Success: PropTech Transformation
-          </h2>
-          <p className="text-xl text-gray-700 mb-4">
-            How Luke Newton and his PropTech team discovered the systematic admin support that changed their business forever
-          </p>
-          <p className="text-lg text-gray-700">
-            Picture this: You&apos;re running a growing PropTech company. You know you need help, but you&apos;re hesitant about offshore solutions. Then you take the plunge. Two weeks later, you&apos;re telling everyone: &quot;We should have done this years ago.&quot; That&apos;s the LockedOn client success story.
-          </p>
-        </div>
+        <Separator className="my-12" />
 
         {/* From Hesitation to Transformation */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <HelpCircle className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">LockedOn Client Success: From Hesitation to Transformation</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Luke Newton from LockedOn, a growing PropTech company in Australia, represents thousands of business owners who know they need help but aren&apos;t sure about offshore solutions. Like many entrepreneurs, he was doing too much himself, drowning in administrative tasks that were keeping him from focusing on what really mattered—growing his business.
-                </p>
-                <p className="mb-4">
-                  LockedOn wasn&apos;t just another tech startup. They were building something significant in the PropTech space, and Luke knew that systematic admin support would be crucial for scaling. But like many business owners, he had reservations about offshore staffing. Would the quality be there? Would communication work? Would someone really understand his business needs?
-                </p>
-                <p className="mb-6">
-                  The decision to start with &quot;one agent&quot; through our One Agent service was strategic. Luke wasn&apos;t looking to replace his entire team—he wanted to test the waters with a single administrative assistant who could handle the day-to-day tasks that were consuming his time.
-                </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <AlertCircle className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">From Hesitation to Transformation</h2>
+              <p className="text-lg text-gray-600">The common concerns every business owner has</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-6">
+              Luke Newton from LockedOn, a growing PropTech company in Australia, represents thousands of business owners 
+              who know they need help but aren't sure about offshore solutions. Like many entrepreneurs, he was doing too 
+              much himself, drowning in administrative tasks that were keeping him from focusing on what really mattered—growing 
+              his business.
+            </p>
+            
+            <p className="mb-8">
+              LockedOn wasn't just another tech startup. They were building something significant in the PropTech space, 
+              and Luke knew that systematic admin support would be crucial for scaling. But like many business owners, he 
+              had reservations about offshore staffing. Would the quality be there? Would communication work? Would someone 
+              really understand his business needs?
+            </p>
 
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">The Common Concerns Every Business Owner Has</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-start">
-                      <Phone className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Communication Worries</h4>
-                        <p className="text-gray-700 text-sm">Will they understand my business? Can they communicate effectively?</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Star className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Quality Concerns</h4>
-                        <p className="text-gray-700 text-sm">Will the work meet our standards? What about attention to detail?</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Globe className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Cultural Alignment</h4>
-                        <p className="text-gray-700 text-sm">Will they understand Australian business culture and expectations?</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <RefreshCw className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Integration Challenges</h4>
-                        <p className="text-gray-700 text-sm">How do we integrate someone remote into our existing processes?</p>
-                      </div>
+            <Card className="bg-amber-50 border-amber-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">The Common Concerns Every Business Owner Has</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <MessageSquare className="w-6 h-6 text-amber-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Communication Worries</h4>
+                      <p className="text-gray-700 text-sm">Will they understand my business? Can they communicate effectively?</p>
                     </div>
                   </div>
-                  <p className="text-center text-gray-700 mt-4 font-semibold">
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <CheckCircle2 className="w-6 h-6 text-amber-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Quality Concerns</h4>
+                      <p className="text-gray-700 text-sm">Will the work meet our standards? What about attention to detail?</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <Globe className="w-6 h-6 text-amber-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Cultural Alignment</h4>
+                      <p className="text-gray-700 text-sm">Will they understand Australian business culture and expectations?</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <Users className="w-6 h-6 text-amber-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Integration Challenges</h4>
+                      <p className="text-gray-700 text-sm">How do we integrate someone remote into our existing processes?</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-white border-l-4 border-amber-600 rounded">
+                  <p className="text-gray-900 font-semibold">
                     Sound familiar? Every business owner has these exact concerns before discovering what Luke discovered.
                   </p>
                 </div>
+              </CardContent>
+            </Card>
 
-                <p className="mt-6">
-                  What Luke didn&apos;t realize was that his hesitation was costing him thousands of dollars in lost productivity every month. While he was debating whether to hire a virtual assistant, he was spending his $150/hour executive time on $25/hour administrative tasks. The mathematics were clear—he just needed to experience the solution to believe it.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <p className="mt-8">
+              What Luke didn't realize was that his hesitation was costing him thousands of dollars in lost productivity 
+              every month. While he was debating whether to hire a virtual assistant, he was spending his $150/hour 
+              executive time on $25/hour administrative tasks. The mathematics were clear—he just needed to experience the 
+              solution to believe it.
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
 
         {/* The 2-Week Revelation */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Zap className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">LockedOn Client Success: &quot;The 2-Week Revelation&quot;</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Two weeks. That&apos;s all it took for Luke Newton to realize he&apos;d been making a costly mistake. &quot;We are loving our new VA, it&apos;s only been 2 weeks but we should have done it years ago.&quot; This wasn&apos;t polite feedback—this was the genuine amazement of a business owner who&apos;d just discovered systematic efficiency.
-                </p>
-                <p className="mb-6">
-                  Enter the administrative virtual assistant who would transform Luke&apos;s entire perspective on offshore staffing. Within those first two weeks, his new team member had already begun demonstrating the systematic approach that separates professional virtual assistants from typical outsourcing solutions.
-                </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Zap className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The 2-Week Revelation</h2>
+              <p className="text-lg text-gray-600">What happened in those first 14 days</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-6">
+              Two weeks. That's all it took for Luke Newton to realize he'd been making a costly mistake. "We are loving 
+              our new VA, it's only been 2 weeks but we should have done it years ago." This wasn't polite feedback—this 
+              was the genuine amazement of a business owner who'd just discovered systematic efficiency.
+            </p>
+            
+            <p className="mb-8">
+              Enter the administrative virtual assistant who would transform Luke's entire perspective on offshore staffing. 
+              Within those first two weeks, his new team member had already begun demonstrating the systematic approach that 
+              separates professional virtual assistants from typical outsourcing solutions.
+            </p>
 
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">What Happened in Those First 2 Weeks</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="flex items-start">
-                      <MessageSquare className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2">Communication Excellence</h4>
-                        <p className="text-gray-700 text-sm">Professional, clear communication via Slack that exceeded expectations</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <BarChart3 className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2">Excel Mastery</h4>
-                        <p className="text-gray-700 text-sm">Advanced Excel skills that surpassed Luke&apos;s initial expectations</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Zap className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2">Speed & Efficiency</h4>
-                        <p className="text-gray-700 text-sm">&quot;All jobs done faster than I thought so far&quot;</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Target className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2">Quality Focus</h4>
-                        <p className="text-gray-700 text-sm">Follows instructions perfectly with minimal mistakes</p>
-                      </div>
+            <Card className="bg-lime-50 border-lime-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">What Happened in Those First 2 Weeks</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-3">
+                    <MessageSquare className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Communication Excellence</h4>
+                      <p className="text-gray-700 text-sm">Professional, clear communication via Slack that exceeded expectations</p>
                     </div>
                   </div>
-                  <div className="bg-gray-50 border-l-4 border-lime-600 p-4 rounded mt-6">
-                    <p className="text-lg text-gray-800 italic mb-2">
-                      &quot;We are loving our new VA, it&apos;s only been 2 weeks but we should have done it years ago.&quot;
-                    </p>
-                    <p className="text-gray-700 font-semibold">— Luke Newton, LockedOn PropTech</p>
+                  <div className="flex items-start gap-3">
+                    <FileSpreadsheet className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Excel Mastery</h4>
+                      <p className="text-gray-700 text-sm">Advanced Excel skills that surpassed Luke's initial expectations</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Zap className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Speed & Efficiency</h4>
+                      <p className="text-gray-700 text-sm">"All jobs done faster than I thought so far"</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Target className="w-6 h-6 text-lime-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Quality Focus</h4>
+                      <p className="text-gray-700 text-sm">Follows instructions perfectly with minimal mistakes</p>
+                    </div>
                   </div>
                 </div>
 
-                <p className="mt-6">
-                  The speed of this transformation wasn&apos;t accidental—it was the result of systematic preparation and professional excellence. The virtual assistant brought more than just administrative skills; she brought the proactive approach that defines successful virtual assistant relationships. Instead of waiting for detailed instructions, she was &quot;asking good questions each time a task is given.&quot;
-                </p>
-                <p className="mt-4">
-                  This is what separates the ShoreAgents approach from typical outsourcing: our virtual assistants don&apos;t just complete tasks—they actively contribute to business improvement. Within two weeks, Luke wasn&apos;t just satisfied with the admin support; he was experiencing the systematic efficiency that made him realize he&apos;d been operating at a disadvantage for years.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                <div className="mt-6 bg-white border-l-4 border-lime-600 p-6 rounded">
+                  <p className="text-gray-800 italic mb-3 text-lg">
+                    "We are loving our new VA, it's only been 2 weeks but we should have done it years ago."
+                  </p>
+                  <p className="text-gray-900 font-bold">— Luke Newton, LockedOn PropTech</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="mt-8">
+              The speed of this transformation wasn't accidental—it was the result of systematic preparation and professional 
+              excellence. The virtual assistant brought more than just administrative skills; she brought the proactive approach 
+              that defines successful virtual assistant relationships. Instead of waiting for detailed instructions, she was 
+              "asking good questions each time a task is given."
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
 
         {/* Performance Excellence */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Award className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">LockedOn Client Success: Performance Excellence That Speaks Volumes</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  The real validation of the LockedOn client success story isn&apos;t in the initial excitement—it&apos;s in the sustained performance over time. Luke&apos;s formal performance reviews tell the complete story of why that &quot;2 weeks&quot; revelation has continued to deliver results month after month.
-                </p>
-                <p className="mb-6">
-                  First-month performance review: Perfect scores across quality, communication, reliability, and time management. One-year performance review: &quot;Lovely to work with,&quot; &quot;Excellent communicator,&quot; &quot;Perfect,&quot; &quot;Great.&quot; This isn&apos;t just satisfaction—this is the systematic excellence that defines long-term virtual assistant partnerships.
-                </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Star className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Performance Excellence That Speaks Volumes</h2>
+              <p className="text-lg text-gray-600">Perfect 5/5 scores sustained over one year</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              The real validation isn't in the initial excitement—it's in the sustained performance over time. Luke's 
+              formal performance reviews tell the complete story of why that "2 weeks" revelation has continued to deliver 
+              results month after month.
+            </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">First Month Performance Review – November 2022</h3>
-                      <Badge className="bg-lime-600 text-white">Perfect 5/5</Badge>
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* First Month */}
+              <Card className="bg-lime-50 border-lime-200">
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <Calendar className="w-10 h-10 text-lime-600 mx-auto mb-2" />
+                    <h3 className="text-xl font-bold text-gray-900">First Month Review</h3>
+                    <p className="text-gray-600 text-sm">November 2022</p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Quality</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-lime-600 text-lime-600" />)}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-700">"Follows instructions well and implements with minimal mistakes"</p>
                     </div>
-                    <div className="space-y-4 mb-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Quality</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Communication</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-lime-600 text-lime-600" />)}
                         </div>
-                        <p className="text-gray-700 text-sm">&quot;Follows instructions well and implements with minimal mistakes&quot;</p>
                       </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Communication</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
-                        </div>
-                        <p className="text-gray-700 text-sm">&quot;Very effective on Slack&quot;</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Reliability</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
-                        </div>
-                        <p className="text-gray-700 text-sm">&quot;Always on time&quot;</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Time Management</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
-                        </div>
-                        <p className="text-gray-700 text-sm">&quot;All jobs done faster than I thought so far&quot;</p>
-                      </div>
+                      <p className="text-xs text-gray-700">"Very effective on Slack"</p>
                     </div>
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
-                      <p className="font-semibold text-gray-900 mb-2">Top 3 Accomplishments:</p>
-                      <ul className="space-y-1 text-sm text-gray-700">
-                        <li className="flex items-start">
-                          <CheckCircle2 className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                          <span>Excel skills above what I expected</span>
-                        </li>
-                        <li className="flex items-start">
-                          <CheckCircle2 className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                          <span>English is fantastic</span>
-                        </li>
-                        <li className="flex items-start">
-                          <CheckCircle2 className="w-4 h-4 text-lime-600 mr-2 mt-0.5 flex-shrink-0" />
-                          <span>Polite and professional demeanor</span>
-                        </li>
-                      </ul>
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Reliability</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-lime-600 text-lime-600" />)}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-700">"Always on time"</p>
+                    </div>
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Time Management</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-lime-600 text-lime-600" />)}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-700">"All jobs done faster than I thought"</p>
                     </div>
                   </div>
+                  <div className="mt-4 p-3 bg-white rounded border-l-4 border-lime-600">
+                    <p className="text-sm font-semibold text-gray-900 mb-2">Top 3 Accomplishments:</p>
+                    <ul className="text-xs text-gray-700 space-y-1">
+                      <li>• Excel skills above what I expected</li>
+                      <li>• English is fantastic</li>
+                      <li>• Polite and professional demeanor</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
 
-                  <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-bold text-gray-900">First Year Performance Review – October 2023</h3>
-                      <Badge className="bg-lime-600 text-white">Perfect 5/5</Badge>
+              {/* First Year */}
+              <Card className="bg-green-50 border-green-200">
+                <CardContent className="p-6">
+                  <div className="text-center mb-4">
+                    <Award className="w-10 h-10 text-green-600 mx-auto mb-2" />
+                    <h3 className="text-xl font-bold text-gray-900">First Year Review</h3>
+                    <p className="text-gray-600 text-sm">October 2023</p>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Quality</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-green-600 text-green-600" />)}
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-700">"Lovely to work with"</p>
                     </div>
-                    <div className="space-y-4 mb-4">
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Quality</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Communication</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-green-600 text-green-600" />)}
                         </div>
-                        <p className="text-gray-700 text-sm">&quot;Lovely to work with&quot;</p>
                       </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Communication</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
-                        </div>
-                        <p className="text-gray-700 text-sm">&quot;Excellent communicator&quot;</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Reliability</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
-                        </div>
-                        <p className="text-gray-700 text-sm">&quot;Perfect always letting us know if issues&quot;</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-semibold text-gray-900">Time Management</span>
-                          <span className="text-lime-600 font-bold">5/5</span>
-                        </div>
-                        <p className="text-gray-700 text-sm">&quot;Great&quot;</p>
-                      </div>
+                      <p className="text-xs text-gray-700">"Excellent communicator"</p>
                     </div>
-                    <div className="bg-white rounded-lg p-4 shadow-sm">
-                      <p className="text-sm text-gray-800 italic mb-2">
-                        &quot;Going well very happy&quot;
-                      </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-sm font-semibold text-gray-900">Overall satisfaction:</span>
-                        <span className="text-lime-600 font-bold">5/5</span>
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Reliability</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-green-600 text-green-600" />)}
+                        </div>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-900">Recommendation likelihood:</span>
-                        <span className="text-lime-600 font-bold">5/5</span>
+                      <p className="text-xs text-gray-700">"Perfect always letting us know if issues"</p>
+                    </div>
+                    <div className="bg-white rounded p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="font-semibold text-gray-900">Time Management</span>
+                        <div className="flex gap-1">
+                          {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-green-600 text-green-600" />)}
+                        </div>
                       </div>
+                      <p className="text-xs text-gray-700">"Great"</p>
                     </div>
                   </div>
-                </div>
+                  <div className="mt-4 p-3 bg-white rounded border-l-4 border-green-600">
+                    <p className="text-sm italic text-gray-800 mb-2">"Going well very happy"</p>
+                    <div className="flex justify-between text-xs text-gray-700">
+                      <span><strong>Overall:</strong> 5/5</span>
+                      <span><strong>Would Recommend:</strong> 5/5</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-                <p className="mt-6">
-                  This consistency in performance excellence is what separates the ShoreAgents approach from typical outsourcing solutions. When a PropTech business owner can give perfect 5/5 ratings across multiple evaluation periods, it validates the systematic approach that enables long-term success in outsourcing partnerships.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <p className="mt-8">
+              This consistency in performance excellence is what separates professional approaches from typical outsourcing 
+              solutions. When a PropTech business owner can give perfect 5/5 ratings across multiple evaluation periods, it 
+              validates the systematic approach that enables long-term success.
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
 
         {/* Financial Transformation */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <DollarSign className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">LockedOn Client Success: The Financial Transformation</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Behind Luke&apos;s amazement at the &quot;2 weeks&quot; revelation was a financial reality that every PropTech business owner should understand. When he said &quot;we should have done this years ago,&quot; he wasn&apos;t just talking about convenience—he was talking about the massive cost savings that had been sitting on the table, waiting for him to discover them.
-                </p>
-                <p className="mb-6">
-                  The mathematics of the LockedOn client success story are compelling: a high-level administrative assistant in Australia costs approximately $65,000+ annually, plus superannuation, WorkCover, and other benefits. The comprehensive virtual assistant service through ShoreAgents costs a fraction of that while delivering superior results and systematic reliability.
-                </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <DollarSign className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Financial Transformation</h2>
+              <p className="text-lg text-gray-600">$52,000+ annual savings and 74% cost reduction</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              Behind Luke's amazement at the "2 weeks" revelation was a financial reality that every PropTech business owner 
+              should understand. When he said "we should have done this years ago," he wasn't just talking about convenience—he 
+              was talking about the massive cost savings that had been sitting on the table, waiting for him to discover them.
+            </p>
 
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Australian PropTech Admin Cost Analysis</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm text-center">
-                      <Building className="w-10 h-10 text-lime-600 mx-auto mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Local Admin Assistant (Sydney/Melbourne)</h4>
-                      <div className="text-3xl font-bold text-lime-600 mb-2">$70,000+</div>
-                      <p className="text-sm text-gray-600 mb-2">Annual Total Cost</p>
-                      <p className="text-xs text-gray-700">Includes: Salary, Super, WorkCover, Leave, Equipment, Office Space</p>
+            <Card className="bg-gradient-to-br from-gray-50 to-lime-50 border-lime-200">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                  Australian PropTech Admin Cost Analysis
+                </h3>
+                
+                <div className="grid md:grid-cols-3 gap-8 mb-8">
+                  {/* Local Cost */}
+                  <div className="bg-white rounded-lg p-6 shadow-sm">
+                    <div className="text-center mb-4">
+                      <Building2 className="w-12 h-12 text-red-600 mx-auto mb-2" />
+                      <h4 className="font-bold text-gray-900">Local Admin Assistant</h4>
+                      <p className="text-xs text-gray-600">Sydney/Melbourne</p>
                     </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm text-center">
-                      <Globe className="w-10 h-10 text-lime-600 mx-auto mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">ShoreAgents Admin Assistant</h4>
-                      <div className="text-3xl font-bold text-lime-600 mb-2">$18,000</div>
-                      <p className="text-sm text-gray-600 mb-2">Annual All-Inclusive</p>
-                      <p className="text-xs text-gray-700">Includes: Salary, Management, Equipment, Office, Training, HR</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm text-center">
-                      <TrendingUp className="w-10 h-10 text-lime-600 mx-auto mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">LockedOn Annual Savings</h4>
-                      <div className="text-3xl font-bold text-lime-600 mb-2">$52,000+</div>
-                      <p className="text-sm text-gray-600 mb-2">Annual Savings</p>
-                      <div className="text-2xl font-bold text-lime-600 mb-2">74%</div>
-                      <p className="text-sm text-gray-600 mb-2">Cost Reduction</p>
-                      <div className="text-xl font-bold text-lime-600">$260K+</div>
-                      <p className="text-xs text-gray-700">5-Year Savings</p>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 border-l-4 border-lime-600 p-4 rounded">
-                    <p className="text-gray-800 font-semibold text-center">
-                      This is why Luke said &quot;we should have done this years ago&quot;
-                    </p>
-                  </div>
-                </div>
-
-                <p className="mt-6">
-                  But the LockedOn client success story isn&apos;t just about direct cost savings. It&apos;s about the opportunity cost of Luke&apos;s time. As a PropTech executive, every hour spent on administrative tasks is an hour not spent on business development, product innovation, or strategic planning. The systematic efficiency that his virtual assistant provided didn&apos;t just save money—it multiplied Luke&apos;s executive productivity.
-                </p>
-                <p className="mt-4">
-                  When PropTech companies can reinvest $52,000+ annually in product development, marketing, or team expansion instead of administrative overhead, they create competitive advantages that compound over time. This is the financial reality behind Luke&apos;s &quot;we should have done this years ago&quot; revelation.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Luke's Revelation */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Lightbulb className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Luke&apos;s Revelation: The Cost of Waiting</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Luke Newton&apos;s honest assessment after just two weeks—&quot;we should have done it years ago&quot;—captures something every business owner recognizes: the regret of waiting too long to solve a known problem. His transformation from hesitant PropTech CEO to enthusiastic advocate wasn&apos;t about discovering a miracle solution. It was about experiencing systematic excellence he didn&apos;t know existed.
-                </p>
-                <p className="mb-6">
-                  Think about what Luke&apos;s revelation actually means. &quot;Years ago&quot; suggests he&apos;d been struggling with administrative burden for a long time, probably spending his executive time on $25/hour tasks while his PropTech company needed $150/hour strategic thinking. The systematic efficiency he discovered in two weeks had been available all along—he just needed to experience it to believe it.
-                </p>
-
-                <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">What &quot;Years Ago&quot; Really Cost Luke</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-start">
-                      <DollarSign className="w-6 h-6 text-red-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Financial Opportunity Cost</h4>
-                        <p className="text-gray-700 text-sm">Years of paying premium rates for work that could have been done at 74% savings</p>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <div className="text-xs text-gray-600">
+                        Includes: Salary, Super, WorkCover, Leave, Equipment, Office Space
                       </div>
-                    </div>
-                    <div className="flex items-start">
-                      <Clock className="w-6 h-6 text-red-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Strategic Time Loss</h4>
-                        <p className="text-gray-700 text-sm">Executive time spent on administrative tasks instead of PropTech innovation</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <TrendingDown className="w-6 h-6 text-red-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Growth Constraints</h4>
-                        <p className="text-gray-700 text-sm">Business scaling limited by founder&apos;s capacity for detailed work</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start">
-                      <AlertCircle className="w-6 h-6 text-red-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Unnecessary Stress</h4>
-                        <p className="text-gray-700 text-sm">Years of operational burden that could have been eliminated</p>
+                      <div className="pt-2 border-t border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold">Annual Total:</span>
+                          <span className="text-xl font-bold text-red-600">$70,000+</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gray-50 border-l-4 border-lime-600 p-4 rounded mt-4">
-                    <p className="text-gray-800 font-semibold">
-                      Luke&apos;s Realization: The solution existed—he just needed to stop hesitating and start testing
-                    </p>
+
+                  {/* Offshore Cost */}
+                  <div className="bg-white rounded-lg p-6 shadow-sm border-2 border-lime-600">
+                    <div className="text-center mb-4">
+                      <Globe className="w-12 h-12 text-lime-600 mx-auto mb-2" />
+                      <h4 className="font-bold text-gray-900">ShoreAgents Assistant</h4>
+                      <p className="text-xs text-gray-600">All-Inclusive</p>
+                    </div>
+                    <div className="space-y-2 text-sm text-gray-700">
+                      <div className="text-xs text-gray-600">
+                        Includes: Salary, Management, Equipment, Office, Training, HR
+                      </div>
+                      <div className="pt-2 border-t border-gray-200">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold">Annual Total:</span>
+                          <span className="text-xl font-bold text-lime-600">$18,000</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <p className="mt-6">
-                  The sustained performance excellence—perfect 5/5 ratings after one year, &quot;excellent communicator,&quot; &quot;lovely to work with&quot;—validates Luke&apos;s initial decision and confirms his regret about waiting. The team member who earned these reviews wasn&apos;t just completing tasks; she was enabling Luke to focus on what PropTech CEOs should be doing: building products, developing strategy, and growing the business.
-                </p>
-                <p className="mt-4">
-                  Luke&apos;s story resonates because it&apos;s so familiar to entrepreneurs. How many business owners are currently spending their time on work that someone else could handle more efficiently? How many are delaying decisions that could free up their capacity for strategic work? How many are operating at a disadvantage simply because they haven&apos;t experienced what systematic virtual assistant support actually delivers?
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* The PropTech Advantage */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Zap className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">The PropTech Advantage Luke Discovered</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  PropTech companies like LockedOn face unique pressures: rapid innovation cycles, technical complexity, and the need to move fast in competitive markets. Luke&apos;s discovery that reliable administrative support could be implemented quickly and efficiently removed a major constraint on his ability to focus on what matters most.
-                </p>
-                <p className="mb-6">
-                  The systematic approach that delivered Luke&apos;s transformation wasn&apos;t magic—it was methodology. Professional recruitment, clear communication standards, systematic training, and ongoing performance management. The difference between hesitation and action was just experiencing how well this actually works.
-                </p>
-
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Why PropTech Companies Choose ShoreAgents</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-start">
-                      <Zap className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Rapid Implementation</h4>
-                        <p className="text-gray-700 text-sm">Transformation visible within 2 weeks, not months</p>
-                      </div>
+                  {/* Savings */}
+                  <div className="bg-gradient-to-br from-lime-500 to-green-600 text-white rounded-lg p-6 shadow-sm">
+                    <div className="text-center mb-4">
+                      <TrendingUp className="w-12 h-12 mx-auto mb-2" />
+                      <h4 className="font-bold">LockedOn Savings</h4>
                     </div>
-                    <div className="flex items-start">
-                      <Target className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Technical Competency</h4>
-                        <p className="text-gray-700 text-sm">Advanced Excel, Slack communication, system integration</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Annual Savings:</span>
+                        <span className="font-bold">$52,000+</span>
                       </div>
-                    </div>
-                    <div className="flex items-start">
-                      <DollarSign className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Cost Efficiency</h4>
-                        <p className="text-gray-700 text-sm">74% cost savings compared to local hiring</p>
+                      <div className="flex justify-between">
+                        <span>Cost Reduction:</span>
+                        <span className="font-bold">74%</span>
                       </div>
-                    </div>
-                    <div className="flex items-start">
-                      <TrendingUp className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900">Scalable Growth</h4>
-                        <p className="text-gray-700 text-sm">Start with one, expand based on proven results</p>
+                      <div className="pt-2 border-t border-white/30">
+                        <div className="flex justify-between items-center">
+                          <span className="font-bold">5-Year Savings:</span>
+                          <span className="text-xl font-bold">$260K+</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Final CTA Section */}
-        <div className="text-center bg-lime-600 rounded-2xl p-12 text-white shadow-lg">
-          <h2 className="text-4xl font-bold mb-6">Don&apos;t wait &quot;years&quot; to discover what Luke discovered in two weeks.</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Stop spending executive time on administrative tasks. Experience the systematic virtual assistant support that transforms hesitant business owners into enthusiastic advocates who wish they&apos;d started sooner.
+                <div className="bg-lime-600 text-white p-6 rounded-lg text-center">
+                  <p className="text-xl font-bold">This is why Luke said "we should have done this years ago"</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="mt-8">
+              But the story isn't just about direct cost savings. It's about the opportunity cost of Luke's time. As a 
+              PropTech executive, every hour spent on administrative tasks is an hour not spent on business development, 
+              product innovation, or strategic planning. The systematic efficiency that his virtual assistant provided didn't 
+              just save money—it multiplied Luke's executive productivity.
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* The Cost of Waiting */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Clock className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Cost of Waiting</h2>
+              <p className="text-lg text-gray-600">What "years ago" really cost Luke</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              Luke Newton's honest assessment after just two weeks—"we should have done it years ago"—captures something 
+              every business owner recognizes: the regret of waiting too long to solve a known problem. His transformation 
+              from hesitant PropTech CEO to enthusiastic advocate wasn't about discovering a miracle solution. It was about 
+              experiencing systematic excellence he didn't know existed.
+            </p>
+
+            <Card className="bg-red-50 border-red-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">What "Years Ago" Really Cost Luke</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <DollarSign className="w-6 h-6 text-red-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Financial Opportunity Cost</h4>
+                      <p className="text-gray-700 text-sm">Years of paying premium rates for work that could have been done at 74% savings</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <Clock className="w-6 h-6 text-red-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Strategic Time Loss</h4>
+                      <p className="text-gray-700 text-sm">Executive time spent on administrative tasks instead of PropTech innovation</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <TrendingUp className="w-6 h-6 text-red-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Growth Constraints</h4>
+                      <p className="text-gray-700 text-sm">Business scaling limited by founder's capacity for detailed work</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <AlertCircle className="w-6 h-6 text-red-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Unnecessary Stress</h4>
+                      <p className="text-gray-700 text-sm">Years of operational burden that could have been eliminated</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-white border-l-4 border-lime-600 rounded">
+                  <p className="text-gray-900 font-semibold">
+                    Luke's Realization: The solution existed—he just needed to stop hesitating and start testing
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="mt-8">
+              Luke's story resonates because it's so familiar to entrepreneurs. How many business owners are currently 
+              spending their time on work that someone else could handle more efficiently? How many are delaying decisions 
+              that could free up their capacity for strategic work? How many are operating at a disadvantage simply because 
+              they haven't experienced what systematic virtual assistant support actually delivers?
+            </p>
+          </div>
+        </section>
+
+      </div>
+
+      {/* Final CTA */}
+      <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white mx-4 mb-8">
+        <CardContent className="p-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Don't Wait "Years" Like Luke Did
+          </h2>
+          <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
+            Stop spending executive time on administrative tasks. Experience the systematic virtual assistant support 
+            that transforms hesitant business owners into enthusiastic advocates in just 2 weeks. Discover what you 
+            should have done years ago.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-bold">
-              <Phone className="w-5 h-5 mr-2" />
+            <Link
+              href="/sales"
+              className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-gray-100 transition-colors"
+            >
               Schedule Your Consultation
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-bold">
-              <Target className="w-5 h-5 mr-2" />
-              Start With One Agent
-            </Button>
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+            <Link
+              href="/case-studies"
+              className="inline-flex items-center px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-lime-600 font-bold text-lg rounded-lg transition-colors"
+            >
+              <Building2 className="w-5 h-5 mr-2" />
+              View More Case Studies
+            </Link>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

@@ -52,9 +52,38 @@ export class IPDetectionService {
   private static instance: IPDetectionService
   private cachedLocation: LocationData | null = null
   private lastFetchTime: number = 0
-  private readonly CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+  private readonly CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours (to avoid rate limits)
+  private readonly STORAGE_KEY = 'shoreagents_location_cache'
+  private readonly STORAGE_TIME_KEY = 'shoreagents_location_cache_time'
 
-  private constructor() {}
+  private constructor() {
+    // Load from localStorage if available
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(this.STORAGE_KEY)
+        const storedTime = localStorage.getItem(this.STORAGE_TIME_KEY)
+        
+        if (stored && storedTime) {
+          const parsedTime = parseInt(storedTime, 10)
+          const now = Date.now()
+          
+          // Check if stored data is still valid (within cache duration)
+          if (now - parsedTime < this.CACHE_DURATION) {
+            this.cachedLocation = JSON.parse(stored)
+            this.lastFetchTime = parsedTime
+            console.log('💾 Loaded location from localStorage cache:', this.cachedLocation?.country)
+          } else {
+            // Clear expired cache
+            localStorage.removeItem(this.STORAGE_KEY)
+            localStorage.removeItem(this.STORAGE_TIME_KEY)
+            console.log('🗑️ Cleared expired location cache')
+          }
+        }
+      } catch (error) {
+        console.warn('⚠️ Failed to load cached location from localStorage:', error)
+      }
+    }
+  }
 
   public static getInstance(): IPDetectionService {
     if (!IPDetectionService.instance) {
@@ -150,6 +179,17 @@ export class IPDetectionService {
             this.cachedLocation = locationData
             this.lastFetchTime = now
             
+            // Save to localStorage for persistence
+            if (typeof window !== 'undefined') {
+              try {
+                localStorage.setItem(this.STORAGE_KEY, JSON.stringify(locationData))
+                localStorage.setItem(this.STORAGE_TIME_KEY, now.toString())
+                console.log('💾 Saved location to localStorage')
+              } catch (error) {
+                console.warn('⚠️ Failed to save location to localStorage:', error)
+              }
+            }
+            
             console.log(`📍 Location detected successfully via ${service.name}:`, {
               country: locationData.country,
               city: locationData.city,
@@ -231,6 +271,17 @@ export class IPDetectionService {
         
         this.cachedLocation = locationData
         this.lastFetchTime = now
+        
+        // Save to localStorage for persistence
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(locationData))
+            localStorage.setItem(this.STORAGE_TIME_KEY, now.toString())
+            console.log('💾 Saved timezone fallback location to localStorage')
+          } catch (error) {
+            console.warn('⚠️ Failed to save location to localStorage:', error)
+          }
+        }
         
         console.log('📍 Location detected via timezone fallback:', {
           country: locationData.country,
@@ -330,7 +381,14 @@ export class IPDetectionService {
   public clearCache(): void {
     this.cachedLocation = null
     this.lastFetchTime = 0
-    console.log('🗑️ Location cache cleared')
+    
+    // Clear localStorage cache too
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(this.STORAGE_KEY)
+      localStorage.removeItem(this.STORAGE_TIME_KEY)
+    }
+    
+    console.log('🗑️ Location cache cleared (memory + localStorage)')
   }
 
   /**

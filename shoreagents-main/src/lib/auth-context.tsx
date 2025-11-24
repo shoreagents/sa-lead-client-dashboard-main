@@ -4,7 +4,6 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createClient } from './supabase/client'
 import type { User } from '@supabase/supabase-js'
-import { useMigrateConversations } from '@/hooks/use-api'
 
 const supabase = createClient()
 
@@ -21,11 +20,24 @@ export const useAppUserQuery = (authUser: User | null) => {
         .from('users')
         .select('*')
         .eq('auth_user_id', authUser.id)
-        .single()
+        .maybeSingle() // Use maybeSingle() instead of single() - returns null if no record
 
       if (error) {
         console.error('Error fetching app user:', error)
+        // If user doesn't exist in users table, sign them out
+        if (error.code === 'PGRST116' || error.details?.includes('0 rows')) {
+          console.warn('⚠️ No user record found for auth user, signing out...')
+          await supabase.auth.signOut()
+          return null
+        }
         throw error
+      }
+
+      // If no user record exists, sign out
+      if (!userData) {
+        console.warn('⚠️ No user record found, signing out...')
+        await supabase.auth.signOut()
+        return null
       }
 
       return userData
@@ -80,9 +92,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refetch: refetchAppUser 
   } = useAppUserQuery(user)
 
-  // Migration hook for conversations
-  const migrateConversationsMutation = useMigrateConversations()
-
   // Memoize the refresh function to prevent unnecessary re-renders
   const refreshUser = async () => {
     if (user) {
@@ -103,38 +112,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase?.auth.onAuthStateChange(
       async (event, session) => {
-        const previousUser = user
         setUser(session?.user ?? null)
         setLoading(false)
-        
-        // Handle conversation migration when user signs up
-        if (event === 'SIGNED_IN' && session?.user && !previousUser) {
-          try {
-            // Check if we're in the browser before accessing localStorage
-            if (typeof window !== 'undefined') {
-              // Get device ID from localStorage
-              const deviceId = localStorage.getItem('device_id')
-              
-              if (deviceId && appUser?.user_id) {
-                console.log('🔄 Migrating conversations from device to user account...')
-                await migrateConversationsMutation.mutateAsync({
-                  userId: appUser.user_id,
-                  deviceId: deviceId
-                })
-                console.log('✅ Conversations migrated successfully')
-              }
-            }
-          } catch (error) {
-            console.error('❌ Error migrating conversations:', error)
-          }
-        }
       }
     ) || { data: { subscription: null } }
 
     return () => {
       subscription?.unsubscribe()
     }
-  }, [user, appUser, migrateConversationsMutation])
+  }, [])
 
   const signOut = async () => {
     try {

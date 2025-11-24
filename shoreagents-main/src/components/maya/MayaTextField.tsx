@@ -16,7 +16,7 @@ interface MayaTextFieldProps {
   title: string
   description: string
   placeholder: string
-  inputType?: 'text' | 'email' | 'number' | 'password'
+  inputType?: 'text' | 'email' | 'number' | 'password' | 'date'
   validation?: (value: string) => boolean
   onComplete: (value: string) => void
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>

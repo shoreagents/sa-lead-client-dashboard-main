@@ -9,7 +9,7 @@ import { ConversationComponent } from '@/components/chat/ConversationComponent'
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
+import { PricingCalculatorModal } from '@/components/pricing-calculator'
 import { InterviewRequestModal } from '@/components/ui/interview-request-modal'
 import { AnonymousUserModal } from '@/components/ui/anonymous-user-modal'
 

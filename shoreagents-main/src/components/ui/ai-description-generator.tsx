@@ -17,6 +17,7 @@ interface AIDescriptionGeneratorProps {
   id?: string;
   onSave?: () => void;
   onEditingChange?: (isEditing: boolean) => void;
+  currency?: string;
 }
 
 export function AIDescriptionGenerator({
@@ -29,7 +30,8 @@ export function AIDescriptionGenerator({
   className = "",
   id,
   onSave,
-  onEditingChange
+  onEditingChange,
+  currency = 'USD'
 }: AIDescriptionGeneratorProps) {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +49,10 @@ export function AIDescriptionGenerator({
     shouldGenerate,
     'description',
     industry,
-    roleTitle
+    roleTitle,
+    undefined, // generateAnother
+    undefined, // generationCount
+    currency // Pass currency for language localization (Aussie vs American English)
   );
   const [isSaved, setIsSaved] = useState(false);
   const [generationCount, setGenerationCount] = useState(0);

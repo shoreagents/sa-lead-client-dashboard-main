@@ -12,6 +12,8 @@ export interface CandidateRecommendation {
   matchScore: number
   isRecommended: boolean
   avatar?: string | null
+  isFavorite?: boolean
+  bio?: string | null
 }
 
 export interface JobPositionMatch {

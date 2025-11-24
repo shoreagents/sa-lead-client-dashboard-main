@@ -68,16 +68,24 @@ export async function POST(request: NextRequest) {
 
     // Also check if there's a Supabase Auth user with this email (even if not in our users table)
     try {
-      const { data: authUser, error: authUserError } = await supabase.auth.admin.getUserByEmail(email);
-      if (!authUserError && authUser.user) {
-        console.log('❌ Supabase Auth user already exists:', authUser.user.id);
+      const { data: authUsers, error: authUserError } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 100
+      })
+
+      const existingSupabaseUser = authUsers?.users?.find(
+        (user) => user.email?.toLowerCase() === email.toLowerCase()
+      )
+
+      if (!authUserError && existingSupabaseUser) {
+        console.log('❌ Supabase Auth user already exists:', existingSupabaseUser.id)
         return NextResponse.json(
           { error: 'An account with this email already exists. Please sign in instead.' },
           { status: 400 }
-        );
+        )
       }
     } catch (adminError) {
-      console.log('🔍 Could not check Supabase Auth directly (admin function not available)');
+      console.log('🔍 Could not check Supabase Auth directly (admin function not available)', adminError)
     }
 
     // Create user in Supabase Auth
@@ -254,6 +262,32 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ User record created/updated successfully:', userData)
+
+    // ✅ UPDATE LEAD PROGRESS TO SIGNED UP
+    const finalUserId = existingAnonymousUser?.user_id || deviceFingerprintId
+    console.log('📊 Updating lead progress to signed_up for user:', finalUserId);
+    try {
+      const { data: progressData, error: progressError } = await supabase
+        .from('lead_progress')
+        .upsert({
+          user_id: finalUserId,
+          status: 'signed_up'
+        }, {
+          onConflict: 'user_id'
+        })
+        .select(); // ADD SELECT TO GET RESULT
+      
+      if (progressError) {
+        console.error('❌ Error updating lead progress to signed_up:', progressError);
+        console.error('❌ Full error details:', JSON.stringify(progressError, null, 2));
+        console.error('❌ Attempted to insert user_id:', finalUserId);
+      } else {
+        console.log('✅ Lead progress updated to signed_up');
+        console.log('✅ Progress data:', progressData);
+      }
+    } catch (progressError) {
+      console.error('❌ Error updating lead progress:', progressError);
+    }
 
     return NextResponse.json({
       success: true,

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Example usage of Prisma in your ShoreAgents project
 import { prisma } from './prisma'
 
@@ -106,4 +107,4 @@ export async function deletePricingQuote(id: string) {
 
 
 
-
+'// @ts-nocheck'

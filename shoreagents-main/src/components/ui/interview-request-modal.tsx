@@ -11,11 +11,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog-videocall';
+} from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertCircle, Calendar, User, CheckCircle } from 'lucide-react';
 import { LoginModal } from '@/components/ui/login-modal';
 import { useAuth } from '@/lib/auth-context';
+import { useInterviewRequestMutation } from '@/hooks/use-api';
 
 interface InterviewRequestModalProps {
   isOpen: boolean;
@@ -23,7 +24,6 @@ interface InterviewRequestModalProps {
   candidateName: string;
   candidatePosition: string;
   candidateId?: string;
-  candidateAvatar?: string;
   onSubmit: (data: InterviewRequestData) => Promise<void>;
 }
 
@@ -31,6 +31,7 @@ export interface InterviewRequestData {
   firstName: string;
   lastName: string;
   email: string;
+  message?: string;
 }
 
 export function InterviewRequestModal({
@@ -39,14 +40,15 @@ export function InterviewRequestModal({
   candidateName,
   candidatePosition,
   candidateId,
-  candidateAvatar,
   onSubmit
 }: InterviewRequestModalProps) {
   const { appUser, isAuthenticated } = useAuth();
+  const interviewRequestMutation = useInterviewRequestMutation();
   const [formData, setFormData] = useState<InterviewRequestData>({
     firstName: '',
     lastName: '',
-    email: ''
+    email: '',
+    message: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,7 +65,8 @@ export function InterviewRequestModal({
       setFormData({
         firstName: '',
         lastName: '',
-        email: ''
+        email: '',
+        message: ''
       });
     }
   }, [isAuthenticated, appUser, isOpen]);
@@ -74,7 +77,8 @@ export function InterviewRequestModal({
       setFormData({
         firstName: appUser.first_name || '',
         lastName: appUser.last_name || '',
-        email: appUser.email || ''
+        email: appUser.email || '',
+        message: ''
       });
     }
     setShowConfirmDialog(false);
@@ -84,7 +88,8 @@ export function InterviewRequestModal({
     setFormData({
       firstName: '',
       lastName: '',
-      email: ''
+      email: '',
+      message: ''
     });
     setShowConfirmDialog(false);
   };
@@ -96,7 +101,6 @@ export function InterviewRequestModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔍 Form submitted!', { formData, isAuthenticated });
     setError('');
 
     // Basic validation
@@ -106,27 +110,41 @@ export function InterviewRequestModal({
     }
 
     if (isAuthenticated) {
-      // User is logged in, pass data to parent component
-      setLoading(true);
+      // User is logged in, submit the interview request directly
       try {
-        console.log('🔍 Calling onSubmit with:', formData);
-        await onSubmit(formData);
+        // Get user_id from auth context
+        const userId = appUser?.user_id;
+        if (!userId) {
+          throw new Error('User ID not found');
+        }
+
+        // Send interview request to API using TanStack Query
+        await interviewRequestMutation.mutateAsync({
+          candidateId: candidateId || candidateName,
+          candidateName,
+          candidatePosition,
+          candidateAvatarUrl: '',
+          requesterFirstName: formData.firstName,
+          requesterLastName: formData.lastName,
+          requesterEmail: formData.email,
+          user_id: userId,
+          message: formData.message || '',
+        });
+
+        // Show success state
         setIsSuccess(true);
         
         // Wait a moment to show success message, then close
         setTimeout(() => {
+          onSubmit(formData);
           onClose();
         }, 2000);
-
       } catch (error) {
-        console.error('❌ Interview request error:', error);
         setError(error instanceof Error ? error.message : 'Failed to submit interview request. Please try again.');
-      } finally {
-        setLoading(false);
+        console.error('Interview request error:', error);
       }
     } else {
       // User is not logged in, close the interview modal and open the login modal with pre-filled data
-      console.log('🔍 User not authenticated, opening login modal');
       onClose();
       setShowLoginModal(true);
     }
@@ -137,7 +155,8 @@ export function InterviewRequestModal({
       setFormData({
         firstName: '',
         lastName: '',
-        email: ''
+        email: '',
+        message: ''
       });
       setError('');
       setIsSuccess(false);
@@ -152,15 +171,16 @@ export function InterviewRequestModal({
     setFormData({
       firstName: '',
       lastName: '',
-      email: ''
+      email: '',
+      message: ''
     });
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px] z-[10000]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center">
               <Calendar className="w-5 h-5 text-lime-600" />
             </div>
@@ -171,25 +191,6 @@ export function InterviewRequestModal({
               <DialogDescription className="text-sm text-gray-600">
                 Schedule an interview with {candidateName}
               </DialogDescription>
-            </div>
-          </div>
-          
-          {/* Candidate Information */}
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg border">
-            <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center overflow-hidden">
-              {candidateAvatar ? (
-                <img 
-                  src={candidateAvatar} 
-                  alt={candidateName}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              ) : (
-                <User className="w-8 h-8 text-lime-600" />
-              )}
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900">{candidateName}</h3>
-              <p className="text-sm text-gray-600">{candidatePosition}</p>
             </div>
           </div>
         </DialogHeader>
@@ -236,7 +237,7 @@ export function InterviewRequestModal({
                   value={formData.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
                   required
-                  disabled={loading || isSuccess}
+                  disabled={loading || isSuccess || interviewRequestMutation.isPending}
                   className={isAuthenticated ? 'bg-gray-50' : ''}
                 />
               </div>
@@ -250,7 +251,7 @@ export function InterviewRequestModal({
                   value={formData.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
                   required
-                  disabled={loading || isSuccess}
+                  disabled={loading || isSuccess || interviewRequestMutation.isPending}
                   className={isAuthenticated ? 'bg-gray-50' : ''}
                 />
               </div>
@@ -265,7 +266,7 @@ export function InterviewRequestModal({
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 required
-                disabled={loading || isSuccess}
+                disabled={loading || isSuccess || interviewRequestMutation.isPending}
                 className={isAuthenticated ? 'bg-gray-50' : ''}
               />
             </div>
@@ -277,17 +278,17 @@ export function InterviewRequestModal({
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={loading || isSuccess}
+              disabled={loading || isSuccess || interviewRequestMutation.isPending}
               className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={loading || isSuccess}
+              disabled={loading || isSuccess || interviewRequestMutation.isPending}
               className="w-full sm:w-auto bg-lime-600 hover:bg-lime-700 text-white"
             >
-              {loading ? (
+              {loading || interviewRequestMutation.isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Submitting Request...
@@ -326,7 +327,7 @@ export function InterviewRequestModal({
       {/* Confirmation Dialog */}
       {showConfirmDialog && (
         <Dialog open={showConfirmDialog} onOpenChange={() => setShowConfirmDialog(false)}>
-          <DialogContent className="sm:max-w-[400px] z-[10001]">
+          <DialogContent className="sm:max-w-[400px]">
             <DialogHeader>
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center">

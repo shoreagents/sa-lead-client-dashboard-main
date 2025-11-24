@@ -22,6 +22,7 @@ interface AIRoleAutocompleteProps {
   label?: string;
   className?: string;
   id?: string;
+  currency?: string;
 }
 
 export function AIRoleAutocomplete({
@@ -31,7 +32,8 @@ export function AIRoleAutocomplete({
   placeholder = "Start typing your role...",
   label,
   className = "",
-  id
+  id,
+  currency = 'USD'
 }: AIRoleAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,7 +56,11 @@ export function AIRoleAutocomplete({
     userId, 
     shouldFetchAI && isOpen && debouncedQuery.length >= 2, // Only fetch when user wants AI suggestions (changed from > 2 to >= 2)
     'role',
-    industry
+    industry,
+    undefined, // roleTitle
+    undefined, // generateAnother
+    undefined, // generationCount
+    currency // Pass currency for virtual role suggestions
   );
 
   // Use only AI suggestions - no hardcoded fallbacks
