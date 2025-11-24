@@ -46,9 +46,10 @@ export default function AdminWorkStatusesPage() {
   const [q, setQ] = useState('')
   const [mood, setMood] = useState<string>('all')
   const [status, setStatus] = useState<string>('all')
-  const [limit] = useState(50)
+  const [limit] = useState(10)
   const [offset, setOffset] = useState(0)
   const [total, setTotal] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
   const [selected, setSelected] = useState<WorkStatusRow | null>(null)
   const [profile, setProfile] = useState<any | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
@@ -76,14 +77,19 @@ export default function AdminWorkStatusesPage() {
     }
   }
 
+  // Calculate total pages
+  const totalPages = Math.ceil(total / limit)
+
+  // Update offset when currentPage changes
+  useEffect(() => {
+    const newOffset = (currentPage - 1) * limit
+    setOffset(newOffset)
+  }, [currentPage, limit])
+
   // Debounced search effect
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (offset === 0) {
-        fetchData()
-      } else {
-        setOffset(0) // Reset to first page when search/filter changes
-      }
+      setCurrentPage(1) // Reset to first page when search/filter changes
     }, 300) // 300ms debounce
 
     return () => clearTimeout(timeoutId)
@@ -200,7 +206,7 @@ export default function AdminWorkStatusesPage() {
                 </SelectContent>
               </Select>
               <Button
-                onClick={() => { setOffset(0); fetchData() }}
+                onClick={() => { setCurrentPage(1); fetchData() }}
                 className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700"
               >
                 <RefreshCw className="w-4 h-4 mr-2" /> Refresh
@@ -282,31 +288,75 @@ export default function AdminWorkStatusesPage() {
                 </Table>
               </div>
             )}
-            <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
-              <div>
-                Showing {total ? pageInfo.start : 0}–{total ? pageInfo.end : 0} of {total}
+            {/* Pagination */}
+            {!loading && total > 0 && totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-white/10 flex-wrap gap-4 w-full mt-6">
+                <div className="text-sm text-gray-400 whitespace-nowrap">
+                  Showing {total ? pageInfo.start : 0} to {total ? pageInfo.end : 0} of {total} work statuses
+                </div>
+                <div className="flex items-center space-x-2 flex-wrap">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="border-white/10 text-white hover:bg-white/10 disabled:opacity-50"
+                  >
+                    Previous
+                  </Button>
+                  
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum
+                      if (totalPages <= 5) {
+                        pageNum = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i
+                      } else {
+                        pageNum = currentPage - 2 + i
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={
+                            currentPage === pageNum
+                              ? "bg-cyan-500 text-white hover:bg-cyan-600"
+                              : "border-white/10 text-white hover:bg-white/10"
+                          }
+                        >
+                          {pageNum}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="border-white/10 text-white hover:bg-white/10 disabled:opacity-50"
+                  >
+                    Next
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOffset(Math.max(0, offset - limit))}
-                  disabled={offset === 0}
-                  className="border-white/10 text-white hover:bg-white/10 disabled:opacity-50"
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setOffset(offset + limit)}
-                  disabled={offset + limit >= total}
-                  className="border-white/10 text-white hover:bg-white/10 disabled:opacity-50"
-                >
-                  Next
-                </Button>
+            )}
+            
+            {/* Show count even when no pagination */}
+            {!loading && total > 0 && totalPages <= 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-white/10 mt-6">
+                <div className="text-sm text-gray-400">
+                  Showing {total ? pageInfo.start : 0} to {total ? pageInfo.end : 0} of {total} work statuses
+                </div>
               </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 

@@ -265,10 +265,9 @@ export async function POST(request: NextRequest) {
           '--disable-offer-store-unmasked-wallet-cards',
           '--disable-popup-blocking',
           '--disable-print-preview',
-          '--disable-prompt-on-repost',
-          '--disable-renderer-backgrounding',
-          '--disable-setuid-sandbox',
-          '--disable-speech-api',
+        '--disable-prompt-on-repost',
+        '--disable-renderer-backgrounding',
+        '--disable-speech-api',
           '--disable-sync',
           '--disable-translate',
           '--disable-windows10-custom-titlebar',
@@ -451,16 +450,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const page = await browser.newPage();
+    let page;
+    try {
+      page = await browser.newPage();
 
-    // Set viewport for consistent rendering
-    await page.setViewport({
-      width: 1200,
-      height: 1600,
-      deviceScaleFactor: 2,
-    });
+      // Set viewport for consistent rendering
+      await page.setViewport({
+        width: 1200,
+        height: 1600,
+        deviceScaleFactor: 2,
+      });
 
-    console.log('📄 Setting page content...');
+      console.log('📄 Setting page content...');
+    } catch (pageError) {
+      console.error('❌ Failed to create page:', pageError);
+      await browser.close();
+      return NextResponse.json(
+        { 
+          error: 'Failed to create browser page',
+          details: pageError instanceof Error ? pageError.message : 'Unknown error'
+        },
+        { status: 500 }
+      );
+    }
 
     // Extract title from HTML for PDF metadata
     let pageTitle = fileName || 'Resume';
@@ -712,7 +724,7 @@ export async function POST(request: NextRequest) {
             htmlEl.style.textShadow = 'none';
             htmlEl.style.filter = 'none';
             htmlEl.style.backdropFilter = 'none';
-            htmlEl.style.webkitBackdropFilter = 'none';
+            (htmlEl.style as any).webkitBackdropFilter = 'none';
           }
           
           // Preserve divider lines - ensure they're visible
@@ -871,7 +883,7 @@ export async function POST(request: NextRequest) {
 
     // Wait for fonts and images to load
     try {
-      await page.evaluateHandle('document.fonts.ready');
+      await page.evaluate(() => document.fonts.ready);
       // Use a Promise-based delay instead of waitForTimeout
       await new Promise(resolve => setTimeout(resolve, 2000));
       console.log('✅ Fonts and resources loaded');
@@ -900,9 +912,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate PDF with optimized settings and metadata
-    let pdfBuffer: Buffer;
+    let pdfBuffer: Buffer | Uint8Array;
     try {
-      pdfBuffer = await page.pdf({
+      const pdfData = await page.pdf({
         format: 'A4',
         printBackground: true,
         margin: {
@@ -915,6 +927,9 @@ export async function POST(request: NextRequest) {
         displayHeaderFooter: false,
         timeout: 60000, // 60 second timeout
       });
+      
+      // Convert Uint8Array to Buffer if needed
+      pdfBuffer = Buffer.isBuffer(pdfData) ? pdfData : Buffer.from(pdfData);
       
       // Add PDF metadata using a library or by modifying the PDF buffer
       // For now, we'll set the title via the response headers and filename
@@ -942,7 +957,10 @@ export async function POST(request: NextRequest) {
     // Return PDF as response with proper metadata
     const sanitizedFileName = (fileName || 'resume.pdf').replace(/[^a-zA-Z0-9._-]/g, '_');
     
-    return new NextResponse(pdfBuffer, {
+    // Convert to Uint8Array for NextResponse compatibility
+    const pdfArray = Buffer.isBuffer(pdfBuffer) ? new Uint8Array(pdfBuffer) : pdfBuffer;
+    
+    return new NextResponse(pdfArray as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
