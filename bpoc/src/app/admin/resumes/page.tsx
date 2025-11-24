@@ -1171,12 +1171,12 @@ export default function ResumesPage() {
             </div>
 
             {/* Pagination */}
-            {!loading && filteredResumes.length > 0 && (
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-400">
+            {!loading && filteredResumes.length > 0 && totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-white/10 flex-wrap gap-4 w-full mt-6">
+                <div className="text-sm text-gray-400 whitespace-nowrap">
                   Showing {startIndex + 1} to {Math.min(endIndex, filteredResumes.length)} of {filteredResumes.length} resumes
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap">
                   <Button
                     variant="outline"
                     size="sm"
@@ -1186,7 +1186,7 @@ export default function ResumesPage() {
                   >
                     Previous
                   </Button>
-
+                  
                   <div className="flex items-center space-x-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum
@@ -1199,7 +1199,7 @@ export default function ResumesPage() {
                       } else {
                         pageNum = currentPage - 2 + i
                       }
-
+                      
                       return (
                         <Button
                           key={pageNum}
@@ -1217,7 +1217,7 @@ export default function ResumesPage() {
                       )
                     })}
                   </div>
-
+                  
                   <Button
                     variant="outline"
                     size="sm"
@@ -1358,21 +1358,29 @@ export default function ResumesPage() {
          <AlertDialogContent className="bg-gray-900 border-gray-700 text-white z-[9999]">
            <AlertDialogHeader>
              <AlertDialogTitle className="text-white">Delete Resume</AlertDialogTitle>
-             <AlertDialogDescription className="text-gray-300">
-               {forceDeleteMode ? (
-                 <>
-                   This resume has applications that reference it. 
-                   <br /><br />
-                   <strong>Force delete will remove:</strong>
-                   <br />• The resume
-                   <br />• All related applications
-                   <br /><br />
-                   <span className="text-yellow-400">This action cannot be undone!</span>
-                 </>
-               ) : (
-                 'Are you sure you want to delete this resume? This action cannot be undone.'
-               )}
-             </AlertDialogDescription>
+            <AlertDialogDescription className="text-gray-300">
+              {forceDeleteMode ? (
+                <>
+                  This resume has applications that reference it. 
+                  <br /><br />
+                  <strong>Force delete will remove:</strong>
+                  <br />• The resume
+                  <br />• All related applications
+                  <br /><br />
+                  <span className="text-yellow-400">This action cannot be undone!</span>
+                </>
+              ) : (
+                <>
+                  Are you sure you want to delete this resume?
+                  <br /><br />
+                  <strong>This will permanently delete:</strong>
+                  <br />• The resume
+                  <br />• All related applications
+                  <br /><br />
+                  <span className="text-yellow-400">This action cannot be undone!</span>
+                </>
+              )}
+            </AlertDialogDescription>
            </AlertDialogHeader>
            <AlertDialogFooter>
              <AlertDialogCancel 

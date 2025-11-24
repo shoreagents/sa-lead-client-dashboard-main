@@ -122,6 +122,10 @@ export async function syncUserToDatabaseServer(userData: UserData) {
       // Use existing completed_data if it's true, otherwise use the new value
       const finalCompletedData = existingUser.completed_data === true ? true : (userData.completed_data ?? false)
       
+      // CRITICAL: Preserve existing admin_level from database - never overwrite with Supabase metadata
+      // This prevents admin levels from being reset to 'user' during sync
+      const finalAdminLevel = existingUser.admin_level || userData.admin_level || 'user'
+      
       console.log('🔍 Final values to save (preserving existing data):', {
         first_name: finalFirstName,
         last_name: finalLastName,
@@ -131,7 +135,13 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         bio: finalBio,
         position: finalPosition,
         company: finalCompany,
-        completed_data: finalCompletedData
+        completed_data: finalCompletedData,
+        admin_level: finalAdminLevel
+      })
+      console.log('🛡️ Admin level preservation:', {
+        existing_admin_level: existingUser.admin_level,
+        supabase_admin_level: userData.admin_level,
+        final_admin_level: finalAdminLevel
       })
       
       const updateQuery = `
@@ -170,7 +180,7 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         finalCompletedData,
         userData.birthday,
         userData.gender,
-        userData.admin_level
+        finalAdminLevel
       ])
       
       console.log('✅ User updated successfully:', updateResult.rows[0])
@@ -181,7 +191,10 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         last_name: updateResult.rows[0].last_name,
         admin_level: updateResult.rows[0].admin_level
       })
-      console.log('⚠️ WARNING: User sync is updating admin_level to:', userData.admin_level)
+      console.log('✅ Admin level preserved:', {
+        saved_admin_level: updateResult.rows[0].admin_level,
+        preserved_from_database: existingUser.admin_level
+      })
       return {
         success: true,
         action: 'updated',
