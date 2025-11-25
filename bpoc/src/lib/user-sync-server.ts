@@ -215,7 +215,7 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         ) VALUES (
           $1, $2, COALESCE(NULLIF($3, ''), SPLIT_PART($2, '@', 1)), COALESCE(NULLIF($4, ''), ''), COALESCE(NULLIF($5, ''), $2), $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW()
         )
-        RETURNING id, email, first_name, last_name, admin_level, slug, username
+        RETURNING id, email, first_name, last_name, full_name, admin_level, slug, username
       `
       
       const insertResult = await client.query(insertQuery, [
@@ -242,21 +242,19 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         email: insertResult.rows[0].email,
         first_name: insertResult.rows[0].first_name,
         last_name: insertResult.rows[0].last_name,
+        full_name: insertResult.rows[0].full_name,
         admin_level: insertResult.rows[0].admin_level,
         slug: insertResult.rows[0].slug,
         username: insertResult.rows[0].username
       })
 
-      // Send notification to n8n
+      // Send basic signup notification to n8n (no profile URL yet)
       notifyN8nNewUser({
         id: insertResult.rows[0].id,
         email: insertResult.rows[0].email,
-        first_name: insertResult.rows[0].first_name,
-        last_name: insertResult.rows[0].last_name,
+        full_name: insertResult.rows[0].full_name || capitalizedFullName,
         admin_level: insertResult.rows[0].admin_level,
-        created_at: new Date(),
-        slug: insertResult.rows[0].slug,
-        username: insertResult.rows[0].username
+        created_at: new Date()
       }).catch(err => console.error('❌ n8n notification error (background):', err))
 
       return {

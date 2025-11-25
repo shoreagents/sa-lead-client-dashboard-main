@@ -115,16 +115,13 @@ export async function POST(request: NextRequest) {
     console.log('✅ Recruiter created successfully:', result.rows[0])
     console.log('🔍 Final admin_level in database:', result.rows[0].admin_level)
 
-    // Send notification to n8n
+    // Send basic signup notification to n8n (no profile URL yet)
     notifyN8nNewUser({
       id: result.rows[0].id,
       email: result.rows[0].email,
-      first_name: result.rows[0].first_name,
-      last_name: result.rows[0].last_name,
+      full_name: capitalizedFullName,
       admin_level: result.rows[0].admin_level,
-      created_at: new Date(),
-      slug: result.rows[0].slug,
-      username: result.rows[0].username
+      created_at: new Date()
     }).catch(err => console.error('❌ n8n notification error (background):', err))
 
     return NextResponse.json({ 
