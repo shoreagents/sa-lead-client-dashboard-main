@@ -66,7 +66,8 @@ export async function GET(request: NextRequest) {
       LIMIT 20
     `;
 
-    // Fetch top companies by total applications
+    // DISABLED: Top companies query removed - companies table is being deleted
+    // Using user.company field instead (from users table)
     const topCompanies = await (prisma as any).$queryRaw`
       SELECT 
         u.company,

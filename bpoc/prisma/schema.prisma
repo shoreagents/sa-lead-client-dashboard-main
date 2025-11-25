@@ -61,7 +61,6 @@ model User {
   ultimateStats                             UltimateStats?
   leaderboardScore                          UserLeaderboardScores?
   workStatus                                UserWorkStatus?
-  companies                                 companies?               @relation(fields: [company_id], references: [id], onUpdate: NoAction)
 
   @@map("users")
 }
@@ -685,7 +684,6 @@ model RecruiterJob {
   company_id           String?                @db.Uuid
   interviews           interviews[]
   applications         RecruiterApplication[]
-  companies            companies?             @relation(fields: [company_id], references: [id], onUpdate: NoAction)
   recruiter            User                   @relation(fields: [recruiter_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([company_id], map: "idx_recruiter_jobs_company_id")
@@ -734,74 +732,6 @@ model JobMatchResult {
   @@map("job_match_results")
 }
 
-model companies {
-  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_name        String
-  registration_number String?
-  tin                 String?
-  address             String?
-  city                String?
-  province            String?
-  logo_url            String?
-  status              String              @default("pending_verification")
-  trial_end_date      DateTime?           @db.Date
-  subscription_status String              @default("trial")
-  payment_method      String?
-  payment_customer_id String?
-  admin_notes         String?
-  verified_by         String?             @db.Uuid
-  verified_at         DateTime?           @db.Timestamptz(6)
-  created_at          DateTime            @default(now()) @db.Timestamptz(6)
-  updated_at          DateTime            @default(now()) @db.Timestamptz(6)
-  company_documents   company_documents[]
-  company_invites     company_invites[]
-  interviews          interviews[]
-  recruiter_jobs      RecruiterJob[]
-  users               User[]
-
-  @@index([created_at(sort: Desc)], map: "idx_companies_created_at")
-  @@index([status], map: "idx_companies_status")
-  @@index([subscription_status], map: "idx_companies_subscription_status")
-  @@index([trial_end_date], map: "idx_companies_trial_end_date")
-}
-
-model company_documents {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id      String    @db.Uuid
-  document_type   String
-  file_url        String
-  file_name       String?
-  file_size       BigInt?
-  mime_type       String?
-  verified_status String    @default("pending")
-  admin_notes     String?
-  verified_by     String?   @db.Uuid
-  verified_at     DateTime? @db.Timestamptz(6)
-  uploaded_at     DateTime  @default(now()) @db.Timestamptz(6)
-  companies       companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([company_id], map: "idx_company_documents_company_id")
-  @@index([document_type], map: "idx_company_documents_document_type")
-  @@index([verified_status], map: "idx_company_documents_verified_status")
-}
-
-model company_invites {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company_id  String    @db.Uuid
-  invite_code String    @unique
-  created_by  String    @db.Uuid
-  used_by     String?   @db.Uuid
-  used_at     DateTime? @db.Timestamptz(6)
-  expires_at  DateTime  @db.Timestamptz(6)
-  is_active   Boolean   @default(true)
-  created_at  DateTime  @default(now()) @db.Timestamptz(6)
-  companies   companies @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([invite_code], map: "idx_company_invites_code")
-  @@index([company_id], map: "idx_company_invites_company_id")
-  @@index([expires_at], map: "idx_company_invites_expires")
-}
-
 model interviews {
   id                                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   application_id                       String               @db.Uuid
@@ -825,7 +755,6 @@ model interviews {
   updated_at                           DateTime             @default(now()) @db.Timestamptz(6)
   recruiter_applications               RecruiterApplication @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users_interviews_candidate_idTousers User                 @relation("interviews_candidate_idTousers", fields: [candidate_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  companies                            companies?           @relation(fields: [company_id], references: [id], onUpdate: NoAction)
   recruiter_jobs                       RecruiterJob         @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users_interviews_recruiter_idTousers User                 @relation("interviews_recruiter_idTousers", fields: [recruiter_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 

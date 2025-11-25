@@ -247,13 +247,14 @@ export async function GET(request: NextRequest) {
                  rj.industry,
                  rj.department,
                  rj.application_deadline,
-                 COALESCE(c.company_name, u.company, 'Recruiter Company') as company_name,
+                 COALESCE(u.company, 'Recruiter Company') as company_name,
                  u.location as recruiter_location,
                  u.full_name as recruiter_name,
                  (SELECT COUNT(*) FROM recruiter_applications WHERE job_id = rj.id) as candidate_count
                 FROM recruiter_jobs rj
                 LEFT JOIN users u ON u.id = rj.recruiter_id
-                LEFT JOIN companies c ON c.id = rj.company_id
+                -- DISABLED: companies table JOIN removed
+                -- LEFT JOIN companies c ON c.id = rj.company_id
                 WHERE rj.id IN (${placeholders})`,
                recruiterJobIds
              );
@@ -423,12 +424,13 @@ export async function GET(request: NextRequest) {
                  // Try multiple approaches for recruiter jobs
                  let directResult = await client.query(
                    `SELECT rj.*, 
-                           COALESCE(c.company_name, u.company, 'Recruiter Company') as company_name, 
+                           COALESCE(u.company, 'Recruiter Company') as company_name, 
                            u.location as recruiter_location,
                            u.full_name as recruiter_name
                     FROM recruiter_jobs rj
                     LEFT JOIN users u ON u.id = rj.recruiter_id
-                    LEFT JOIN companies c ON c.id = rj.company_id
+                    -- DISABLED: companies table JOIN removed
+                    -- LEFT JOIN companies c ON c.id = rj.company_id
                     WHERE rj.id::text = $1`,
                    [String(appRow.jobId)]
                  );
@@ -438,12 +440,13 @@ export async function GET(request: NextRequest) {
                    console.log('🔍 Trying with string conversion for recruiter job');
                    directResult = await client.query(
                      `SELECT rj.*, 
-                             COALESCE(c.company_name, u.company, 'Recruiter Company') as company_name, 
+                             COALESCE(u.company, 'Recruiter Company') as company_name, 
                              u.location as recruiter_location,
                              u.full_name as recruiter_name
                       FROM recruiter_jobs rj
                       LEFT JOIN users u ON u.id = rj.recruiter_id
-                      LEFT JOIN companies c ON c.id = rj.company_id
+                      -- DISABLED: companies table JOIN removed
+                      -- LEFT JOIN companies c ON c.id = rj.company_id
                       WHERE rj.id = $1::uuid`,
                      [appRow.jobId]
                    );

@@ -88,8 +88,9 @@ export async function GET(request: NextRequest) {
         job: {
           select: {
             id: true,
-            job_title: true,
-            company_id: true
+            job_title: true
+            // DISABLED: company_id removed - companies table is being deleted
+            // company_id: true
           }
         }
       },
@@ -125,7 +126,8 @@ export async function GET(request: NextRequest) {
         position: applicant.user?.position || null,
         company: applicant.user?.company || null,
         jobTitle: applicant.job?.job_title || 'Unknown Job',
-        jobCompany: applicant.job?.company_id || 'Unknown Company',
+        // DISABLED: company_id removed - use user.company as fallback
+        jobCompany: applicant.user?.company || 'Unknown Company',
         status: applicant.status || 'submitted',
         appliedAt: applicant.created_at,
         resumeId: applicant.resume_id,

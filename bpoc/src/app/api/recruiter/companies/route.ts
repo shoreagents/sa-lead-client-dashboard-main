@@ -1,7 +1,16 @@
+// DISABLED: This route is disabled because companies, company_documents, and company_invites tables are being deleted
 import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/database';
+// import pool from '@/lib/database';
 
 export async function GET(request: NextRequest) {
+  // DISABLED: Companies table functionality removed
+  console.warn('⚠️ /api/recruiter/companies is disabled - companies table is being deleted');
+  return NextResponse.json({ 
+    companies: [],
+    message: 'This endpoint is disabled. Companies table functionality has been removed.'
+  }, { status: 410 }); // 410 Gone status code
+  
+  /* DISABLED CODE - Companies table references removed
   try {
     // Fetch companies from members table
     const result = await pool.query(`
@@ -72,4 +81,5 @@ export async function GET(request: NextRequest) {
     ];
     return NextResponse.json({ companies: fallbackCompanies });
   }
+  */
 }
