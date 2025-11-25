@@ -28,11 +28,9 @@ export async function notifyN8nNewUser(user: UserNotificationData) {
     process.env.NEXT_PUBLIC_APP_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.bpoc.io')
 
-  // Try to build a public profile URL
-  const profileSlug =
-    user.slug ||
-    user.username ||
-    (user.email ? user.email.split('@')[0] : '')
+  // Try to build a public profile URL.
+  // Only use slug/username so we don't create links for incomplete profiles.
+  const profileSlug = user.slug || user.username || ''
 
   const profileUrl =
     profileSlug && profileSlug.length > 0

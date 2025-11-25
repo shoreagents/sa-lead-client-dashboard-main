@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import pool from '@/lib/database'
+import { notifyN8nNewUser } from '@/lib/n8n'
 import { createClient } from '@supabase/supabase-js'
 
 // GET - Fetch user profile from Railway
@@ -305,8 +306,32 @@ export async function PUT(request: NextRequest) {
     console.log('✅ API: User profile updated:', {
       id: updatedUser.id,
       full_name: updatedUser.full_name,
-      avatar_url: updatedUser.avatar_url
+      avatar_url: updatedUser.avatar_url,
+      completed_data: updatedUser.completed_data,
+      slug: updatedUser.slug,
+      username: updatedUser.username
     })
+
+    // If profile just became completed for the first time, trigger n8n notification
+    const justCompleted =
+      existing.completed_data !== true && completedData === true
+
+    if (justCompleted) {
+      try {
+        await notifyN8nNewUser({
+          id: updatedUser.id,
+          email: updatedUser.email,
+          full_name: updatedUser.full_name,
+          admin_level: updatedUser.admin_level,
+          created_at: updatedUser.created_at,
+          slug: updatedUser.slug,
+          username: updatedUser.username
+        })
+      } catch (e) {
+        console.error('❌ Failed to send n8n signup notification:', e)
+      }
+    }
+
     console.log('🚀🚀🚀 DATABASE UPDATE COMPLETED - About to start position sync!')
 
     // Sync position changes to user_work_status table
