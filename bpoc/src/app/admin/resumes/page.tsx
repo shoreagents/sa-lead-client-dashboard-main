@@ -82,7 +82,7 @@ export default function ResumesPage() {
   const [forceDeleteMode, setForceDeleteMode] = useState(false)
 
   const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(10)
+  const [itemsPerPage] = useState(12)
   const [sortOrder, setSortOrder] = useState<string>('latest')
   const [exportingResumeId, setExportingResumeId] = useState<string | null>(null)
 
@@ -1048,7 +1048,7 @@ export default function ResumesPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Resume Cards Grid */}
+            {/* Resume Cards Grid - 12 cards per page: 1 col mobile, 2 cols tablet, 3 cols desktop, 4 cols xl */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {currentResumes.map((resume) => (
                 <motion.div
