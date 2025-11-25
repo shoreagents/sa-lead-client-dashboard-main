@@ -215,7 +215,7 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         ) VALUES (
           $1, $2, COALESCE(NULLIF($3, ''), SPLIT_PART($2, '@', 1)), COALESCE(NULLIF($4, ''), ''), COALESCE(NULLIF($5, ''), $2), $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW(), NOW()
         )
-        RETURNING id, email, first_name, last_name, admin_level
+        RETURNING id, email, first_name, last_name, admin_level, slug, username
       `
       
       const insertResult = await client.query(insertQuery, [
@@ -242,7 +242,9 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         email: insertResult.rows[0].email,
         first_name: insertResult.rows[0].first_name,
         last_name: insertResult.rows[0].last_name,
-        admin_level: insertResult.rows[0].admin_level
+        admin_level: insertResult.rows[0].admin_level,
+        slug: insertResult.rows[0].slug,
+        username: insertResult.rows[0].username
       })
 
       // Send notification to n8n
@@ -252,7 +254,9 @@ export async function syncUserToDatabaseServer(userData: UserData) {
         first_name: insertResult.rows[0].first_name,
         last_name: insertResult.rows[0].last_name,
         admin_level: insertResult.rows[0].admin_level,
-        created_at: new Date()
+        created_at: new Date(),
+        slug: insertResult.rows[0].slug,
+        username: insertResult.rows[0].username
       }).catch(err => console.error('❌ n8n notification error (background):', err))
 
       return {

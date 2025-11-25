@@ -122,7 +122,9 @@ export async function POST(request: NextRequest) {
       first_name: result.rows[0].first_name,
       last_name: result.rows[0].last_name,
       admin_level: result.rows[0].admin_level,
-      created_at: new Date()
+      created_at: new Date(),
+      slug: result.rows[0].slug,
+      username: result.rows[0].username
     }).catch(err => console.error('❌ n8n notification error (background):', err))
 
     return NextResponse.json({ 

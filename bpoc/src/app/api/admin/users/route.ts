@@ -105,7 +105,34 @@ export async function POST(request: NextRequest) {
         })
 
       case 'delete':
-        // Delete user from your users table using PostgreSQL
+        // Manually delete related records first to avoid foreign key constraints
+        console.log('API: Deleting user and related data for:', userId)
+        
+        // 1. Delete user work status
+        await pool.query('DELETE FROM user_work_status WHERE user_id = $1', [userId])
+        
+        // 2. Delete AI analysis results
+        await pool.query('DELETE FROM ai_analysis_results WHERE user_id = $1', [userId])
+        
+        // 3. Delete disc personality stats
+        await pool.query('DELETE FROM disc_personality_stats WHERE user_id = $1', [userId])
+        
+        // 4. Delete typing hero stats
+        await pool.query('DELETE FROM typing_hero_stats WHERE user_id = $1', [userId])
+        
+        // 5. Delete applications (this might cascade to interviews/messages if set up, but safe to delete explicitly)
+        await pool.query('DELETE FROM applications WHERE user_id = $1', [userId])
+        
+        // 6. Delete saved resumes
+        await pool.query('DELETE FROM saved_resumes WHERE user_id = $1', [userId])
+        
+        // 7. Delete resumes extracted
+        await pool.query('DELETE FROM resumes_extracted WHERE user_id = $1', [userId])
+        
+        // 8. Delete resumes generated
+        await pool.query('DELETE FROM resumes_generated WHERE user_id = $1', [userId])
+
+        // 9. Finally delete the user
         const deleteResult = await pool.query(
           'DELETE FROM users WHERE id = $1',
           [userId]
@@ -115,6 +142,7 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
+        console.log('API: User and all related data deleted successfully')
         return NextResponse.json({ message: 'User deleted successfully' })
 
       default:

@@ -9,12 +9,17 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { toast } from '@/components/ui/toast'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   Table,
   TableBody,
@@ -81,6 +86,9 @@ export default function AnalysisPage() {
   const [scoreFilter, setScoreFilter] = useState<string>('all')
   const [selectedAnalysis, setSelectedAnalysis] = useState<Analysis | null>(null)
   const [analysisModalOpen, setAnalysisModalOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [analysisToDelete, setAnalysisToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
 
@@ -240,16 +248,48 @@ export default function AnalysisPage() {
 
   const handleViewAnalysis = (analysis: Analysis) => {
     console.log('handleViewAnalysis called with:', analysis)
-    console.log('Strengths Analysis:', analysis.strengths_analysis)
-    console.log('Salary Analysis:', analysis.salary_analysis)
-    console.log('Career Path:', analysis.career_path)
-    console.log('Section Analysis:', analysis.section_analysis)
     try {
       setSelectedAnalysis(analysis)
       setAnalysisModalOpen(true)
-      console.log('Modal state updated - selectedAnalysis:', analysis, 'analysisModalOpen:', true)
     } catch (error) {
       console.error('Error in handleViewAnalysis:', error)
+    }
+  }
+
+  const confirmDelete = (id: string) => {
+    setAnalysisToDelete(id)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteAnalysis = async () => {
+    if (!analysisToDelete) return
+
+    try {
+      setIsDeleting(true)
+      const response = await fetch(`/api/admin/analysis/${analysisToDelete}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setAnalyses(prev => prev.filter(a => a.id !== analysisToDelete))
+        // Update stats
+        setStats(prev => ({
+          ...prev,
+          totalAnalyses: prev.totalAnalyses - 1,
+          completedAnalyses: prev.completedAnalyses - 1
+        }))
+        toast.success('Analysis deleted successfully')
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to delete analysis')
+      }
+    } catch (error) {
+      console.error('Error deleting analysis:', error)
+      toast.error('Error deleting analysis')
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+      setAnalysisToDelete(null)
     }
   }
 
@@ -479,10 +519,7 @@ export default function AnalysisPage() {
                             <DropdownMenuContent className="bg-gray-900 border-white/10">
                               <DropdownMenuItem 
                                 className="text-red-400"
-                                onClick={() => {
-                                  // Add delete functionality here
-                                  console.log('Delete analysis:', analysis.id)
-                                }}
+                                onClick={() => confirmDelete(analysis.id)}
                               >
                                 Delete
                               </DropdownMenuItem>
@@ -714,6 +751,28 @@ export default function AnalysisPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-gray-900 border-white/10 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Analysis Result</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Are you sure you want to delete this analysis result? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-white/10 text-white hover:bg-white/10 hover:text-white">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteAnalysis}
+              className="bg-red-600 hover:bg-red-700 text-white border-0"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   )
 }
