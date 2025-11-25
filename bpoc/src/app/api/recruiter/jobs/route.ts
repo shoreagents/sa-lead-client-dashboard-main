@@ -29,9 +29,13 @@ export async function GET(request: NextRequest) {
     console.log('🔍 Is company admin:', user.is_company_admin)
     console.log('🔍 Company ID:', user.company_id)
     
-    const whereClause = user.is_company_admin && user.company_id
-      ? { company_id: user.company_id }
-      : { recruiter_id: userId }
+    // DISABLED: company_id filtering removed - companies table is being deleted
+    // const whereClause = user.is_company_admin && user.company_id
+    //   ? { company_id: user.company_id }
+    //   : { recruiter_id: userId }
+    
+    // Always filter by recruiter_id now (company_id filtering disabled)
+    const whereClause = { recruiter_id: userId }
     
     const recruiterJobs = await (prisma as any).RecruiterJob.findMany({
       where: whereClause,
@@ -43,13 +47,14 @@ export async function GET(request: NextRequest) {
             company: true,
             company_id: true
           }
-        },
-        companies: {
-          select: {
-            id: true,
-            name: true
-          }
         }
+        // DISABLED: companies relation removed
+        // companies: {
+        //   select: {
+        //     id: true,
+        //     name: true
+        //   }
+        // }
       },
       orderBy: { created_at: 'desc' }
     })
@@ -70,9 +75,10 @@ export async function GET(request: NextRequest) {
         title: row.job_title,
         recruiter: row.recruiter,
         company: row.recruiter?.company,
-        company_id: row.company_id,
-        companies: row.companies,
-        finalCompany: row.recruiter?.company || row.companies?.name || row.company_id || 'Unknown Company'
+        company_id: row.company_id
+        // DISABLED: companies relation removed
+        // companies: row.companies,
+        // finalCompany: row.recruiter?.company || row.companies?.name || row.company_id || 'Unknown Company'
       });
       
       return {
@@ -86,7 +92,8 @@ export async function GET(request: NextRequest) {
         salaryMin: row.salary_min || 0,
         salaryMax: row.salary_max || 0,
         status: row.status || 'inactive',
-        company: row.recruiter?.company || row.companies?.name || row.company_id || 'Unknown Company',
+        // DISABLED: companies table reference removed - use recruiter.company as fallback
+        company: row.recruiter?.company || 'Unknown Company',
         created_at: row.created_at,
         work_type: row.work_type,
         work_arrangement: row.work_arrangement,
@@ -154,17 +161,19 @@ export async function POST(request: NextRequest) {
     
     // Get the recruiter user ID and company from the authenticated user
     const recruiterId = userId
-    const recruiterCompanyId = user.company_id
+    // DISABLED: company_id check removed - companies table is being deleted
+    // const recruiterCompanyId = user.company_id
     console.log('🔍 Recruiter ID:', recruiterId)
-    console.log('🔍 Recruiter Company ID:', recruiterCompanyId)
+    // console.log('🔍 Recruiter Company ID:', recruiterCompanyId)
     
+    // DISABLED: Company requirement check removed
     // Check if company is set (required for new B2B model)
-    if (!recruiterCompanyId) {
-      console.log('❌ Recruiter not linked to a company!')
-      return NextResponse.json({ 
-        error: 'You must be associated with a company to post jobs. Please register your company first or use an invite code to join an existing company.' 
-      }, { status: 400 })
-    }
+    // if (!recruiterCompanyId) {
+    //   console.log('❌ Recruiter not linked to a company!')
+    //   return NextResponse.json({ 
+    //     error: 'You must be associated with a company to post jobs. Please register your company first or use an invite code to join an existing company.' 
+    //   }, { status: 400 })
+    // }
     
     // Map enum values from frontend format to database enum format
     const mapExperienceLevel = (level: string) => {
@@ -224,7 +233,9 @@ export async function POST(request: NextRequest) {
     // Prepare job data for insertion
     const jobData = {
       recruiter_id: recruiterId,
-      company_id: recruiterCompanyId,
+      // DISABLED: company_id removed - companies table is being deleted
+      // company_id: recruiterCompanyId,
+      company_id: null, // Set to null since companies table is being deleted
       job_title: body.job_title,
       job_description: body.job_description,
       industry: body.industry,

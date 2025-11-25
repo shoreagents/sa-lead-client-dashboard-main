@@ -105,11 +105,12 @@ export async function GET(request: NextRequest) {
         
         try {
           // Get job details from recruiter_jobs table with company name
+          // DISABLED: companies table JOIN removed
           const jobQuery = `
-            SELECT rj.job_title, COALESCE(c.company_name, u.company, 'Unknown Company') as company_name
+            SELECT rj.job_title, COALESCE(u.company, 'Unknown Company') as company_name
             FROM recruiter_jobs rj
             LEFT JOIN users u ON u.id = rj.recruiter_id
-            LEFT JOIN companies c ON c.id = rj.company_id
+            -- DISABLED: LEFT JOIN companies c ON c.id = rj.company_id
             WHERE rj.id = $1
           `;
           const jobResult = await client.query(jobQuery, [row.job_id]);
