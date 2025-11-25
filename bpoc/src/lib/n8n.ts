@@ -1,6 +1,4 @@
 
-import { User } from '@/types/user' // Assuming a User type exists, or define a minimal interface
-
 interface UserNotificationData {
   id: string
   email: string
@@ -9,6 +7,8 @@ interface UserNotificationData {
   last_name?: string | null
   admin_level?: string | null
   created_at?: string | Date | null
+  slug?: string | null
+  username?: string | null
 }
 
 /**
@@ -23,6 +23,22 @@ export async function notifyN8nNewUser(user: UserNotificationData) {
     return
   }
 
+  // Determine base URL for profile links
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://www.bpoc.io')
+
+  // Try to build a public profile URL
+  const profileSlug =
+    user.slug ||
+    user.username ||
+    (user.email ? user.email.split('@')[0] : '')
+
+  const profileUrl =
+    profileSlug && profileSlug.length > 0
+      ? `${baseUrl.replace(/\/+$/, '')}/${profileSlug}`
+      : null
+
   // Construct the payload
   const payload = {
     event: 'user_signup',
@@ -31,7 +47,8 @@ export async function notifyN8nNewUser(user: UserNotificationData) {
       email: user.email,
       full_name: user.full_name || `${user.first_name || ''} ${user.last_name || ''}`.trim(),
       admin_level: user.admin_level || 'user',
-      created_at: user.created_at || new Date().toISOString()
+      created_at: user.created_at || new Date().toISOString(),
+      profile_url: profileUrl
     },
     source: 'bpoc_app',
     timestamp: new Date().toISOString()

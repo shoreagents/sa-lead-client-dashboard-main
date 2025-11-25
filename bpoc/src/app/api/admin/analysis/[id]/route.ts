@@ -72,3 +72,27 @@ export async function GET(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    console.log('API: Deleting analysis with ID:', id)
+
+    const result = await pool.query(
+      'DELETE FROM ai_analysis_results WHERE id = $1',
+      [id]
+    )
+
+    if (result.rowCount === 0) {
+      return NextResponse.json({ error: 'Analysis not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ message: 'Analysis deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting analysis:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
