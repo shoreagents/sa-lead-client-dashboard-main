@@ -34,6 +34,8 @@ interface TypingHeroStats {
 interface DiscPersonalityStats {
   id: string
   user_id: string
+  total_sessions?: number
+  completed_sessions?: number
   last_taken_at: string
   d: number
   i: number
@@ -42,9 +44,9 @@ interface DiscPersonalityStats {
   primary_style: string
   secondary_style: string
   best_confidence_score: number
-  strengths: string[]
-  blind_spots: string[]
-  preferred_env: string[]
+  strengths?: string[]
+  blind_spots?: string[]
+  preferred_env?: string[]
   created_at: string
   updated_at: string
   user_name: string
@@ -156,15 +158,27 @@ export default function GamesPage() {
   // Filter DISC Personality stats
   const filteredDiscPersonalityStats = discPersonalityStats.filter(stat => {
     const matchesSearch = stat.user_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         stat.user_email.toLowerCase().includes(searchTerm.toLowerCase())
+                         stat.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         stat.primary_style?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         stat.secondary_style?.toLowerCase().includes(searchTerm.toLowerCase())
     
     if (!matchesSearch) return false
     
     switch (filterType) {
+      case 'primary-d':
+        return stat.primary_style === 'D'
+      case 'primary-i':
+        return stat.primary_style === 'I'
+      case 'primary-s':
+        return stat.primary_style === 'S'
+      case 'primary-c':
+        return stat.primary_style === 'C'
       case 'high-confidence':
         return stat.best_confidence_score >= 80
       case 'recent':
         return stat.last_taken_at && new Date(stat.last_taken_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      case 'multiple-sessions':
+        return (stat.total_sessions || 0) > 1
       case 'all':
       default:
         return true
@@ -511,13 +525,18 @@ export default function GamesPage() {
               <div className="flex items-center gap-4 ml-auto">
                 <div className="relative">
                   <Select value={filterType || 'all'} onValueChange={handleFilterChange}>
-                    <SelectTrigger className="w-[180px] bg-white/10 border-white/20 text-white focus:ring-cyan-500">
-                      <SelectValue placeholder="All Players" />
+                    <SelectTrigger className="w-[200px] bg-white/10 border-white/20 text-white focus:ring-cyan-500">
+                      <SelectValue placeholder="Filter by..." />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-900 border-white/10">
                       <SelectItem value="all">All Players</SelectItem>
+                      <SelectItem value="primary-d">Primary: D (Dominance)</SelectItem>
+                      <SelectItem value="primary-i">Primary: I (Influence)</SelectItem>
+                      <SelectItem value="primary-s">Primary: S (Steadiness)</SelectItem>
+                      <SelectItem value="primary-c">Primary: C (Conscientiousness)</SelectItem>
                       <SelectItem value="high-confidence">High Confidence (80%+)</SelectItem>
-                      <SelectItem value="recent">Recently Active</SelectItem>
+                      <SelectItem value="recent">Recently Active (7 days)</SelectItem>
+                      <SelectItem value="multiple-sessions">Multiple Sessions</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
