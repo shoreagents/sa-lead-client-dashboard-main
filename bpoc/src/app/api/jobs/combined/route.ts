@@ -14,12 +14,15 @@ function formatSalary(currency: string, min: number | null, max: number | null, 
 
 export async function GET(_request: NextRequest) {
   try {
-    // Fetch from job_requests (admin jobs)
+    // Fetch from job_requests (admin jobs) - only unprocessed ones
     const jobRequestsRes = await pool.query(`
       SELECT jr.*, m.company AS company_name
       FROM job_requests jr
       LEFT JOIN members m ON m.company_id = jr.company_id
       WHERE jr.status = 'active'
+        AND NOT EXISTS (
+          SELECT 1 FROM processed_job_requests p WHERE p.id = jr.id
+        )
       ORDER BY jr.created_at DESC
     `)
 

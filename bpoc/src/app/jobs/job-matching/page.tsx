@@ -173,6 +173,10 @@ function JobMatchingContent() {
   const [showResumeModal, setShowResumeModal] = useState(false)
   const [hasResume, setHasResume] = useState<boolean | null>(null)
   const [showAIAnalysis, setShowAIAnalysis] = useState(false)
+  
+  // Use ref to track max progress to prevent going backwards
+  const maxProgressRef = useRef(0)
+  const isMatchingRef = useRef(false)
 
 
   // Fetch jobs and calculate match scores
@@ -249,13 +253,23 @@ function JobMatchingContent() {
         setJobs(mapped)
 
         // Calculate match scores for each job if user is logged in and has resume
-        if (user?.id && hasResume) {
+        if (user?.id && hasResume && !isMatchingRef.current) {
+          isMatchingRef.current = true
           setIsLoadingMatches(true)
+          maxProgressRef.current = 0
           setAnalysisProgress(0)
+          
+          // Helper function to update progress (only increases)
+          const updateProgress = (newProgress: number) => {
+            if (newProgress > maxProgressRef.current) {
+              maxProgressRef.current = newProgress
+              setAnalysisProgress(newProgress)
+            }
+          }
           
           try {
             const jobIds = mapped.map((job: any) => job.originalId)
-            setAnalysisProgress(25)
+            updateProgress(10) // Initial progress
             
             const response = await fetch('/api/jobs/batch-match', {
               method: 'POST',
@@ -268,14 +282,21 @@ function JobMatchingContent() {
               })
             })
 
+            updateProgress(40) // After request sent
+
             if (response.ok) {
+              updateProgress(60) // Response received
+              
               const data = await response.json()
-              setAnalysisProgress(75)
+              updateProgress(75) // Data parsed
               
               const scores: {[key: string]: any} = {}
               
               // Process results - map originalId back to combined job.id
               if (data.results) {
+                const totalResults = Object.keys(data.results).length
+                let processedCount = 0
+                
                 Object.entries(data.results).forEach(([originalId, result]: [string, any]) => {
                   // Find the corresponding job with this originalId
                   // Normalize IDs for comparison (recruiter jobs use UUIDs)
@@ -298,11 +319,16 @@ function JobMatchingContent() {
                     console.warn(`⚠️ Could not find job for originalId=${originalId} in mapped jobs`);
                     console.warn(`⚠️ Available originalIds:`, mapped.map((j: any) => ({ id: j.id, originalId: j.originalId })));
                   }
+                  
+                  processedCount++
+                  // Update progress as we process each result
+                  const processingProgress = 75 + Math.round((processedCount / totalResults) * 20)
+                  updateProgress(processingProgress)
                 })
               }
               
               setMatchScores(scores)
-              setAnalysisProgress(100)
+              updateProgress(100)
             } else {
               const errorText = await response.text()
               console.error('Batch match API error:', response.status, errorText)
@@ -322,12 +348,21 @@ function JobMatchingContent() {
               }
             })
             setMatchScores(scores)
-            setAnalysisProgress(100)
+            // Update progress even in error case
+            if (maxProgressRef.current < 100) {
+              maxProgressRef.current = 100
+              setAnalysisProgress(100)
+            }
           }
           
           setTimeout(() => {
             setIsLoadingMatches(false)
-            setAnalysisProgress(0)
+            isMatchingRef.current = false
+            // Don't reset progress to 0 - keep it at 100 briefly, then fade out
+            setTimeout(() => {
+              setAnalysisProgress(0)
+              maxProgressRef.current = 0
+            }, 300)
           }, 500)
         }
       } catch (e) {
@@ -337,9 +372,9 @@ function JobMatchingContent() {
     })()
   }, [user?.id, hasResume])
 
-  // Refresh match scores when user changes
+  // Refresh match scores when user changes (fallback for individual matching)
   useEffect(() => {
-    if (user?.id && jobs.length > 0 && hasResume) {
+    if (user?.id && jobs.length > 0 && hasResume && !isMatchingRef.current) {
       // Check if we already have match scores for all jobs
       const hasAllScores = jobs.every(job => matchScores[job.id])
       
@@ -350,17 +385,27 @@ function JobMatchingContent() {
       
       (async () => {
         try {
+          isMatchingRef.current = true
           setIsLoadingMatches(true)
+          maxProgressRef.current = 0
           setAnalysisProgress(0)
+          
+          // Helper function to update progress (only increases)
+          const updateProgress = (newProgress: number) => {
+            if (newProgress > maxProgressRef.current) {
+              maxProgressRef.current = newProgress
+              setAnalysisProgress(newProgress)
+            }
+          }
           
           const scores: {[key: string]: any} = {}
           const totalJobs = jobs.length
           
           for (let i = 0; i < jobs.length; i++) {
             const job = jobs[i]
-            const progress = Math.round(((i + 1) / totalJobs) * 100)
-            
-            setAnalysisProgress(progress)
+            // Calculate progress: 5% base + 90% for jobs + 5% final
+            const progress = 5 + Math.round(((i + 1) / totalJobs) * 90)
+            updateProgress(progress)
             
             try {
               // Normalize originalId for the API call (ensure it's the database ID)
@@ -432,7 +477,7 @@ function JobMatchingContent() {
             await new Promise(resolve => setTimeout(resolve, 200))
           }
           
-          setAnalysisProgress(100)
+          updateProgress(100)
           setMatchScores(scores)
         } catch (error) {
           console.error('Error in individual job matching:', error)
@@ -445,7 +490,12 @@ function JobMatchingContent() {
         } finally {
           setTimeout(() => {
             setIsLoadingMatches(false)
-            setAnalysisProgress(0)
+            isMatchingRef.current = false
+            // Don't reset progress to 0 - keep it at 100 briefly, then fade out
+            setTimeout(() => {
+              setAnalysisProgress(0)
+              maxProgressRef.current = 0
+            }, 300)
           }, 500)
         }
       })()

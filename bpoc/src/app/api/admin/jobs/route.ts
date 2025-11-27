@@ -62,6 +62,32 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
+    // Get jobs from recruiter_jobs table
+    console.log('📊 Fetching recruiter_jobs...');
+    let recruiterJobsResult;
+    try {
+      recruiterJobsResult = await pool.query(`
+      SELECT 
+        rj.*, 
+        COALESCE(rj.company_id::text, u.company) AS company_name,
+        COALESCE(app_counts.applicant_count, 0) AS real_applicants,
+        'recruiter_jobs' as source_table
+      FROM recruiter_jobs rj
+      LEFT JOIN users u ON u.id = rj.recruiter_id
+      LEFT JOIN (
+        SELECT job_id, COUNT(*) as applicant_count
+        FROM recruiter_applications
+        GROUP BY job_id
+      ) app_counts ON app_counts.job_id = rj.id
+      WHERE rj.status = 'active'
+      ORDER BY rj.created_at DESC
+    `)
+      console.log(`✅ recruiter_jobs query completed: ${recruiterJobsResult.rows.length} rows`);
+    } catch (error) {
+      console.error('❌ Error in recruiter_jobs query:', error);
+      throw error;
+    }
+
     // Process job_requests (admin jobs)
     console.log('🔄 Processing job_requests...');
     const jobRequests = await Promise.all(jobRequestsResult.rows.map(async (row: any) => {
@@ -198,12 +224,80 @@ export async function GET(request: NextRequest) {
       }
     }))
 
+    // Process recruiter_jobs
+    console.log('🔄 Processing recruiter_jobs...');
+    const recruiterJobs = await Promise.all(recruiterJobsResult.rows.map(async (row: any) => {
+      const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM recruiter_applications WHERE job_id = $1', [row.id])
+      const realApplicants = apps.rows?.[0]?.cnt ?? 0
+      const employmentType: string[] = []
+      if (row.work_type) employmentType.push(capitalize(String(row.work_type)))
+      if (row.experience_level) employmentType.push(capitalize(String(row.experience_level)))
+      const salary = formatSalary(String(row.currency || 'PHP'), row.salary_min != null ? Number(row.salary_min) : null, row.salary_max != null ? Number(row.salary_max) : null, String(row.salary_type || 'monthly'))
+      const createdAt = row.created_at ? new Date(row.created_at) : new Date()
+      const ms = Date.now() - createdAt.getTime()
+      const minutes = Math.floor(ms / (1000 * 60))
+      const hours = Math.floor(minutes / 60)
+      const days = Math.floor(hours / 24)
+      
+      let postedDays: number
+      if (days > 0) {
+        postedDays = days
+      } else if (hours > 0) {
+        postedDays = 0 // Will show as "Just now" in frontend
+      } else if (minutes > 0) {
+        postedDays = 0 // Will show as "Just now" in frontend
+      } else {
+        postedDays = 0 // Will show as "Just now" in frontend
+      }
+      const locationType = String(row.work_arrangement || 'onsite')
+      const priorityFromDb = String(row.priority ?? '').toLowerCase()
+      const priority: 'low' | 'medium' | 'high' | 'urgent' =
+        ['low', 'medium', 'high', 'urgent'].includes(priorityFromDb)
+          ? (priorityFromDb as any)
+          : ((): 'low' | 'medium' | 'high' => {
+              if (realApplicants >= 50) return 'high'
+              if (realApplicants >= 10) return 'medium'
+              return 'low'
+            })()
+
+      return {
+        id: `recruiter_jobs_${row.id}`,
+        originalId: String(row.id),
+        source: 'recruiter_jobs',
+        company: row.company_name || 'Unknown Company',
+        companyLogo: '🏢',
+        title: row.job_title || 'Untitled Role',
+        location: '',
+        locationType: locationType === 'onsite' ? 'on-site' : locationType,
+        salary,
+        employmentType,
+        postedDays,
+        applicants: realApplicants,
+        status: 'hiring' as const, // recruiter_jobs with status='active' should show as 'hiring'
+        priority,
+        createdAt: row.created_at,
+        applicationDeadline: row.application_deadline,
+        experienceLevel: row.experience_level,
+        workArrangement: row.work_arrangement,
+        shift: row.shift,
+        industry: row.industry,
+        department: row.department,
+        workType: row.work_type,
+        currency: row.currency,
+        salaryType: row.salary_type,
+        salary_min: row.salary_min,
+        salary_max: row.salary_max,
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      }
+    }))
+
     // Combine all jobs and sort by creation date
-    const allJobs = [...jobRequests, ...processedJobs].sort((a, b) => 
+    const allJobs = [...jobRequests, ...processedJobs, ...recruiterJobs].sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
 
-    console.log(`🔍 Admin Jobs API: Found ${jobRequests.length} jobs from job_requests, ${processedJobs.length} jobs from processed_job_requests`)
+    console.log(`🔍 Admin Jobs API: Found ${jobRequests.length} jobs from job_requests, ${processedJobs.length} jobs from processed_job_requests, ${recruiterJobs.length} jobs from recruiter_jobs`)
     console.log(`📊 Total: ${allJobs.length} active jobs`)
 
     // Jobs are already processed, just return them

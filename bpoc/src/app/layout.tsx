@@ -60,7 +60,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  // Icon is automatically handled by Next.js via icon.tsx
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg',
+    shortcut: '/icon.svg',
+  },
   manifest: "/site.webmanifest",
 };
 

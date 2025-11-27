@@ -13,17 +13,65 @@ function formatSalary(currency: string, min: number | null, max: number | null, 
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = Number((await params).id)
-    if (!id || Number.isNaN(id)) return NextResponse.json({ error: 'id required' }, { status: 400 })
+    const rawId = (await params).id
+    if (!rawId) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
-    const res = await pool.query(
-      `SELECT p.*, m.company AS company_name
-       FROM processed_job_requests p
-       LEFT JOIN members m ON m.company_id = p.company_id
-       WHERE p.id = $1 AND p.status IN ('processed','active')
-       LIMIT 1`,
-      [id]
-    )
+    // Parse prefixed IDs: processed_{id}, job_request_{id}, recruiter_{id}
+    let actualId: number | string | null = null
+    let source: 'processed' | 'job_request' | 'recruiter' | null = null
+
+    if (rawId.startsWith('processed_')) {
+      actualId = Number(rawId.replace('processed_', ''))
+      source = 'processed'
+    } else if (rawId.startsWith('job_request_')) {
+      actualId = Number(rawId.replace('job_request_', ''))
+      source = 'job_request'
+    } else if (rawId.startsWith('recruiter_')) {
+      actualId = rawId.replace('recruiter_', '')
+      source = 'recruiter'
+    } else {
+      // Fallback: try as numeric ID (for backward compatibility)
+      actualId = Number(rawId)
+      source = 'processed'
+    }
+
+    if (!actualId || (typeof actualId === 'number' && Number.isNaN(actualId))) {
+      return NextResponse.json({ error: 'invalid id' }, { status: 400 })
+    }
+
+    let res
+    if (source === 'recruiter') {
+      // Query recruiter_jobs
+      res = await pool.query(
+        `SELECT rj.*, COALESCE(rj.company_id::text, u.company) AS company_name
+         FROM recruiter_jobs rj
+         LEFT JOIN users u ON u.id = rj.recruiter_id
+         WHERE rj.id = $1 AND rj.status = 'active'
+         LIMIT 1`,
+        [actualId]
+      )
+    } else if (source === 'job_request') {
+      // Query job_requests
+      res = await pool.query(
+        `SELECT jr.*, m.company AS company_name
+         FROM job_requests jr
+         LEFT JOIN members m ON m.company_id = jr.company_id
+         WHERE jr.id = $1 AND jr.status = 'active'
+         LIMIT 1`,
+        [actualId]
+      )
+    } else {
+      // Query processed_job_requests (default)
+      res = await pool.query(
+        `SELECT p.*, m.company AS company_name
+         FROM processed_job_requests p
+         LEFT JOIN members m ON m.company_id = p.company_id
+         WHERE p.id = $1 AND p.status IN ('processed','active')
+         LIMIT 1`,
+        [actualId]
+      )
+    }
+
     if (res.rows.length === 0) return NextResponse.json({ error: 'not found' }, { status: 404 })
     const row = res.rows[0]
 
@@ -36,13 +84,18 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     const postedDays = Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)))
     const locationType = String(row.work_arrangement || 'onsite')
 
-    // Count real applications from applications table (unique per user by constraint)
-    const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [id])
+    // Count real applications from appropriate table
+    let apps
+    if (source === 'recruiter') {
+      apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM recruiter_applications WHERE job_id = $1', [actualId])
+    } else {
+      apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [actualId])
+    }
     const realApplicants = apps.rows?.[0]?.cnt ?? 0
 
     const job = {
-      id: String(row.id),
-      company: 'ShoreAgents',
+      id: source === 'recruiter' ? `recruiter_${row.id}` : source === 'job_request' ? `job_request_${row.id}` : `processed_${row.id}`,
+      company: source === 'recruiter' ? (row.company_name || 'Company') : 'ShoreAgents',
       companyLogo: row.company_logo || '🏢',
       title: row.job_title || 'Untitled Role',
       location: row.location || row['location'] || '',
