@@ -104,9 +104,14 @@ export async function GET(request: NextRequest) {
     const activeResumes = parseInt(resumesResult.rows[0]?.count || '0')
 
     // Fetch active jobs count from all three sources (matching job-matching page)
-    // 1. job_requests (admin jobs)
+    // 1. job_requests (admin jobs) - only unprocessed ones
     const jobRequestsResult = await pool.query(
-      "SELECT COUNT(*) as count FROM job_requests WHERE status = 'active'"
+      `SELECT COUNT(*) as count 
+       FROM job_requests 
+       WHERE status = 'active'
+         AND NOT EXISTS (
+           SELECT 1 FROM processed_job_requests p WHERE p.id = job_requests.id
+         )`
     )
     const jobRequestsCount = parseInt(jobRequestsResult.rows[0]?.count || '0')
 

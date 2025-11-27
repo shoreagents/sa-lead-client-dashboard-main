@@ -6,10 +6,32 @@ export async function GET(request: NextRequest) {
     const rawJobId = (request.nextUrl.searchParams.get('jobId') || '').trim()
     if (!rawJobId) return NextResponse.json({ error: 'jobId required' }, { status: 400 })
 
-    // Check if it's a recruiter job (UUID format or starts with 'recruiter_')
-    const isRecruiterJob = rawJobId.startsWith('recruiter_') || rawJobId.includes('-')
-    const actualJobId = isRecruiterJob ? rawJobId.replace('recruiter_', '') : rawJobId
-    const numericJobId = isRecruiterJob ? null : Number(actualJobId)
+    // Parse prefixed IDs: processed_{id}, job_request_{id}, recruiter_{id}
+    let actualJobId: number | string | null = null
+    let isRecruiterJob = false
+    
+    if (rawJobId.startsWith('recruiter_')) {
+      actualJobId = rawJobId.replace('recruiter_', '')
+      isRecruiterJob = true
+    } else if (rawJobId.startsWith('processed_')) {
+      actualJobId = Number(rawJobId.replace('processed_', ''))
+      isRecruiterJob = false
+    } else if (rawJobId.startsWith('job_request_')) {
+      actualJobId = Number(rawJobId.replace('job_request_', ''))
+      isRecruiterJob = false
+    } else {
+      // Fallback: try as numeric ID (for backward compatibility)
+      // Also check if it contains '-' which might indicate a UUID (recruiter job)
+      if (rawJobId.includes('-') && rawJobId.length > 10) {
+        actualJobId = rawJobId
+        isRecruiterJob = true
+      } else {
+        actualJobId = Number(rawJobId)
+        isRecruiterJob = false
+      }
+    }
+    
+    const numericJobId = isRecruiterJob ? null : (typeof actualJobId === 'number' ? actualJobId : null)
 
     // For development, allow access without strict authentication
     if (process.env.NODE_ENV === 'development') {
@@ -30,7 +52,7 @@ export async function GET(request: NextRequest) {
         )
       } else {
         if (!numericJobId || Number.isNaN(numericJobId)) return NextResponse.json({ error: 'Invalid jobId' }, { status: 400 })
-        // Query applications for regular jobs
+        // Query applications for regular jobs (both processed_job_requests and job_requests use the same applications table)
         res = await pool.query(
           `SELECT a.*, 
                   u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,

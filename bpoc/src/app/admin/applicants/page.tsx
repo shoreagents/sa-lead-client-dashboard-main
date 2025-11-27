@@ -95,7 +95,8 @@ export default function Page() {
 
   const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
   const openJob = (job: JobSummary) => {
-    const slug = `${slugify(job.company)}-${slugify(job.title)}-${job.id}`
+    // Slugify the ID to convert underscores to hyphens (e.g., processed_133 -> processed-133)
+    const slug = `${slugify(job.company)}-${slugify(job.title)}-${slugify(job.id)}`
     router.push(`/admin/applicants/${encodeURIComponent(slug)}`)
   }
 

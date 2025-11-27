@@ -41,13 +41,28 @@ import {
 } from 'lucide-react'
 
 function extractIdFromSlug(slug: string): string | null {
-  // Expect format: some-slug-{id} or some-slug-recruiter-{uuid}
+  // Expect format: some-slug-{prefix}-{id} or some-slug-{id}
+  // New format supports: processed_{id}, job_request_{id}, recruiter_{id}
   const parts = slug.split('-')
-  const last = parts[parts.length - 1]
   
-  // Check if it's a numeric ID
-  if (/^[0-9]+$/.test(last)) {
-    return last
+  // Check for prefixed IDs at the end of the slug (most reliable)
+  // Pattern: ...-processed-{id} or ...-job-request-{id}
+  if (parts.length >= 2) {
+    const lastTwo = parts.slice(-2)
+    const last = parts[parts.length - 1]
+    
+    // Check for processed-{id} pattern
+    if (lastTwo[0] === 'processed' && /^[0-9]+$/.test(last)) {
+      return `processed_${last}`
+    }
+    
+    // Check for job-request-{id} pattern
+    if (parts.length >= 3) {
+      const lastThree = parts.slice(-3)
+      if (lastThree[0] === 'job' && lastThree[1] === 'request' && /^[0-9]+$/.test(last)) {
+        return `job_request_${last}`
+      }
+    }
   }
   
   // Check if it's a recruiter job (contains 'recruiter' in the slug)
@@ -68,6 +83,12 @@ function extractIdFromSlug(slug: string): string | null {
         return `recruiter_${potentialUuid}`
       }
     }
+  }
+  
+  // Fallback: check if last part is a numeric ID (for backward compatibility)
+  const last = parts[parts.length - 1]
+  if (/^[0-9]+$/.test(last)) {
+    return last
   }
   
   return null

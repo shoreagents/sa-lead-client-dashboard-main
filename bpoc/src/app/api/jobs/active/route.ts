@@ -28,6 +28,9 @@ export async function GET(_request: NextRequest) {
       FROM job_requests jr
       LEFT JOIN members m ON m.company_id = jr.company_id
       WHERE jr.status = 'active'
+        AND NOT EXISTS (
+          SELECT 1 FROM processed_job_requests p WHERE p.id = jr.id
+        )
       ORDER BY jr.created_at DESC
     `)
 
@@ -62,7 +65,7 @@ export async function GET(_request: NextRequest) {
             })()
 
       return {
-        id: String(row.id),
+        id: `processed_${row.id}`,
         company: 'ShoreAgents',
         companyLogo: row.company_logo || '🏢',
         title: row.job_title || 'Untitled Role',
@@ -106,7 +109,7 @@ export async function GET(_request: NextRequest) {
             })()
 
       return {
-        id: String(row.id),
+        id: `job_request_${row.id}`,
         company: 'ShoreAgents',
         companyLogo: row.company_logo || '🏢',
         title: row.job_title || 'Untitled Role',
