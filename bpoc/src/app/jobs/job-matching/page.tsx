@@ -101,6 +101,8 @@ function JobMatchingContent() {
   const [applicationType, setApplicationType] = useState<'success' | 'error' | 'info'>('success');
   const [appliedMap, setAppliedMap] = useState<Record<string, boolean>>({});
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+  const [shareModalData, setShareModalData] = useState<{ platform: string; text: string; url: string }>({ platform: '', text: '', url: '' });
   // Use Header's auth modals by toggling URL search params
   const shareRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -532,10 +534,12 @@ function JobMatchingContent() {
         
         try {
           await navigator.clipboard.writeText(facebookShareText);
+          setShareModalData({ platform: 'Facebook', text: facebookShareText, url: jobUrl });
+          setShowShareModal(true);
           setTimeout(() => {
             const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(jobUrl)}`;
             window.open(facebookUrl, '_blank', 'width=600,height=400');
-          }, 300);
+          }, 1500);
         } catch (err) {
           const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(jobUrl)}`;
           window.open(facebookUrl, '_blank', 'width=600,height=400');
@@ -548,10 +552,12 @@ function JobMatchingContent() {
         
         try {
           await navigator.clipboard.writeText(linkedinShareText);
+          setShareModalData({ platform: 'LinkedIn', text: linkedinShareText, url: jobUrl });
+          setShowShareModal(true);
           setTimeout(() => {
             const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(jobUrl)}`;
             window.open(linkedinUrl, '_blank', 'width=600,height=400');
-          }, 300);
+          }, 1500);
         } catch (err) {
           const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(jobUrl)}`;
           window.open(linkedinUrl, '_blank', 'width=600,height=400');
@@ -2014,6 +2020,130 @@ function JobMatchingContent() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className="relative w-full max-w-2xl"
+          >
+            {/* Glow Effects */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 rounded-2xl blur-2xl animate-pulse"></div>
+            
+            {/* Modal Content */}
+            <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-2xl border-2 border-cyan-400/30 shadow-2xl overflow-hidden">
+              {/* Header with Gradient */}
+              <div className="bg-gradient-to-r from-cyan-500 to-purple-600 p-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                      <span className="text-3xl">✓</span>
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Text Copied Successfully!</h3>
+                      <p className="text-cyan-100 text-sm">Ready to share on {shareModalData.platform}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowShareModal(false)}
+                    className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:scale-110"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-6">
+                {/* Instructions */}
+                <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 rounded-xl p-5 border border-cyan-400/20">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-xl">💡</span>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-2">What to do next:</h4>
+                      <ol className="space-y-2 text-gray-300">
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">1.</span>
+                          <span>The {shareModalData.platform} share dialog will open in 1.5 seconds</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">2.</span>
+                          <span>Paste the text below (Ctrl+V or Cmd+V) into the post box</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-cyan-400 font-bold mt-0.5">3.</span>
+                          <span>Your job image will appear automatically - just hit Share!</span>
+                        </li>
+                      </ol>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text Preview */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Post Text Preview</label>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(shareModalData.text);
+                          const btn = document.getElementById('copy-again-btn-job');
+                          if (btn) {
+                            btn.textContent = '✓ Copied!';
+                            setTimeout(() => {
+                              btn.textContent = 'Copy Again';
+                            }, 2000);
+                          }
+                        } catch (err) {
+                          console.error('Failed to copy:', err);
+                        }
+                      }}
+                      id="copy-again-btn-job"
+                      className="text-xs px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg border border-cyan-400/30 transition-all duration-200 hover:scale-105 font-medium"
+                    >
+                      Copy Again
+                    </button>
+                  </div>
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-white/10 max-h-48 overflow-y-auto">
+                    <p className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                      {shareModalData.text}
+                    </p>
+                  </div>
+                </div>
+
+                {/* BPOC Branding Footer */}
+                <div className="flex items-center justify-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">B</span>
+                  </div>
+                  <span className="text-lg font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    BPOC.IO
+                  </span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-400 text-sm">Where BPO Careers Begin</span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowShareModal(false)}
+                    className="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
+                  >
+                    Got It! 👍
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

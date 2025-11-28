@@ -3,16 +3,8 @@ import pool from '@/lib/database'
 
 export async function GET() {
   try {
-    // Count active jobs from all three sources (same as job-matching page)
-    // 1. Count from job_requests table
-    const jobRequestsResult = await pool.query(`
-      SELECT COUNT(*) as count 
-      FROM job_requests 
-      WHERE status = 'active'
-    `)
-    const jobRequestsCount = parseInt(jobRequestsResult.rows[0].count || 0)
-    
-    // 2. Count from processed_job_requests table
+    // Count active jobs from job sources (recruiter_jobs table has been dropped)
+    // 1. Count from processed_job_requests table
     const processedJobsResult = await pool.query(`
       SELECT COUNT(*) as count 
       FROM processed_job_requests 
@@ -20,23 +12,25 @@ export async function GET() {
     `)
     const processedJobsCount = parseInt(processedJobsResult.rows[0].count || 0)
     
-    // 3. Count from recruiter_jobs table
-    const recruiterJobsResult = await pool.query(`
+    // 2. Count from job_requests table (excluding those already in processed_job_requests)
+    const jobRequestsResult = await pool.query(`
       SELECT COUNT(*) as count 
-      FROM recruiter_jobs 
+      FROM job_requests 
       WHERE status = 'active'
+        AND NOT EXISTS (
+          SELECT 1 FROM processed_job_requests p WHERE p.id = job_requests.id
+        )
     `)
-    const recruiterJobsCount = parseInt(recruiterJobsResult.rows[0].count || 0)
+    const jobRequestsCount = parseInt(jobRequestsResult.rows[0].count || 0)
     
     // Total active jobs from all sources
-    const activeJobs = jobRequestsCount + processedJobsCount + recruiterJobsCount
+    const activeJobs = jobRequestsCount + processedJobsCount
     
     return NextResponse.json({ 
       active_jobs: activeJobs,
       breakdown: {
         job_requests: jobRequestsCount,
-        processed_job_requests: processedJobsCount,
-        recruiter_jobs: recruiterJobsCount
+        processed_job_requests: processedJobsCount
       }
     })
   } catch (error) {

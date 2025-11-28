@@ -121,11 +121,8 @@ export async function GET(request: NextRequest) {
     )
     const processedJobsCount = parseInt(processedJobsResult.rows[0]?.count || '0')
 
-    // 3. recruiter_jobs (new recruiter-posted jobs)
-    const recruiterJobsResult = await pool.query(
-      "SELECT COUNT(*) as count FROM recruiter_jobs WHERE status = 'active'"
-    )
-    const recruiterJobsCount = parseInt(recruiterJobsResult.rows[0]?.count || '0')
+    // Recruiter jobs removed - table dropped
+    const recruiterJobsCount = 0
 
     // Combine all active jobs
     const activeJobs = jobRequestsCount + processedJobsCount + recruiterJobsCount

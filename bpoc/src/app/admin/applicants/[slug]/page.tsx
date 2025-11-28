@@ -49,8 +49,8 @@ function extractIdFromSlug(slug: string): string | null {
   // Pattern: ...-processed-{id} or ...-job-request-{id}
   if (parts.length >= 2) {
     const lastTwo = parts.slice(-2)
-    const last = parts[parts.length - 1]
-    
+  const last = parts[parts.length - 1]
+  
     // Check for processed-{id} pattern
     if (lastTwo[0] === 'processed' && /^[0-9]+$/.test(last)) {
       return `processed_${last}`

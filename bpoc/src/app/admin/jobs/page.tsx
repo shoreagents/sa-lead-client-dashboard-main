@@ -2490,20 +2490,9 @@ function JobsPage() {
                       ))}
                     </div>
                     <div className="mt-auto pt-4">
-                      <textarea id="new-comment" className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white min-h-[60px]" placeholder="Write a comment..." />
-                      <Button className="mt-2 w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700" onClick={async ()=>{
-                        const el = document.getElementById('new-comment') as HTMLTextAreaElement | null
-                        if (!el || !el.value.trim()) return
-                        try {
-                          const token = await getSessionToken()
-                          const res = await fetch(`/api/admin/jobs/${editingJob.id}/comments`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ comment: el.value }) })
-                          if (res.ok) {
-                            const data = await res.json()
-                            setEditingJob((p:any)=> ({...(p||{}), __comments: [data.comment, ...((p&&p.__comments)||[])]}))
-                            el.value=''
-                          }
-                        } catch {}
-                      }}>Send</Button>
+                      <div className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-gray-400 text-sm text-center">
+                        Comments feature has been disabled
+                      </div>
                     </div>
                   </div>
                 </>

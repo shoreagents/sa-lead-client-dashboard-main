@@ -92,15 +92,9 @@ export async function POST(request: NextRequest) {
     
     // Check if it's a UUID (recruiter job) or number (processed/job_request job)
     if (typeof actualJobId === 'string' && actualJobId.includes('-')) {
-      // It's a UUID - recruiter job
-      jobType = 'recruiter'
-      uuidJobId = actualJobId
-      
-      // Verify recruiter job exists
-      const recruiterJobCheck = await client.query('SELECT id FROM recruiter_jobs WHERE id = $1', [uuidJobId])
-      if (recruiterJobCheck.rows.length === 0) {
-        return NextResponse.json({ error: 'Recruiter job not found' }, { status: 404 })
-      }
+      // Recruiter jobs removed - reject recruiter job applications
+      await client.query('ROLLBACK')
+      return NextResponse.json({ error: 'Recruiter jobs have been removed. Cannot apply to this job.' }, { status: 410 })
     } else {
       // It's a number - check which table it's in
       numericJobId = Number(actualJobId)
@@ -291,39 +285,8 @@ export async function POST(request: NextRequest) {
         console.error('❌ Error inserting processed job application:', insertError)
         throw insertError
       }
-    } else {
-      // Use recruiter_applications table for recruiter jobs
-      console.log('📝 Checking for existing recruiter job application:', { userId, uuidJobId })
-      existing = await client.query('SELECT * FROM recruiter_applications WHERE user_id = $1 AND job_id = $2 LIMIT 1', [userId, uuidJobId])
-      
-      if (existing.rows.length > 0) {
-        console.log('✅ Application already exists')
-        await client.query('COMMIT')
-        return NextResponse.json({ application: existing.rows[0], created: false })
-      }
-
-      console.log('📝 Inserting new recruiter job application:', { userId, uuidJobId, resumeId, resumeSlug })
-      try {
-        ins = await client.query(
-          `INSERT INTO recruiter_applications (user_id, job_id, resume_id, resume_slug, status)
-           VALUES ($1, $2, $3, $4, 'submitted')
-           RETURNING *`,
-          [userId, uuidJobId, resumeId, resumeSlug]
-        )
-        console.log('✅ Recruiter job application created:', ins.rows[0]?.id)
-
-        // Update the applicants count in recruiter_jobs
-        await client.query(
-          `UPDATE recruiter_jobs 
-           SET applicants = applicants + 1, updated_at = now()
-           WHERE id = $1`,
-          [uuidJobId]
-        )
-      } catch (insertError: any) {
-        console.error('❌ Error inserting recruiter job application:', insertError)
-        throw insertError
-      }
     }
+    // Recruiter jobs removed - this branch should never be reached now
 
     await client.query('COMMIT')
     console.log('✅ Application submitted successfully')

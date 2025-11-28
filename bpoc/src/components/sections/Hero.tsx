@@ -178,7 +178,7 @@ export default function Hero() {
     const scheduleNext = () => {
       const duration = getTabDuration(activeTab)
       timeoutId = setTimeout(() => {
-        setActiveTab((prev) => (prev + 1) % demoTabs.length)
+      setActiveTab((prev) => (prev + 1) % demoTabs.length)
         scheduleNext()
       }, duration)
     }
@@ -819,7 +819,7 @@ export default function Hero() {
                                }}
                              >
                                 {resumeLogs.map((log, i) => (
-                                    <motion.div  
+                                    <motion.div 
                                         key={i}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
@@ -1592,8 +1592,8 @@ export default function Hero() {
                     <div className="w-full h-8 pl-8 pr-3 bg-white/5 border border-white/10 rounded-md text-xs text-gray-300 flex items-center">
                         {talentSearchQuery}
                         {talentDemoStep === 1 && <span className="animate-pulse">|</span>}
-                    </div>
                 </div>
+            </div>
 
                 {/* Filters */}
                 <div className="flex gap-2 mb-3 overflow-x-auto pb-1 flex-shrink-0 scrollbar-hide">
@@ -1602,15 +1602,15 @@ export default function Hero() {
                     </div>
                     <div className="h-6 px-2 bg-white/5 text-gray-400 text-[10px] rounded-md flex items-center border border-white/10 whitespace-nowrap">
                         Available Now
-                    </div>
+                </div>
                     <div className="h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-md flex items-center px-3 text-xs text-white font-medium gap-1 ml-auto">
                         <RefreshCw className={`w-3 h-3 ${talentDemoStep === 2 ? 'animate-spin' : ''}`} />
-                        <span className="hidden sm:inline">Refresh</span>
-                    </div>
+                    <span className="hidden sm:inline">Refresh</span>
                 </div>
+            </div>
 
-                {/* Candidates Grid */}
-                <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 grid grid-cols-2 gap-3 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            {/* Candidates Grid */}
+            <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-white/10 grid grid-cols-2 gap-3 pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                     {talentDemoStep === 2 ? (
                         <div className="col-span-2 flex flex-col items-center justify-center h-32 space-y-2">
                             <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
@@ -1618,114 +1618,114 @@ export default function Hero() {
                         </div>
                     ) : talentDemoStep >= 3 ? (
                      <>
-                        {/* Candidate 1 */}
-                        <Card className="glass-card border-white/10 hover:border-white/20 transition-all duration-300 group relative overflow-hidden">
-                            {/* Profile Header */}
-                            <div className="relative h-14 w-full flex justify-center">
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base mx-auto mt-3 shadow-lg border-2 bg-gradient-to-br from-cyan-500 to-purple-600 border-cyan-400 ring-2 ring-cyan-400/30 relative z-10">
-                                    RJ
+                 {/* Candidate 1 */}
+                <Card className="glass-card border-white/10 hover:border-white/20 transition-all duration-300 group relative overflow-hidden">
+                    {/* Profile Header */}
+                    <div className="relative h-14 w-full flex justify-center">
+                         <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base mx-auto mt-3 shadow-lg border-2 bg-gradient-to-br from-cyan-500 to-purple-600 border-cyan-400 ring-2 ring-cyan-400/30 relative z-10">
+                            RJ
+                        </div>
+                    </div>
+
+                    <CardContent className="p-3 pt-0 text-center relative z-10 pb-3">
+                        {/* Name & Badge */}
+                        <div className="mb-1.5">
+                            <div className="flex items-center justify-center gap-1 mb-0.5">
+                                <h3 className="text-xs font-bold text-white">Rica</h3>
+                                <div className="w-3 h-3 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg border border-cyan-300/30">
+                                    <Check className="w-2 h-2 text-white font-bold" />
                                 </div>
                             </div>
+                            <p className="text-[9px] text-gray-400">@ricaj</p>
+                        </div>
 
-                            <CardContent className="p-3 pt-0 text-center relative z-10 pb-3">
-                                {/* Name & Badge */}
-                                <div className="mb-1.5">
-                                    <div className="flex items-center justify-center gap-1 mb-0.5">
-                                        <h3 className="text-xs font-bold text-white">Rica</h3>
-                                        <div className="w-3 h-3 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg border border-cyan-300/30">
-                                            <Check className="w-2 h-2 text-white font-bold" />
-                                        </div>
-                                    </div>
-                                    <p className="text-[9px] text-gray-400">@ricaj</p>
-                                </div>
+                        {/* Score & Rank */}
+                        <div className="flex flex-wrap justify-center gap-1 mb-2">
+                            <div className="flex items-center gap-1">
+                                <Trophy className="w-2.5 h-2.5 text-yellow-400" />
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                                    98
+                                </span>
+                            </div>
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-cyan-400/30 text-cyan-200 border border-cyan-400/50">
+                                💎 Diamond
+                            </span>
+                        </div>
 
-                                {/* Score & Rank */}
-                                <div className="flex flex-wrap justify-center gap-1 mb-2">
-                                    <div className="flex items-center gap-1">
-                                        <Trophy className="w-2.5 h-2.5 text-yellow-400" />
-                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
-                                            98
-                                        </span>
-                                    </div>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-cyan-400/30 text-cyan-200 border border-cyan-400/50">
-                                        💎 Diamond
-                                    </span>
-                                </div>
+                        {/* Details */}
+                        <div className="flex justify-center items-center gap-2 mb-2 text-[8px] text-gray-300">
+                            <div className="flex items-center gap-1">
+                                <MapPin className="w-2 h-2 text-cyan-400" />
+                                <span>Manila</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Calendar className="w-2 h-2 text-purple-400" />
+                                <span>Oct 23</span>
+                            </div>
+                        </div>
 
-                                {/* Details */}
-                                <div className="flex justify-center items-center gap-2 mb-2 text-[8px] text-gray-300">
-                                    <div className="flex items-center gap-1">
-                                        <MapPin className="w-2 h-2 text-cyan-400" />
-                                        <span>Manila</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Calendar className="w-2 h-2 text-purple-400" />
-                                        <span>Oct 23</span>
-                                    </div>
-                                </div>
-
-                                <Button size="sm" className="w-full h-6 text-[9px] bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/20">
-                                    <Eye className="w-2.5 h-2.5 mr-1" />
-                                    View Profile
-                                </Button>
-                            </CardContent>
-                            
-                            {/* Background Gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </Card>
-                        
-                        {/* Candidate 2 */}
+                        <Button size="sm" className="w-full h-6 text-[9px] bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/20">
+                            <Eye className="w-2.5 h-2.5 mr-1" />
+                            View Profile
+                        </Button>
+                    </CardContent>
+                    
+                    {/* Background Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Card>
+                
+                {/* Candidate 2 */}
                         <Card className="glass-card border-white/10 hover:border-white/20 transition-all duration-300 group relative overflow-hidden opacity-60">
-                            {/* Profile Header */}
-                            <div className="relative h-14 w-full flex justify-center">
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base mx-auto mt-3 shadow-lg border-2 bg-gradient-to-br from-orange-500 to-red-600 border-slate-300 ring-2 ring-slate-300/30 relative z-10">
-                                    MS
-                                </div>
+                    {/* Profile Header */}
+                    <div className="relative h-14 w-full flex justify-center">
+                         <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base mx-auto mt-3 shadow-lg border-2 bg-gradient-to-br from-orange-500 to-red-600 border-slate-300 ring-2 ring-slate-300/30 relative z-10">
+                            MS
+                        </div>
+                    </div>
+
+                    <CardContent className="p-3 pt-0 text-center relative z-10 pb-3">
+                        {/* Name & Badge */}
+                        <div className="mb-1.5">
+                            <div className="flex items-center justify-center gap-1 mb-0.5">
+                                <h3 className="text-xs font-bold text-white">Maria</h3>
                             </div>
+                            <p className="text-[9px] text-gray-400">@marias</p>
+                        </div>
 
-                            <CardContent className="p-3 pt-0 text-center relative z-10 pb-3">
-                                {/* Name & Badge */}
-                                <div className="mb-1.5">
-                                    <div className="flex items-center justify-center gap-1 mb-0.5">
-                                        <h3 className="text-xs font-bold text-white">Maria</h3>
-                                    </div>
-                                    <p className="text-[9px] text-gray-400">@marias</p>
-                                </div>
+                        {/* Score & Rank */}
+                        <div className="flex flex-wrap justify-center gap-1 mb-2">
+                            <div className="flex items-center gap-1">
+                                <Trophy className="w-2.5 h-2.5 text-yellow-400" />
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
+                                    85
+                                </span>
+                            </div>
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-slate-400/30 text-slate-200 border border-slate-400/50">
+                                🥈 Platinum
+                            </span>
+                        </div>
 
-                                {/* Score & Rank */}
-                                <div className="flex flex-wrap justify-center gap-1 mb-2">
-                                    <div className="flex items-center gap-1">
-                                        <Trophy className="w-2.5 h-2.5 text-yellow-400" />
-                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
-                                            85
-                                        </span>
-                                    </div>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-slate-400/30 text-slate-200 border border-slate-400/50">
-                                        🥈 Platinum
-                                    </span>
-                                </div>
+                        {/* Details */}
+                        <div className="flex justify-center items-center gap-2 mb-2 text-[8px] text-gray-300">
+                            <div className="flex items-center gap-1">
+                                <MapPin className="w-2 h-2 text-cyan-400" />
+                                <span>Cebu</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Calendar className="w-2 h-2 text-purple-400" />
+                                <span>Nov 23</span>
+                            </div>
+                        </div>
 
-                                {/* Details */}
-                                <div className="flex justify-center items-center gap-2 mb-2 text-[8px] text-gray-300">
-                                    <div className="flex items-center gap-1">
-                                        <MapPin className="w-2 h-2 text-cyan-400" />
-                                        <span>Cebu</span>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        <Calendar className="w-2 h-2 text-purple-400" />
-                                        <span>Nov 23</span>
-                                    </div>
-                                </div>
-
-                                <Button size="sm" className="w-full h-6 text-[9px] bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/20">
-                                    <Eye className="w-2.5 h-2.5 mr-1" />
-                                    View Profile
-                                </Button>
-                            </CardContent>
-                            
-                            {/* Background Gradient */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </Card>
+                        <Button size="sm" className="w-full h-6 text-[9px] bg-gradient-to-br from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white shadow-lg shadow-purple-500/20">
+                            <Eye className="w-2.5 h-2.5 mr-1" />
+                            View Profile
+                        </Button>
+                    </CardContent>
+                    
+                    {/* Background Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Card>
                      </>
                     ) : (
                         <div className="col-span-2 flex items-center justify-center h-32 text-gray-500 text-xs">
@@ -1763,7 +1763,7 @@ export default function Hero() {
                       
                       return (
                         <>
-                          {/* 2nd */}
+                    {/* 2nd */}
                           <motion.div 
                               layout
                               key={`podium-2-${second?.id || 'empty'}`}
@@ -1772,15 +1772,15 @@ export default function Hero() {
                               transition={{ type: "spring", bounce: 0.5, layout: { duration: 0.5 } }}
                               className="flex flex-col items-center"
                           >
-                              <div className="w-6 h-6 rounded-full bg-slate-300/20 border border-slate-300/50 flex items-center justify-center text-[10px] font-bold text-slate-300 mb-0.5 shadow-lg">
+                        <div className="w-6 h-6 rounded-full bg-slate-300/20 border border-slate-300/50 flex items-center justify-center text-[10px] font-bold text-slate-300 mb-0.5 shadow-lg">
                                   {second ? getInitials(second.u) : 'MS'}
-                              </div>
-                              <div className="bg-gradient-to-t from-slate-500/50 to-slate-400/20 w-12 h-10 rounded-t-lg flex items-end justify-center pb-1 border-t border-x border-slate-400/30 relative group">
-                                  <span className="text-xs font-bold text-slate-300">2</span>
-                                  <div className="absolute inset-0 bg-slate-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg" />
-                              </div>
+                        </div>
+                        <div className="bg-gradient-to-t from-slate-500/50 to-slate-400/20 w-12 h-10 rounded-t-lg flex items-end justify-center pb-1 border-t border-x border-slate-400/30 relative group">
+                            <span className="text-xs font-bold text-slate-300">2</span>
+                            <div className="absolute inset-0 bg-slate-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg" />
+                        </div>
                           </motion.div>
-                          {/* 1st */}
+                    {/* 1st */}
                           <motion.div 
                               layout
                               key={`podium-1-${first?.id || 'empty'}`}
@@ -1789,20 +1789,20 @@ export default function Hero() {
                               transition={{ type: "spring", bounce: 0.6, layout: { duration: 0.5 } }}
                               className="flex flex-col items-center"
                           >
-                              <div className="relative mb-0.5">
-                                  <div className="absolute -top-2.5 left-1/2 transform -translate-x-1/2 animate-bounce">
-                                      <Crown className="w-3 h-3 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
-                                  </div>
-                                  <div className="w-7 h-7 rounded-full bg-yellow-400/20 border-2 border-yellow-400/50 flex items-center justify-center text-[10px] font-bold text-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.3)] relative z-10">
+                        <div className="relative mb-0.5">
+                            <div className="absolute -top-2.5 left-1/2 transform -translate-x-1/2 animate-bounce">
+                                <Crown className="w-3 h-3 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.5)]" />
+                            </div>
+                            <div className="w-7 h-7 rounded-full bg-yellow-400/20 border-2 border-yellow-400/50 flex items-center justify-center text-[10px] font-bold text-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.3)] relative z-10">
                                       {first ? getInitials(first.u) : 'RJ'}
-                                  </div>
-                              </div>
-                              <div className="bg-gradient-to-t from-yellow-500/50 to-yellow-400/20 w-14 h-14 rounded-t-lg flex items-end justify-center pb-1 border-t border-x border-yellow-400/30 shadow-[0_0_20px_rgba(250,204,21,0.15)] relative group">
-                                  <span className="text-sm font-bold text-yellow-300">1</span>
-                                  <div className="absolute inset-0 bg-yellow-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg" />
-                              </div>
+                            </div>
+                        </div>
+                        <div className="bg-gradient-to-t from-yellow-500/50 to-yellow-400/20 w-14 h-14 rounded-t-lg flex items-end justify-center pb-1 border-t border-x border-yellow-400/30 shadow-[0_0_20px_rgba(250,204,21,0.15)] relative group">
+                            <span className="text-sm font-bold text-yellow-300">1</span>
+                            <div className="absolute inset-0 bg-yellow-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg" />
+                        </div>
                           </motion.div>
-                          {/* 3rd */}
+                    {/* 3rd */}
                           <motion.div 
                               layout
                               key={`podium-3-${third?.id || 'empty'}`}
@@ -1811,13 +1811,13 @@ export default function Hero() {
                               transition={{ type: "spring", bounce: 0.5, layout: { duration: 0.5 } }}
                               className="flex flex-col items-center"
                           >
-                              <div className="w-6 h-6 rounded-full bg-orange-400/20 border border-orange-400/50 flex items-center justify-center text-[10px] font-bold text-orange-300 mb-0.5 shadow-lg">
+                        <div className="w-6 h-6 rounded-full bg-orange-400/20 border border-orange-400/50 flex items-center justify-center text-[10px] font-bold text-orange-300 mb-0.5 shadow-lg">
                                   {third ? getInitials(third.u) : 'DK'}
-                              </div>
-                              <div className="bg-gradient-to-t from-orange-500/50 to-orange-400/20 w-12 h-8 rounded-t-lg flex items-end justify-center pb-1 border-t border-x border-orange-400/30 relative group">
-                                  <span className="text-xs font-bold text-orange-300">3</span>
-                                  <div className="absolute inset-0 bg-orange-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg" />
-                              </div>
+                        </div>
+                        <div className="bg-gradient-to-t from-orange-500/50 to-orange-400/20 w-12 h-8 rounded-t-lg flex items-end justify-center pb-1 border-t border-x border-orange-400/30 relative group">
+                            <span className="text-xs font-bold text-orange-300">3</span>
+                            <div className="absolute inset-0 bg-orange-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-t-lg" />
+                        </div>
                           </motion.div>
                         </>
                       )

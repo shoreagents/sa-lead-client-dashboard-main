@@ -11,8 +11,8 @@ export async function GET(request: NextRequest) {
     let isRecruiterJob = false
     
     if (rawJobId.startsWith('recruiter_')) {
-      actualJobId = rawJobId.replace('recruiter_', '')
-      isRecruiterJob = true
+      // Recruiter jobs removed - return empty
+      return NextResponse.json({ error: 'Recruiter jobs have been removed' }, { status: 404 })
     } else if (rawJobId.startsWith('processed_')) {
       actualJobId = Number(rawJobId.replace('processed_', ''))
       isRecruiterJob = false
@@ -21,14 +21,9 @@ export async function GET(request: NextRequest) {
       isRecruiterJob = false
     } else {
       // Fallback: try as numeric ID (for backward compatibility)
-      // Also check if it contains '-' which might indicate a UUID (recruiter job)
-      if (rawJobId.includes('-') && rawJobId.length > 10) {
-        actualJobId = rawJobId
-        isRecruiterJob = true
-      } else {
-        actualJobId = Number(rawJobId)
-        isRecruiterJob = false
-      }
+      // Recruiter jobs removed - no UUID check
+      actualJobId = Number(rawJobId)
+      isRecruiterJob = false
     }
     
     const numericJobId = isRecruiterJob ? null : (typeof actualJobId === 'number' ? actualJobId : null)
@@ -36,20 +31,9 @@ export async function GET(request: NextRequest) {
     // For development, allow access without strict authentication
     if (process.env.NODE_ENV === 'development') {
       let res
+      // Recruiter jobs removed - only query applications table
       if (isRecruiterJob) {
-        // Query recruiter_applications for recruiter jobs
-        res = await pool.query(
-          `SELECT ra.*, 
-                  u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
-                  sr.resume_title as saved_resume_title,
-                  sr.resume_slug as saved_resume_slug
-           FROM recruiter_applications ra
-           LEFT JOIN users u ON u.id = ra.user_id
-           LEFT JOIN saved_resumes sr ON sr.id = ra.resume_id
-           WHERE ra.job_id = $1
-           ORDER BY ra.created_at DESC`,
-          [actualJobId]
-        )
+        return NextResponse.json({ error: 'Recruiter jobs have been removed' }, { status: 404 })
       } else {
         if (!numericJobId || Number.isNaN(numericJobId)) return NextResponse.json({ error: 'Invalid jobId' }, { status: 400 })
         // Query applications for regular jobs (both processed_job_requests and job_requests use the same applications table)
