@@ -43,10 +43,8 @@ import {
   Star,
   Gift,
   Share2,
-  Facebook,
-  Linkedin,
-  Mail,
   Copy,
+  Linkedin,
   ChevronDown,
   ChevronUp,
   Brain,
@@ -525,25 +523,52 @@ function JobMatchingContent() {
     setSelectedJob(jobId);
   };
 
-  const handleShare = (platform: string, job: any) => {
+  const handleShare = async (platform: string, job: any) => {
     const jobUrl = `${window.location.origin}/jobs/${job.id}`;
-    const message = `Check out this amazing job opportunity at ${job.company}: ${job.title}`;
     
     switch (platform) {
       case 'facebook':
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(jobUrl)}`);
+        const facebookShareText = `💼 Amazing Job Opportunity at ${job.company}!\n\n📋 Position: ${job.title}\n💰 Salary: ${job.salary}\n📍 Location: ${job.location}\n\n🚀 Ready to advance your BPO career?\n\nBPOC.IO connects you with:\n✅ Top BPO employers\n✅ AI-powered job matching\n✅ Career development tools\n✅ Skills assessments\n\nJoin thousands of professionals building their future!\n\n${jobUrl}\n\n#BPO #JobOpportunity #CareerGrowth #BPOIO`;
+        
+        try {
+          await navigator.clipboard.writeText(facebookShareText);
+          setTimeout(() => {
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(jobUrl)}`;
+            window.open(facebookUrl, '_blank', 'width=600,height=400');
+          }, 300);
+        } catch (err) {
+          const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(jobUrl)}`;
+          window.open(facebookUrl, '_blank', 'width=600,height=400');
+        }
+        setShareJobId(null);
         break;
+        
       case 'linkedin':
-        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(jobUrl)}`);
+        const linkedinShareText = `💼 Exciting Job Opportunity: ${job.title} at ${job.company}\n\n📋 Position Details:\n• Title: ${job.title}\n• Salary: ${job.salary}\n• Location: ${job.location}\n• Work Arrangement: ${job.work_arrangement || 'Not specified'}\n\n💼 Looking for your next BPO career move?\n\nBPOC.IO offers:\n✅ AI-powered job matching\n✅ Direct connections to top employers\n✅ Career development resources\n✅ Professional skills assessments\n\n🚀 Ready to take the next step in your career?\n\n${jobUrl}\n\n#BPO #JobOpportunity #CareerDevelopment #ProfessionalGrowth #BPOIO`;
+        
+        try {
+          await navigator.clipboard.writeText(linkedinShareText);
+          setTimeout(() => {
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(jobUrl)}`;
+            window.open(linkedinUrl, '_blank', 'width=600,height=400');
+          }, 300);
+        } catch (err) {
+          const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(jobUrl)}`;
+          window.open(linkedinUrl, '_blank', 'width=600,height=400');
+        }
+        setShareJobId(null);
         break;
-      case 'email':
-        window.open(`mailto:?subject=${encodeURIComponent(`Job Opportunity: ${job.title}`)}&body=${encodeURIComponent(message + '\n\n' + jobUrl)}`);
-        break;
+        
       case 'copy':
-        navigator.clipboard.writeText(jobUrl);
+        try {
+          await navigator.clipboard.writeText(jobUrl);
+          // Optional: Show a toast or notification
+        } catch (err) {
+          console.error('Failed to copy link:', err);
+        }
+        setShareJobId(null);
         break;
     }
-    setShareJobId(null);
   };
 
   const getMatchColor = (percentage: number) => {
@@ -949,49 +974,44 @@ function JobMatchingContent() {
                           </Button>
                           
                           {shareJobId === job.id && (
-                            <div className="absolute top-full right-0 mt-1 bg-gray-800 border border-white/20 rounded-lg shadow-lg z-50 min-w-[160px]">
+                            <div className="absolute top-full right-0 mt-1 bg-gray-800/95 backdrop-blur-md border border-white/20 rounded-lg shadow-xl z-50 min-w-[240px]">
                               <div className="py-2">
+                                {/* Facebook Share */}
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleShare('facebook', job);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                                  className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                                 >
-                                  <div className="w-4 h-4 bg-blue-600 rounded flex items-center justify-center">
-                                    <span className="text-white text-xs font-bold">f</span>
-                                  </div>
-                                  Facebook
+                                  <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-sm font-bold">f</div>
+                                  <span className="font-medium">Share on Facebook</span>
                                 </button>
+                                
+                                {/* LinkedIn Share */}
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleShare('linkedin', job);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                                  className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                                 >
-                                  <Linkedin className="w-4 h-4 text-blue-500" />
-                                  LinkedIn
+                                  <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center text-sm font-bold">in</div>
+                                  <span className="font-medium">Share on LinkedIn</span>
                                 </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleShare('email', job);
-                                  }}
-                                  className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
-                                >
-                                  <Mail className="w-4 h-4 text-gray-400" />
-                                  Email
-                                </button>
+
+                                <div className="border-t border-white/10 my-1"></div>
+                                
+                                {/* Copy Link */}
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleShare('copy', job);
                                   }}
-                                  className="w-full text-left px-4 py-2 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                                  className="w-full text-left px-4 py-2.5 hover:bg-white/10 transition-colors text-white flex items-center gap-3"
                                 >
-                                  <Copy className="w-4 h-4 text-gray-400" />
-                                  Copy link
+                                  <div className="w-8 h-8 bg-gray-600 rounded-lg flex items-center justify-center">📋</div>
+                                  <span className="font-medium">Copy Link</span>
                                 </button>
                               </div>
                             </div>
