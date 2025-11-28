@@ -62,31 +62,9 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    // Get jobs from recruiter_jobs table
-    console.log('📊 Fetching recruiter_jobs...');
-    let recruiterJobsResult;
-    try {
-      recruiterJobsResult = await pool.query(`
-      SELECT 
-        rj.*, 
-        COALESCE(rj.company_id::text, u.company) AS company_name,
-        COALESCE(app_counts.applicant_count, 0) AS real_applicants,
-        'recruiter_jobs' as source_table
-      FROM recruiter_jobs rj
-      LEFT JOIN users u ON u.id = rj.recruiter_id
-      LEFT JOIN (
-        SELECT job_id, COUNT(*) as applicant_count
-        FROM recruiter_applications
-        GROUP BY job_id
-      ) app_counts ON app_counts.job_id = rj.id
-      WHERE rj.status = 'active'
-      ORDER BY rj.created_at DESC
-    `)
-      console.log(`✅ recruiter_jobs query completed: ${recruiterJobsResult.rows.length} rows`);
-    } catch (error) {
-      console.error('❌ Error in recruiter_jobs query:', error);
-      throw error;
-    }
+    // Recruiter jobs removed - table dropped
+    console.log('📊 Recruiter jobs removed - skipping...');
+    const recruiterJobsResult = { rows: [] };
 
     // Process job_requests (admin jobs)
     console.log('🔄 Processing job_requests...');
@@ -224,9 +202,9 @@ export async function GET(request: NextRequest) {
       }
     }))
 
-    // Process recruiter_jobs
-    console.log('🔄 Processing recruiter_jobs...');
-    const recruiterJobs = await Promise.all(recruiterJobsResult.rows.map(async (row: any) => {
+    // Recruiter jobs removed - table dropped
+    console.log('🔄 Recruiter jobs removed - skipping...');
+    const recruiterJobs: any[] = [];
       const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM recruiter_applications WHERE job_id = $1', [row.id])
       const realApplicants = apps.rows?.[0]?.cnt ?? 0
       const employmentType: string[] = []

@@ -57,14 +57,8 @@ export async function GET(request: NextRequest) {
       try {
         let res;
         if (source === 'recruiter') {
-          res = await client.query(
-            `SELECT rj.*, COALESCE(rj.company_id::text, u.company) AS company_name
-             FROM recruiter_jobs rj
-             LEFT JOIN users u ON u.id = rj.recruiter_id
-             WHERE rj.id = $1 AND rj.status = 'active'
-             LIMIT 1`,
-            [actualId]
-          );
+          // Recruiter jobs removed - return null
+          res = { rows: [] };
         } else if (source === 'job_request') {
           res = await client.query(
             `SELECT jr.*, m.company AS company_name

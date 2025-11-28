@@ -38,20 +38,11 @@ export async function GET(request: NextRequest) {
         userAppsCheck = { rows: [{ count: 0 }] };
       }
       
-      try {
-        recruiterAppsCheck = await client.query(
-          'SELECT COUNT(*) as count FROM recruiter_applications WHERE user_id = $1',
-          [userId]
-        );
-        console.log('✅ Recruiter applications table query successful');
-      } catch (error) {
-        console.warn('⚠️ Recruiter applications table query failed:', error);
-        recruiterAppsCheck = { rows: [{ count: 0 }] };
-      }
+      // Recruiter applications removed - table dropped
+      recruiterAppsCheck = { rows: [{ count: 0 }] };
       
-      totalApps = Number(userAppsCheck.rows[0]?.count || 0) + Number(recruiterAppsCheck.rows[0]?.count || 0);
+      totalApps = Number(userAppsCheck.rows[0]?.count || 0);
       console.log('📊 User applications count (processed):', userAppsCheck.rows[0]?.count);
-      console.log('📊 User applications count (recruiter):', recruiterAppsCheck.rows[0]?.count);
       console.log('📊 Total applications count:', totalApps);
 
       // Let's also check what status values actually exist in the applications table
@@ -106,34 +97,15 @@ export async function GET(request: NextRequest) {
       
       // Fetch from recruiter_applications table (recruiter jobs)
       let recruiterResult;
-      try {
-        recruiterResult = await client.query(
-          `SELECT 
-            ra.id,
-            ra.job_id as "jobId",
-            ra.resume_id as "resumeId",
-            ra.resume_slug as "resumeSlug",
-            ra.status as "applicationStatus",
-            ra.created_at as "appliedDate",
-            'recruiter' as "jobType"
-           FROM recruiter_applications ra
-           WHERE ra.user_id = $1
-           ORDER BY ra.created_at DESC`,
-          [userId]
-        );
-        console.log('✅ Recruiter applications query successful');
-      } catch (error) {
-        console.warn('⚠️ Recruiter applications query failed:', error);
-        recruiterResult = { rows: [] };
-      }
+      // Recruiter applications removed - table dropped
+      recruiterResult = { rows: [] };
       
-      // Combine results
+      // Combine results (only processed now)
       const simpleResult = {
-        rows: [...processedResult.rows, ...recruiterResult.rows]
+        rows: [...processedResult.rows]
       };
       
       console.log('📋 Processed applications query executed, rows returned:', processedResult.rows.length);
-      console.log('📋 Recruiter applications query executed, rows returned:', recruiterResult.rows.length);
       console.log('📋 Total applications query result:', JSON.stringify(simpleResult.rows, null, 2));
       console.log('🔍 Raw status values from database:', simpleResult.rows.map(row => ({ id: row.id, status: row.applicationStatus, statusType: typeof row.applicationStatus, jobType: row.jobType })));
 
@@ -141,12 +113,11 @@ export async function GET(request: NextRequest) {
       if (simpleResult.rows.length > 0) {
         console.log('🔍 Fetching job details...');
         
-        // Separate processed and recruiter job IDs
+        // Separate processed job IDs (recruiter jobs removed)
         const processedJobIds = simpleResult.rows.filter(row => row.jobType === 'processed').map(row => row.jobId);
-        const recruiterJobIds = simpleResult.rows.filter(row => row.jobType === 'recruiter').map(row => row.jobId);
+        const recruiterJobIds: string[] = []; // Recruiter jobs removed
         
         console.log('📋 Processed Job IDs to fetch:', processedJobIds);
-        console.log('📋 Recruiter Job IDs to fetch:', recruiterJobIds);
         console.log('📋 All application rows:', simpleResult.rows.map(row => ({ 
           id: row.id, 
           jobId: row.jobId, 
@@ -161,14 +132,11 @@ export async function GET(request: NextRequest) {
         console.log('🔍 Checking database tables...');
         try {
           const processedCount = await client.query('SELECT COUNT(*) as count FROM processed_job_requests');
-          const recruiterCount = await client.query('SELECT COUNT(*) as count FROM recruiter_jobs');
-          console.log('📊 Database table counts - Processed jobs:', processedCount.rows[0].count, 'Recruiter jobs:', recruiterCount.rows[0].count);
+          console.log('📊 Database table counts - Processed jobs:', processedCount.rows[0].count);
           
-          // Show sample data from both tables
+          // Show sample data from processed table
           const sampleProcessed = await client.query('SELECT id, job_title FROM processed_job_requests LIMIT 3');
-          const sampleRecruiter = await client.query('SELECT id, job_title FROM recruiter_jobs LIMIT 3');
           console.log('📊 Sample processed jobs:', sampleProcessed.rows.map(j => ({ id: j.id, title: j.job_title })));
-          console.log('📊 Sample recruiter jobs:', sampleRecruiter.rows.map(j => ({ id: j.id, title: j.job_title })));
         } catch (error) {
           console.warn('⚠️ Error checking database tables:', error);
         }
@@ -224,69 +192,8 @@ export async function GET(request: NextRequest) {
           }
         }
 
-         // Fetch recruiter jobs
-         if (recruiterJobIds.length > 0) {
-           console.log('🔍 Fetching recruiter jobs for IDs:', recruiterJobIds);
-           try {
-             // Try a different approach - use IN clause instead of ANY
-             const placeholders = recruiterJobIds.map((_, index) => `$${index + 1}`).join(',');
-             recruiterJobsResult = await client.query(
-               `SELECT 
-                 rj.id,
-                 rj.job_title,
-                 rj.job_description,
-                 rj.requirements,
-                 rj.benefits,
-                 rj.skills,
-                 rj.salary_min,
-                 rj.salary_max,
-                 rj.currency,
-                 rj.salary_type,
-                 rj.work_arrangement,
-                 rj.experience_level,
-                 rj.industry,
-                 rj.department,
-                 rj.application_deadline,
-                 COALESCE(u.company, 'Recruiter Company') as company_name,
-                 u.location as recruiter_location,
-                 u.full_name as recruiter_name,
-                 (SELECT COUNT(*) FROM recruiter_applications WHERE job_id = rj.id) as candidate_count
-                FROM recruiter_jobs rj
-                LEFT JOIN users u ON u.id = rj.recruiter_id
-                -- DISABLED: companies table JOIN removed
-                -- LEFT JOIN companies c ON c.id = rj.company_id
-                WHERE rj.id IN (${placeholders})`,
-               recruiterJobIds
-             );
-             console.log('✅ Recruiter jobs query successful');
-             console.log('🔍 Recruiter jobs found:', recruiterJobsResult.rows.length);
-             console.log('🔍 Recruiter jobs data:', recruiterJobsResult.rows.map(job => ({
-               id: job.id,
-               title: job.job_title,
-               company: job.company_name,
-               recruiter: job.recruiter_name
-             })));
-             
-             // Debug the actual query being executed
-             console.log('🔍 Query placeholders:', placeholders);
-             console.log('🔍 Query parameters:', recruiterJobIds);
-             console.log('🔍 Full recruiter jobs result:', JSON.stringify(recruiterJobsResult.rows, null, 2));
-             
-             // If no results, let's check if the table exists and has data
-             if (recruiterJobsResult.rows.length === 0) {
-               console.log('⚠️ No recruiter jobs found, checking table...');
-               const tableCheck = await client.query('SELECT COUNT(*) as count FROM recruiter_jobs');
-               console.log('📊 Total recruiter jobs in table:', tableCheck.rows[0].count);
-               
-               // Check if any of the job IDs exist
-               const idCheck = await client.query('SELECT id FROM recruiter_jobs WHERE id = ANY($1)', [recruiterJobIds]);
-               console.log('📊 Job IDs that exist in recruiter_jobs:', idCheck.rows.map(r => r.id));
-             }
-           } catch (error) {
-             console.warn('⚠️ Recruiter jobs query failed:', error);
-             recruiterJobsResult = { rows: [] };
-           }
-         }
+         // Recruiter jobs removed - table dropped
+         recruiterJobsResult = { rows: [] };
 
         // Combine job results and add source information
         const jobsResult: { rows: any[] } = {
@@ -341,6 +248,12 @@ export async function GET(request: NextRequest) {
 
         // Combine application data with job details
         const applications = await Promise.all(simpleResult.rows.map(async (appRow) => {
+          // Skip recruiter jobs - table has been removed
+          if (appRow.jobType === 'recruiter') {
+            console.log('⚠️ Skipping recruiter job application (table removed):', appRow.jobId);
+            return null;
+          }
+
           // Try multiple approaches to find job details
           let jobDetails = jobDetailsMap.get(appRow.jobId) || 
                           jobDetailsMap.get(String(appRow.jobId)) || 
@@ -418,51 +331,7 @@ export async function GET(request: NextRequest) {
                   const allProcessedJobs = await client.query('SELECT id, job_title FROM processed_job_requests LIMIT 5');
                   console.log('📊 Available processed job IDs:', allProcessedJobs.rows.map(j => ({ id: j.id, title: j.job_title })));
                 }
-               } else if (appRow.jobType === 'recruiter') {
-                 console.log('🔍 Attempting direct query for recruiter job:', appRow.jobId);
-                 
-                 // Try multiple approaches for recruiter jobs
-                 let directResult = await client.query(
-                   `SELECT rj.*, 
-                           COALESCE(u.company, 'Recruiter Company') as company_name, 
-                           u.location as recruiter_location,
-                           u.full_name as recruiter_name
-                    FROM recruiter_jobs rj
-                    LEFT JOIN users u ON u.id = rj.recruiter_id
-                    -- DISABLED: companies table JOIN removed
-                    -- LEFT JOIN companies c ON c.id = rj.company_id
-                    WHERE rj.id::text = $1`,
-                   [String(appRow.jobId)]
-                 );
-                 
-                 // If not found, try with string conversion
-                 if (directResult.rows.length === 0) {
-                   console.log('🔍 Trying with string conversion for recruiter job');
-                   directResult = await client.query(
-                     `SELECT rj.*, 
-                             COALESCE(u.company, 'Recruiter Company') as company_name, 
-                             u.location as recruiter_location,
-                             u.full_name as recruiter_name
-                      FROM recruiter_jobs rj
-                      LEFT JOIN users u ON u.id = rj.recruiter_id
-                      -- DISABLED: companies table JOIN removed
-                      -- LEFT JOIN companies c ON c.id = rj.company_id
-                      WHERE rj.id = $1::uuid`,
-                     [appRow.jobId]
-                   );
-                 }
-                 
-                 console.log('🔍 Direct recruiter query result:', directResult.rows.length, 'rows');
-                 if (directResult.rows.length > 0) {
-                   finalJobDetails = directResult.rows[0];
-                   console.log('✅ Found job details via direct query:', finalJobDetails.job_title, 'Company:', finalJobDetails.company_name);
-                 } else {
-                   console.warn('⚠️ No recruiter job found with ID:', appRow.jobId);
-                   // Check what IDs actually exist
-                   const allRecruiterJobs = await client.query('SELECT id, job_title FROM recruiter_jobs LIMIT 5');
-                   console.log('📊 Available recruiter job IDs:', allRecruiterJobs.rows.map(j => ({ id: j.id, title: j.job_title })));
-                 }
-               }
+              }
             } catch (error) {
               console.warn('⚠️ Direct job details query failed:', error);
             }
@@ -610,13 +479,16 @@ export async function GET(request: NextRequest) {
           };
         }));
 
-        console.log('✅ Processed applications:', applications.length);
-        console.log('✅ Sample processed application:', applications[0]);
+        // Filter out null values (recruiter jobs that were skipped)
+        const filteredApplications = applications.filter((app): app is NonNullable<typeof app> => app !== null);
+
+        console.log('✅ Processed applications:', filteredApplications.length);
+        console.log('✅ Sample processed application:', filteredApplications[0]);
         console.log('🚀 ===== APPLICATIONS API DEBUG END =====');
 
         return NextResponse.json({
-          applications,
-          total: applications.length,
+          applications: filteredApplications,
+          total: filteredApplications.length,
           message: 'Applications retrieved successfully'
         });
       }

@@ -41,15 +41,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 
     let res
     if (source === 'recruiter') {
-      // Query recruiter_jobs
-      res = await pool.query(
-        `SELECT rj.*, COALESCE(rj.company_id::text, u.company) AS company_name
-         FROM recruiter_jobs rj
-         LEFT JOIN users u ON u.id = rj.recruiter_id
-         WHERE rj.id = $1 AND rj.status = 'active'
-         LIMIT 1`,
-        [actualId]
-      )
+      // Recruiter jobs removed - table dropped
+      return NextResponse.json({ error: 'Recruiter jobs have been removed' }, { status: 404 })
     } else if (source === 'job_request') {
       // Query job_requests
       res = await pool.query(
@@ -86,11 +79,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 
     // Count real applications from appropriate table
     let apps
-    if (source === 'recruiter') {
-      apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM recruiter_applications WHERE job_id = $1', [actualId])
-    } else {
-      apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [actualId])
-    }
+    // Recruiter jobs removed - only use applications table
+    apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [actualId])
     const realApplicants = apps.rows?.[0]?.cnt ?? 0
 
     const job = {
