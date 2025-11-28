@@ -233,10 +233,7 @@ export async function GET(request: NextRequest) {
                         marginRight: 12,
                       }}
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                      </svg>
+                      <div style={{ color: '#22c55e', fontSize: 20, fontWeight: 700, display: 'flex' }}>₱</div>
                     </div>
                     <div style={{ color: '#22c55e', fontSize: 28, fontWeight: 600, display: 'flex' }}>{salary}</div>
                   </div>
