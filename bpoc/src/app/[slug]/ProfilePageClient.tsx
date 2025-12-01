@@ -125,6 +125,7 @@ export default function ProfilePage() {
   const [activeSection, setActiveSection] = useState<string>('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [overallScore, setOverallScore] = useState<number>(0);
+  const [leaderboardData, setLeaderboardData] = useState<any>(null);
   const [isEditingPersonalInfo, setIsEditingPersonalInfo] = useState<boolean>(false);
   const [editedPersonalInfo, setEditedPersonalInfo] = useState({
     first_name: '',
@@ -922,16 +923,53 @@ export default function ProfilePage() {
         const user = data.user || {};
         setUserProfile(user);
         
-        // Fetch overall score from leaderboard
+        // Fetch game stats from leaderboard API to ensure accurate completion status
+        // This uses the same data source as the games page for consistency
         if (user.id) {
           try {
             const scoreResponse = await fetch(`/api/leaderboards/user/${user.id}`);
             if (scoreResponse.ok) {
               const scoreData = await scoreResponse.json();
               setOverallScore(scoreData.overall?.overall_score || 0);
+              setLeaderboardData(scoreData);
+              
+              // Populate game_stats from leaderboard API if not available from profile API
+              // This ensures the profile completion card shows accurate status
+              if (scoreData.components) {
+                const typingStats = scoreData.components.typing_hero?.details;
+                const discStats = scoreData.components.disc_personality?.details;
+                
+                if (typingStats || discStats) {
+                  const updatedUser = { ...user };
+                  updatedUser.game_stats = updatedUser.game_stats || {};
+                  
+                  // Populate typing hero stats if available from leaderboard
+                  if (typingStats && (typingStats.best_wpm > 0 || typingStats.latest_wpm > 0)) {
+                    updatedUser.game_stats.typing_hero_stats = {
+                      ...updatedUser.game_stats.typing_hero_stats,
+                      best_wpm: typingStats.best_wpm || updatedUser.game_stats.typing_hero_stats?.best_wpm || 0,
+                      latest_wpm: typingStats.latest_wpm || typingStats.best_wpm || updatedUser.game_stats.typing_hero_stats?.latest_wpm || 0,
+                      best_accuracy: typingStats.best_accuracy || updatedUser.game_stats.typing_hero_stats?.best_accuracy || 0,
+                      total_sessions: typingStats.total_sessions || updatedUser.game_stats.typing_hero_stats?.total_sessions || 0
+                    };
+                  }
+                  
+                  // Populate DISC stats if available from leaderboard
+                  if (discStats && discStats.latest_primary_type) {
+                    updatedUser.game_stats.disc_personality_stats = {
+                      ...updatedUser.game_stats.disc_personality_stats,
+                      primary_type: discStats.latest_primary_type || updatedUser.game_stats.disc_personality_stats?.primary_type || null,
+                      best_confidence_score: discStats.best_confidence_score || updatedUser.game_stats.disc_personality_stats?.best_confidence_score || null,
+                      completed_sessions: discStats.completed_sessions || updatedUser.game_stats.disc_personality_stats?.completed_sessions || 0
+                    };
+                  }
+                  
+                  setUserProfile(updatedUser);
+                }
+              }
             }
           } catch (error) {
-            console.log('Failed to fetch overall score:', error);
+            console.log('Failed to fetch leaderboard data:', error);
             setOverallScore(0);
           }
         }
@@ -1272,8 +1310,7 @@ export default function ProfilePage() {
                             (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
                              userProfile.game_stats.typing_hero_stats.latest_wpm > 0);
                           const hasDisc = userProfile.game_stats?.disc_personality_stats && 
-                            (userProfile.game_stats.disc_personality_stats.primary_type || 
-                             userProfile.game_stats.disc_personality_stats.latest_primary_type);
+                            !!userProfile.game_stats.disc_personality_stats.primary_type;
                           const completedSteps = [hasPersonalData, hasWorkStatusData, hasResume, hasTypingHero, hasDisc].filter(Boolean).length;
                           const completionPercentage = Math.round((completedSteps / 5) * 100);
                           
@@ -1450,12 +1487,20 @@ export default function ProfilePage() {
                                 const hasPersonalData = userProfile.completed_data === true;
                                 const hasWorkStatusData = userProfile.work_status_completed_data === true;
                                 const hasResume = userProfile.resume_score !== undefined && userProfile.resume_score > 0;
-                                const hasTypingHero = userProfile.game_stats?.typing_hero_stats && 
+                                
+                                // Check Typing Hero - use leaderboard data as fallback
+                                const typingStats = leaderboardData?.components?.typing_hero?.details;
+                                const hasTypingHero = (userProfile.game_stats?.typing_hero_stats && 
                                   (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
-                                   userProfile.game_stats.typing_hero_stats.latest_wpm > 0);
-                                const hasDisc = userProfile.game_stats?.disc_personality_stats && 
-                                  (userProfile.game_stats.disc_personality_stats.primary_type || 
-                                   userProfile.game_stats.disc_personality_stats.latest_primary_type);
+                                   userProfile.game_stats.typing_hero_stats.latest_wpm > 0)) ||
+                                  (typingStats && (typingStats.best_wpm > 0 || typingStats.latest_wpm > 0));
+                                
+                                // Check DISC - use leaderboard data as fallback
+                                const discStats = leaderboardData?.components?.disc_personality?.details;
+                                const hasDisc = (userProfile.game_stats?.disc_personality_stats && 
+                                  !!userProfile.game_stats.disc_personality_stats.primary_type) ||
+                                  (discStats && !!discStats.latest_primary_type);
+                                
                                 const completedSteps = [hasPersonalData, hasWorkStatusData, hasResume, hasTypingHero, hasDisc].filter(Boolean).length;
                                 return Math.round((completedSteps / 5) * 100);
                               })()}%
@@ -1469,12 +1514,20 @@ export default function ProfilePage() {
                                   const hasPersonalData = userProfile.completed_data === true;
                                   const hasWorkStatusData = userProfile.work_status_completed_data === true;
                                   const hasResume = userProfile.resume_score !== undefined && userProfile.resume_score > 0;
-                                  const hasTypingHero = userProfile.game_stats?.typing_hero_stats && 
+                                  
+                                  // Check Typing Hero - use leaderboard data as fallback
+                                  const typingStats = leaderboardData?.components?.typing_hero?.details;
+                                  const hasTypingHero = (userProfile.game_stats?.typing_hero_stats && 
                                     (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
-                                     userProfile.game_stats.typing_hero_stats.latest_wpm > 0);
-                                  const hasDisc = userProfile.game_stats?.disc_personality_stats && 
-                                    (userProfile.game_stats.disc_personality_stats.primary_type || 
-                                     userProfile.game_stats.disc_personality_stats.latest_primary_type);
+                                     userProfile.game_stats.typing_hero_stats.latest_wpm > 0)) ||
+                                    (typingStats && (typingStats.best_wpm > 0 || typingStats.latest_wpm > 0));
+                                  
+                                  // Check DISC - use leaderboard data as fallback
+                                  const discStats = leaderboardData?.components?.disc_personality?.details;
+                                  const hasDisc = (userProfile.game_stats?.disc_personality_stats && 
+                                    !!userProfile.game_stats.disc_personality_stats.primary_type) ||
+                                    (discStats && !!discStats.latest_primary_type);
+                                  
                                   const completedSteps = [hasPersonalData, hasWorkStatusData, hasResume, hasTypingHero, hasDisc].filter(Boolean).length;
                                   return (completedSteps / 5) * 100;
                                 })()}%` 
@@ -1579,74 +1632,85 @@ export default function ProfilePage() {
 
                           {/* Step 4: Typing Hero */}
                           <div className="flex items-center gap-4 p-4 bg-gray-700/30 rounded-lg border border-gray-600/30">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              userProfile.game_stats?.typing_hero_stats && 
-                              (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
-                               userProfile.game_stats.typing_hero_stats.latest_wpm > 0)
-                                ? 'bg-green-500 text-white'
-                                : 'bg-gray-600 text-gray-400'
-                            }`}>
-                              {userProfile.game_stats?.typing_hero_stats && 
-                               (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
-                                userProfile.game_stats.typing_hero_stats.latest_wpm > 0) ? (
-                                <CheckCircle className="w-5 h-5" />
-                              ) : (
-                                <span className="text-sm font-bold">4</span>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <h5 className="text-white font-semibold">Typing Hero</h5>
-                              <p className="text-gray-400 text-sm">Improve your typing skills and speed</p>
-                            </div>
-                            {userProfile.game_stats?.typing_hero_stats && 
-                             (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
-                              userProfile.game_stats.typing_hero_stats.latest_wpm > 0) ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Completed</Badge>
-                            ) : isOwner ? (
-                              <Button
-                                onClick={() => router.push('/career-tools/games/typing-hero')}
-                                size="sm"
-                                className="bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
-                              >
-                                Start
-                              </Button>
-                            ) : null}
+                            {(() => {
+                              const typingStats = leaderboardData?.components?.typing_hero?.details;
+                              const isCompleted = (userProfile.game_stats?.typing_hero_stats && 
+                                (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
+                                 userProfile.game_stats.typing_hero_stats.latest_wpm > 0)) ||
+                                (typingStats && (typingStats.best_wpm > 0 || typingStats.latest_wpm > 0));
+                              
+                              return (
+                                <>
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    isCompleted
+                                      ? 'bg-green-500 text-white'
+                                      : 'bg-gray-600 text-gray-400'
+                                  }`}>
+                                    {isCompleted ? (
+                                      <CheckCircle className="w-5 h-5" />
+                                    ) : (
+                                      <span className="text-sm font-bold">4</span>
+                                    )}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h5 className="text-white font-semibold">Typing Hero</h5>
+                                    <p className="text-gray-400 text-sm">Improve your typing skills and speed</p>
+                                  </div>
+                                  {isCompleted ? (
+                                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Completed</Badge>
+                                  ) : isOwner ? (
+                                    <Button
+                                      onClick={() => router.push('/career-tools/games/typing-hero')}
+                                      size="sm"
+                                      className="bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
+                                    >
+                                      Start
+                                    </Button>
+                                  ) : null}
+                                </>
+                              );
+                            })()}
                           </div>
 
                           {/* Step 5: BPOC DISC */}
                           <div className="flex items-center gap-4 p-4 bg-gray-700/30 rounded-lg border border-gray-600/30">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              userProfile.game_stats?.disc_personality_stats && 
-                              (userProfile.game_stats.disc_personality_stats.primary_type || 
-                               userProfile.game_stats.disc_personality_stats.latest_primary_type)
-                                ? 'bg-green-500 text-white'
-                                : 'bg-gray-600 text-gray-400'
-                            }`}>
-                              {userProfile.game_stats?.disc_personality_stats && 
-                               (userProfile.game_stats.disc_personality_stats.primary_type || 
-                                userProfile.game_stats.disc_personality_stats.latest_primary_type) ? (
-                                <CheckCircle className="w-5 h-5" />
-                              ) : (
-                                <span className="text-sm font-bold">5</span>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <h5 className="text-white font-semibold">BPOC DISC</h5>
-                              <p className="text-gray-400 text-sm">Discover your personality type and communication style</p>
-                            </div>
-                            {userProfile.game_stats?.disc_personality_stats && 
-                             (userProfile.game_stats.disc_personality_stats.primary_type || 
-                              userProfile.game_stats.disc_personality_stats.latest_primary_type) ? (
-                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Completed</Badge>
-                            ) : isOwner ? (
-                              <Button
-                                onClick={() => router.push('/career-tools/games/disc-personality')}
-                                size="sm"
-                                className="bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
-                              >
-                                Start
-                              </Button>
-                            ) : null}
+                            {(() => {
+                              const discStats = leaderboardData?.components?.disc_personality?.details;
+                              const isCompleted = (userProfile.game_stats?.disc_personality_stats && 
+                                !!userProfile.game_stats.disc_personality_stats.primary_type) ||
+                                (discStats && !!discStats.latest_primary_type);
+                              
+                              return (
+                                <>
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                    isCompleted
+                                      ? 'bg-green-500 text-white'
+                                      : 'bg-gray-600 text-gray-400'
+                                  }`}>
+                                    {isCompleted ? (
+                                      <CheckCircle className="w-5 h-5" />
+                                    ) : (
+                                      <span className="text-sm font-bold">5</span>
+                                    )}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h5 className="text-white font-semibold">BPOC DISC</h5>
+                                    <p className="text-gray-400 text-sm">Discover your personality type and communication style</p>
+                                  </div>
+                                  {isCompleted ? (
+                                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Completed</Badge>
+                                  ) : isOwner ? (
+                                    <Button
+                                      onClick={() => router.push('/career-tools/games/disc-personality')}
+                                      size="sm"
+                                      className="bg-blue-500/20 text-blue-300 border-blue-500/30 hover:bg-blue-500/30"
+                                    >
+                                      Start
+                                    </Button>
+                                  ) : null}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -1672,12 +1736,20 @@ export default function ProfilePage() {
                           const hasPersonalData = userProfile.completed_data === true;
                           const hasWorkStatusData = userProfile.work_status_completed_data === true;
                           const hasResume = userProfile.resume_score !== undefined && userProfile.resume_score > 0;
-                          const hasTypingHero = userProfile.game_stats?.typing_hero_stats && 
+                          
+                          // Check Typing Hero - use leaderboard data as fallback
+                          const typingStats = leaderboardData?.components?.typing_hero?.details;
+                          const hasTypingHero = (userProfile.game_stats?.typing_hero_stats && 
                             (userProfile.game_stats.typing_hero_stats.best_wpm > 0 || 
-                             userProfile.game_stats.typing_hero_stats.latest_wpm > 0);
-                          const hasDisc = userProfile.game_stats?.disc_personality_stats && 
-                            (userProfile.game_stats.disc_personality_stats.primary_type || 
-                             userProfile.game_stats.disc_personality_stats.latest_primary_type);
+                             userProfile.game_stats.typing_hero_stats.latest_wpm > 0)) ||
+                            (typingStats && (typingStats.best_wpm > 0 || typingStats.latest_wpm > 0));
+                          
+                          // Check DISC - use leaderboard data as fallback
+                          const discStats = leaderboardData?.components?.disc_personality?.details;
+                          const hasDisc = (userProfile.game_stats?.disc_personality_stats && 
+                            !!userProfile.game_stats.disc_personality_stats.primary_type) ||
+                            (discStats && !!discStats.latest_primary_type);
+                          
                           const completedSteps = [hasPersonalData, hasWorkStatusData, hasResume, hasTypingHero, hasDisc].filter(Boolean).length;
                           const completionPercentage = Math.round((completedSteps / 5) * 100);
                           
