@@ -25,40 +25,11 @@ export async function GET(request: NextRequest) {
         GROUP BY job_id
       ) app_counts ON app_counts.job_id = j.id
       WHERE j.status IN ('active', 'processed', 'inactive', 'closed')
-        AND NOT EXISTS (
-          SELECT 1 FROM processed_job_requests p WHERE p.id = j.id
-        )
       ORDER BY j.created_at DESC
     `)
       console.log(`✅ unprocessed job_requests query completed: ${jobRequestsResult.rows.length} rows`);
     } catch (error) {
       console.error('❌ Error in job_requests query:', error);
-      throw error;
-    }
-
-    // Get jobs from processed_job_requests table
-    console.log('📊 Fetching processed_job_requests...');
-    let processedJobsResult;
-    try {
-      processedJobsResult = await pool.query(`
-      SELECT 
-        p.*, 
-        m.company AS company_name,
-        COALESCE(app_counts.applicant_count, 0) AS real_applicants,
-        'processed_job_requests' as source_table
-      FROM processed_job_requests p
-      LEFT JOIN members m ON m.company_id = p.company_id
-      LEFT JOIN (
-        SELECT job_id, COUNT(*) as applicant_count
-        FROM applications
-        GROUP BY job_id
-      ) app_counts ON app_counts.job_id = p.id
-      WHERE p.status IN ('active', 'closed', 'processed')
-      ORDER BY p.created_at DESC
-    `)
-      console.log(`✅ processed_job_requests query completed: ${processedJobsResult.rows.length} rows`);
-    } catch (error) {
-      console.error('❌ Error in processed_job_requests query:', error);
       throw error;
     }
 
@@ -118,75 +89,19 @@ export async function GET(request: NextRequest) {
         status: mapStatusFromEnum(row.status),
         priority,
         createdAt: row.created_at,
-        applicationDeadline: row.application_deadline,
-        experienceLevel: row.experience_level,
-        workArrangement: row.work_arrangement,
-        shift: row.shift,
-        industry: row.industry,
-        department: row.department,
-        workType: row.work_type,
-        currency: row.currency,
-        salaryType: row.salary_type,
-        salary_min: row.salary_min,
-        salary_max: row.salary_max,
-        created_at: row.created_at,
-        updated_at: row.updated_at
-      }
-    }))
-
-    // Process processed_job_requests
-    console.log('🔄 Processing processed_job_requests...');
-    const processedJobs = await Promise.all(processedJobsResult.rows.map(async (row: any) => {
-      const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [row.id])
-      const realApplicants = apps.rows?.[0]?.cnt ?? 0
-      const employmentType: string[] = []
-      if (row.work_type) employmentType.push(capitalize(String(row.work_type)))
-      if (row.experience_level) employmentType.push(capitalize(String(row.experience_level)))
-      const salary = formatSalary(String(row.currency || 'PHP'), row.salary_min != null ? Number(row.salary_min) : null, row.salary_max != null ? Number(row.salary_max) : null, String(row.salary_type || 'monthly'))
-      const createdAt = row.created_at ? new Date(row.created_at) : new Date()
-      const ms = Date.now() - createdAt.getTime()
-      const minutes = Math.floor(ms / (1000 * 60))
-      const hours = Math.floor(minutes / 60)
-      const days = Math.floor(hours / 24)
-      
-      let postedDays: number
-      if (days > 0) {
-        postedDays = days
-      } else if (hours > 0) {
-        postedDays = 0 // Will show as "Just now" in frontend
-      } else if (minutes > 0) {
-        postedDays = 0 // Will show as "Just now" in frontend
-      } else {
-        postedDays = 0 // Will show as "Just now" in frontend
-      }
-      const locationType = String(row.work_arrangement || 'onsite')
-      const priorityFromDb = String(row.priority ?? '').toLowerCase()
-      const priority: 'low' | 'medium' | 'high' | 'urgent' =
-        ['low', 'medium', 'high', 'urgent'].includes(priorityFromDb)
-          ? (priorityFromDb as any)
-          : ((): 'low' | 'medium' | 'high' => {
-              if (realApplicants >= 50) return 'high'
-              if (realApplicants >= 10) return 'medium'
-              return 'low'
-            })()
-
-      return {
-        id: `processed_job_requests_${row.id}`,
-        originalId: String(row.id),
-        source: 'processed_job_requests',
-        company: 'ShoreAgents',
-        companyLogo: row.company_logo || '🏢',
-        title: row.job_title || 'Untitled Role',
-        location: row.location || row['location'] || '',
-        locationType: locationType === 'onsite' ? 'on-site' : locationType,
-        salary,
-        employmentType,
-        postedDays,
-        applicants: realApplicants,
-        status: mapStatusFromEnum(row.status),
-        priority,
-        createdAt: row.created_at,
-        applicationDeadline: row.application_deadline,
+        applicationDeadline: row.application_deadline ? (() => {
+          const date = row.application_deadline;
+          if (date instanceof Date) {
+            // If it's a Date object, format as YYYY-MM-DD
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          }
+          // If it's a string, extract YYYY-MM-DD part
+          const dateStr = String(date).split('T')[0].trim();
+          return dateStr.match(/^\d{4}-\d{2}-\d{2}$/) ? dateStr : null;
+        })() : null,
         experienceLevel: row.experience_level,
         workArrangement: row.work_arrangement,
         shift: row.shift,
@@ -207,11 +122,11 @@ export async function GET(request: NextRequest) {
     const recruiterJobs: any[] = [];
 
     // Combine all jobs and sort by creation date
-    const allJobs = [...jobRequests, ...processedJobs, ...recruiterJobs].sort((a, b) => 
+    const allJobs = [...jobRequests, ...recruiterJobs].sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
 
-    console.log(`🔍 Admin Jobs API: Found ${jobRequests.length} jobs from job_requests, ${processedJobs.length} jobs from processed_job_requests, ${recruiterJobs.length} jobs from recruiter_jobs`)
+    console.log(`🔍 Admin Jobs API: Found ${jobRequests.length} jobs from job_requests, ${recruiterJobs.length} jobs from recruiter_jobs`)
     console.log(`📊 Total: ${allJobs.length} active jobs`)
 
     // Jobs are already processed, just return them
@@ -394,7 +309,7 @@ export async function POST(request: NextRequest) {
         try {
           await client.query('BEGIN')
           // Ensure processed row is removed even if FK is missing
-          await client.query('DELETE FROM processed_job_requests WHERE id = $1', [id])
+          // Job deletion now only affects job_requests table
           await client.query('DELETE FROM job_requests WHERE id = $1', [id])
           await client.query('COMMIT')
           return NextResponse.json({ success: true })
@@ -492,7 +407,19 @@ function rowToJobCard(row: any) {
     priority,
     createdAt: row.created_at,
     shift: row.shift || 'day',
-    applicationDeadline: row.application_deadline || null,
+    applicationDeadline: row.application_deadline ? (() => {
+      const date = row.application_deadline;
+      if (date instanceof Date) {
+        // If it's a Date object, format as YYYY-MM-DD
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+      // If it's a string, extract YYYY-MM-DD part
+      const dateStr = String(date).split('T')[0].trim();
+      return dateStr.match(/^\d{4}-\d{2}-\d{2}$/) ? dateStr : null;
+    })() : null,
   }
 }
 

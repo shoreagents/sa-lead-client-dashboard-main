@@ -36,11 +36,11 @@ export async function GET(request: NextRequest) {
 			const countRes = await client.query(
 				`SELECT COUNT(*)::int AS matches
 				 FROM job_match_results r
-				 JOIN processed_job_requests p ON p.status = 'active' AND CAST(p.id AS text) = r.job_id
+				 JOIN job_requests jr ON jr.status = 'active' AND CAST(jr.id AS text) = r.job_id
 				 WHERE r.user_id = $1 AND r.score >= $2`,
 				[userId, threshold]
 			)
-			const totalRes = await client.query(`SELECT COUNT(*)::int AS total FROM processed_job_requests WHERE status = 'active'`)
+			const totalRes = await client.query(`SELECT COUNT(*)::int AS total FROM job_requests WHERE status = 'active'`)
 			return NextResponse.json({ matches: countRes.rows[0]?.matches ?? 0, totalActiveJobs: totalRes.rows[0]?.total ?? 0, threshold })
 		} finally {
 			client.release()

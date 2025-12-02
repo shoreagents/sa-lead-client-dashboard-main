@@ -429,12 +429,18 @@ function JobMatchingContent() {
                 try {
                   // Try to get the response as text first
                   errorText = await matchRes.clone().text();
-                  console.log(`❌ Individual match failed - Raw response:`, errorText);
                   
                   // Try to parse as JSON
                   if (errorText && errorText.trim().startsWith('{')) {
-                    errorData = JSON.parse(errorText);
-                  } else if (errorText) {
+                    try {
+                      errorData = JSON.parse(errorText);
+                    } catch (parseErr) {
+                      errorData = { 
+                        error: `Server error (${matchRes.status})`,
+                        details: errorText || `Failed to parse JSON. Status: ${matchRes.status} ${matchRes.statusText}`
+                      };
+                    }
+                  } else if (errorText && errorText.trim().length > 0) {
                     errorData = { error: errorText, details: errorText };
                   } else {
                     errorData = { 
@@ -442,35 +448,51 @@ function JobMatchingContent() {
                       details: `The server returned an error but no error message. Status: ${matchRes.status} ${matchRes.statusText}`
                     };
                   }
-                } catch (parseError) {
+                } catch (parseError: any) {
                   console.error('Error parsing error response:', parseError);
                   errorData = { 
                     error: `HTTP ${matchRes.status}: ${matchRes.statusText}`,
-                    details: errorText || `Failed to parse error response. Status: ${matchRes.status}`
+                    details: errorText || `Failed to parse error response. Status: ${matchRes.status}. Parse error: ${parseError?.message || 'Unknown'}`
+                  };
+                }
+                
+                // Ensure errorData has meaningful content
+                if (!errorData.error && !errorData.details) {
+                  errorData = {
+                    error: `HTTP ${matchRes.status}: ${matchRes.statusText}`,
+                    details: `No error details available. Status: ${matchRes.status}`
                   };
                 }
                 
                 scores[job.id] = { 
                   score: null,
-                  reasoning: errorData.error || errorData.details || 'Analysis failed',
+                  reasoning: errorData.error || errorData.details || `Analysis failed (${matchRes.status})`,
                   breakdown: {},
                   error: true
                 }
                 console.error(`❌ Individual match failed for ${job.id}:`, {
                   status: matchRes.status,
                   statusText: matchRes.statusText,
-                  errorData,
-                  errorText
+                  errorData: errorData,
+                  errorText: errorText || '(empty)',
+                  hasErrorData: !!errorData.error || !!errorData.details,
+                  jobId: normalizedJobId
                 });
               }
-            } catch (error) {
+            } catch (error: any) {
               console.error('Error fetching match score for job:', job.id, error)
+              const errorMessage = error instanceof Error ? error.message : (error?.toString() || 'Network error');
               scores[job.id] = { 
                 score: null, 
-                reasoning: error instanceof Error ? error.message : 'Network error', 
+                reasoning: errorMessage, 
                 breakdown: {},
                 error: true
               }
+              console.error(`❌ Network/fetch error for ${job.id}:`, {
+                message: errorMessage,
+                stack: error instanceof Error ? error.stack : undefined,
+                jobId: job.originalId
+              });
             }
             
             // Small delay to show progress
@@ -1522,13 +1544,6 @@ function JobMatchingContent() {
                               }
                             }
                             
-                            if (!user?.id) {
-                              setApplicationMessage('You must be logged in to apply');
-                              setApplicationType('error');
-                              setShowApplicationDialog(true);
-                              return;
-                            }
-                            
                             console.log('Submitting application:', {
                               jobId: dbJobId,
                               resumeId,
@@ -1536,15 +1551,29 @@ function JobMatchingContent() {
                               userId: user.id
                             })
                             
-                            const resp = await fetch('/api/user/applications', {
-                              method: 'POST',
-                              headers: { 
-                                'Content-Type': 'application/json', 
-                                Authorization: `Bearer ${token}`,
-                                'x-user-id': user.id
-                              },
-                              body: JSON.stringify({ jobId: dbJobId, resumeId, resumeSlug })
-                            })
+                            let resp: Response | null = null
+                            try {
+                              resp = await fetch('/api/user/applications', {
+                                method: 'POST',
+                                headers: { 
+                                  'Content-Type': 'application/json', 
+                                  Authorization: `Bearer ${token}`,
+                                  'x-user-id': user.id
+                                },
+                                body: JSON.stringify({ jobId: dbJobId, resumeId, resumeSlug })
+                              })
+                            } catch (fetchError: any) {
+                              // Handle network errors
+                              console.error('Network error during application submission:', fetchError)
+                              setApplicationMessage('Network error. Please check your connection and try again.')
+                              setApplicationType('error')
+                              setShowApplicationDialog(true)
+                              return
+                            }
+                            
+                            if (!resp) {
+                              return
+                            }
                             
                             if (!resp.ok) {
                               let errorData: any = {}
@@ -1557,69 +1586,65 @@ function JobMatchingContent() {
                                 
                                 // Try to parse as JSON
                                 if (errorText && errorText.trim().startsWith('{')) {
-                                  errorData = JSON.parse(errorText)
-                                } else if (errorText) {
+                                  try {
+                                    errorData = JSON.parse(errorText)
+                                  } catch (parseErr) {
+                                    errorData = { error: errorText, details: errorText }
+                                  }
+                                } else if (errorText && errorText.trim()) {
                                   // If it's not JSON, use the text as the error message
                                   errorData = { error: errorText, details: errorText }
-                                } else {
-                                  // Empty response
-                                  errorData = { 
-                                    error: `Server error (${resp.status})`,
-                                    details: `The server returned an error but no error message. Status: ${resp.status} ${resp.statusText}`
-                                  }
                                 }
                               } catch (parseError) {
                                 console.error('Error parsing error response:', parseError)
-                                errorData = { 
-                                  error: `HTTP ${resp.status}: ${resp.statusText}`,
-                                  details: errorText || `Failed to parse error response. Status: ${resp.status}`
-                                }
                               }
                               
-                              // Log error details for debugging
-                              const errorLog: any = {
-                                status: resp.status,
-                                statusText: resp.statusText,
-                                jobId: dbJobId,
-                                resumeId,
-                                resumeSlug,
-                                userId: user.id
-                              }
-                              
-                              // Only add errorText and errorData if they have meaningful content
-                              if (errorText && errorText.trim()) {
-                                errorLog.errorText = errorText
-                              }
-                              if (errorData && Object.keys(errorData).length > 0) {
-                                errorLog.errorData = errorData
-                              } else if (errorText && errorText.trim()) {
-                                // If errorData is empty but we have errorText, use that
-                                errorLog.errorMessage = errorText
-                              }
-                              
-                              console.error('Application submission failed:', errorLog)
-                              
-                              // Build a comprehensive error message
-                              const errorMessage = errorData.error || 
-                                                  errorData.details || 
-                                                  errorData.message || 
+                              // Always include status information
+                              const errorMessage = errorData?.error || 
+                                                  errorData?.details || 
+                                                  errorData?.message || 
+                                                  errorData?.hint ||
                                                   errorText ||
                                                   `Failed to submit application (${resp.status} ${resp.statusText})`
+                              
+                              // Log comprehensive error details - use JSON.stringify to ensure all properties are visible
+                              const errorLogDetails = {
+                                status: resp.status,
+                                statusText: resp.statusText,
+                                jobId: String(dbJobId),
+                                resumeId: String(resumeId),
+                                resumeSlug: String(resumeSlug),
+                                userId: String(user.id),
+                                errorText: errorText || '(empty response body)',
+                                errorData: Object.keys(errorData).length > 0 ? errorData : '(no error data)',
+                                errorMessage: String(errorMessage)
+                              }
+                              console.error('Application submission failed:', JSON.stringify(errorLogDetails, null, 2))
                               
                               setApplicationMessage(errorMessage)
                               setApplicationType('error')
                               setShowApplicationDialog(true)
                               return
                             }
+                            
+                            // Success - parse response
+                            const result = await resp.json().catch(() => ({}))
+                            
                             // Update local state to reflect application before redirect
                             setAppliedMap(prev => ({ ...prev, [selectedJobData.id]: true }));
                             setSelectedJob(null);
                             setSelectedJobDetails(null);
                             router.push('/jobs/job-matching?application=success');
                             return;
-                          } catch (err) {
-                            console.error(err)
-                            setApplicationMessage('Could not apply. Please try again.');
+                          } catch (err: any) {
+                            console.error('Unexpected error during application submission:', err)
+                            const errorMsg = err?.message || err?.toString() || 'Unknown error occurred'
+                            console.error('Error details:', {
+                              message: errorMsg,
+                              stack: err?.stack,
+                              name: err?.name
+                            })
+                            setApplicationMessage(`Could not apply: ${errorMsg}`);
                             setApplicationType('error');
                             setShowApplicationDialog(true);
                           }

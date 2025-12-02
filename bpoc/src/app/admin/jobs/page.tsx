@@ -57,8 +57,19 @@ interface JobCard {
   applicants: number
   status: string
   priority: 'low' | 'medium' | 'high' | 'urgent'
-  source?: 'processed' | 'original'
+  source?: 'original'
   applicationDeadline?: string
+  createdAt?: string
+  workArrangement?: string
+  experienceLevel?: string
+  shift?: string
+  industry?: string
+  department?: string
+  jobDescription?: string
+  requirements?: string | string[]
+  responsibilities?: string | string[]
+  benefits?: string | string[]
+  skills?: string | string[]
 }
 
 interface StatusColumn {
@@ -74,7 +85,6 @@ function JobsPage() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [columns, setColumns] = useState<StatusColumn[]>([
     { id: 'job-request', title: 'New Job Request', color: 'bg-yellow-500', icon: Pause },
-    { id: 'approved', title: 'Processed Request', color: 'bg-orange-500', icon: AlertCircle },
     { id: 'hiring', title: 'Active/Hiring', color: 'bg-green-500', icon: CheckCircle },
     { id: 'closed', title: 'Closed', color: 'bg-gray-500', icon: X }
   ])
@@ -218,12 +228,31 @@ function JobsPage() {
     setDraggedJob(jobId)
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', jobId)
+    // Set drag image for smoother visual feedback
+    const target = e.currentTarget as HTMLElement
+    if (target) {
+      const dragImage = target.cloneNode(true) as HTMLElement
+      dragImage.style.opacity = '0.8'
+      dragImage.style.transform = 'rotate(2deg)'
+      document.body.appendChild(dragImage)
+      dragImage.style.position = 'absolute'
+      dragImage.style.top = '-1000px'
+      e.dataTransfer.setDragImage(dragImage, e.clientX - target.getBoundingClientRect().left, e.clientY - target.getBoundingClientRect().top)
+      setTimeout(() => document.body.removeChild(dragImage), 0)
+    }
+  }
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setDraggedJob(null)
   }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
-    console.log('Drag over column')
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
   }
 
   const handleDrop = async (e: React.DragEvent, status: string) => {
@@ -241,57 +270,61 @@ function JobsPage() {
     // Once in Closed, do not allow moving anywhere
     if (job.status === 'closed') return
 
-    // Treat processed and active/hiring cards as processed-source
-    // so they can never move back to New or Processed
-    const isProcessed = (job as any).source === 'processed' || job.status === 'approved' || job.status === 'processed' || job.status === 'hiring' || job.status === 'active'
-    if (isProcessed && status === 'job-request') {
+    // Moving from job-request to hiring: process job (improve with AI) and activate
+    if (job.status === 'job-request' && status === 'hiring') {
+      const prev = jobs
+      
+      // Optimistically move the job to hiring column immediately (real-time)
+      setJobs(prevJobs => prevJobs.map(j => 
+        j.id === jobId ? { ...j, status: 'hiring' } : j
+      ))
+      
+      // Process in background without blocking UI
+      ;(async () => {
+        try {
+          const token = await getSessionToken()
+          if (!token) throw new Error('Not authenticated')
+          const res = await fetch('/api/admin/jobs/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ id: numericId, asIs: false, to: 'active' })
+          })
+          if (!res.ok) {
+            const errorText = await res.text()
+            console.error('❌ API error response:', errorText)
+            throw new Error(`Failed to activate job: ${res.status} - ${errorText}`)
+          }
+          const data = await res.json()
+          // Silently update with processed job data in background
+          setJobs(prevJobs => {
+            const withoutOriginal = prevJobs.filter(j => j.id !== String(data.originalJobId))
+            const processed = data.processedJob || {}
+            const existing = prevJobs.find(j => j.id === String(data.originalJobId)) || ({} as any)
+            const priority = processed.priority || existing.priority || 'medium'
+            return [{ ...processed, status: 'hiring', priority }, ...withoutOriginal]
+          })
+        } catch (err) {
+          console.error(err)
+          // Silently revert to previous state on error
+          setJobs(prev)
+        }
+      })()
       return
     }
 
-    // If dropping an original job into Processed Request: run processing flow
-    if (!isProcessed && status === 'approved') {
+    // Moving from hiring to closed: update status
+    if ((job.status === 'hiring' || job.status === 'active') && status === 'closed') {
       const prev = jobs
+      setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? { ...j, status: 'closed' } : j))
       try {
         const token = await getSessionToken()
         if (!token) throw new Error('Not authenticated')
-        const res = await fetch('/api/admin/jobs/process', {
+        const res = await fetch('/api/admin/jobs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ id: numericId, asIs: true })
+          body: JSON.stringify({ action: 'update', data: { id: numericId, status: 'closed' } })
         })
-        if (!res.ok) throw new Error('Failed to process job')
-        const data = await res.json()
-        setJobs(prevJobs => {
-          const withoutOriginal = prevJobs.filter(j => j.id !== String(data.originalJobId))
-          const existing = prevJobs.find(j => j.id === String(data.originalJobId)) || ({} as any)
-          const processed = data.processedJob || {}
-          const priority = processed.priority || existing.priority || 'medium'
-          // Map status to 'approved' for column display
-          return [{ ...processed, priority, status: 'approved', source: 'processed' as any }, ...withoutOriginal]
-        })
-        // Immediately hydrate with full processed fields
-        try {
-          const fres = await fetch(`/api/admin/processed-jobs/${numericId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
-          if (fres.ok) {
-            const fdata = await fres.json()
-            const pj = fdata.job
-            setJobs(prev => prev.map(j => j.id === jobId ? {
-              ...j,
-              title: pj.job_title || j.title,
-              source: 'processed' as any,
-              status: j.status || 'approved', // Preserve status for column display
-              job_description: pj.job_description,
-              requirements: pj.requirements,
-              responsibilities: pj.responsibilities,
-              benefits: pj.benefits,
-              skills: pj.skills,
-              priority: ((): any => {
-                const pr = String(pj.priority || '').toLowerCase()
-                return pr === 'low' || pr === 'medium' || pr === 'high' ? pr : j.priority
-              })()
-            } : j))
-          }
-        } catch {}
+        if (!res.ok) throw new Error('Failed to close job')
       } catch (err) {
         console.error(err)
         setJobs(prev)
@@ -299,161 +332,31 @@ function JobsPage() {
       return
     }
 
-    // Processed/Active cards: allow toggling between Processed Request and Active/Hiring, but never back to New
-    if (isProcessed) {
-      if (status === 'job-request') return // never allow back to New Job Request
-
-      // Allow closing only from Active/Hiring → Closed
-      if (status === 'closed') {
-        // Only allow if currently active/hiring
-        if (!(job.status === 'hiring' || job.status === 'active')) return
-        const prev = jobs
-        // Optimistic UI update - immediately show in closed column
-        setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? { ...j, status: 'closed', source: 'processed' as any } : j))
-        try {
-          const token = await getSessionToken()
-          if (!token) throw new Error('Not authenticated')
-          
-          // First, try to update in processed_job_requests
-          let res = await fetch('/api/admin/processed-jobs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ action: 'update', data: { id: numericId, status: 'closed' } })
-          })
-          
-          // If job not found in processed_job_requests, process it first then close
-          if (!res.ok && res.status === 404) {
-            console.log('Job not found in processed_job_requests, processing first...')
-            const processRes = await fetch('/api/admin/jobs/process', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-              body: JSON.stringify({ id: numericId, asIs: true, to: 'active' })
-            })
-            if (!processRes.ok) throw new Error('Failed to process job before closing')
-            
-            // Now try to close it
-            res = await fetch('/api/admin/processed-jobs', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-              body: JSON.stringify({ action: 'update', data: { id: numericId, status: 'closed' } })
-            })
-          }
-          
-          if (!res.ok) throw new Error('Failed to close processed job')
-        } catch (err) {
-          console.error(err)
-          setJobs(prev)
-        }
-        return
-      }
-
-      if (status === 'approved' || status === 'hiring') {
-        const prev = jobs
-        const newProcessedStatus = status === 'approved' ? 'processed' : 'active'
-        // Optimistic UI update - map status correctly for column filtering
-        setJobs(prevJobs => prevJobs.map(j => {
-          if (j.id === jobId) {
-            // Map processed status to 'approved' for column display, active status to 'hiring'
-            const displayStatus = newProcessedStatus === 'processed' ? 'approved' : 'hiring'
-            return { ...j, status: displayStatus, source: 'processed' as any }
-          }
-          return j
-        }))
-        try {
-          const token = await getSessionToken()
-          if (!token) throw new Error('Not authenticated')
-          const res = await fetch('/api/admin/processed-jobs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ action: 'update', data: { id: numericId, status: newProcessedStatus } })
-          })
-          if (!res.ok) throw new Error('Failed to move processed job')
-          // Reload processed fields to hydrate card
-          const fres = await fetch(`/api/admin/processed-jobs/${numericId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
-          if (fres.ok) {
-            const fdata = await fres.json()
-            const pj = fdata.job
-            setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? {
-              ...j,
-              title: pj.job_title || j.title,
-              status: j.status || (newProcessedStatus === 'processed' ? 'approved' : 'hiring'), // Preserve status for column display
-              job_description: pj.job_description,
-              requirements: pj.requirements,
-              responsibilities: pj.responsibilities,
-              benefits: pj.benefits,
-              skills: pj.skills
-            } : j))
-          }
-        } catch (err) {
-          console.error(err)
-          setJobs(prev)
-        }
-        return
-      }
-
-      // Other destinations (including Closed from non-active) ignored
+    // Moving from job-request to closed: not allowed (must be active first)
+    if (job.status === 'job-request' && status === 'closed') {
       return
     }
 
-    // Otherwise, moving an original job within job_requests
-    // Special case: moving directly to Active/Hiring should also process into processed_job_requests with status 'active'
-    if (status === 'hiring') {
+    // Other moves: update status directly
+    if (status === 'hiring' || status === 'closed' || status === 'job-request') {
       const prev = jobs
+      const dbStatus = status === 'hiring' ? 'active' : status === 'closed' ? 'closed' : 'active'
+      setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? { ...j, status } : j))
       try {
         const token = await getSessionToken()
         if (!token) throw new Error('Not authenticated')
-        // Process original into processed table and mark active
-        const res = await fetch('/api/admin/jobs/process', {
+        const res = await fetch('/api/admin/jobs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ id: numericId, asIs: true, to: 'active' })
+          body: JSON.stringify({ action: 'update', data: { id: numericId, status: dbStatus } })
         })
-        if (!res.ok) {
-          const errorText = await res.text()
-          console.error('❌ API error response:', errorText)
-          throw new Error(`Failed to activate job: ${res.status} - ${errorText}`)
-        }
-        const data = await res.json()
-        // Replace original with processed card and set as active/hiring
-        setJobs(prevJobs => {
-          const withoutOriginal = prevJobs.filter(j => j.id !== String(data.originalJobId))
-          // Keep priority from processed job if available; otherwise derive from existing card
-          const processed = data.processedJob || {}
-          const existing = jobs.find(j => j.id === String(data.originalJobId)) || ({} as any)
-          const priority = processed.priority || existing.priority || 'medium'
-          // Map status to 'hiring' for column display
-          return [{ ...processed, status: 'hiring', source: 'processed' as any, priority }, ...withoutOriginal]
-        })
-        // Hydrate processed details
-        const fres = await fetch(`/api/admin/processed-jobs/${jobId}`, { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' })
-        if (fres.ok) {
-          const fdata = await fres.json()
-          const pj = fdata.job
-          setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? {
-            ...j,
-            title: pj.job_title || j.title,
-            status: j.status || 'hiring', // Preserve status for column display
-            job_description: pj.job_description,
-            requirements: pj.requirements,
-            responsibilities: pj.responsibilities,
-            benefits: pj.benefits,
-            skills: pj.skills,
-            priority: ((): any => {
-              const pr = String(pj.priority || '').toLowerCase()
-              return pr === 'low' || pr === 'medium' || pr === 'high' ? pr : j.priority
-            })()
-          } : j))
-        }
+        if (!res.ok) throw new Error('Failed to update job status')
       } catch (err) {
         console.error(err)
         setJobs(prev)
       }
       return
     }
-
-    // Default: status-only move within original job_requests
-    // Do not allow moving original jobs directly to Closed
-    if (status === 'closed') return
     const prev = jobs
     setJobs(prevJobs => prevJobs.map(j => j.id === jobId ? { ...j, status } : j))
     try {
@@ -1013,7 +916,7 @@ function JobsPage() {
     if (!editingJob) return
     
     // Update pending changes
-    setPendingChanges(prev => ({ ...prev, ...changes }))
+    setPendingChanges((prev: any) => ({ ...prev, ...changes }))
     setHasUnsavedChanges(true)
     
     // Apply local mutation immediately for UI feedback
@@ -1031,8 +934,14 @@ function JobsPage() {
       const token = await getSessionToken()
       if (!token) throw new Error('Not authenticated')
       
-      const payload = { id: editingJob.id, ...pendingChanges }
-      const endpoint = editingJob.__source === 'processed' ? '/api/admin/processed-jobs' : '/api/admin/jobs'
+      // Prepare payload, converting empty strings to null for date fields
+      const cleanedChanges = { ...pendingChanges }
+      if (cleanedChanges.application_deadline === '') {
+        cleanedChanges.application_deadline = null
+      }
+      
+      const payload = { id: editingJob.id, ...cleanedChanges }
+      const endpoint = '/api/admin/jobs'
       
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -1040,7 +949,11 @@ function JobsPage() {
         body: JSON.stringify({ action: 'update', data: payload })
       })
       
-      if (!res.ok) throw new Error('Update failed')
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Update failed:', errorData)
+        throw new Error(errorData.error || `Update failed: ${res.status} ${res.statusText}`)
+      }
       
       // Update jobs list with saved changes
       setJobs(prev => prev.map(j => j.id === String(editingJob.id)
@@ -1056,7 +969,7 @@ function JobsPage() {
             shift: (pendingChanges.shift ?? j.shift),
             industry: (pendingChanges.industry ?? j.industry),
             department: (pendingChanges.department ?? j.department),
-            applicationDeadline: (pendingChanges.application_deadline ?? j.applicationDeadline),
+            applicationDeadline: (pendingChanges.application_deadline ? String(pendingChanges.application_deadline).split('T')[0] : j.applicationDeadline),
             jobDescription: (pendingChanges.jobDescription ?? j.jobDescription),
             requirements: (pendingChanges.requirements ?? j.requirements),
             responsibilities: (pendingChanges.responsibilities ?? j.responsibilities),
@@ -1187,10 +1100,8 @@ function JobsPage() {
             const columnJobs: JobCard[] =
               column.id === 'job-request'
                 ? jobs.filter(job => job.status === 'job-request' || job.status === 'inactive')
-                : column.id === 'approved'
-                  ? jobs.filter(job => job.status === 'approved' || job.status === 'processed')
                   : column.id === 'hiring'
-                    ? jobs.filter(job => job.status === 'hiring' || job.status === 'active')
+                    ? jobs.filter(job => job.status === 'hiring' || job.status === 'active' || job.status === 'approved')
                     : column.id === 'closed'
                       ? jobs.filter(job => job.status === 'closed')
                       : []
@@ -1199,16 +1110,19 @@ function JobsPage() {
             return (
                              <div
                  key={column.id}
-                 className="flex-shrink-0 w-80 min-h-[70vh] border-2 border-dashed border-transparent hover:border-white/20 transition-colors"
+                 className={`flex-shrink-0 w-[360px] min-h-[70vh] border-2 border-dashed transition-all duration-200 ${
+                   draggedJob ? 'border-purple-500/30 bg-purple-500/5' : 'border-transparent hover:border-white/20'
+                 }`}
                  onDragOver={handleDragOver}
+                 onDragLeave={handleDragLeave}
                  onDrop={(e) => handleDrop(e, column.id)}
                >
                 {/* Column Header */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${column.color}`}></div>
-                    <h3 className="text-lg font-semibold text-white">{column.title}</h3>
-                    <Badge className="bg-white/10 text-white border-white/20">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3.5 h-3.5 rounded-full ${column.color}`}></div>
+                    <h3 className="text-xl font-semibold text-white">{column.title}</h3>
+                    <Badge className="bg-white/10 text-white border-white/20 text-sm px-2.5 py-1">
                        {columnJobs.length}
                     </Badge>
                   </div>
@@ -1224,28 +1138,33 @@ function JobsPage() {
                   <IconComponent className="w-5 h-5 text-gray-400" />
                   )}
                 </div>
-                {column.id === 'job-request' || column.id === 'approved' || column.id === 'hiring' || column.id === 'closed' ? (
+                {column.id === 'job-request' || column.id === 'hiring' || column.id === 'closed' ? (
                 <div className="relative">
-                  <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-2 pb-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
+                  <div className="space-y-4 max-h-[75vh] overflow-y-auto pr-3 pb-4 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent hover:scrollbar-thumb-white/30">
                   {columnJobs.map((job) => (
                                                              <div
                       key={job.id}
                       draggable
                       onDragStart={(e) => handleDragStart(e, job.id)}
+                      onDragEnd={handleDragEnd}
                         onClick={() => handleEditJob(job)}
                         role="button"
                         tabIndex={0}
-                        className="cursor-pointer active:cursor-grabbing hover:scale-102 transition-transform outline-none focus:ring-2 focus:ring-purple-500/40 rounded-md"
+                        className={`cursor-move active:cursor-grabbing hover:scale-[1.02] transition-all duration-200 outline-none focus:ring-2 focus:ring-purple-500/40 rounded-md ${
+                          draggedJob === job.id ? 'opacity-50 scale-95 rotate-1' : 'opacity-100'
+                        }`}
                     >
-                      <Card className="glass-card border-white/10 hover:border-white/15 transition-all duration-200">
-                        <CardContent className="p-4">
+                      <Card className={`glass-card border-white/10 hover:border-white/15 transition-all duration-200 ${
+                        draggedJob === job.id ? 'shadow-2xl shadow-purple-500/20' : ''
+                      }`}>
+                        <CardContent className="p-5">
                           {/* Header with title and menu */}
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-white text-sm line-clamp-2 mb-1">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1 min-w-0 pr-2">
+                              <h3 className="font-semibold text-white text-base line-clamp-2 mb-2">
                                 {job.title || 'Untitled Role'}
                               </h3>
-                              <p className="text-xs text-gray-400">{job.company || 'ShoreAgents'}</p>
+                              <p className="text-sm text-gray-400">{job.company || 'ShoreAgents'}</p>
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -1269,8 +1188,8 @@ function JobsPage() {
                           </div>
 
                           {/* Status indicator */}
-                          <div className="flex items-center mb-3">
-                            <div className={`w-2 h-2 rounded-full mr-2 ${
+                          <div className="flex items-center mb-4">
+                            <div className={`w-2.5 h-2.5 rounded-full mr-2.5 ${
                               column.id === 'job-request' 
                                 ? 'bg-yellow-500'
                                 : column.id === 'approved'
@@ -1279,7 +1198,7 @@ function JobsPage() {
                                     ? 'bg-green-500'
                                     : 'bg-gray-500'
                             }`}></div>
-                            <span className="text-xs text-gray-400 capitalize">
+                            <span className="text-sm text-gray-400 capitalize">
                               {column.id === 'job-request' ? 'New Request' : 
                                column.id === 'approved' ? 'Approved' :
                                column.id === 'hiring' ? 'Active' : 'Closed'}
@@ -1287,17 +1206,41 @@ function JobsPage() {
                           </div>
                           
                           {/* Key info */}
-                          <div className="space-y-2 mb-3">
-                            <div className="flex items-center text-xs text-gray-300">
-                              <span className="font-medium">₱{job.salary.replace('₱', '')}</span>
+                          <div className="space-y-3 mb-4">
+                            <div className="flex items-center text-sm text-gray-300">
+                              <span className="font-semibold">₱{job.salary.replace('₱', '')}</span>
                             </div>
-                            <div className="flex items-center justify-between text-xs text-gray-400">
-                              <span>{formatTimeAgo(job.postedDays, job.createdAt)}</span>
+                            <div className="flex items-center justify-between text-sm text-gray-400">
+                              <span>{formatTimeAgo(job.postedDays, job.createdAt || undefined)}</span>
                               <span>{job.applicants} applicants</span>
                             </div>
                             {job.applicationDeadline && (
-                              <div className="flex items-center text-xs text-gray-400">
-                                <span className="text-orange-400">Deadline: {new Date(job.applicationDeadline).toLocaleDateString()}</span>
+                              <div className="flex items-center text-sm text-gray-400">
+                                <span className="text-orange-400 font-medium">Deadline: {(() => {
+                                  try {
+                                    // Format date string (YYYY-MM-DD) to MM/DD/YYYY without timezone conversion
+                                    const dateStr = String(job.applicationDeadline).split('T')[0].trim();
+                                    // Check if it's in YYYY-MM-DD format
+                                    if (dateStr && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                                      const [year, month, day] = dateStr.split('-');
+                                      return `${month}/${day}/${year}`;
+                                    }
+                                    // Try parsing as Date object if it's not in expected format
+                                    const dateObj = new Date(job.applicationDeadline);
+                                    if (!isNaN(dateObj.getTime())) {
+                                      // Format as MM/DD/YYYY
+                                      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                                      const day = String(dateObj.getDate()).padStart(2, '0');
+                                      const year = dateObj.getFullYear();
+                                      return `${month}/${day}/${year}`;
+                                    }
+                                    // If all else fails, return the string as-is
+                                    return dateStr || String(job.applicationDeadline);
+                                  } catch (error) {
+                                    // Fallback: return the raw value
+                                    return String(job.applicationDeadline);
+                                  }
+                                })()}</span>
                               </div>
                             )}
                           </div>
@@ -1305,7 +1248,7 @@ function JobsPage() {
                           {/* Priority badge */}
                           <div className="flex justify-end">
                             <Badge 
-                              className={`text-xs px-2 py-1 ${
+                              className={`text-sm px-3 py-1.5 ${
                                 job.priority === 'high' 
                                   ? 'bg-red-500/20 text-red-400 border-red-500/30' 
                                   : job.priority === 'medium'
@@ -1460,7 +1403,7 @@ function JobsPage() {
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">₱</span>
                     )}
                     <Input 
-                      value={formatSalaryInput(newJobData.salaryMin)} 
+                      value={formatSalaryInput(String(newJobData.salaryMin || ''))} 
                       onChange={(e)=> {
                         const value = e.target.value
                         // Store the raw numeric value for validation
@@ -1488,7 +1431,7 @@ function JobsPage() {
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">₱</span>
                     )}
                     <Input 
-                      value={formatSalaryInput(newJobData.salaryMax)} 
+                      value={formatSalaryInput(String(newJobData.salaryMax || ''))} 
                       onChange={(e)=> {
                         const value = e.target.value
                         // Store the raw numeric value for validation
@@ -2524,6 +2467,8 @@ function JobsPage() {
                  if (!successMessage.includes('Error')) {
                    setIsEditJobDialogOpen(false)
                    setEditingJob(null)
+                   // Reload the page to show updated changes
+                   window.location.reload()
                  }
                }}
              >

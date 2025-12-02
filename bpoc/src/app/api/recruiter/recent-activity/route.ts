@@ -19,7 +19,7 @@ export async function GET() {
           a.created_at as activity_time
         FROM applications a
         JOIN users u ON a.user_id = u.id
-        JOIN processed_job_requests pjr ON a.job_id = pjr.id
+        JOIN job_requests jr ON a.job_id = jr.id
         ORDER BY a.created_at DESC
         LIMIT 3
       `

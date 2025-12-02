@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
               m.company as company_name, 'job_requests' as source
             FROM job_requests jr
             LEFT JOIN members m ON jr.company_id = m.company_id
-            WHERE jr.id = ANY($1) AND jr.status = 'active'
+            WHERE jr.id = ANY($1) AND jr.status IN ('active', 'processed')
           `, [jobRequestIds]);
         } catch (error) {
           console.error('Error fetching job_requests:', error);
@@ -91,30 +91,8 @@ export async function POST(request: NextRequest) {
         jobRequestsResult = { rows: [] };
       }
 
-      // Check processed_job_requests table
-      if (processedJobIds.length > 0) {
-        try {
-          processedJobsResult = await client.query(`
-            SELECT 
-              pjr.id, pjr.job_title, pjr.job_description, 
-              COALESCE(pjr.requirements, ARRAY[]::text[]) as requirements, 
-              COALESCE(pjr.responsibilities, ARRAY[]::text[]) as responsibilities, 
-              COALESCE(pjr.benefits, ARRAY[]::text[]) as benefits, 
-              COALESCE(pjr.skills, ARRAY[]::text[]) as skills, 
-              pjr.experience_level,
-              pjr.industry, pjr.department, pjr.work_arrangement, pjr.salary_min, pjr.salary_max,
-              m.company as company_name, 'processed_job_requests' as source
-            FROM processed_job_requests pjr
-            LEFT JOIN members m ON pjr.company_id = m.company_id
-            WHERE pjr.id = ANY($1) AND pjr.status = 'active'
-          `, [processedJobIds]);
-        } catch (error) {
-          console.error('Error fetching processed jobs:', error);
-          processedJobsResult = { rows: [] };
-        }
-      } else {
-        processedJobsResult = { rows: [] };
-      }
+      // Processed jobs are now in job_requests, so skip this section
+      processedJobsResult = { rows: [] };
 
       // Check recruiter_jobs table
       if (recruiterJobIds.length > 0) {
@@ -154,7 +132,7 @@ export async function POST(request: NextRequest) {
       
       if (jobs.length === 0) {
         console.warn('⚠️ No jobs found for batch match. Requested job IDs:', jobIds);
-        console.warn('⚠️ Searched in: job_requests, processed_job_requests, recruiter_jobs');
+        console.warn('⚠️ Searched in: job_requests, recruiter_jobs');
         return NextResponse.json({ 
           results: {},
           cached: 0,
@@ -248,7 +226,7 @@ export async function POST(request: NextRequest) {
         console.log(`Processing ${uncachedJobs.length} uncached jobs in batches of 5`);
         console.log(`📋 Uncached jobs breakdown:`, {
           recruiter: uncachedJobs.filter(j => j.source === 'recruiter_jobs').length,
-          processed: uncachedJobs.filter(j => j.source === 'processed_job_requests').length,
+          processed: 0, // processed_job_requests table removed
           job_requests: uncachedJobs.filter(j => j.source === 'job_requests').length
         });
         
