@@ -85,39 +85,17 @@ export async function GET(request: NextRequest) {
               m.company as company_name, 'job_requests' as source
             FROM job_requests jr
             LEFT JOIN members m ON jr.company_id = m.company_id
-            WHERE jr.id = $1 AND jr.status = 'active'
+            WHERE jr.id = $1 AND jr.status IN ('active', 'processed')
           `, [jobId]);
         } catch (error) {
           console.error('Error fetching job_requests:', error);
-        }
-        
-        // If not found in job_requests, check processed_job_requests
-        if (jobResult.rows.length === 0) {
-          try {
-            jobResult = await client.query(`
-              SELECT 
-                pjr.id, pjr.job_title, pjr.job_description, 
-                COALESCE(pjr.requirements, ARRAY[]::text[]) as requirements, 
-                COALESCE(pjr.responsibilities, ARRAY[]::text[]) as responsibilities, 
-                COALESCE(pjr.benefits, ARRAY[]::text[]) as benefits, 
-                COALESCE(pjr.skills, ARRAY[]::text[]) as skills, 
-                pjr.experience_level,
-                pjr.industry, pjr.department, pjr.work_arrangement, pjr.salary_min, pjr.salary_max,
-                m.company as company_name, 'processed_job_requests' as source
-              FROM processed_job_requests pjr
-              LEFT JOIN members m ON pjr.company_id = m.company_id
-              WHERE pjr.id = $1 AND pjr.status = 'active'
-            `, [jobId]);
-          } catch (error) {
-            console.error('Error fetching processed job:', error);
-          }
         }
       }
 
       // jobResult is already set above
 
       if (jobResult.rows.length === 0) {
-        console.error(`❌ Job not found: jobId=${normalizedJobId}, isRecruiterJob=${isRecruiterJob}`);
+        console.error(`Job not found: jobId=${normalizedJobId}, isRecruiterJob=${isRecruiterJob}`);
         return NextResponse.json({ 
           error: 'Job not found',
           details: `No active job found with ID: ${normalizedJobId}`

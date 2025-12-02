@@ -21,10 +21,10 @@ export async function GET(
 
     const { id } = await params
     const res = await pool.query(
-      `SELECT p.*, m.company as company_name
-       FROM processed_job_requests p
-       LEFT JOIN members m ON m.company_id = p.company_id
-       WHERE p.id = $1`,
+      `SELECT jr.*, m.company as company_name
+       FROM job_requests jr
+       LEFT JOIN members m ON m.company_id = jr.company_id
+       WHERE jr.id = $1`,
       [id]
     )
     if (res.rows.length === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 })

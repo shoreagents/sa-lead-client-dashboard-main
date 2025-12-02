@@ -103,127 +103,28 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid job ID format' }, { status: 400 })
       }
       
-      // Check both processed_job_requests and job_requests to determine which table
-      const processedJobCheck = await client.query('SELECT id FROM processed_job_requests WHERE id = $1', [numericJobId])
-      const jobRequestCheck = await client.query('SELECT id FROM job_requests WHERE id = $1', [numericJobId])
+      // Check job_requests table
+      const jobRequestCheck = await client.query('SELECT id, status FROM job_requests WHERE id = $1', [numericJobId])
       
-      if (processedJobCheck.rows.length > 0) {
-        // Job exists in processed_job_requests
-        jobType = 'processed'
-        console.log('📝 Job found in processed_job_requests:', numericJobId)
-      } else if (jobRequestCheck.rows.length > 0) {
+      if (jobRequestCheck.rows.length > 0) {
         // Job exists in job_requests
-        // Check if there's a corresponding processed_job_request with the same ID
-        // (When jobs are processed, they get the same ID in processed_job_requests)
-        const processedVersion = await client.query(
-          'SELECT id FROM processed_job_requests WHERE id = $1',
-          [numericJobId]
-        )
-        
-        if (processedVersion.rows.length > 0) {
-          // Use the processed version (same ID exists in processed_job_requests)
-          jobType = 'processed'
-          console.log('✅ Found processed version of job_request with same ID:', numericJobId)
-        } else {
-          // Job exists in job_requests but not yet in processed_job_requests
-          // Since user wants all active jobs to be applicable, we'll auto-create processed_job_request
-          const jobRequestDetails = await client.query(
-            `SELECT 
-              company_id, job_title, work_arrangement, salary_min, salary_max,
-              job_description, requirements, responsibilities, benefits, skills,
-              experience_level, application_deadline, industry, department,
-              work_type, currency, salary_type, status, views, applicants,
-              created_at, updated_at, priority, shift
-            FROM job_requests WHERE id = $1 AND status = 'active'`,
-            [numericJobId]
-          )
-          
-          if (jobRequestDetails.rows.length > 0) {
-            // Job is active in job_requests - auto-create processed_job_request entry
-            const jobData = jobRequestDetails.rows[0]
-            console.log('📝 Auto-creating processed_job_request for active job_request:', numericJobId)
-            
-            try {
-              // Insert into processed_job_requests with the same ID
-              // Match the pattern from the process route - use NOW() for timestamps and cast arrays
-              // We'll do this before starting the main transaction, or include it in the same transaction
-              const insertResult = await client.query(`
-                INSERT INTO processed_job_requests (
-                  id, company_id, job_title, work_arrangement, salary_min, salary_max,
-                  job_description, requirements, responsibilities, benefits, skills,
-                  experience_level, application_deadline, industry, department,
-                  work_type, currency, salary_type, status, views, applicants,
-                  created_at, updated_at, priority, shift
-                ) VALUES (
-                  $1, $2, $3, $4, $5, $6, $7,
-                  $8::text[], $9::text[], $10::text[], $11::text[],
-                  $12, $13, $14, $15,
-                  $16, $17, $18, $19, $20, $21, NOW(), NOW(), $22, $23
-                )
-                ON CONFLICT (id) DO NOTHING
-                RETURNING id
-              `, [
-                numericJobId,
-                jobData.company_id,
-                jobData.job_title,
-                jobData.work_arrangement,
-                jobData.salary_min,
-                jobData.salary_max,
-                jobData.job_description,
-                jobData.requirements || [],
-                jobData.responsibilities || [],
-                jobData.benefits || [],
-                jobData.skills || [],
-                jobData.experience_level,
-                jobData.application_deadline,
-                jobData.industry,
-                jobData.department,
-                jobData.work_type,
-                jobData.currency,
-                jobData.salary_type,
-                jobData.status || 'active',
-                jobData.views ?? 0,
-                jobData.applicants ?? 0,
-                jobData.priority,
-                jobData.shift
-              ])
-              
-              jobType = 'processed'
-              if (insertResult.rows.length > 0) {
-                console.log('✅ Auto-created processed_job_request for job_request:', numericJobId)
-              } else {
-                console.log('✅ processed_job_request already exists for job_request:', numericJobId)
-              }
-            } catch (createError: any) {
-              console.error('❌ Error auto-creating processed_job_request:', createError)
-              console.error('❌ Error details:', {
-                message: createError.message,
-                code: createError.code,
-                detail: createError.detail,
-                constraint: createError.constraint,
-                stack: createError.stack
-              })
-              // If creation fails, return error with details
-              return NextResponse.json({ 
-                error: 'Unable to process application',
-                details: createError.detail || createError.message || 'Failed to process job for application. Please try again later.',
-                code: createError.code
-              }, { status: 500 })
-            }
-          } else {
-            return NextResponse.json({ 
-              error: 'This job is not available',
-              details: 'This job is not active and cannot be applied to.'
-            }, { status: 400 })
-          }
+        const job = jobRequestCheck.rows[0]
+        // Accept both 'active' and 'processed' status jobs (both are active/hiring)
+        if (job.status !== 'active' && job.status !== 'processed') {
+          return NextResponse.json({ 
+            error: 'This job is not available',
+            details: 'This job is not active and cannot be applied to.'
+          }, { status: 400 })
         }
+        jobType = 'job_request'
+        console.log('📝 Job found in job_requests:', numericJobId)
       } else {
         return NextResponse.json({ error: 'Job not found' }, { status: 404 })
       }
     }
 
     // Start transaction for application processing
-    // (If we already started one for processed_job_request creation, this will be a no-op in PostgreSQL)
+    // Start transaction for application processing
     // But to be safe, we'll check if we need to start it
     try {
       await client.query('BEGIN')
@@ -261,9 +162,9 @@ export async function POST(request: NextRequest) {
 
     // Check for existing application and insert new one
     let existing, ins
-    if (jobType === 'processed') {
-      // Use applications table for processed jobs
-      console.log('📝 Checking for existing processed job application:', { userId, numericJobId })
+    if (jobType === 'job_request') {
+      // Use applications table for job_requests
+      console.log('📝 Checking for existing application:', { userId, numericJobId })
       existing = await client.query('SELECT * FROM applications WHERE user_id = $1 AND job_id = $2 LIMIT 1', [userId, numericJobId])
       
       if (existing.rows.length > 0) {
@@ -272,7 +173,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ application: existing.rows[0], created: false })
       }
 
-      console.log('📝 Inserting new processed job application:', { userId, numericJobId, resumeId, resumeSlug })
+      console.log('📝 Inserting new application:', { userId, numericJobId, resumeId, resumeSlug })
       try {
         ins = await client.query(
           `INSERT INTO applications (user_id, job_id, resume_id, resume_slug, status)
@@ -280,9 +181,9 @@ export async function POST(request: NextRequest) {
            RETURNING *`,
           [userId, numericJobId, resumeId, resumeSlug]
         )
-        console.log('✅ Processed job application created:', ins.rows[0]?.id)
+        console.log('✅ Application created:', ins.rows[0]?.id)
       } catch (insertError: any) {
-        console.error('❌ Error inserting processed job application:', insertError)
+        console.error('❌ Error inserting application:', insertError)
         throw insertError
       }
     }

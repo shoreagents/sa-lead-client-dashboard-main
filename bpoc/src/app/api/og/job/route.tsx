@@ -71,9 +71,9 @@ export async function GET(request: NextRequest) {
         } else {
           res = await client.query(
             `SELECT p.*, m.company AS company_name
-             FROM processed_job_requests p
-             LEFT JOIN members m ON m.company_id = p.company_id
-             WHERE p.id = $1 AND p.status IN ('processed','active')
+             FROM job_requests jr
+             LEFT JOIN members m ON m.company_id = jr.company_id
+             WHERE jr.id = $1 AND jr.status = 'active'
              LIMIT 1`,
             [actualId]
           );

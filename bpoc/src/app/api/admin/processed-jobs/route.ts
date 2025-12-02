@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     if (fields.length === 0) return NextResponse.json({ error: 'no fields' }, { status: 400 })
 
     const setSql = fields.map((f, i) => `${f} = $${i + 1}`).join(', ')
-    const update = await pool.query(`UPDATE processed_job_requests SET ${setSql}, updated_at = NOW() WHERE id = $${fields.length + 1} RETURNING *`, [...values, id])
+    const update = await pool.query(`UPDATE job_requests SET ${setSql}, updated_at = NOW() WHERE id = $${fields.length + 1} RETURNING *`, [...values, id])
     if (update.rows.length === 0) return NextResponse.json({ error: 'not found' }, { status: 404 })
 
     // Business rule: when a job is closed, if any application for that job is 'hired',

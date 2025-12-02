@@ -8,49 +8,54 @@ datasource db {
 }
 
 model User {
-  id                                        String                   @id @default(uuid()) @db.Uuid
-  email                                     String                   @unique
-  first_name                                String
-  last_name                                 String
-  full_name                                 String
-  location                                  String
-  avatar_url                                String?
-  created_at                                DateTime?                @default(now()) @db.Timestamp(6)
-  updated_at                                DateTime?                @default(now()) @db.Timestamp(6)
-  phone                                     String?
-  bio                                       String?
-  position                                  String?
-  admin_level                               String?                  @default("user") @db.VarChar(10)
-  completed_data                            Boolean                  @default(false)
-  birthday                                  DateTime?                @db.Date
-  slug                                      String?                  @unique
-  gender                                    String?
-  gender_custom                             String?
-  location_place_id                         String?
-  location_lat                              Float?
-  location_lng                              Float?
-  location_city                             String?
-  location_province                         String?
-  location_country                          String?
-  location_barangay                         String?
-  location_region                           String?
-  username                                  String?                  @unique
-  company                                   String?                  @db.VarChar(255)
-  company_id                                String?                  @db.Uuid
-  is_company_admin                          Boolean                  @default(false)
-  aiAnalysisResults                         AiAnalysisResults?
-  applications                              Application[]
-  discPersonalitySessions                   DiscPersonalitySession[]
-  discPersonalityStats                      DiscPersonalityStats?
-  privacySettings                           PrivacySettings?
-  resumesExtracted                          ResumesExtracted?
-  resumesGenerated                          ResumesGenerated?
-  savedResumes                              SavedResume[]
-  typingHeroSessions                        TypingHeroSession[]
-  typingHeroStats                           TypingHeroStats?
-  leaderboardScore                          UserLeaderboardScores?
-  workStatus                                UserWorkStatus?
+  id                      String                   @id @default(uuid()) @db.Uuid
+  email                   String                   @unique
+  first_name              String
+  last_name               String
+  full_name               String
+  location                String
+  avatar_url              String?
+  created_at              DateTime?                @default(now()) @db.Timestamp(6)
+  updated_at              DateTime?                @default(now()) @db.Timestamp(6)
+  phone                   String?
+  bio                     String?
+  position                String?
+  admin_level             String?                  @default("user") @db.VarChar(10)
+  completed_data          Boolean                  @default(false)
+  birthday                DateTime?                @db.Date
+  slug                    String?                  @unique
+  gender                  String?
+  gender_custom           String?
+  location_place_id       String?
+  location_lat            Float?
+  location_lng            Float?
+  location_city           String?
+  location_province       String?
+  location_country        String?
+  location_barangay       String?
+  location_region         String?
+  username                String?                  @unique
+  company                 String?                  @db.VarChar(255)
+  company_id              String?                  @db.Uuid
+  is_company_admin        Boolean                  @default(false)
+  agency_id               String?                  @db.Uuid
+  role                    String?                  @default("candidate") @db.VarChar(20)
+  aiAnalysisResults       AiAnalysisResults?
+  applications            Application[]
+  discPersonalitySessions DiscPersonalitySession[]
+  discPersonalityStats    DiscPersonalityStats?
+  privacySettings         PrivacySettings?
+  resumesExtracted        ResumesExtracted?
+  resumesGenerated        ResumesGenerated?
+  savedResumes            SavedResume[]
+  typingHeroSessions      TypingHeroSession[]
+  typingHeroStats         TypingHeroStats?
+  leaderboardScore        UserLeaderboardScores?
+  workStatus              UserWorkStatus?
+  agencies                agencies?                @relation(fields: [agency_id], references: [id])
 
+  @@index([agency_id], map: "idx_users_agency_id")
+  @@index([role], map: "idx_users_role")
   @@map("users")
 }
 
@@ -350,20 +355,20 @@ model ResumesGenerated {
 }
 
 model SavedResume {
-  id                    String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user_id               String                 @db.Uuid
-  resume_slug           String                 @unique
-  resume_title          String
-  resume_data           Json
-  template_used         String
-  is_public             Boolean?               @default(true)
-  view_count            Int?                   @default(0)
-  created_at            DateTime?              @default(now()) @db.Timestamp(6)
-  updated_at            DateTime?              @default(now()) @db.Timestamp(6)
-  original_resume_id    String?                @db.Uuid
-  applications          Application[]
-  originalResume        ResumesGenerated?      @relation(fields: [original_resume_id], references: [id], onUpdate: NoAction)
-  user                  User                   @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id            String            @db.Uuid
+  resume_slug        String            @unique
+  resume_title       String
+  resume_data        Json
+  template_used      String
+  is_public          Boolean?          @default(true)
+  view_count         Int?              @default(0)
+  created_at         DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at         DateTime?         @default(now()) @db.Timestamp(6)
+  original_resume_id String?           @db.Uuid
+  applications       Application[]
+  originalResume     ResumesGenerated? @relation(fields: [original_resume_id], references: [id], onUpdate: NoAction)
+  user               User              @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([original_resume_id], map: "idx_saved_resumes_original_resume_id")
   @@index([is_public], map: "idx_saved_resumes_public")
@@ -380,7 +385,7 @@ model Application {
   created_at  DateTime                @default(now()) @db.Timestamptz(6)
   position    Int?                    @default(0)
   updated_at  DateTime?               @default(now()) @db.Timestamptz(6)
-  job         ProcessedJobRequest     @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  job         JobRequest              @relation(fields: [job_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   resume      SavedResume             @relation(fields: [resume_id], references: [id], onUpdate: NoAction)
   user        User                    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -394,34 +399,33 @@ model Application {
 }
 
 model JobRequest {
-  id                   Int                    @id @default(autoincrement())
-  company_id           String?                @db.Uuid
-  job_title            String
-  work_arrangement     work_arrangement_enum?
-  salary_min           Int?
-  salary_max           Int?
-  job_description      String
-  requirements         String[]               @default([])
-  responsibilities     String[]               @default([])
-  benefits             String[]               @default([])
-  skills               String[]               @default([])
-  experience_level     experience_level_enum?
-  application_deadline DateTime?              @db.Date
-  industry             String?
-  department           String?
-  work_type            String                 @default("full-time")
-  currency             String                 @default("PHP")
-  salary_type          String                 @default("monthly")
-  status               job_status_enum        @default(active)
-  views                Int                    @default(0)
-  applicants           Int                    @default(0)
-  created_at           DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime               @default(now()) @db.Timestamptz(6)
-  priority             priority_enum          @default(medium)
-  shift                shift_enum             @default(day)
-  // comments             JobRequestComment[] // Commented out - table has been removed
-  company              Member?                @relation(fields: [company_id], references: [company_id], onUpdate: NoAction)
-  processedJob         ProcessedJobRequest?
+  id                     Int                     @id @default(autoincrement())
+  company_id             String?                 @db.Uuid
+  job_title              String
+  work_arrangement       work_arrangement_enum?
+  salary_min             Int?
+  salary_max             Int?
+  job_description        String
+  requirements           String[]                @default([])
+  responsibilities       String[]                @default([])
+  benefits               String[]                @default([])
+  skills                 String[]                @default([])
+  experience_level       experience_level_enum?
+  application_deadline   DateTime?               @db.Date
+  industry               String?
+  department             String?
+  work_type              String                  @default("full-time")
+  currency               String                  @default("PHP")
+  salary_type            String                  @default("monthly")
+  status                 job_status_enum         @default(active)
+  views                  Int                     @default(0)
+  applicants             Int                     @default(0)
+  created_at             DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime                @default(now()) @db.Timestamptz(6)
+  priority               priority_enum           @default(medium)
+  shift                  shift_enum              @default(day)
+  company                Member?                 @relation(fields: [company_id], references: [company_id], onUpdate: NoAction)
+  applications           Application[]
 
   @@index([company_id], map: "idx_job_requests_company_id")
   @@index([created_at], map: "idx_job_requests_created_at")
@@ -431,51 +435,16 @@ model JobRequest {
   @@map("job_requests")
 }
 
-model ProcessedJobRequest {
-  id                   Int                    @id
-  company_id           String?                @db.Uuid
-  job_title            String
-  work_arrangement     work_arrangement_enum?
-  salary_min           Int?
-  salary_max           Int?
-  job_description      String
-  requirements         String[]               @default([])
-  responsibilities     String[]               @default([])
-  benefits             String[]               @default([])
-  skills               String[]               @default([])
-  experience_level     experience_level_enum?
-  application_deadline DateTime?              @db.Date
-  industry             String?
-  department           String?
-  work_type            String                 @default("full-time")
-  currency             String                 @default("PHP")
-  salary_type          String                 @default("monthly")
-  status               job_status_enum        @default(active)
-  views                Int                    @default(0)
-  applicants           Int                    @default(0)
-  created_at           DateTime               @default(now()) @db.Timestamptz(6)
-  updated_at           DateTime               @default(now()) @db.Timestamptz(6)
-  priority             priority_enum          @default(medium)
-  shift                shift_enum             @default(day)
-  applications         Application[]
-  company              Member?                @relation(fields: [company_id], references: [company_id], onUpdate: NoAction)
-  originalJob          JobRequest             @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([company_id], map: "idx_processed_job_requests_company_id")
-  @@index([created_at], map: "idx_processed_job_requests_created_at")
-  @@index([shift], map: "idx_processed_job_requests_shift")
-  @@index([status], map: "idx_processed_job_requests_status")
-  @@map("processed_job_requests")
-}
-
 model Member {
-  company       String
-  created_at    DateTime?             @default(now()) @db.Timestamp(6)
-  updated_at    DateTime?             @default(now()) @db.Timestamp(6)
-  company_id    String                @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  jobRequests   JobRequest[]
-  processedJobs ProcessedJobRequest[]
+  company                String
+  created_at             DateTime?                @default(now()) @db.Timestamp(6)
+  updated_at             DateTime?                @default(now()) @db.Timestamp(6)
+  company_id             String                   @id @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  agency_id              String?                  @db.Uuid
+  jobRequests            JobRequest[]
+  agencies               agencies?                @relation(fields: [agency_id], references: [id])
 
+  @@index([agency_id], map: "idx_members_agency_id")
   @@map("members")
 }
 
@@ -493,6 +462,18 @@ model JobMatchResult {
   @@index([user_id], map: "idx_job_match_results_user")
   @@map("job_match_results")
 }
+
+model agencies {
+  id         String   @id @db.Uuid
+  name       String   @db.VarChar(255)
+  slug       String   @unique @db.VarChar(50)
+  logo_url   String?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  members    Member[]
+  users      User[]
+}
+
 
 enum application_status_enum {
   submitted

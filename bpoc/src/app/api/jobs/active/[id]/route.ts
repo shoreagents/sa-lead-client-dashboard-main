@@ -54,12 +54,12 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
         [actualId]
       )
     } else {
-      // Query processed_job_requests (default)
+      // Query job_requests (default fallback)
       res = await pool.query(
-        `SELECT p.*, m.company AS company_name
-         FROM processed_job_requests p
-         LEFT JOIN members m ON m.company_id = p.company_id
-         WHERE p.id = $1 AND p.status IN ('processed','active')
+        `SELECT jr.*, m.company AS company_name
+         FROM job_requests jr
+         LEFT JOIN members m ON m.company_id = jr.company_id
+         WHERE jr.id = $1 AND jr.status = 'active'
          LIMIT 1`,
         [actualId]
       )
@@ -84,7 +84,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     const realApplicants = apps.rows?.[0]?.cnt ?? 0
 
     const job = {
-      id: source === 'recruiter' ? `recruiter_${row.id}` : source === 'job_request' ? `job_request_${row.id}` : `processed_${row.id}`,
+      id: source === 'recruiter' ? `recruiter_${row.id}` : `job_request_${row.id}`,
       company: source === 'recruiter' ? (row.company_name || 'Company') : 'ShoreAgents',
       companyLogo: row.company_logo || '🏢',
       title: row.job_title || 'Untitled Role',

@@ -73,15 +73,14 @@ export async function GET(
         }
       })
     } else {
-      // Handle processed job requests (existing logic)
-      // Extract numeric ID if it starts with 'processed_'
+      // Handle numeric ID (fallback to job_requests)
       const actualJobId = jobId.startsWith('processed_') ? jobId.replace('processed_', '') : jobId
       
       const result = await pool.query(`
-        SELECT p.*, m.company AS company_name
-        FROM processed_job_requests p
-        LEFT JOIN members m ON m.company_id = p.company_id
-        WHERE p.id = $1
+        SELECT jr.*, m.company AS company_name
+        FROM job_requests jr
+        LEFT JOIN members m ON m.company_id = jr.company_id
+        WHERE jr.id = $1
       `, [actualJobId])
 
       if (result.rows.length === 0) {
@@ -96,9 +95,9 @@ export async function GET(
 
       return NextResponse.json({
         job: {
-          id: `processed_${row.id}`,
+          id: `job_request_${row.id}`,
           originalId: String(row.id),
-          source: 'processed_job_requests',
+          source: 'job_requests',
           company: 'ShoreAgents',
           companyLogo: row.company_logo || '🏢',
           title: row.job_title || 'Untitled Role',

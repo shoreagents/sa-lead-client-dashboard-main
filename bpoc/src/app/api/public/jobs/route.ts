@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 		}
 
 		// count first
-		const countSql = `SELECT COUNT(*)::int AS total FROM processed_job_requests ${whereParts.length ? 'WHERE ' + whereParts.join(' AND ') : ''}`
+		const countSql = `SELECT COUNT(*)::int AS total FROM job_requests ${whereParts.length ? 'WHERE ' + whereParts.join(' AND ') : ''}`
 		const countRes = await client.query(countSql, params)
 		const total = countRes.rows[0]?.total || 0
 
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 			SELECT id, company_id, job_title, department, work_arrangement, salary_min, salary_max,
 			       currency, salary_type, experience_level, priority, shift, application_deadline,
 			       industry, work_type, status, views, applicants, created_at, updated_at
-			FROM processed_job_requests
+			FROM job_requests
 			${whereParts.length ? 'WHERE ' + whereParts.join(' AND ') : ''}
 			ORDER BY created_at DESC
 			LIMIT $${params.length - 1} OFFSET $${params.length}

@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Recruiter jobs have been removed' }, { status: 404 })
       } else {
         if (!numericJobId || Number.isNaN(numericJobId)) return NextResponse.json({ error: 'Invalid jobId' }, { status: 400 })
-        // Query applications for regular jobs (both processed_job_requests and job_requests use the same applications table)
+        // Query applications for regular jobs (job_requests uses the applications table)
         res = await pool.query(
           `SELECT a.*, 
                   u.email as user_email, u.full_name as user_full_name, u.avatar_url as user_avatar, u.position as user_position, u.location as user_location,
@@ -161,7 +161,7 @@ export async function PATCH(request: NextRequest) {
           const jobIdRes = await pool.query('SELECT job_id FROM applications WHERE id = $1', [applicationId])
           const jobId = jobIdRes.rows[0]?.job_id
           if (jobId != null) {
-            await pool.query(`UPDATE processed_job_requests SET status = 'closed', updated_at = NOW() WHERE id = $1`, [jobId])
+            await pool.query(`UPDATE job_requests SET status = 'closed', updated_at = NOW() WHERE id = $1`, [jobId])
             await pool.query(`UPDATE applications SET status = 'closed', updated_at = NOW() WHERE job_id = $1 AND id <> $2 AND status <> 'hired'`, [jobId, applicationId])
           }
         }
@@ -218,7 +218,7 @@ export async function PATCH(request: NextRequest) {
         const jobIdRes = await pool.query('SELECT job_id FROM applications WHERE id = $1', [applicationId])
         const jobId = jobIdRes.rows[0]?.job_id
         if (jobId != null) {
-          await pool.query(`UPDATE processed_job_requests SET status = 'closed', updated_at = NOW() WHERE id = $1`, [jobId])
+          await pool.query(`UPDATE job_requests SET status = 'closed', updated_at = NOW() WHERE id = $1`, [jobId])
           await pool.query(`UPDATE applications SET status = 'closed', updated_at = NOW() WHERE job_id = $1 AND id <> $2 AND status <> 'hired'`, [jobId, applicationId])
         }
       }

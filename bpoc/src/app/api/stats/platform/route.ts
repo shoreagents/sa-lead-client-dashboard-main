@@ -108,24 +108,15 @@ export async function GET(request: NextRequest) {
     const jobRequestsResult = await pool.query(
       `SELECT COUNT(*) as count 
        FROM job_requests 
-       WHERE status = 'active'
-         AND NOT EXISTS (
-           SELECT 1 FROM processed_job_requests p WHERE p.id = job_requests.id
-         )`
+       WHERE status = 'active'`
     )
     const jobRequestsCount = parseInt(jobRequestsResult.rows[0]?.count || '0')
-
-    // 2. processed_job_requests (existing jobs)
-    const processedJobsResult = await pool.query(
-      "SELECT COUNT(*) as count FROM processed_job_requests WHERE status = 'active'"
-    )
-    const processedJobsCount = parseInt(processedJobsResult.rows[0]?.count || '0')
 
     // Recruiter jobs removed - table dropped
     const recruiterJobsCount = 0
 
     // Combine all active jobs
-    const activeJobs = jobRequestsCount + processedJobsCount + recruiterJobsCount
+    const activeJobs = jobRequestsCount + recruiterJobsCount
 
     return NextResponse.json({
       totalUsers,

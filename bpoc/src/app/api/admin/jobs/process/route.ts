@@ -67,62 +67,36 @@ export async function POST(request: NextRequest) {
         }
       : await callAnthropicForImprovement(seed)
 
-    // Update original status only
-    await client.query('UPDATE job_requests SET status = $1::job_status_enum, updated_at = NOW() WHERE id = $2', ['processed', id])
-
-    // Insert or update processed row (1:1 by id)
-    const insertSql = `
-      INSERT INTO processed_job_requests (
-        id, company_id, job_title, work_arrangement, salary_min, salary_max, job_description,
-        requirements, responsibilities, benefits, skills,
-        experience_level, application_deadline, industry, department,
-        work_type, currency, salary_type, status, views, applicants, created_at, updated_at, priority
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7,
-        $8::text[], $9::text[], $10::text[], $11::text[],
-        $12, $13, $14, $15,
-        $16, $17, $18, $19, $20, $21, NOW(), NOW(), $22
-      )
-      ON CONFLICT (id) DO UPDATE SET
-        job_title = EXCLUDED.job_title,
-        job_description = EXCLUDED.job_description,
-        requirements = EXCLUDED.requirements,
-        responsibilities = EXCLUDED.responsibilities,
-        benefits = EXCLUDED.benefits,
-        skills = EXCLUDED.skills,
-        experience_level = EXCLUDED.experience_level,
-        status = EXCLUDED.status,
+    // Update job_requests with improved data and new status
+    const updateSql = `
+      UPDATE job_requests SET
+        job_title = $1,
+        job_description = $2,
+        requirements = $3::text[],
+        responsibilities = $4::text[],
+        benefits = $5::text[],
+        skills = $6::text[],
+        experience_level = $7,
+        status = $8::job_status_enum,
         updated_at = NOW()
+      WHERE id = $9
       RETURNING *
     `
-    const ins = await client.query(insertSql, [
-      id,
-      src.company_id,
+    const updateResult = await client.query(updateSql, [
       improved.job_title || src.job_title,
-      src.work_arrangement,
-      src.salary_min,
-      src.salary_max,
       improved.job_description || src.job_description,
       improved.requirements || src.requirements || [],
       improved.responsibilities || src.responsibilities || [],
       improved.benefits || src.benefits || [],
       improved.skills || src.skills || [],
       improved.experience_level || src.experience_level,
-      src.application_deadline,
-      src.industry,
-      src.department,
-      src.work_type,
-      src.currency,
-      src.salary_type,
       processedStatus,
-      src.views ?? 0,
-      src.applicants ?? 0,
-      src.priority
+      id
     ])
 
     await client.query('COMMIT')
 
-    const row = ins.rows[0]
+    const row = updateResult.rows[0]
     const companyName = await getCompanyName(row.company_id)
     const card = rowToJobCard({ ...row, company_name: companyName })
     return NextResponse.json({ processedJob: card, originalJobId: String(id) })
@@ -277,7 +251,7 @@ function rowToJobCard(row: any) {
     employmentType,
     postedDays,
     applicants: row.applicants ?? 0,
-    status: 'approved',
+    status: row.status || 'active',
     priority,
   }
 }

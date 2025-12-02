@@ -128,22 +128,9 @@ export async function GET(request: NextRequest) {
         let processedJobsResult: { rows: any[] } = { rows: [] };
         let recruiterJobsResult: { rows: any[] } = { rows: [] };
 
-        // First, let's check what's actually in the database tables
-        console.log('🔍 Checking database tables...');
-        try {
-          const processedCount = await client.query('SELECT COUNT(*) as count FROM processed_job_requests');
-          console.log('📊 Database table counts - Processed jobs:', processedCount.rows[0].count);
-          
-          // Show sample data from processed table
-          const sampleProcessed = await client.query('SELECT id, job_title FROM processed_job_requests LIMIT 3');
-          console.log('📊 Sample processed jobs:', sampleProcessed.rows.map(j => ({ id: j.id, title: j.job_title })));
-        } catch (error) {
-          console.warn('⚠️ Error checking database tables:', error);
-        }
-
-        // Fetch processed jobs
+        // Fetch jobs from job_requests
         if (processedJobIds.length > 0) {
-          console.log('🔍 Fetching processed jobs for IDs:', processedJobIds);
+          console.log('🔍 Fetching jobs for IDs:', processedJobIds);
           try {
             processedJobsResult = await client.query(
               `SELECT 
@@ -164,30 +151,14 @@ export async function GET(request: NextRequest) {
                 p.application_deadline,
                 'ShoreAgents' as company_name,
                 (SELECT COUNT(*) FROM applications WHERE job_id = p.id) as candidate_count
-               FROM processed_job_requests p
+               FROM job_requests p
                WHERE p.id = ANY($1)`,
               [processedJobIds]
             );
-            console.log('✅ Processed jobs query successful');
-            console.log('🔍 Processed jobs found:', processedJobsResult.rows.length);
-            console.log('🔍 Processed jobs data:', processedJobsResult.rows.map(job => ({
-              id: job.id,
-              title: job.job_title,
-              company: job.company_name
-            })));
-            
-            // If no results, let's check if the table exists and has data
-            if (processedJobsResult.rows.length === 0) {
-              console.log('⚠️ No processed jobs found, checking table...');
-              const tableCheck = await client.query('SELECT COUNT(*) as count FROM processed_job_requests');
-              console.log('📊 Total processed jobs in table:', tableCheck.rows[0].count);
-              
-              // Check if any of the job IDs exist
-              const idCheck = await client.query('SELECT id FROM processed_job_requests WHERE id = ANY($1)', [processedJobIds]);
-              console.log('📊 Job IDs that exist in processed_job_requests:', idCheck.rows.map(r => r.id));
-            }
+            console.log('✅ Jobs query successful');
+            console.log('🔍 Jobs found:', processedJobsResult.rows.length);
           } catch (error) {
-            console.warn('⚠️ Processed jobs query failed:', error);
+            console.warn('⚠️ Jobs query failed:', error);
             processedJobsResult = { rows: [] };
           }
         }
@@ -198,7 +169,7 @@ export async function GET(request: NextRequest) {
         // Combine job results and add source information
         const jobsResult: { rows: any[] } = {
           rows: [
-            ...processedJobsResult.rows.map((job: any) => ({ ...job, source: 'processed' })),
+            ...processedJobsResult.rows.map((job: any) => ({ ...job, source: 'job_request' })),
             ...recruiterJobsResult.rows.map((job: any) => ({ ...job, source: 'recruiter' }))
           ]
         };
@@ -286,24 +257,24 @@ export async function GET(request: NextRequest) {
             // Try to fetch job details directly based on job type
             try {
               if (appRow.jobType === 'processed') {
-                console.log('🔍 Attempting direct query for processed job:', appRow.jobId);
+                console.log('🔍 Attempting direct query for job:', appRow.jobId);
                 
-                // Try multiple approaches for processed jobs
+                // Try multiple approaches for jobs
                 let directResult = await client.query(
                   `SELECT p.*, 
                           'ShoreAgents' as company_name
-                   FROM processed_job_requests p
+                   FROM job_requests p
                    WHERE p.id = $1`,
                   [appRow.jobId]
                 );
                 
                 // If not found, try with string conversion
                 if (directResult.rows.length === 0) {
-                  console.log('🔍 Trying with string conversion for processed job');
+                  console.log('🔍 Trying with string conversion for job');
                   directResult = await client.query(
                     `SELECT p.*, 
                             'ShoreAgents' as company_name
-                     FROM processed_job_requests p
+                     FROM job_requests p
                      WHERE p.id::text = $1`,
                     [String(appRow.jobId)]
                   );
@@ -315,21 +286,21 @@ export async function GET(request: NextRequest) {
                   directResult = await client.query(
                     `SELECT p.*, 
                             'ShoreAgents' as company_name
-                     FROM processed_job_requests p
+                     FROM job_requests p
                      WHERE p.id = $1`,
                     [parseInt(appRow.jobId)]
                   );
                 }
                 
-                console.log('🔍 Direct processed query result:', directResult.rows.length, 'rows');
+                console.log('🔍 Direct job query result:', directResult.rows.length, 'rows');
                 if (directResult.rows.length > 0) {
                   finalJobDetails = directResult.rows[0];
                   console.log('✅ Found job details via direct query:', finalJobDetails.job_title);
                 } else {
-                  console.warn('⚠️ No processed job found with ID:', appRow.jobId);
+                  console.warn('⚠️ No job found with ID:', appRow.jobId);
                   // Check what IDs actually exist
-                  const allProcessedJobs = await client.query('SELECT id, job_title FROM processed_job_requests LIMIT 5');
-                  console.log('📊 Available processed job IDs:', allProcessedJobs.rows.map(j => ({ id: j.id, title: j.job_title })));
+                  const allJobs = await client.query('SELECT id, job_title FROM job_requests LIMIT 5');
+                  console.log('📊 Available job IDs:', allJobs.rows.map(j => ({ id: j.id, title: j.job_title })));
                 }
               }
             } catch (error) {

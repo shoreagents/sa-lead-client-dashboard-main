@@ -14,31 +14,19 @@ function formatSalary(currency: string, min: number | null, max: number | null, 
 
 export async function GET(_request: NextRequest) {
   try {
-    // Fetch from job_requests (admin jobs) - only unprocessed ones
+    // Fetch from job_requests (all active jobs - includes both 'active' and 'processed' status)
     const jobRequestsRes = await pool.query(`
       SELECT jr.*, m.company AS company_name
       FROM job_requests jr
       LEFT JOIN members m ON m.company_id = jr.company_id
-      WHERE jr.status = 'active'
-        AND NOT EXISTS (
-          SELECT 1 FROM processed_job_requests p WHERE p.id = jr.id
-        )
+      WHERE jr.status IN ('active', 'processed')
       ORDER BY jr.created_at DESC
-    `)
-
-    // Fetch from processed_job_requests (existing jobs)
-    const processedJobsRes = await pool.query(`
-      SELECT p.*, m.company AS company_name
-      FROM processed_job_requests p
-      LEFT JOIN members m ON m.company_id = p.company_id
-      WHERE p.status = 'active'
-      ORDER BY p.created_at DESC
     `)
 
     // Recruiter jobs removed - table dropped
     const recruiterJobsRes = { rows: [] }
 
-    // Process job_requests (admin jobs)
+    // Process job_requests
     const jobRequests = await Promise.all(jobRequestsRes.rows.map(async (row: any) => {
       const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [row.id])
       const realApplicants = apps.rows?.[0]?.cnt ?? 0
@@ -155,128 +143,11 @@ export async function GET(_request: NextRequest) {
       }
     }))
 
-    // Process processed_job_requests
-    const processedJobs = await Promise.all(processedJobsRes.rows.map(async (row: any) => {
-      const apps = await pool.query('SELECT COUNT(*)::int AS cnt FROM applications WHERE job_id = $1', [row.id])
-      const realApplicants = apps.rows?.[0]?.cnt ?? 0
-      const employmentType: string[] = []
-      if (row.work_type) employmentType.push(capitalize(String(row.work_type)))
-      if (row.experience_level) employmentType.push(capitalize(String(row.experience_level)))
-      const salary = formatSalary(String(row.currency || 'PHP'), row.salary_min != null ? Number(row.salary_min) : null, row.salary_max != null ? Number(row.salary_max) : null, String(row.salary_type || 'monthly'))
-      const createdAt = row.created_at ? new Date(row.created_at) : new Date()
-      const ms = Date.now() - createdAt.getTime()
-      const minutes = Math.floor(ms / (1000 * 60))
-      const hours = Math.floor(minutes / 60)
-      const days = Math.floor(hours / 24)
-      
-      let postedDays: number | string
-      if (days > 0) {
-        postedDays = days
-      } else if (hours > 0) {
-        postedDays = hours === 1 ? '1 hour ago' : `${hours} hours ago`
-      } else if (minutes > 0) {
-        postedDays = minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`
-      } else {
-        postedDays = 'Just now'
-      }
-      const locationType = String(row.work_arrangement || 'onsite')
-      const priorityFromDb = String(row.priority ?? '').toLowerCase()
-      const priority: 'low' | 'medium' | 'high' | 'urgent' =
-        ['low', 'medium', 'high', 'urgent'].includes(priorityFromDb)
-          ? (priorityFromDb as any)
-          : ((): 'low' | 'medium' | 'high' => {
-              if (realApplicants >= 50) return 'high'
-              if (realApplicants >= 10) return 'medium'
-              return 'low'
-            })()
-
-      return {
-        id: `processed_${row.id}`,
-        originalId: String(row.id),
-        source: 'processed_job_requests',
-        company: 'ShoreAgents',
-        companyLogo: row.company_logo || '🏢',
-        title: row.job_title || 'Untitled Role',
-        location: row.location || row['location'] || '',
-        locationType: locationType === 'onsite' ? 'on-site' : locationType,
-        salary,
-        employmentType,
-        postedDays,
-        applicants: realApplicants,
-        status: row.status || 'hiring',
-        priority,
-        application_deadline: row.application_deadline,
-        experience_level: row.experience_level,
-        work_arrangement: row.work_arrangement,
-        shift: row.shift,
-        industry: row.industry,
-        department: row.department,
-        work_type: row.work_type,
-        currency: row.currency,
-        salary_type: row.salary_type,
-        salary_min: row.salary_min,
-        salary_max: row.salary_max,
-        created_at: row.created_at,
-        updated_at: row.updated_at,
-        // Include full details for initial load with proper parsing
-        job_description: row.job_description || '',
-        requirements: (() => {
-          if (Array.isArray(row.requirements)) {
-            return row.requirements.flatMap((item: any) => 
-              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
-            );
-          }
-          if (typeof row.requirements === 'string') {
-            try {
-              const parsed = JSON.parse(row.requirements);
-              return Array.isArray(parsed) ? parsed : [row.requirements];
-            } catch {
-              return row.requirements.split('\n\n').filter((s: string) => s.trim());
-            }
-          }
-          return [];
-        })(),
-        responsibilities: (() => {
-          if (Array.isArray(row.responsibilities)) {
-            return row.responsibilities.flatMap((item: any) => 
-              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
-            );
-          }
-          if (typeof row.responsibilities === 'string') {
-            try {
-              const parsed = JSON.parse(row.responsibilities);
-              return Array.isArray(parsed) ? parsed : [row.responsibilities];
-            } catch {
-              return row.responsibilities.split('\n\n').filter((s: string) => s.trim());
-            }
-          }
-          return [];
-        })(),
-        benefits: (() => {
-          if (Array.isArray(row.benefits)) {
-            return row.benefits.flatMap((item: any) => 
-              typeof item === 'string' ? item.split('\n\n').filter((s: string) => s.trim()) : [item]
-            );
-          }
-          if (typeof row.benefits === 'string') {
-            try {
-              const parsed = JSON.parse(row.benefits);
-              return Array.isArray(parsed) ? parsed : [row.benefits];
-            } catch {
-              return row.benefits.split('\n\n').filter((s: string) => s.trim());
-            }
-          }
-          return [];
-        })(),
-        skills: row.skills || []
-      }
-    }))
-
     // Recruiter jobs removed - table dropped
     const recruiterJobs: any[] = []
 
-    // Combine all three arrays and sort by creation date
-    const allJobs = [...jobRequests, ...processedJobs, ...recruiterJobs].sort((a, b) => 
+    // Combine all jobs and sort by creation date
+    const allJobs = [...jobRequests, ...recruiterJobs].sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     )
 
