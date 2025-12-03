@@ -18,9 +18,10 @@ export async function GET(
       }, { status: 400 })
     }
 
-    // Get user's current progress (one-to-one relationship, so only one record exists)
-    const currentProgress = await prisma.leadProgress.findFirst({
+    // Get user's progress history
+    const progressHistory = await prisma.leadProgress.findMany({
       where: { user_id: userId },
+      orderBy: { created_at: 'desc' },
       include: {
         user: {
           select: {
@@ -34,9 +35,8 @@ export async function GET(
       }
     })
 
-    // Get current status
-    const currentStatus = currentProgress?.status || 'new_lead'
-    const progressHistory = currentProgress ? [currentProgress] : []
+    // Get current status (latest progress record)
+    const currentStatus = progressHistory[0]?.status || 'new_lead'
 
     return NextResponse.json({
       success: true,
@@ -73,42 +73,28 @@ export async function POST(
       }, { status: 400 })
     }
 
-    // Check if user already has a progress record (one-to-one relationship)
-    const existingProgress = await prisma.leadProgress.findFirst({
-      where: { user_id: userId }
+    // Get the current status for this user
+    const currentProgress = await prisma.leadProgress.findFirst({
+      where: { user_id: userId },
+      orderBy: { created_at: 'desc' }
     })
 
-    let updatedProgress
+    const previousStatus = currentProgress?.status || null
 
-    if (existingProgress) {
-      // Update existing record
-      updatedProgress = await prisma.leadProgress.update({
-        where: { id: existingProgress.id },
-        data: {
-          previous_status: existingProgress.status, // Store old status as previous
-          status, // Update to new status
-          changed_by: changedBy || null,
-          change_reason: changeReason || null
-        }
-      })
-      console.log('✅ Updated existing lead status:', updatedProgress)
-    } else {
-      // Create new record only if none exists
-      updatedProgress = await prisma.leadProgress.create({
-        data: {
-          user_id: userId,
-          status,
-          previous_status: null,
-          changed_by: changedBy || null,
-          change_reason: changeReason || null
-        }
-      })
-      console.log('✅ Created new lead status:', updatedProgress)
-    }
+    // Create new progress record
+    const newProgress = await prisma.leadProgress.create({
+      data: {
+        user_id: userId,
+        status,
+        previous_status: previousStatus,
+        changed_by: changedBy || null,
+        change_reason: changeReason || null
+      }
+    })
 
     return NextResponse.json({
       success: true,
-      data: updatedProgress,
+      data: newProgress,
       message: `Lead status updated to ${status}`
     })
 
@@ -120,9 +106,5 @@ export async function POST(
     }, { status: 500 })
   }
 }
-
-
-
-
 
 

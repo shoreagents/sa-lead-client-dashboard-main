@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { createClient } from './supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { generateUserId } from '@/lib/userEngagementService'
@@ -62,10 +62,23 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
         .from('users')
         .select('*')
         .eq('auth_user_id', authUser.id)
-        .single()
+        .maybeSingle() // Use maybeSingle() - returns null if no record found
 
       if (error) {
         console.error('Error fetching user data:', error)
+        // If user doesn't exist in users table, sign them out
+        if (error.code === 'PGRST116' || error.details?.includes('0 rows')) {
+          console.warn('⚠️ No user record found for auth user, signing out...')
+          await supabase.auth.signOut()
+          return null
+        }
+        return null
+      }
+
+      // If no user record exists, sign out
+      if (!data) {
+        console.warn('⚠️ No user record found, signing out...')
+        await supabase.auth.signOut()
         return null
       }
 
@@ -169,7 +182,7 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
           .from('users')
           .select('*')
           .eq('user_id', deviceFingerprintId)
-          .single()
+          .maybeSingle() // Use maybeSingle() - returns null if no record
 
         console.log('🔍 Existing user check:', { existingUser, checkError })
 
@@ -323,52 +336,18 @@ export function UserAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchUserData])
 
-  // Authentication effect - check session and listen for changes
   useEffect(() => {
-    // Skip on server side
-    if (typeof window === 'undefined') return
-
-    let mounted = true
-
-    // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return
-      
-      if (session?.user) {
-        fetchUserData(session.user).then(userData => {
-          if (mounted) {
-            setUser(userData)
-            setLoading(false)
-          }
-        })
-      } else {
-        setUser(null)
-        setLoading(false)
-      }
-    })
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!mounted) return
-      
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: { user: User } | null) => {
       if (session?.user) {
         const userData = await fetchUserData(session.user)
-        if (mounted) {
-          setUser(userData)
-          setLoading(false)
-        }
+        setUser(userData)
       } else {
-        if (mounted) {
-          setUser(null)
-          setLoading(false)
-        }
+        setUser(null)
       }
+      setLoading(false)
     })
 
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
-    }
+    return () => subscription.unsubscribe()
   }, [fetchUserData])
 
   // User-specific computed properties

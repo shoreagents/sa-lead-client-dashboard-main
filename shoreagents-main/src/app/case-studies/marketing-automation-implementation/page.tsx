@@ -1,472 +1,643 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
-  CheckCircle, 
-  TrendingUp, 
-  Users, 
-  Target, 
-  Building, 
-  Award, 
-  Globe, 
-  Clock,
-  Phone,
+  Target,
+  Award,
+  TrendingUp,
   Star,
-  Zap,
-  Home,
-  Shield,
-  FileText,
-  Video,
-  Handshake,
-  DollarSign,
-  Calendar,
-  Lightbulb,
+  Users,
+  Building2,
   ArrowRight,
-  AlertCircle,
+  Globe,
   CheckCircle2,
-  RefreshCw,
-  Headphones,
-  Settings,
-  PlayCircle,
+  Lightbulb,
+  Zap,
   XCircle,
-  BarChart3,
-  MessageSquare,
-  Image as ImageIcon,
+  Settings,
+  Shield,
   Rocket,
-  Layers,
-  Briefcase,
-  MapPin,
-  Flag,
-  ClipboardList,
-  Gift,
   ThumbsUp,
-  TrendingDown,
-  Smile,
-  Sparkles,
-  Percent,
-  BookOpen,
-  GraduationCap,
-  Heart,
-  UserCheck,
-  Wifi,
-  WifiOff,
-  CloudRain,
-  HomeIcon,
-  AlertTriangle,
-  CheckCircle as CheckCircleIcon
-} from 'lucide-react';
-import Image from 'next/image';
+  FileCheck,
+  Home,
+  UserX,
+  AlertTriangle
+} from "lucide-react";
+import Link from "next/link";
 
 export default function MarketingAutomationImplementationPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <Badge className="bg-red-600 text-white px-4 py-2 text-lg mb-6">
-            REVEALED: Why Most Virtual Assistants Fail
-          </Badge>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Why Mark Called ShoreAgents a &apos;Game-Changer&apos;: The Methodology That Actually Works
-          </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-            When training company owner Mark Dwyer tried ShoreAgents after experiencing typical VA problems, he discovered why our systematic approach is &quot;a game-changer.&quot; This case study reveals the methodology differences that create &quot;autopilot&quot; business operations instead of ongoing headaches.
-          </p>
-          
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&h=600&fit=crop"
-              alt="Sales Trainer Active Operations"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-lime-600 text-white mb-4 text-sm px-3 py-1">
+              Sales Trainer Active Client Success - Australia
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Why Mark Called It a 'Game-Changer':<br />
+              <span className="text-lime-600">Marketing on Autopilot Through Systematic Implementation</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              When training company owner Mark Dwyer tried ShoreAgents after experiencing typical VA problems, he 
+              discovered why our systematic approach is "a game-changer." This reveals the methodology differences 
+              that create "autopilot" business operations instead of ongoing headaches.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/sales" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Schedule Your Consultation
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View More Case Studies
+              </Link>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Client Quote Card */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="text-center">
-                <div className="mb-6">
-                  <Image
-                    src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop"
-                    alt="Sales Trainer Logo"
-                    width={100}
-                    height={100}
-                    className="mx-auto rounded-full"
-                  />
-                </div>
-                <blockquote className="text-xl text-gray-700 italic mb-6">
-                  &quot;As someone who owns a thriving Real Estate Training and Recruitment company, I know the importance of having things run smoothly behind the scenes. Hiring a VA has been a game-changer for me in achieving this. Although it took some initial effort to set up, having marketing tasks consistently handled on autopilot has resulted in significant success. I am truly grateful to ShoreAgents for providing an excellent VA service that I would highly recommend to anyone looking to streamline their business operations.&quot;
-                </blockquote>
-                <div className="text-gray-900 font-bold">Mark Dwyer</div>
-                <div className="text-gray-600">Sales Trainer Active, AU</div>
-                <div className="text-gray-600">Hired One Agent</div>
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <Globe className="w-4 h-4 text-gray-600" />
-                  <span>Australia</span>
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        
+        {/* Client Quote */}
+        <Card className="bg-gradient-to-br from-gray-50 to-white border-lime-200 shadow-lg mb-16">
+          <CardContent className="p-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4">
+                <div className="w-20 h-20 bg-gradient-to-br from-lime-400 to-lime-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  MD
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <blockquote className="text-xl md:text-2xl text-gray-700 mb-6 italic leading-relaxed">
+                "As someone who owns a thriving Real Estate Training and Recruitment company, I know the importance 
+                of having things run smoothly behind the scenes. Hiring a VA has been a game-changer for me in 
+                achieving this. Although it took some initial effort to set up, having marketing tasks consistently 
+                handled on autopilot has resulted in significant success. I am truly grateful to ShoreAgents for 
+                providing an excellent VA service that I would highly recommend to anyone looking to streamline 
+                their business operations."
+              </blockquote>
+              <div className="text-lg font-bold text-gray-900">Mark Dwyer</div>
+              <div className="text-gray-600 mb-2">Sales Trainer Active</div>
+              <div className="flex items-center gap-2 text-gray-600">
+                <Globe className="w-4 h-4" />
+                <span>Australia</span>
+                <span className="mx-2">•</span>
+                <span>Hired One Agent</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Overview */}
+        <div className="mb-12">
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            Picture this: You're a training company owner who understands quality. You've heard the horror stories—disappeared 
+            workers, training nightmares, home-based chaos. So when you need a virtual assistant, you research properly and 
+            choose systematic methodology over cheap alternatives. That's Mark's smart approach, and here's exactly why our 
+            methodology delivers "game-changer" results.
+          </p>
         </div>
 
-        {/* Intro Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Target className="w-8 h-8 text-lime-600 mr-2" />
-            Mark Dwyer Case Study: Why Our Methodology Works
-          </h2>
-          <p className="text-xl text-gray-700 mb-4">
-            How a Real Estate Training company owner chose the right methodology from the start and achieved &quot;autopilot&quot; business operations
-          </p>
-          <p className="text-lg text-gray-700">
-            Picture this: You&apos;re a training company owner who understands quality. You&apos;ve heard the horror stories—disappeared workers, training nightmares, home-based chaos. So when you need a virtual assistant, you research properly and choose systematic methodology over cheap alternatives. That&apos;s Mark&apos;s smart approach, and here&apos;s exactly why our methodology delivers &quot;game-changer&quot; results.
-          </p>
-        </div>
+        <Separator className="my-12" />
 
         {/* Why Most VA Experiences Fail */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <AlertTriangle className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Why Most Virtual Assistant Experiences Fail (And How Mark Avoided These Problems)</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Mark Dwyer&apos;s success with ShoreAgents stands out because he avoided the disasters that plague 80% of VA implementations. After 500+ placements and 12+ years in this industry, I can tell you exactly why most virtual assistant experiences fail within the first 90 days.
-                </p>
-                <p className="mb-6">
-                  Most BPO companies promise &quot;trained&quot; virtual assistants—that&apos;s basically BS. There are too many business variations to deliver real training. You end up training them yourself anyway, but without the systematic infrastructure to make it work. Mark chose a different path.
-                </p>
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <AlertTriangle className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Why Most VA Experiences Fail</h2>
+              <p className="text-lg text-gray-600">And how Mark avoided these problems</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-6">
+              Mark Dwyer's success with ShoreAgents stands out because he avoided the disasters that plague 80% of VA 
+              implementations. After 500+ placements and 12+ years in this industry, we can tell you exactly why most 
+              virtual assistant experiences fail within the first 90 days.
+            </p>
+            
+            <p className="mb-8">
+              Most BPO companies promise "trained" virtual assistants—that's basically BS. There are too many business 
+              variations to deliver real training. You end up training them yourself anyway, but without the systematic 
+              infrastructure to make it work. Mark chose a different path.
+            </p>
 
-                <div className="bg-red-50 border-l-4 border-red-600 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">The Three Common VA Disasters Mark Avoided</h3>
-                  <div className="space-y-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <HomeIcon className="w-8 h-8 text-red-600 mr-3" />
-                        <h4 className="font-bold text-gray-900 text-lg">Home-Based Worker Chaos</h4>
+            <Card className="bg-red-50 border-red-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">The Three Common VA Disasters Mark Avoided</h3>
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg p-6 border-l-4 border-red-600">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Home className="w-8 h-8 text-red-600 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Home-Based Worker Chaos</h4>
+                        <ul className="text-gray-700 text-sm space-y-1">
+                          <li>• Rain on tin roofs during client calls</li>
+                          <li>• Power outages mid-project</li>
+                          <li>• Chickens and roosters in the background</li>
+                          <li>• Disappearing for days without explanation</li>
+                        </ul>
+                        <p className="text-gray-700 text-sm mt-2 italic">
+                          Philippines infrastructure isn't ready for home-based professional services.
+                        </p>
                       </div>
-                      <p className="text-gray-700 text-sm mb-2">Rain on tin roofs during client calls. Power outages mid-project. Chickens and roosters in the background. Disappearing for days without explanation. Philippines infrastructure isn&apos;t ready for home-based professional services.</p>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <GraduationCap className="w-8 h-8 text-red-600 mr-3" />
-                        <h4 className="font-bold text-gray-900 text-lg">Training Guarantee Lies</h4>
-                      </div>
-                      <p className="text-gray-700 text-sm mb-2">Companies guarantee training they can&apos;t deliver. Your business is unique—no BPO has pre-trained people for your specific processes. You&apos;ll train them yourself, but without support systems, it becomes a nightmare.</p>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <AlertCircle className="w-8 h-8 text-red-600 mr-3" />
-                        <h4 className="font-bold text-gray-900 text-lg">Freelancer Platform Risks</h4>
-                      </div>
-                      <p className="text-gray-700 text-sm mb-2">Independent contractors are hard to track and manage. I&apos;ve seen clients lose computers, data, and money. When something goes wrong, you have zero recourse and no professional infrastructure backing you.</p>
                     </div>
                   </div>
-                  <div className="bg-gray-50 border-l-4 border-lime-600 p-4 rounded mt-6">
-                    <p className="text-gray-800 font-semibold">
-                      Smart Choice: Mark avoided these problems by choosing our systematic approach from the start
+
+                  <div className="bg-white rounded-lg p-6 border-l-4 border-red-600">
+                    <div className="flex items-start gap-3 mb-3">
+                      <UserX className="w-8 h-8 text-red-600 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Training Guarantee Lies</h4>
+                        <p className="text-gray-700 text-sm mb-2">
+                          Companies guarantee training they can't deliver. Your business is unique—no BPO has pre-trained 
+                          people for your specific processes. You'll train them yourself, but without support systems, 
+                          it becomes a nightmare.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 border-l-4 border-red-600">
+                    <div className="flex items-start gap-3 mb-3">
+                      <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Freelancer Platform Risks</h4>
+                        <p className="text-gray-700 text-sm">
+                          Independent contractors are hard to track and manage. We've seen clients lose computers, data, 
+                          and money. When something goes wrong, you have zero recourse and no professional infrastructure 
+                          backing you.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-white border-l-4 border-lime-600 rounded">
+                  <p className="text-gray-900 font-semibold">
+                    Smart Choice: Mark avoided these problems by choosing our systematic approach from the start
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="mt-8">
+              Mark understands quality from his training company background. When he chose ShoreAgents, he made a smart 
+              decision to avoid the typical VA disasters that plague most business owners. Here's exactly what makes our 
+              approach different and why it delivered his "game-changer" results.
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* The Systematic Difference */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Settings className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The ShoreAgents Systematic Difference</h2>
+              <p className="text-lg text-gray-600">Four advantages that create "game-changer" results</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-6">
+              Mark's "game-changer" experience came from discovering our systematic approach that addresses every problem 
+              other providers ignore. After 500+ successful placements, we've developed infrastructure and processes that 
+              eliminate the typical VA disasters.
+            </p>
+            
+            <p className="mb-8">
+              When Mark says "it took some initial effort to set up," he's referring to our systematic implementation 
+              process. We focus on building sustainable systems that deliver lasting "autopilot" operations rather than 
+              quick fixes that break down over time.
+            </p>
+
+            <Card className="bg-lime-50 border-lime-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">The Four Systematic Advantages Mark Experienced</h3>
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-lime-600">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Building2 className="w-8 h-8 text-lime-600 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Professional Office Infrastructure</h4>
+                        <p className="text-gray-700 text-sm">
+                          Enterprise-grade equipment, biometric security, backup power systems, professional supervision. 
+                          No chickens, no power outages, no disappearing acts. Your VA works in a real office environment.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-green-600">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Shield className="w-8 h-8 text-green-600 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Staff Leasing vs Freelancing</h4>
+                        <p className="text-gray-700 text-sm">
+                          Your VA is our employee under Philippines law, dedicated exclusively to your business. No sharing 
+                          with other clients, no independent contractor risks, no data security nightmares.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-blue-600">
+                    <div className="flex items-start gap-3 mb-3">
+                      <FileCheck className="w-8 h-8 text-blue-600 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Honest Implementation Support</h4>
+                        <p className="text-gray-700 text-sm">
+                          We don't promise fake training. We support YOUR process documentation and help implement YOUR 
+                          systems. Mark invested setup time upfront and achieved "autopilot" results long-term.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-sm border-l-4 border-purple-600">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Globe className="w-8 h-8 text-purple-600 flex-shrink-0" />
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Geographic Specialization</h4>
+                        <p className="text-gray-700 text-sm">
+                          Deep understanding of Australian business culture, perfect timezone alignment, established 
+                          professional relationships. Mark didn't just get cheaper labor—he got cultural fit.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 p-4 bg-white border-l-4 border-lime-600 rounded">
+                  <p className="text-gray-900 font-semibold">
+                    Result: Mark achieved "significant success" because our methodology eliminates typical VA failure points
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="mt-8">
+              Mark's transformation from "initial effort to set up" to "marketing tasks consistently handled on autopilot" 
+              demonstrates our systematic approach in action. This isn't about finding cheap labor—it's about implementing 
+              business process improvements that happen to cost 78% less than local alternatives while delivering superior 
+              results.
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* From Setup to Autopilot */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Rocket className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">From Setup to "Autopilot" Success</h2>
+              <p className="text-lg text-gray-600">Mark's implementation journey</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-6">
+              Mark's honest assessment—"it took some initial effort to set up"—reveals our systematic implementation 
+              approach. Unlike providers who promise instant results, we focus on building sustainable systems that create 
+              long-term operational efficiency.
+            </p>
+            
+            <p className="mb-8">
+              As a training company owner, Mark understood that proper implementation prevents ongoing problems. His 
+              willingness to invest setup time created the "autopilot" marketing operations that now run seamlessly behind 
+              the scenes.
+            </p>
+
+            <Card className="bg-gradient-to-br from-lime-50 to-lime-100 border-lime-200">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                  Our Proven Implementation Methodology
+                </h3>
+                
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg p-6 shadow-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-lime-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">
+                        1
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Phase 1: Process Documentation Support</h4>
+                        <p className="text-gray-700 mb-2">
+                          We help you document YOUR specific processes—no fake "training" promises. Mark invested time 
+                          here to create systematic procedures his VA could follow consistently.
+                        </p>
+                        <div className="bg-lime-50 p-3 rounded border-l-4 border-lime-600">
+                          <p className="text-gray-900 font-semibold text-sm">
+                            Why It Works: Your business gets documented processes that any future staff can follow.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">
+                        2
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Phase 2: Professional Infrastructure Setup</h4>
+                        <p className="text-gray-700 mb-2">
+                          Your VA starts in our office environment with enterprise equipment, security protocols, and 
+                          professional supervision. No home-based chaos or reliability issues.
+                        </p>
+                        <div className="bg-green-50 p-3 rounded border-l-4 border-green-600">
+                          <p className="text-gray-900 font-semibold text-sm">
+                            Mark's Experience: Professional setup that supports consistent performance from day one.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">
+                        3
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Phase 3: Systematic Training Implementation</h4>
+                        <p className="text-gray-700 mb-2">
+                          Your VA learns YOUR documented processes with our support. Mark's marketing procedures became 
+                          systematic workflows that run without daily oversight.
+                        </p>
+                        <div className="bg-blue-50 p-3 rounded border-l-4 border-blue-600">
+                          <p className="text-gray-900 font-semibold text-sm">
+                            Key Difference: Training on your actual business, not generic procedures.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-sm">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl flex-shrink-0">
+                        4
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900 mb-2">Phase 4: "Autopilot" Optimization</h4>
+                        <p className="text-gray-700 mb-2">
+                          Continuous refinement until operations run smoothly without your daily input. Mark achieved 
+                          "significant success" as marketing tasks became truly automated.
+                        </p>
+                        <div className="bg-purple-50 p-3 rounded border-l-4 border-purple-600">
+                          <p className="text-gray-900 font-semibold text-sm">
+                            End Result: "Having things run smoothly behind the scenes" – Mark's own words.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-8 bg-white border-l-4 border-lime-600 p-6 rounded">
+                  <p className="text-gray-800 italic mb-3 text-lg">
+                    "Although it took some initial effort to set up, having marketing tasks consistently handled on 
+                    autopilot has resulted in significant success. It's been a game-changer for me."
+                  </p>
+                  <p className="text-gray-900 font-bold">— Mark Dwyer, Owner, Sales Trainer Active</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* The Science Behind Autopilot */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Lightbulb className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">The Science Behind "Autopilot" Operations</h2>
+              <p className="text-lg text-gray-600">Why Mark's results are replicable</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              Mark's "game-changer" results aren't luck—they're the inevitable outcome of systematic implementation. When 
+              you eliminate the three main failure points (infrastructure, training lies, and freelancer risks), virtual 
+              assistant success becomes predictable and scalable.
+            </p>
+
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                  The Three Elements That Make Our Approach a "Game-Changer"
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <Building2 className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Infrastructure Reliability</h4>
+                      <p className="text-gray-700 text-sm">
+                        Professional office environment eliminates 90% of typical VA problems. Mark never dealt with power 
+                        outages, home distractions, or unreliable internet. Consistent infrastructure enables consistent 
+                        performance.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <FileCheck className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Process Documentation</h4>
+                      <p className="text-gray-700 text-sm">
+                        Mark's "initial effort to set up" created documented systems that run independently. Instead of 
+                        training people over and over, you train the process once and it scales forever.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg">
+                    <Globe className="w-6 h-6 text-blue-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1">Cultural Integration</h4>
+                      <p className="text-gray-700 text-sm">
+                        Geographic specialization in Australian business culture means your VA understands your market 
+                        context. Mark didn't just get cheaper labor—he got someone who understands his business environment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 p-4 bg-white border-l-4 border-lime-600 rounded">
+                  <p className="text-gray-900 font-semibold">
+                    Combined Effect: "Marketing tasks consistently handled on autopilot" – systematic reliability
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <p className="mt-8">
+              Mark's enthusiastic recommendation—"truly grateful" and "would highly recommend to anyone"—reflects the 
+              confidence of someone who has experienced systematic business improvement. His training company background 
+              means he understands the difference between temporary fixes and permanent solutions.
+            </p>
+          </div>
+        </section>
+
+        <Separator className="my-12" />
+
+        {/* How to Replicate Success */}
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Target className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">How to Replicate Mark's Success</h2>
+              <p className="text-lg text-gray-600">The systematic implementation that creates "autopilot" results</p>
+            </div>
+          </div>
+          
+          <div className="prose prose-lg max-w-none text-gray-700">
+            <p className="mb-8">
+              Mark's transformation from typical VA frustrations to "autopilot" success follows our systematic methodology. 
+              Here's exactly how to implement the same approach that made him "truly grateful" and achieved "significant 
+              success" for his training company.
+            </p>
+
+            <Card className="bg-lime-50 border-lime-200">
+              <CardContent className="p-6">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">4-Step Success Framework</h3>
+                <div className="space-y-6">
+                  <div className="bg-white rounded-lg p-6">
+                    <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-lime-600" />
+                      Step 1: Choose Infrastructure Over Price
+                    </h4>
+                    <p className="text-gray-700 text-sm mb-2">
+                      Mark chose professional office environment over home-based cheaper options. Reliable infrastructure 
+                      eliminates 90% of typical VA problems and enables the consistent performance needed for "autopilot" 
+                      operations.
                     </p>
-                  </div>
-                </div>
-
-                <p className="mt-6">
-                  Mark understands quality from his training company background. When he chose ShoreAgents, he made a smart decision to avoid the typical VA disasters that plague most business owners. Here&apos;s exactly what makes our approach different and why it delivered his &quot;game-changer&quot; results.
-                </p>
-                <p className="mt-4">
-                  The transformation Mark achieved—from initial setup to &quot;autopilot&quot; operations—demonstrates what happens when business owners choose systematic methodology over cheap alternatives. Let me show you the specific differences that create these results through our proven virtual assistant framework.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* The ShoreAgents Systematic Difference */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Lightbulb className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">What Mark Discovered: The ShoreAgents Systematic Difference</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Mark&apos;s &quot;game-changer&quot; experience came from discovering our systematic approach that addresses every problem other providers ignore. After 500+ successful placements, we&apos;ve developed infrastructure and processes that eliminate the typical VA disasters.
-                </p>
-                <p className="mb-6">
-                  When Mark says &quot;it took some initial effort to set up,&quot; he&apos;s referring to our systematic implementation process. We focus on building sustainable systems that deliver lasting &quot;autopilot&quot; operations rather than quick fixes that break down over time.
-                </p>
-
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">The Four Systematic Advantages Mark Experienced</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <Building className="w-8 h-8 text-lime-600 mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Professional Office Infrastructure</h4>
-                      <p className="text-gray-700 text-sm">Enterprise-grade equipment, biometric security, backup power systems, professional supervision. No chickens, no power outages, no disappearing acts. Your VA works in a real office environment.</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <Shield className="w-8 h-8 text-lime-600 mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Staff Leasing vs Freelancing</h4>
-                      <p className="text-gray-700 text-sm">Your VA is our employee under Philippines law, dedicated exclusively to your business. No sharing with other clients, no independent contractor risks, no data security nightmares.</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <Settings className="w-8 h-8 text-lime-600 mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Honest Implementation Support</h4>
-                      <p className="text-gray-700 text-sm">We don&apos;t promise fake training. We support YOUR process documentation and help implement YOUR systems. Mark invested setup time upfront and achieved &quot;autopilot&quot; results long-term.</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <Globe className="w-8 h-8 text-lime-600 mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Geographic Specialization</h4>
-                      <p className="text-gray-700 text-sm">Deep understanding of Australian business culture, perfect timezone alignment, established professional relationships. Mark didn&apos;t just get cheaper labor—he got cultural fit.</p>
+                    <div className="bg-red-50 p-3 rounded mt-2">
+                      <p className="text-gray-900 font-semibold text-xs">
+                        Why Most Fail: They choose cheap labor over systematic infrastructure and spend more time managing 
+                        problems than growing their business.
+                      </p>
                     </div>
                   </div>
-                  <div className="bg-gray-50 border-l-4 border-lime-600 p-4 rounded mt-6">
-                    <p className="text-gray-800 font-semibold">
-                      Result: Mark achieved &quot;significant success&quot; because our methodology eliminates typical VA failure points
+
+                  <div className="bg-white rounded-lg p-6">
+                    <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-lime-600" />
+                      Step 2: Invest in Process Documentation
+                    </h4>
+                    <p className="text-gray-700 text-sm mb-2">
+                      Mark's "initial effort to set up" involved documenting his marketing processes systematically. This 
+                      upfront investment creates scalable systems that run independently of individual people.
                     </p>
-                  </div>
-                </div>
-
-                <p className="mt-6">
-                  Mark&apos;s transformation from &quot;initial effort to set up&quot; to &quot;marketing tasks consistently handled on autopilot&quot; demonstrates our systematic approach in action. This isn&apos;t about finding cheap labor—it&apos;s about implementing business process improvements that happen to cost 78% less than local alternatives while delivering superior results through our proven outsourcing methodology.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Mark's Implementation */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Settings className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Mark&apos;s Implementation: From Setup to &quot;Autopilot&quot; Success</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Mark&apos;s honest assessment—&quot;it took some initial effort to set up&quot;—reveals our systematic implementation approach. Unlike providers who promise instant results, we focus on building sustainable systems that create long-term operational efficiency.
-                </p>
-                <p className="mb-6">
-                  As a training company owner, Mark understood that proper implementation prevents ongoing problems. His willingness to invest setup time created the &quot;autopilot&quot; marketing operations that now run seamlessly behind the scenes.
-                </p>
-
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Our Proven Implementation Methodology (What Mark Experienced)</h3>
-                  <div className="space-y-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <div className="bg-lime-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-3">1</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Phase 1: Process Documentation Support</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">We help you document YOUR specific processes—no fake &quot;training&quot; promises. Mark invested time here to create systematic procedures his VA could follow consistently.</p>
-                      <div className="bg-gray-50 border-l-4 border-lime-600 p-3 rounded">
-                        <p className="text-gray-800 font-semibold text-sm">Why It Works: Your business gets documented processes that any future staff can follow.</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <div className="bg-lime-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-3">2</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Phase 2: Professional Infrastructure Setup</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">Your VA starts in our office environment with enterprise equipment, security protocols, and professional supervision. No home-based chaos or reliability issues.</p>
-                      <div className="bg-gray-50 border-l-4 border-lime-600 p-3 rounded">
-                        <p className="text-gray-800 font-semibold text-sm">Mark&apos;s Experience: Professional setup that supports consistent performance from day one.</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <div className="bg-lime-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-3">3</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Phase 3: Systematic Training Implementation</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">Your VA learns YOUR documented processes with our support. Mark&apos;s marketing procedures became systematic workflows that run without daily oversight.</p>
-                      <div className="bg-gray-50 border-l-4 border-lime-600 p-3 rounded">
-                        <p className="text-gray-800 font-semibold text-sm">Key Difference: Training on your actual business, not generic procedures.</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <div className="bg-lime-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold mr-3">4</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Phase 4: &quot;Autopilot&quot; Optimization</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">Continuous refinement until operations run smoothly without your daily input. Mark achieved &quot;significant success&quot; as marketing tasks became truly automated.</p>
-                      <div className="bg-gray-50 border-l-4 border-lime-600 p-3 rounded">
-                        <p className="text-gray-800 font-semibold text-sm">End Result: &quot;Having things run smoothly behind the scenes&quot; – Mark&apos;s own words.</p>
-                      </div>
+                    <div className="bg-lime-50 p-3 rounded mt-2">
+                      <p className="text-gray-900 font-semibold text-xs">
+                        Mark's Advantage: Training company owners understand that documented processes enable consistent 
+                        delivery regardless of staff changes.
+                      </p>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-lime-50 border-l-4 border-lime-600 rounded-lg p-6 mt-6">
-                  <blockquote className="text-gray-800 italic text-lg mb-4">
-                    &quot;Although it took some initial effort to set up, having marketing tasks consistently handled on autopilot has resulted in significant success. It&apos;s been a game-changer for me.&quot;
-                  </blockquote>
-                  <p className="text-gray-700 font-semibold">— Mark Dwyer, Owner, Sales Trainer Active</p>
-                </div>
-
-                <p className="mt-6">
-                  Mark&apos;s transformation demonstrates our systematic approach in action. The &quot;initial effort to set up&quot; creates sustainable business process improvements that deliver long-term operational efficiency. This is why he describes the experience as a &quot;game-changer&quot; and why he &quot;would highly recommend to anyone looking to streamline their business operations.&quot;
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Why Mark's Results Are Replicable */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Rocket className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Why Mark&apos;s Results Are Replicable: The Science Behind &quot;Autopilot&quot; Operations</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Mark&apos;s &quot;game-changer&quot; results aren&apos;t luck—they&apos;re the inevitable outcome of systematic implementation. When you eliminate the three main failure points (infrastructure, training lies, and freelancer risks), virtual assistant success becomes predictable and scalable.
-                </p>
-                <p className="mb-6">
-                  As a training company owner, Mark recognizes the difference between shortcuts and systematic approaches. His success validates our methodology: proper setup investment creates long-term operational efficiency that runs &quot;on autopilot.&quot;
-                </p>
-
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">The Three Elements That Make Our Approach a &quot;Game-Changer&quot;</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <Building className="w-8 h-8 text-lime-600 mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Infrastructure Reliability</h4>
-                      <p className="text-gray-700 text-sm">Professional office environment eliminates 90% of typical VA problems. Mark never dealt with power outages, home distractions, or unreliable internet. Consistent infrastructure enables consistent performance.</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <FileText className="w-8 h-8 text-lime-600 mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Process Documentation</h4>
-                      <p className="text-gray-700 text-sm">Mark&apos;s &quot;initial effort to set up&quot; created documented systems that run independently. Instead of training people over and over, you train the process once and it scales forever.</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <Handshake className="w-8 h-8 text-lime-600 mb-3" />
-                      <h4 className="font-bold text-gray-900 mb-2">Cultural Integration</h4>
-                      <p className="text-gray-700 text-sm">Geographic specialization in Australian business culture means your VA understands your market context. Mark didn&apos;t just get cheaper labor—he got someone who understands his business environment.</p>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 border-l-4 border-lime-600 p-4 rounded mt-6">
-                    <p className="text-gray-800 font-semibold text-center">
-                      Combined Effect: &quot;Marketing tasks consistently handled on autopilot&quot; – systematic reliability
+                  <div className="bg-white rounded-lg p-6">
+                    <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-lime-600" />
+                      Step 3: Focus on Systematic Training
+                    </h4>
+                    <p className="text-gray-700 text-sm mb-2">
+                      Instead of believing "training guarantees," Mark worked with our systematic approach to implement his 
+                      documented processes. Real training happens on your actual business workflows, not generic procedures.
                     </p>
+                    <div className="bg-blue-50 p-3 rounded mt-2">
+                      <p className="text-gray-900 font-semibold text-xs">
+                        Critical Difference: Training on your specific business creates expertise that transfers and scales 
+                        with your operations.
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <p className="mt-6">
-                  Mark&apos;s enthusiastic recommendation—&quot;truly grateful&quot; and &quot;would highly recommend to anyone&quot;—reflects the confidence of someone who has experienced systematic business improvement. His training company background means he understands the difference between temporary fixes and permanent solutions.
-                </p>
-                <p className="mt-4">
-                  When business owners describe our service as a &quot;game-changer,&quot; they&apos;re recognizing the methodology differences that create predictable, scalable results. Mark&apos;s success story demonstrates why our systematic approach consistently delivers the operational efficiency that enables business growth through our comprehensive real estate virtual assistant and marketing virtual assistant solutions.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* How to Replicate Mark's Success */}
-        <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
-            <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Lightbulb className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">How to Replicate Mark&apos;s &quot;Game-Changer&quot; Success</h2>
-              </div>
-              <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  Mark&apos;s transformation from typical VA frustrations to &quot;autopilot&quot; success follows our systematic methodology. Here&apos;s exactly how to implement the same approach that made him &quot;truly grateful&quot; and achieved &quot;significant success&quot; for his training company.
-                </p>
-                <p className="mb-6">
-                  The key insight from Mark&apos;s experience: he understood that &quot;initial effort to set up&quot; creates long-term operational efficiency. While immediate improvements often occur, the greatest value comes from systematic implementation that builds sustainable, scalable business processes.
-                </p>
-
-                <div className="bg-lime-50 rounded-lg p-6 shadow-sm mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">The Systematic Implementation That Creates &quot;Autopilot&quot; Results</h3>
-                  <div className="space-y-6">
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-3">
-                        <div className="bg-lime-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">1</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Choose Infrastructure Over Price</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">Mark chose professional office environment over home-based cheaper options. Reliable infrastructure eliminates 90% of typical VA problems and enables the consistent performance needed for &quot;autopilot&quot; operations.</p>
-                      <div className="bg-red-50 border-l-4 border-red-600 p-3 rounded mt-3">
-                        <p className="text-gray-800 font-semibold text-sm">Why Most Fail: They choose cheap labor over systematic infrastructure and spend more time managing problems than growing their business.</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-3">
-                        <div className="bg-lime-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">2</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Invest in Process Documentation</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">Mark&apos;s &quot;initial effort to set up&quot; involved documenting his marketing processes systematically. This upfront investment creates scalable systems that run independently of individual people.</p>
-                      <div className="bg-lime-50 border-l-4 border-lime-600 p-3 rounded mt-3">
-                        <p className="text-gray-800 font-semibold text-sm">Mark&apos;s Advantage: Training company owners understand that documented processes enable consistent delivery regardless of staff changes.</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-3">
-                        <div className="bg-lime-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">3</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Focus on Systematic Training</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">Instead of believing &quot;training guarantees,&quot; Mark worked with our systematic approach to implement his documented processes. Real training happens on your actual business workflows, not generic procedures.</p>
-                      <div className="bg-lime-50 border-l-4 border-lime-600 p-3 rounded mt-3">
-                        <p className="text-gray-800 font-semibold text-sm">Critical Difference: Training on your specific business creates expertise that transfers and scales with your operations.</p>
-                      </div>
-                    </div>
-
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <div className="flex items-center mb-3">
-                        <div className="bg-lime-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3">4</div>
-                        <h4 className="font-bold text-gray-900 text-lg">Measure &quot;Significant Success&quot;</h4>
-                      </div>
-                      <p className="text-gray-700 mb-2">Mark tracked measurable business improvement beyond just cost savings. The goal is operational efficiency that enables business growth, not just cheaper labor.</p>
-                      <div className="bg-lime-50 border-l-4 border-lime-600 p-3 rounded mt-3">
-                        <p className="text-gray-800 font-semibold text-sm">Success Indicator: When you achieve &quot;having things run smoothly behind the scenes,&quot; you&apos;ve created the systematic efficiency Mark experienced.</p>
-                      </div>
+                  <div className="bg-white rounded-lg p-6">
+                    <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-lime-600" />
+                      Step 4: Measure "Significant Success"
+                    </h4>
+                    <p className="text-gray-700 text-sm mb-2">
+                      Mark tracked measurable business improvement beyond just cost savings. The goal is operational 
+                      efficiency that enables business growth, not just cheaper labor.
+                    </p>
+                    <div className="bg-green-50 p-3 rounded mt-2">
+                      <p className="text-gray-900 font-semibold text-xs">
+                        Success Indicator: When you achieve "having things run smoothly behind the scenes," you've created 
+                        the systematic efficiency Mark experienced.
+                      </p>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
 
-        {/* Final CTA Section */}
-        <div className="text-center bg-lime-600 rounded-2xl p-12 text-white shadow-lg">
-          <h2 className="text-4xl font-bold mb-6">Ready to experience the systematic methodology that made Mark describe ShoreAgents as a &quot;game-changer&quot;?</h2>
-          <p className="text-xl mb-8 opacity-90">
-            Follow Mark&apos;s proven approach: invest in proper setup, choose infrastructure over price, and focus on systematic implementation that creates &quot;autopilot&quot; business operations.
+      </div>
+
+      {/* Final CTA */}
+      <Card className="bg-gradient-to-r from-lime-500 to-green-600 text-white mx-4 mb-8">
+        <CardContent className="p-12 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Ready to Experience Your "Game-Changer" Moment?
+          </h2>
+          <p className="text-xl mb-8 opacity-90 max-w-3xl mx-auto">
+            Follow Mark's proven approach: invest in proper setup, choose infrastructure over price, and focus on 
+            systematic implementation that creates "autopilot" business operations. Stop fighting VA disasters and 
+            start experiencing operational excellence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-bold">
-              <Phone className="w-5 h-5 mr-2" />
+            <Link
+              href="/sales"
+              className="inline-flex items-center px-8 py-4 bg-white text-lime-600 font-bold text-lg rounded-lg hover:bg-gray-100 transition-colors"
+            >
               Schedule Your Consultation
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-bold">
-              <BarChart3 className="w-5 h-5 mr-2" />
-              Marketing Solutions
-            </Button>
+              <ArrowRight className="ml-2 w-5 h-5" />
+            </Link>
+            <Link
+              href="/case-studies"
+              className="inline-flex items-center px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-lime-600 font-bold text-lg rounded-lg transition-colors"
+            >
+              <Building2 className="w-5 h-5 mr-2" />
+              View More Case Studies
+            </Link>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

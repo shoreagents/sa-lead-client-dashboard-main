@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
 
+interface LeadCaptureUpdateBody {
+  user_id: string
+  first_lead_capture?: boolean
+  second_lead_capture?: boolean
+}
+
 export async function POST(request: NextRequest) {
   try {
     console.log('🎯 Update lead capture API called');
     
-    const body = await request.json();
+    const body = await request.json() as LeadCaptureUpdateBody;
     const { 
       user_id,
       first_lead_capture,
@@ -25,7 +31,7 @@ export async function POST(request: NextRequest) {
     const supabase = createClient();
 
     // Prepare update data
-    const updateData: any = {};
+    const updateData: Partial<Pick<LeadCaptureUpdateBody, 'first_lead_capture' | 'second_lead_capture'>> = {};
     if (first_lead_capture !== undefined) {
       updateData.first_lead_capture = first_lead_capture;
     }

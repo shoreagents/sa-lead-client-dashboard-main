@@ -1,24 +1,14 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Send, ChevronDown, ChevronUp, ExternalLink, Sparkles, MoreVertical, Pin, PinOff } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useChatContext, Message } from '@/lib/chat-context';
-import { useAuth } from '@/lib/auth-context';
 import { MayaTextField, MayaNameFields, MayaAnonymousUserForm, MayaTalentSearchModal, MayaPricingCalculatorModal, MayaPricingForm } from '@/components/maya';
 import { generateUserId } from '@/lib/userEngagementService';
-import { getPreGeneratedGreeting, markGreetingAsUsed, hasUsedGreeting } from '@/lib/pre-greeting-service';
-import { 
-  useConversations, 
-  useMessages, 
-  useCreateConversation, 
-  useSendMessage,
-  useConversationContext,
-  useUpdateConversationContext,
-  ChatConversation,
-  ChatMessage
-} from '@/hooks/use-api';
 
 
 interface ChatConsoleProps {
@@ -70,50 +60,13 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     clearMessages,
     isLoading,
     setIsLoading,
-    generateAIResponse,
-    deviceId,
-    getDeviceId,
-    currentContext,
-    setCurrentContext,
-    updateContext,
-    saveContextSnapshot,
-    createAnonymousConversation,
-    currentConversationId,
-    setCurrentConversationId,
-    clearAllChatHistory,
-    conversations
+    generateAIResponse
   } = useChatContext();
   
-  // Get user authentication
-  const { appUser } = useAuth();
+  // Use the same user ID generation logic as AnonymousUserButton
+  const userId = useMemo(() => generateUserId(), []);
+  console.log('🎯 Chat Console using userId:', userId);
   
-  // Get device ID and determine the correct user ID to use
-  const currentDeviceId = deviceId || '';
-  const userId = appUser?.user_id || currentDeviceId; // Use actual user ID if authenticated, otherwise device ID
-  
-  // TanStack Query hooks
-  // Note: conversations are managed by ChatContext, no need to fetch here
-  const { data: dbMessages = [] } = useMessages(currentConversationId, {
-    enabled: !!currentConversationId,
-    retry: 2,
-    retryDelay: 1000,
-    onError: (error) => {
-      console.warn('Failed to fetch messages:', error);
-    }
-  });
-  const { data: conversationContext } = useConversationContext(currentConversationId, {
-    enabled: !!currentConversationId,
-    retry: 2,
-    retryDelay: 1000,
-    onError: (error) => {
-      console.warn('Failed to fetch conversation context:', error);
-    }
-  });
-  const createConversationMutation = useCreateConversation();
-  const sendMessageMutation = useSendMessage();
-  const updateContextMutation = useUpdateConversationContext();
-  
-  // Local state
   const [inputValue, setInputValue] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -129,37 +82,9 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
   const [isPricingCalculatorOpen, setIsPricingCalculatorOpen] = useState(false);
   const [isCollectingPricing, setIsCollectingPricing] = useState(false);
   const [isDirectTeamCreation, setIsDirectTeamCreation] = useState(false);
-  
-  // Track greeted conversations to prevent duplicates
-  const greetedConversations = useRef(new Set<string>());
-  
-  // Load greeted conversations from localStorage on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('greetedConversations');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          greetedConversations.current = new Set(parsed);
-          console.log('📱 Bottom nav loaded greeted conversations from localStorage:', Array.from(greetedConversations.current));
-        } catch (error) {
-          console.error('Error loading greeted conversations:', error);
-        }
-      }
-    }
-  }, []);
-  
-  // Save greeted conversations to localStorage whenever it changes
-  const saveGreetedConversations = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const array = Array.from(greetedConversations.current);
-      localStorage.setItem('greetedConversations', JSON.stringify(array));
-      console.log('💾 Bottom nav saved greeted conversations to localStorage:', array);
-    }
-  }, []);
   const [pricingStep, setPricingStep] = useState<'teamSize' | 'roleType' | 'industry' | 'individualRoles' | 'experience' | 'description' | 'workplaceSetup' | 'workplaceType' | 'workplaceIndividual' | 'workplace' | null>(null);
   const [pricingData, setPricingData] = useState<{teamSize?: string; roleType?: string; roles?: string; experience?: string; description?: string; workplaceSetup?: string; workplaceType?: string; currentMember?: number; [key: string]: any}>({});
-  const [conversationContextLocal, setConversationContextLocal] = useState<{isTalentInquiry?: boolean; conversationHistory?: Message[]}>({});
+  const [conversationContext, setConversationContext] = useState<{isTalentInquiry?: boolean; conversationHistory?: Message[]}>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -187,33 +112,17 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  // Separate useEffect for scrolling - only when messages change
   useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages.length]);
-
-  // Auto-show pricing form after contact info is collected (if team creation was requested)
-  useEffect(() => {
-    if (isDirectTeamCreation && !isCollectingContact && contactStep === null && !isCollectingPricing) {
-      // Contact form was just completed, now show pricing form
-      console.log('✅ Contact info collected, now showing pricing form for team creation');
-      setIsCollectingPricing(true);
-      setPricingStep('teamSize');
-    }
-  }, [isDirectTeamCreation, isCollectingContact, contactStep, isCollectingPricing]);
-
-  // Separate useEffect for focus
-  useEffect(() => {
-    if (isOpen && !isMinimized && !isCollectingContact && !isCollectingPricing) {
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 100);
-    }
-  }, [isOpen, isMinimized, isCollectingContact, isCollectingPricing]);
+    scrollToBottom();
+      // Only focus main input if no form is being collected
+      if (isOpen && !isMinimized && !isCollectingContact && !isCollectingPricing) {
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 100);
+      }
+  }, [messages, isOpen, isMinimized, isCollectingContact, isCollectingPricing]);
 
   useEffect(() => {
     if (inputValue === '') {
@@ -242,154 +151,42 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
     }
   }, [isOpen]);
 
-  // Initialize conversation when chat opens
-  useEffect(() => {
-    if (isOpen && !currentConversationId && userId) {
-      const initializeConversation = async () => {
-        try {
-          const conversationId = await createAnonymousConversation(userId);
-          setCurrentConversationId(conversationId);
-          
-          // Initialize context
-          setCurrentContext({
-            deviceId: userId,
-            conversationType: appUser?.user_id ? 'authenticated' : 'anonymous',
-            title: 'New Chat',
-            contextData: {
-              userPreferences: {},
-              conversationHistory: [],
-              systemState: {},
-              metadata: {}
-            },
-            contextSnapshot: null
-          });
-        } catch (error) {
-          console.error('Error initializing conversation:', error);
-        }
-      };
-      
-      initializeConversation();
-    }
-  }, [isOpen, currentConversationId, userId, appUser?.user_id, createAnonymousConversation, setCurrentConversationId, setCurrentContext]);
-
-  // Sync database messages with local messages - only on conversation change
-  useEffect(() => {
-    if (dbMessages.length > 0 && currentConversationId) {
-      const transformedMessages: Message[] = dbMessages.map(msg => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-        timestamp: new Date(msg.timestamp),
-        contextSnapshot: msg.contextSnapshot
-      }));
-      
-      // Only update if local messages are empty (initial load) or conversation changed
-      if (messages.length === 0) {
-        setMessages(transformedMessages);
-      }
-    }
-  }, [currentConversationId]); // Only run when conversation changes, not on every dbMessages update
-
-  // Update context when conversation context changes
-  useEffect(() => {
-    if (conversationContext && currentContext) {
-      // Only update if the context data is actually different
-      const contextDataChanged = JSON.stringify(conversationContext.contextData) !== JSON.stringify(currentContext.contextData);
-      const titleChanged = conversationContext.title !== currentContext.title;
-      
-      if (contextDataChanged || titleChanged) {
-        updateContext({
-          contextData: conversationContext.contextData,
-          title: conversationContext.title
-        });
-      }
-    }
-  }, [conversationContext, currentContext]);
-
   // Generate personalized greeting when chat opens and there are no messages
   useEffect(() => {
-    // Only generate greeting if:
-    // 1. Chat is open
-    // 2. No messages are loaded yet
-    // 3. Not currently loading
-    // 4. We have a user ID
-    // 5. We have a conversation ID
-    // 6. We haven't already greeted this conversation
-    // 7. This is a truly new conversation (no existing messages)
-    if (isOpen && 
-        messages.length === 0 && 
-        !isLoading && 
-        userId && 
-        currentConversationId && 
-        !greetedConversations.current.has(currentConversationId)) {
-      
-      // Check if this conversation already has messages by looking at the conversation data
-      const hasExistingMessages = conversations.find(c => c.id === currentConversationId)?.messageCount > 0;
-      
-      if (hasExistingMessages) {
-        console.log('⏭️ Bottom nav conversation already has messages, marking as greeted:', currentConversationId);
-        greetedConversations.current.add(currentConversationId);
-        saveGreetedConversations();
-        return;
-      }
-      
-      console.log('🎯 Bottom nav generating greeting for NEW conversation:', currentConversationId);
-      
-      const generateInstantGreeting = async () => {
+    if (isOpen && messages.length === 0 && !isLoading) {
+      const generatePersonalizedGreeting = async () => {
         try {
-          // Mark this conversation as greeted immediately to prevent duplicates
-          greetedConversations.current.add(currentConversationId);
-          saveGreetedConversations();
-          
-          // Check if we have a pre-generated greeting (INSTANT!)
-          const preGreeting = getPreGeneratedGreeting(userId);
-          let greetingText: string;
-          
-          if (preGreeting && !hasUsedGreeting(currentConversationId)) {
-            // Use pre-generated greeting (ZERO DELAY!)
-            console.log('✨ Using pre-generated greeting (INSTANT!)');
-            greetingText = preGreeting.greeting;
-            markGreetingAsUsed(currentConversationId);
-          } else {
-            // Fallback to instant greeting generation
-            console.log('⚡ Generating instant greeting (fallback)');
-            const userName = appUser?.first_name || '';
-            greetingText = userName 
-              ? `Hi ${userName}! 👋 I'm Maya from ShoreAgents. I'm here to help you build your perfect offshore team. What can I help you with today?`
-              : `Hi there! 👋 I'm Maya from ShoreAgents. I'm here to help you build your perfect offshore team. What can I help you with today?`;
-          }
+          setIsLoading(true);
+          const { response, relatedContent, userData } = await generateAIResponse('', [], userId);
           
           const greetingMessage: Message = {
-            id: 'instant-greeting-' + Date.now(),
+            id: 'personalized-greeting',
             role: 'assistant',
-            content: greetingText,
+            content: response,
             timestamp: new Date(),
-            contextSnapshot: saveContextSnapshot()
+            relatedContent: relatedContent.length > 0 ? relatedContent : undefined,
+            userData: userData,
           };
 
-          // Add message instantly (no loading)
           addMessage(greetingMessage);
-          
-          // Save greeting message to database in background (don't wait)
-          if (currentConversationId) {
-            sendMessageMutation.mutateAsync({
-              conversationId: currentConversationId,
-              userId: userId,
-              role: 'assistant',
-              content: greetingText,
-              contextSnapshot: saveContextSnapshot()
-            }).catch(error => {
-              console.error('Error saving greeting message:', error);
-            });
-          }
         } catch (error) {
-          console.error('Error generating instant greeting:', error);
+          console.error('Error generating personalized greeting:', error);
+          // Fallback to generic greeting if personalized greeting fails
+          const fallbackMessage: Message = {
+            id: 'fallback-greeting',
+            role: 'assistant',
+            content: "Hello! I'm Maya from ShoreAgents. What would you like to know?",
+            timestamp: new Date(),
+          };
+          addMessage(fallbackMessage);
+        } finally {
+          setIsLoading(false);
         }
       };
 
-      generateInstantGreeting();
+      generatePersonalizedGreeting();
     }
-  }, [isOpen, messages.length, userId, currentConversationId, conversations]);
+  }, [isOpen, messages.length, isLoading, generateAIResponse, userId, addMessage]);
 
   useEffect(() => {
     if (isOpen && inputRef.current && !isCollectingContact && !isCollectingPricing) {
@@ -427,41 +224,22 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
 
 
   // Wrapper function for MayaTextField setMessages prop
-  const handleSetMessages = (newMessages: React.SetStateAction<Message[]>) => {
-    if (typeof newMessages === 'function') {
-      setMessages(newMessages(messages));
-    } else {
-      setMessages(newMessages);
-    }
+  const handleSetMessages: React.Dispatch<React.SetStateAction<Message[]>> = (update) => {
+    setMessages(update);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || isLoading || !currentConversationId) return;
+    if (!inputValue.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: inputValue,
       timestamp: new Date(),
-      contextSnapshot: saveContextSnapshot()
     };
 
     addMessage(userMessage);
-    
-    // Save user message to database
-    try {
-      await sendMessageMutation.mutateAsync({
-        conversationId: currentConversationId,
-        userId: userId,
-        role: 'user',
-        content: inputValue,
-        contextSnapshot: saveContextSnapshot()
-      });
-    } catch (error) {
-      console.error('Error saving user message:', error);
-    }
-    
     setInputValue('');
     setIsLoading(true);
     // Reset textarea height after sending
@@ -493,28 +271,22 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                                     (messageLower.includes('for') || messageLower.includes('to') || messageLower.includes('help')));
       
       // Update conversation context
-      setConversationContextLocal({
+      setConversationContext({
         isTalentInquiry,
-        conversationHistory: [...messages, userMessage]
+        conversationHistory: [...messages, {
+          id: Date.now().toString(),
+          role: 'user',
+          content: inputValue,
+          timestamp: new Date(),
+        }]
       });
       
-      // Direct team creation - check for contact info first before showing pricing form
-      if (isDirectTeamCreation && !isCollectingPricing && !isCollectingContact) {
-        console.log('🎯 Direct team creation detected');
-        console.log('🔍 User data check:', userData);
-        
-        // First check if user has contact info (first name and last name)
-        if (!userData?.userProfile?.hasContactInfo) {
-          console.log('✅ User has no contact info, collecting name first before showing pricing form');
-          setIsDirectTeamCreation(true); // Keep flag so we can show pricing after contact is collected
-          setIsCollectingContact(true);
-          setContactStep('name');
-        } else {
-          console.log('✅ User has contact info, starting pricing calculator immediately');
-          setIsDirectTeamCreation(true);
-          setIsCollectingPricing(true);
-          setPricingStep('teamSize');
-        }
+      // ❌ DISABLED: Direct team creation - Maya now handles conversationally
+      if (false && isDirectTeamCreation && !isCollectingPricing) {
+        console.log('🎯 Direct team creation detected, starting pricing calculator immediately');
+        setIsDirectTeamCreation(true);
+        setIsCollectingPricing(true);
+        setPricingStep('teamSize');
       }
       
       const assistantMessage: Message = {
@@ -524,56 +296,9 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
         timestamp: new Date(),
         relatedContent: relatedContent.length > 0 ? relatedContent : undefined,
         userData: userData,
-        contextSnapshot: saveContextSnapshot()
       };
 
       addMessage(assistantMessage);
-      
-      // Save assistant message to database
-      try {
-        await sendMessageMutation.mutateAsync({
-          conversationId: currentConversationId,
-          userId: userId,
-          role: 'assistant',
-          content: response,
-          contextSnapshot: saveContextSnapshot()
-        });
-      } catch (error) {
-        console.error('Error saving assistant message:', error);
-      }
-      
-      // Update conversation context if needed
-      if (isTalentInquiry && currentContext) {
-        updateContext({
-          contextData: {
-            ...currentContext.contextData,
-            userPreferences: {
-              ...currentContext.contextData.userPreferences,
-              isTalentInquiry: true
-            },
-            conversationHistory: [...messages, userMessage, assistantMessage]
-          }
-        });
-        
-        // Update context in database
-        if (currentConversationId) {
-          try {
-            await updateContextMutation.mutateAsync({
-              conversationId: currentConversationId,
-              contextData: {
-                ...currentContext.contextData,
-                userPreferences: {
-                  ...currentContext.contextData.userPreferences,
-                  isTalentInquiry: true
-                },
-                conversationHistory: [...messages, userMessage, assistantMessage]
-              }
-            });
-          } catch (error) {
-            console.error('Error updating conversation context:', error);
-          }
-        }
-      }
       
        // Check if Maya is asking for contact information
        const responseLower = response.toLowerCase();
@@ -614,7 +339,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
          isCollectingContact: isCollectingContact
        });
        
-       if (isAskingForContact && !isCollectingContact && !isSimpleGreeting && !isCollectingPricing && !isDirectTeamCreation) {
+       // ❌ DISABLED: Old modal-based contact form - Maya now asks conversationally
+       if (false && isAskingForContact && !isCollectingContact && !isSimpleGreeting && !isCollectingPricing && !isDirectTeamCreation) {
          console.log('🎯 Triggering contact collection form!');
          console.log('🔍 User data check:', userData);
          
@@ -677,7 +403,9 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
          (inputValue.toLowerCase().includes('candidate') && 
           (inputValue.toLowerCase().includes('about') || inputValue.toLowerCase().includes('?')));
        
-       if ((isSuggestingPricingForTalent || hasPricingCalculatorSuggestion) && 
+       // ❌ DISABLED: Old modal-based pricing form - Maya now uses ONLY conversational chat
+       // The API handles all data extraction and saving automatically in the background
+       if (false && (isSuggestingPricingForTalent || hasPricingCalculatorSuggestion) && 
            !isCollectingPricing && 
            !candidatesRecentlyShown && 
            !isAskingAboutCandidates) {
@@ -709,7 +437,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
          isDirectTeamCreation: isDirectTeamCreation
        });
        
-       if (isAskingForIndustry && !isCollectingIndustry && !isCollectingContact && !isCollectingPricing && !isDirectTeamCreation && !isSimpleGreeting) {
+       // ❌ DISABLED: Old modal-based industry form - Maya now asks conversationally
+       if (false && isAskingForIndustry && !isCollectingIndustry && !isCollectingContact && !isCollectingPricing && !isDirectTeamCreation && !isSimpleGreeting) {
          console.log('🎯 Triggering industry collection form!');
          console.log('🔍 User data check:', userData);
          
@@ -728,24 +457,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
         role: 'assistant',
         content: "I'm sorry, I encountered an error. Please try again or contact our support team.",
         timestamp: new Date(),
-        contextSnapshot: saveContextSnapshot()
       };
       addMessage(errorMessage);
-      
-      // Save error message to database
-      if (currentConversationId) {
-        try {
-          await sendMessageMutation.mutateAsync({
-            conversationId: currentConversationId,
-            userId: userId,
-            role: 'assistant',
-            content: errorMessage.content,
-            contextSnapshot: saveContextSnapshot()
-          });
-        } catch (dbError) {
-          console.error('Error saving error message:', dbError);
-        }
-      }
     } finally {
       setIsLoading(false);
       // Maintain focus on input field after message submission (only if no form is being collected)
@@ -782,8 +495,54 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                 : 'bg-white text-gray-800 border border-gray-100'
             }`}
           >
-            <div className="text-sm leading-relaxed font-normal whitespace-pre-wrap">
-              {message.content}
+            <div className="text-sm leading-relaxed font-normal prose prose-sm max-w-none">
+              {isUser ? (
+                <div className="whitespace-pre-wrap">{message.content}</div>
+              ) : (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    // Paragraphs
+                    p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                    // Bold text
+                    strong: ({node, ...props}) => <strong className="font-bold text-gray-900" {...props} />,
+                    // Italic text
+                    em: ({node, ...props}) => <em className="italic" {...props} />,
+                    // Unordered lists
+                    ul: ({node, ...props}) => <ul className="list-disc pl-5 mb-2 space-y-1" {...props} />,
+                    // Ordered lists
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-5 mb-2 space-y-1" {...props} />,
+                    // List items
+                    li: ({node, ...props}) => <li className="text-gray-800" {...props} />,
+                    // Links
+                    a: ({node, ...props}) => (
+                      <a 
+                        className="text-lime-600 hover:text-lime-700 underline font-medium" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        {...props} 
+                      />
+                    ),
+                    // Headings
+                    h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2 text-gray-900" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-base font-bold mb-2 text-gray-900" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-1 text-gray-900" {...props} />,
+                    // Code blocks
+                    code: ({node, inline, ...props}: any) => 
+                      inline ? (
+                        <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono text-gray-800" {...props} />
+                      ) : (
+                        <code className="block bg-gray-100 p-2 rounded text-xs font-mono text-gray-800 overflow-x-auto mb-2" {...props} />
+                      ),
+                    // Blockquotes
+                    blockquote: ({node, ...props}) => (
+                      <blockquote className="border-l-4 border-lime-500 pl-3 italic text-gray-700 my-2" {...props} />
+                    ),
+                  }}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              )}
             </div>
             
             {message.relatedContent && message.relatedContent.length > 0 && (
@@ -825,7 +584,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
   return (
     <>
       {/* Background Overlay */}
-      {isOpen && !isMinimized && (
+      {isOpen && (
         <div 
           className="fixed inset-0 bg-black/20 z-[9998] transition-opacity duration-300"
           onClick={onClose}
@@ -851,13 +610,9 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
            height: isMinimized ? '42px' : (isFullHeight ? '100vh' : '520px')
          }}
        >
-       {/* Header */}
-       <div className={`p-2 rounded-t-xl flex items-center justify-between transition-colors duration-300 ${
-         isMinimized 
-           ? 'bg-white text-lime-600 border-2 border-lime-500 shadow-lg' 
-           : 'bg-gradient-to-r from-lime-500 to-lime-600 text-white'
-       }`}>
-         <div className="flex items-center gap-3">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-lime-500 to-lime-600 text-white p-2 rounded-t-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
             {/* Maya Santos Avatar - Hidden when minimized */}
             {!isMinimized && (
               <div className="relative pl-2">
@@ -891,11 +646,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className={`p-1 rounded-full transition-colors duration-300 ease-out ${
-                  isMinimized 
-                    ? 'hover:bg-lime-100' 
-                    : 'hover:bg-lime-400/20'
-                }`}
+                className="p-1 hover:bg-lime-400/20 rounded-full transition-colors duration-300 ease-out"
                 title="More options"
               >
                 <MoreVertical size={18} />
@@ -923,8 +674,8 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                   </button>
                   <button
                     onClick={() => {
-                      // Clear all chat history
-                      clearAllChatHistory();
+                      // Clear chat history
+                      clearMessages();
                       setShowMenu(false);
                     }}
                     className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -932,7 +683,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    Clear all chat history
+                    Clear chat history
                   </button>
                 </div>
               )}
@@ -940,11 +691,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
             
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className={`p-1 rounded-full transition-colors duration-300 ease-out ${
-                isMinimized 
-                  ? 'hover:bg-lime-100' 
-                  : 'hover:bg-lime-400/20'
-              }`}
+              className="p-1 hover:bg-lime-400/20 rounded-full transition-colors duration-300 ease-out"
               title={isMinimized ? "Expand chat" : "Minimize chat"}
             >
               {isMinimized ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
@@ -955,11 +702,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                 // Delay the actual close to allow animation to complete
                 setTimeout(() => onClose(), 300);
               }}
-              className={`p-1 rounded-full transition-colors duration-200 ${
-                isMinimized 
-                  ? 'hover:bg-lime-100' 
-                  : 'hover:bg-lime-400/20'
-              }`}
+              className="p-1 hover:bg-lime-400/20 rounded-full transition-colors duration-200"
               title="Close chat"
             >
               <X size={18} />
@@ -983,10 +726,12 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
               {isLoading && (
                 <div className="flex justify-start mb-4">
                   <div className="max-w-[90%]">
-                    <div className="bg-gradient-to-r from-lime-50 to-lime-100 rounded-2xl px-4 py-3 border border-lime-200 shadow-sm">
-                      <div className="flex items-center space-x-2">
-                        <LimeLoader />
-                        <span className="text-sm text-lime-800 font-medium">Maya is thinking...</span>
+                    <div className="bg-gray-50 rounded-2xl px-4 py-3 border border-gray-100 shadow-sm">
+                      <div className="flex items-center justify-center">
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full border-2 border-current border-t-transparent w-6 h-6" />
+                          <span className="text-sm text-gray-600">Maya is thinking...</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1051,7 +796,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                             content: `Industry: ${industry}`,
                             timestamp: new Date(),
                           };
-                          handleSetMessages(userMessage);
+                          handleSetMessages((prev) => [...prev, userMessage]);
                           
                           // Add Maya's response
                           const mayaMessage: Message = {
@@ -1060,7 +805,7 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
                             content: `Great! I can see you're in the ${industry} industry. This will help me provide more relevant talent recommendations. How can I assist you further?`,
                             timestamp: new Date(),
                           };
-                          handleSetMessages(mayaMessage);
+                          handleSetMessages((prev) => [...prev, mayaMessage]);
                         }
                       } catch (error) {
                         console.error('Error updating industry:', error);
@@ -1079,7 +824,6 @@ const ChatConsole: React.FC<ChatConsoleProps> = ({ isOpen, onClose }) => {
               {/* Pricing Collection Form */}
               {isCollectingPricing && pricingStep && (
                 <div className="mt-4">
-                  {console.log('🔧 Rendering pricing form:', { isCollectingPricing, pricingStep })}
                   <MayaPricingForm
                     currentStep={pricingStep}
                     onStepChange={(step: string | null) => {

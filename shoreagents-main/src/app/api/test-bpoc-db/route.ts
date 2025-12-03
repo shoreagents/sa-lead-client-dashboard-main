@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    void _request
     console.log('🧪 Testing BPOC database connection...');
     
     // Test database connection
@@ -54,4 +55,3 @@ export async function GET(request: NextRequest) {
     }, { status: 500 });
   }
 }
-

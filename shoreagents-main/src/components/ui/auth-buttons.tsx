@@ -1,12 +1,12 @@
-'use client'
+"use client"
 
-import { Button } from './button'
-import { LoginModal } from './login-modal'
-import { UserMenu } from './user-menu'
-import { useUserAuth } from '@/lib/user-auth-context'
+import { memo } from "react"
+import { LoginModal } from "./login-modal"
+import { UserMenu } from "./user-menu"
+import { useAuth } from "@/lib/auth-context"
 
-export function AuthButtons() {
-  const { user, loading } = useUserAuth()
+export const AuthButtons = memo(function AuthButtons() {
+  const { user, loading } = useAuth()
 
   if (loading) {
     return (
@@ -26,5 +26,4 @@ export function AuthButtons() {
       <LoginModal />
     </div>
   )
-}
-
+})

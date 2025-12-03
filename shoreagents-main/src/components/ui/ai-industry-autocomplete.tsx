@@ -15,6 +15,7 @@ interface AIIndustryAutocompleteProps {
   label?: string;
   className?: string;
   id?: string;
+  currency?: string;
 }
 
 export function AIIndustryAutocomplete({
@@ -23,7 +24,8 @@ export function AIIndustryAutocomplete({
   placeholder = "Start typing your industry...",
   label,
   className = "",
-  id
+  id,
+  currency = 'USD'
 }: AIIndustryAutocompleteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +35,14 @@ export function AIIndustryAutocomplete({
   
 
   const userId = generateUserId();
+  
+  // Sync searchQuery with incoming value prop (for pre-filling)
+  useEffect(() => {
+    if (value && value !== searchQuery) {
+      setSearchQuery(value);
+      console.log('🏭 AIIndustryAutocomplete: Syncing with parent value:', value);
+    }
+  }, [value]);
   
   // Debounce the search query - only update after 1 second of no typing
   useEffect(() => {
@@ -47,7 +57,12 @@ export function AIIndustryAutocomplete({
     debouncedQuery, // Use debounced query instead of immediate searchQuery
     userId, 
     isOpen && debouncedQuery.length >= 2, // Only fetch when debounced query is ready (changed from > 2 to >= 2)
-    'industry'
+    'industry',
+    undefined, // industry (not needed for industry type suggestions)
+    undefined, // roleTitle
+    undefined, // generateAnother
+    undefined, // generationCount
+    currency   // Pass user's currency for location-aware suggestions (THIS IS PARAM #9!)
   );
 
   // Fallback suggestions for common industry terms - INDUSTRIES ONLY, NOT JOB ROLES

@@ -29,6 +29,7 @@ export function AnonymousUserInitializer() {
             headers: {
               'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ deviceId }) // Pass the device ID
           })
           
           const result = await response.json()

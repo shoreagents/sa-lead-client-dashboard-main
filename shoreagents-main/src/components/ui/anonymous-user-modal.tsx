@@ -13,9 +13,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog-videocall';
+} from '@/components/ui/dialog';
 import { Send, X } from 'lucide-react';
 import { generateUserId } from '@/lib/userEngagementService';
+import { useCurrency } from '@/lib/currencyContext';
 
 interface AnonymousUserModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ interface AnonymousUserModalProps {
 }
 
 export function AnonymousUserModal({ isOpen, onClose }: AnonymousUserModalProps) {
+  const { selectedCurrency } = useCurrency(); // Get user's detected/selected currency
   const [formData, setFormData] = useState({
     industry: '',
     employeeCount: '',
@@ -114,6 +116,7 @@ export function AnonymousUserModal({ isOpen, onClose }: AnonymousUserModalProps)
               label="Industry *"
               placeholder="Select your industry..."
               id="industry"
+              currency={selectedCurrency.code}
             />
           </div>
 

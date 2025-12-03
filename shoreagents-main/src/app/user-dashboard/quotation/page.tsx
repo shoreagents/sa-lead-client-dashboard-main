@@ -2,13 +2,12 @@
 
 import { UserGuard } from '@/components/auth/UserGuard'
 import { UserDashboardSidebar } from '@/components/layout/UserDashboardSidebar'
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar'
 import { useUserAuth } from '@/lib/user-auth-context'
 import { useDeleteQuotationMutation } from '@/hooks/use-api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { 
   Quote, 
   Plus,
@@ -26,9 +25,8 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { UserQuoteService } from '@/lib/userQuoteService'
-import { UserQuoteSummary } from '@/hooks/use-api'
-import { PricingCalculatorModal } from '@/components/ui/pricing-calculator-modal'
+import { UserQuoteService, UserQuoteSummary } from '@/lib/userQuoteService'
+import { PricingCalculatorModal } from '@/components/pricing-calculator'
 import { QuoteSummaryModal } from '@/components/ui/quote-summary-modal'
 import { useCurrency } from '@/lib/currencyContext'
 import { RefreshCw } from 'lucide-react'
@@ -36,7 +34,7 @@ import { RefreshCw } from 'lucide-react'
 
 export default function QuotationPage() {
   const { user } = useUserAuth()
-  const { formatPrice, convertPrice } = useCurrency()
+  const { formatPrice, convertPrice, selectedCurrency } = useCurrency()
   const queryClient = useQueryClient()
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false)
@@ -44,6 +42,32 @@ export default function QuotationPage() {
   const [selectedQuote, setSelectedQuote] = useState<UserQuoteSummary | null>(null)
   const [isDownloading, setIsDownloading] = useState<string | null>(null)
   const [isSending, setIsSending] = useState<string | null>(null)
+
+  // Currency conversion helper - Convert from quote's saved currency to selected currency
+  const convertQuoteCurrency = (amount: number, fromCurrency: string): number => {
+    if (fromCurrency === selectedCurrency.code) {
+      return amount // No conversion needed
+    }
+    
+    // Currency rates relative to PHP (from fixedPricingService.ts)
+    const CURRENCY_RATES: Record<string, number> = {
+      USD: 0.018,  // 1 PHP = $0.018
+      AUD: 0.027,  // 1 PHP = A$0.027
+      CAD: 0.024,  // 1 PHP = C$0.024
+      GBP: 0.014,  // 1 PHP = £0.014
+      NZD: 0.029,  // 1 PHP = NZ$0.029
+      EUR: 0.016,  // 1 PHP = €0.016
+      PHP: 1.0     // 1 PHP = ₱1.0
+    }
+    
+    // Step 1: Convert from original currency to USD
+    const amountInUsd = amount / (CURRENCY_RATES[fromCurrency] || 1)
+    
+    // Step 2: Convert from USD to target currency
+    const amountInTargetCurrency = amountInUsd * (CURRENCY_RATES[selectedCurrency.code] || 1)
+    
+    return amountInTargetCurrency
+  }
 
   // TanStack Query for fetching quotations
   const {
@@ -54,7 +78,7 @@ export default function QuotationPage() {
     isFetching,
     isStale
   } = useQuery({
-    queryKey: ['user-quotations', user?.user_id],
+    queryKey: ['quotations', user?.user_id],
     queryFn: async () => {
       if (!user?.user_id) {
         throw new Error('User not authenticated')
@@ -65,16 +89,7 @@ export default function QuotationPage() {
       
       if (result.success && result.data) {
         console.log('✅ Fetched quotations:', result.data.length)
-        // Deduplicate at the API level as well
-        const uniqueQuotes = result.data.reduce((acc, current) => {
-          const existing = acc.find(quote => quote.id === current.id)
-          if (!existing) {
-            acc.push(current)
-          }
-          return acc
-        }, [] as typeof result.data)
-        console.log('🔍 After deduplication:', uniqueQuotes.length)
-        return uniqueQuotes
+        return result.data
       } else {
         throw new Error('Failed to fetch quotations')
       }
@@ -84,8 +99,8 @@ export default function QuotationPage() {
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    refetchOnWindowFocus: false, // Disable to prevent multiple calls
-    refetchOnMount: false // Disable to prevent multiple calls
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   })
 
   // TanStack Query mutation for deleting quotations
@@ -101,13 +116,13 @@ export default function QuotationPage() {
     },
     onMutate: async ({ quoteId }) => {
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['user-quotations', user?.user_id] })
+      await queryClient.cancelQueries({ queryKey: ['quotations', user?.user_id] })
       
       // Snapshot the previous value
-      const previousQuotations = queryClient.getQueryData(['user-quotations', user?.user_id])
+      const previousQuotations = queryClient.getQueryData(['quotations', user?.user_id])
       
       // Optimistically update the quotations
-      queryClient.setQueryData(['user-quotations', user?.user_id], (old: UserQuoteSummary[] = []) =>
+      queryClient.setQueryData(['quotations', user?.user_id], (old: UserQuoteSummary[] = []) =>
         old.filter(quote => quote.id !== quoteId)
       )
       
@@ -116,13 +131,13 @@ export default function QuotationPage() {
     onError: (err, { quoteId }, context) => {
       // Revert the optimistic update
       if (context?.previousQuotations) {
-        queryClient.setQueryData(['user-quotations', user?.user_id], context.previousQuotations)
+        queryClient.setQueryData(['quotations', user?.user_id], context.previousQuotations)
       }
       console.error('❌ Error deleting quote:', err)
     },
     onSettled: () => {
       // Refetch after mutation
-      queryClient.invalidateQueries({ queryKey: ['user-quotations', user?.user_id] })
+      queryClient.invalidateQueries({ queryKey: ['quotations', user?.user_id] })
     }
   })
 
@@ -219,8 +234,8 @@ export default function QuotationPage() {
   };
 
   // Convert UserQuoteSummary to display format
-  const formatQuotationForDisplay = (quote: UserQuoteSummary) => {
-    // Determine status based on age
+  const formatQuotationForDisplay = (quote: UserQuoteSummary, index: number) => {
+    // Determine status based on age and position
     const quoteDate = new Date(quote.created_at)
     const now = new Date()
     const daysSinceCreation = Math.floor((now.getTime() - quoteDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -230,13 +245,15 @@ export default function QuotationPage() {
       status = "Expired"
     } else if (daysSinceCreation > 14) {
       status = "Pending"
+    } else if (index === 0) {
+      status = "Latest"
     }
 
     return {
       id: quote.id,
       clientName: "Your Company",
       projectName: `${quote.industry} Team - ${quote.member_count} Members`,
-      amount: convertPrice(quote.total_monthly_cost), // Convert to current currency
+      amount: convertQuoteCurrency(quote.total_monthly_cost, quote.currency_code), // Convert from quote's currency to selected currency
       status: status,
       createdDate: quote.created_at,
       validUntil: new Date(new Date(quote.created_at).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from creation
@@ -254,49 +271,19 @@ export default function QuotationPage() {
           }
         });
 
-        return Object.values(groupedRoles).map((groupedRole, index) => ({
-          id: `${quote.id}-role-${index}`,
+        const convertedTotal = convertQuoteCurrency(quote.total_monthly_cost, quote.currency_code);
+        return Object.values(groupedRoles).map((groupedRole) => ({
           name: groupedRole.count > 1 ? `${groupedRole.role.role_title} x${groupedRole.count}` : groupedRole.role.role_title,
           quantity: groupedRole.count,
-          rate: Math.round(convertPrice(quote.total_monthly_cost / quote.roles_count)),
-          total: Math.round(convertPrice(quote.total_monthly_cost / quote.roles_count)) * groupedRole.count
+          rate: Math.round(convertedTotal / quote.roles_count),
+          total: Math.round(convertedTotal / quote.roles_count) * groupedRole.count
         }));
       })()
     }
   }
 
-  // Debug: Check for duplicate IDs in quotations
-  const quotationIds = quotations.map(q => q.id)
-  const duplicateIds = quotationIds.filter((id, index) => quotationIds.indexOf(id) !== index)
-  if (duplicateIds.length > 0) {
-    console.warn('🚨 Found duplicate quotation IDs:', [...new Set(duplicateIds)])
-    console.log('📊 Total quotations:', quotations.length)
-    console.log('🔍 Unique quotations:', [...new Set(quotationIds)].length)
-  }
-
-  // More robust deduplication using Map for better performance
-  const quotationMap = new Map<string, typeof quotations[0]>()
-  quotations.forEach(quote => {
-    const existing = quotationMap.get(quote.id)
-    if (!existing || new Date(quote.created_at) > new Date(existing.created_at)) {
-      quotationMap.set(quote.id, quote)
-    }
-  })
-  const uniqueQuotations = Array.from(quotationMap.values())
-
-  const displayQuotations = uniqueQuotations.map(formatQuotationForDisplay)
-  
-  // Sort quotations by created_at (most recent first) and mark the first one as "Latest"
-  const sortedQuotations = displayQuotations.sort((a, b) => 
-    new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
-  )
-  
-  // Mark the most recent quotation as "Latest"
-  if (sortedQuotations.length > 0) {
-    sortedQuotations[0].status = "Latest"
-  }
-  
-  const filteredQuotations = sortedQuotations.filter(quote => 
+  const displayQuotations = quotations.map(formatQuotationForDisplay)
+  const filteredQuotations = displayQuotations.filter(quote => 
     selectedStatus === 'all' || quote.status.toLowerCase() === selectedStatus
   )
 
@@ -351,106 +338,90 @@ export default function QuotationPage() {
       <SidebarProvider>
         <UserDashboardSidebar />
         <SidebarInset>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-20">
+          <div className="flex flex-1 flex-col gap-4 p-4">
+            {/* Header */}
+            <div className="grid gap-4">
+              <div className="flex items-center justify-between">
+                <div>
+            <div className="flex items-center gap-2">
+                    <h2 className="text-2xl font-bold tracking-tight">Quotation Management</h2>
+              <Badge variant="secondary" className="text-xs">
+                {filteredQuotations.length} quotations
+              </Badge>
+              {isStale && (
+                <Badge variant="outline" className="text-xs text-orange-600">
+                  Data may be outdated
+                </Badge>
+              )}
+            </div>
+                  <p className="text-muted-foreground">
+                    Create, manage, and track your quotations
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => refetch()}
+                    disabled={isFetching}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                <Button 
+                  className="bg-lime-600 hover:bg-lime-700"
+                  onClick={handleCreateQuotation}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Quotation
+                </Button>
+                </div>
+              </div>
+            </div>
 
             {/* Filters */}
             <div className="flex gap-2 flex-wrap">
               <Button
-                size="sm"
                 variant={selectedStatus === 'all' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('all')}
-                className={`h-8 text-sm ${selectedStatus === 'all' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
+                className={selectedStatus === 'all' ? 'bg-lime-600 hover:bg-lime-700' : ''}
               >
                 All
               </Button>
               <Button
-                size="sm"
                 variant={selectedStatus === 'latest' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('latest')}
-                className={`h-8 text-sm ${selectedStatus === 'latest' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
+                className={selectedStatus === 'latest' ? 'bg-lime-600 hover:bg-lime-700' : ''}
               >
                 Latest
               </Button>
               <Button
-                size="sm"
                 variant={selectedStatus === 'active' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('active')}
-                className={`h-8 text-sm ${selectedStatus === 'active' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
+                className={selectedStatus === 'active' ? 'bg-lime-600 hover:bg-lime-700' : ''}
               >
                 Active
               </Button>
               <Button
-                size="sm"
                 variant={selectedStatus === 'pending' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('pending')}
-                className={`h-8 text-sm ${selectedStatus === 'pending' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
+                className={selectedStatus === 'pending' ? 'bg-lime-600 hover:bg-lime-700' : ''}
               >
                 Pending
               </Button>
               <Button
-                size="sm"
                 variant={selectedStatus === 'expired' ? 'default' : 'outline'}
                 onClick={() => setSelectedStatus('expired')}
-                className={`h-8 text-sm ${selectedStatus === 'expired' ? 'bg-lime-600 hover:bg-lime-700 text-white' : ''}`}
+                className={selectedStatus === 'expired' ? 'bg-lime-600 hover:bg-lime-700' : ''}
               >
                 Expired
               </Button>
             </div>
 
-            {/* Summary Stats - Moved to Top */}
-            {!isLoading && !error && filteredQuotations.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-lime-600">
-                        {filteredQuotations.length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Total Quotations</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
-                        {formatPrice(filteredQuotations.reduce((sum, q) => sum + q.amount, 0))}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Total Value</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {filteredQuotations.filter(q => q.status === 'Approved').length}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Approved</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Loading State */}
             {isLoading && (
-              <div className="space-y-4 py-4">
-                {[...Array(3)].map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <Skeleton className="h-6 w-48" />
-                        <Skeleton className="h-6 w-20" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-3/4" />
-                        <div className="flex gap-2">
-                          <Skeleton className="h-8 w-24" />
-                          <Skeleton className="h-8 w-24" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full border-2 border-lime-600 border-t-transparent w-8 h-8" />
+                <span className="ml-2 text-gray-600">Loading quotations...</span>
               </div>
             )}
 
@@ -463,11 +434,10 @@ export default function QuotationPage() {
                   {error instanceof Error ? error.message : 'An unexpected error occurred'}
                 </p>
                 <Button 
-                  size="sm"
                   onClick={() => refetch()}
-                  className="h-8 bg-lime-600 hover:bg-lime-700 text-sm"
+                  className="bg-lime-600 hover:bg-lime-700"
                 >
-                  <RefreshCw className="w-3 h-3 mr-1" />
+                  <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
               </div>
@@ -529,8 +499,8 @@ export default function QuotationPage() {
                           {/* Items List */}
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium">Items:</h4>
-                            {filteredQuotations[0].items.map((item) => (
-                              <div key={item.id} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded">
+                            {filteredQuotations[0].items.map((item, index) => (
+                              <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-2 rounded">
                                 <div>
                                   <span className="font-medium">{item.name}</span>
                                   <span className="text-muted-foreground ml-2">x{item.quantity}</span>
@@ -550,9 +520,8 @@ export default function QuotationPage() {
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => handleViewQuote(filteredQuotations[0])}
-                                className="h-8 text-sm"
                               >
-                                <Eye className="w-3 h-3 mr-1" />
+                                <Eye className="w-4 h-4 mr-2" />
                                 View
                               </Button>
                               <Button 
@@ -564,7 +533,7 @@ export default function QuotationPage() {
                                 }}
                                 disabled={isDownloading === filteredQuotations[0].id}
                               >
-                                <Download className="w-3 h-3 mr-1" />
+                                <Download className="w-4 h-4 mr-2" />
                                 {isDownloading === filteredQuotations[0].id ? 'Downloading...' : 'Download PDF'}
                               </Button>
                               <Button 
@@ -576,7 +545,7 @@ export default function QuotationPage() {
                                 }}
                                 disabled={isSending === filteredQuotations[0].id}
                               >
-                                <Send className="w-3 h-3 mr-1" />
+                                <Send className="w-4 h-4 mr-2" />
                                 {isSending === filteredQuotations[0].id ? 'Sending...' : 'Send to Client'}
                               </Button>
                               <Button 
@@ -589,7 +558,7 @@ export default function QuotationPage() {
                                 {deleteQuotationMutation.isPending ? (
                                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                                 ) : (
-                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  <Trash2 className="w-4 h-4 mr-2" />
                                 )}
                                 {deleteQuotationMutation.isPending ? 'Deleting...' : 'Delete'}
                               </Button>
@@ -735,6 +704,36 @@ export default function QuotationPage() {
               </div>
             )}
 
+            {/* Summary Stats */}
+            {!isLoading && !error && filteredQuotations.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-lime-600">
+                        {filteredQuotations.length}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Total Quotations</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {formatPrice(filteredQuotations.reduce((sum, q) => sum + q.amount, 0))}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Total Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {filteredQuotations.filter(q => q.status === 'Approved').length}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Approved</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </SidebarInset>
       </SidebarProvider>

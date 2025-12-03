@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
 import { SideNav } from "@/components/layout/SideNav";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
-  CheckCircle, 
   TrendingUp, 
   Users, 
   Target, 
-  Building, 
+  Building2, 
   Award, 
   Globe, 
   Clock,
@@ -17,103 +16,122 @@ import {
   Star,
   Zap,
   Home,
-  Shield,
   FileText,
   Video,
   Handshake,
   DollarSign,
-  Calendar,
   ArrowRight,
-  Lightbulb,
-  Code,
-  Image as ImageIcon
-} from 'lucide-react';
-import Image from 'next/image';
+  Code
+} from "lucide-react";
+import Link from "next/link";
 
 export default function ExceptionalTeamPerformancePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <SideNav />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <Badge className="bg-red-600 text-white px-4 py-2 text-lg mb-6">
-            AUSTRALIAN REAL ESTATE BREAKTHROUGH: From Team Hire to &quot;Legends&quot; Status
-          </Badge>
-          <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
-            Century 21&apos;s Ultimate Win: The Staff Who Became &quot;Legends&quot; Instead of Employees
-          </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-            When Century 21 Rich River Real Estate hired a specialized team for property management and multimedia operations, they discovered professionals who earned recognition as &quot;legends&quot; within their organization. This Century 21 client success story reveals systematic Australian real estate outsourcing excellence.
-          </p>
-          
-          <div className="relative mb-12">
-            <Image
-              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&h=600&fit=crop"
-              alt="Century 21 Rich River Real Estate Operations"
-              width={1200}
-              height={600}
-              className="w-full h-96 object-cover rounded-lg shadow-lg"
-            />
+      
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-lime-50 to-gray-100 py-16 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <Badge className="bg-red-600 text-white mb-4 text-sm px-3 py-1">
+              🚨 AUSTRALIAN REAL ESTATE BREAKTHROUGH: From Team Hire to "Legends" Status
+            </Badge>
+            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Century 21 Client Success:<br />
+              <span className="text-lime-600">The Staff Who Became &quot;Legends&quot; Instead of Employees</span>
+            </h1>
+            <p className="text-xl text-gray-700 leading-relaxed mb-8">
+              When Century 21 Rich River Real Estate hired a specialized team for property management and multimedia operations, 
+              they discovered professionals who earned recognition as &quot;legends&quot; within their organization. This Century 21 
+              client success story reveals systematic Australian real estate outsourcing excellence.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/pricing" 
+                className="inline-flex items-center px-6 py-3 bg-lime-600 text-white font-semibold rounded-lg hover:bg-lime-700 transition-colors"
+              >
+                Schedule Your Consultation
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Link>
+              <Link 
+                href="/case-studies" 
+                className="inline-flex items-center px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg border-2 border-gray-300 hover:border-lime-600 transition-colors"
+              >
+                View More Case Studies
+              </Link>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Client Quote Card */}
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+        {/* Client Quote */}
         <div className="mb-16">
-          <Card className="border-lime-200 shadow-md">
+          <Card className="bg-gradient-to-br from-lime-50 to-green-50 border-l-4 border-lime-500">
             <CardContent className="p-8">
-              <div className="text-center">
-                <div className="mb-6">
-                  <Image
-                    src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=100&h=100&fit=crop"
-                    alt="Century 21 Logo"
-                    width={100}
-                    height={100}
-                    className="mx-auto rounded-full"
-                  />
-                </div>
-                <blockquote className="text-xl text-gray-700 italic mb-6">
-                  &quot;We have 2 staff with ShoreAgents one in Property Management and one in multimedia. We are constantly blown away by the capabilities of our team in the Philippines and we will be hiring more staff with ShoreAgents in the future! The whole team there are legends.&quot;
-                </blockquote>
-                <div className="text-gray-900 font-bold">Andrew Lochhead</div>
-                <div className="text-gray-600">Century 21 Rich River Real Estate, AU</div>
-                <div className="text-gray-600">Hired a Team</div>
-                <div className="mt-2 flex items-center justify-center gap-2">
-                  <Globe className="w-4 h-4 text-gray-600" />
-                  <span>Australia</span>
+              <blockquote className="text-xl text-gray-800 italic mb-6 leading-relaxed">
+                &quot;We have 2 staff with ShoreAgents one in Property Management and one in multimedia. We are constantly 
+                blown away by the capabilities of our team in the Philippines and we will be hiring more staff with ShoreAgents 
+                in the future! The whole team there are legends.&quot;
+              </blockquote>
+              <div className="border-t border-lime-200 pt-4">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <div className="font-bold text-gray-900 text-lg">Andrew Lochhead</div>
+                    <div className="text-gray-700">Century 21 Rich River Real Estate</div>
+                  </div>
+                  <div className="flex items-center gap-6 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Globe className="w-4 h-4" />
+                      <span>Australia</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />
+                      <span>2 Team Members</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Intro Section */}
+        {/* Intro */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 flex items-center">
-            <Home className="w-8 h-8 text-lime-600 mr-2" />
-            Century 21 Client Success: When Professional Excellence Transforms Business Operations
-          </h2>
-          <p className="text-xl text-gray-700 mb-4">
-            How a leading Australian real estate agency achieved exceptional team performance through systematic property management outsourcing
-          </p>
-          <p className="text-lg text-gray-700">
-            Picture this: You hire offshore professionals and they integrate so seamlessly that management declares them &quot;legends&quot; who are constantly exceeding expectations. That&apos;s exactly what happened at Century 21 Rich River Real Estate. This Century 21 client success story demonstrates systematic Australian real estate outsourcing excellence.
+          <p className="text-lg text-gray-700 leading-relaxed mb-6">
+            How a leading Australian real estate agency achieved exceptional team performance through systematic property 
+            management outsourcing. Picture this: You hire offshore professionals and they integrate so seamlessly that management 
+            declares them &quot;legends&quot; who are constantly exceeding expectations. That&apos;s exactly what happened at 
+            Century 21 Rich River Real Estate.
           </p>
         </div>
 
+        <Separator className="my-12" />
+
         {/* Strategic Team Implementation */}
-        <div className="mb-16">
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Award className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Strategic Team Implementation</h2>
+              <p className="text-lg text-gray-600">Complete team approach delivering exceptional results</p>
+            </div>
+          </div>
+
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            When Andrew Lochhead at Century 21 Rich River Real Estate made the strategic decision to hire a specialized offshore 
+            team through ShoreAgents, he needed professionals who could handle the complex demands of Australian property management 
+            and multimedia operations. The decision to hire a complete team rather than individual contractors proved transformational.
+          </p>
+
           <Card className="border-lime-200 shadow-md">
             <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Award className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Century 21 Client Success: Strategic Team Implementation</h2>
-              </div>
               <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  When Andrew Lochhead at Century 21 Rich River Real Estate made the strategic decision to hire a specialized offshore team through ShoreAgents, he needed professionals who could handle the complex demands of Australian property management and multimedia operations. The decision to hire a complete team rather than individual contractors proved transformational.
-                </p>
-
                 <div className="bg-lime-50 rounded-lg p-6 mb-6 shadow-sm">
                   <blockquote className="text-xl text-gray-800 italic border-l-4 border-lime-600 pl-4 mb-4">
                     &quot;We are constantly blown away by the capabilities of our team in the Philippines and we will be hiring more staff with ShoreAgents in the future! The whole team there are legends.&quot;
@@ -124,7 +142,7 @@ export default function ExceptionalTeamPerformancePage() {
                 </div>
 
                 <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Century 21 Client Success: Professional Team Structure</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">Professional Team Structure</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white rounded-lg p-6 shadow-sm">
                       <div className="flex items-center mb-4">
@@ -151,32 +169,50 @@ export default function ExceptionalTeamPerformancePage() {
                 </div>
 
                 <p className="mt-6">
-                  The strategic decision to hire a complete team created synergies that enhanced overall performance. Property management and multimedia operations require coordination, and having specialists who understand both their individual roles and collaborative requirements delivered exceptional results for Century 21 Rich River Real Estate.
+                  The strategic decision to hire a complete team created synergies that enhanced overall performance. Property management 
+                  and multimedia operations require coordination, and having specialists who understand both their individual roles and 
+                  collaborative requirements delivered exceptional results for Century 21 Rich River Real Estate.
                 </p>
                 <p className="mt-4">
-                  This Century 21 client success story demonstrates how systematic team-based approaches to Australian real estate outsourcing create sustainable competitive advantages. When offshore teams integrate seamlessly with local operations while maintaining exceptional performance standards, they transform from service providers to valued team members earning recognition as business &quot;legends&quot;.
+                  This Century 21 client success story demonstrates how systematic team-based approaches to Australian real estate 
+                  outsourcing create sustainable competitive advantages. When offshore teams integrate seamlessly with local operations 
+                  while maintaining exceptional performance standards, they transform from service providers to valued team members earning 
+                  recognition as business &quot;legends&quot; through our specialized real estate outsourcing solutions.
                 </p>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </section>
+
+        <Separator className="my-12" />
 
         {/* Sustained Professional Excellence */}
-        <div className="mb-16">
+        <section className="mb-16">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="bg-lime-100 rounded-full p-3">
+              <Star className="w-8 h-8 text-lime-600" />
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Sustained Professional Excellence</h2>
+              <p className="text-lg text-gray-600">Consistent performance earning "legends" recognition</p>
+            </div>
+          </div>
+
+          <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+            The true validation of any offshore staffing partnership isn&apos;t the initial enthusiasm—it&apos;s sustained excellence 
+            over time. Century 21 Rich River Real Estate&apos;s ongoing satisfaction demonstrates something remarkable: consistent 
+            professional performance that integrates seamlessly with their Australian operations year after year.
+          </p>
+
+          <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+            Management consistently reports exceptional satisfaction with team performance, professional communication standards, and 
+            the ability to handle complex Australian real estate requirements. This isn&apos;t short-term success—it&apos;s systematic 
+            excellence that builds management confidence and creates opportunities for strategic expansion.
+          </p>
+
           <Card className="border-lime-200 shadow-md">
             <CardContent className="p-8">
-              <div className="flex items-center mb-6">
-                <Star className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Century 21 Client Success: Sustained Professional Excellence</h2>
-              </div>
               <div className="prose prose-lg max-w-none text-gray-700">
-                <p className="mb-4">
-                  The true validation of any offshore staffing partnership isn&apos;t the initial enthusiasm—it&apos;s sustained excellence over time. Century 21 Rich River Real Estate&apos;s ongoing satisfaction demonstrates something remarkable: consistent professional performance that integrates seamlessly with their Australian operations year after year.
-                </p>
-                <p className="mb-6">
-                  Management consistently reports exceptional satisfaction with team performance, professional communication standards, and the ability to handle complex Australian real estate requirements. This isn&apos;t short-term success—it&apos;s systematic excellence that builds management confidence and creates opportunities for strategic expansion.
-                </p>
-
                 <div className="bg-lime-50 rounded-lg p-6 shadow-sm">
                   <h3 className="text-2xl font-bold text-gray-900 mb-6">Professional Excellence: Key Performance Areas</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -232,15 +268,22 @@ export default function ExceptionalTeamPerformancePage() {
                 </div>
 
                 <p className="mt-6">
-                  What makes this professional excellence particularly compelling is management&apos;s declaration that the team members are &quot;legends&quot; who consistently exceed expectations. This isn&apos;t honeymoon period enthusiasm—it&apos;s sustained professional excellence that validates systematic approaches to Australian real estate outsourcing.
+                  What makes this professional excellence particularly compelling is management&apos;s declaration that the team members 
+                  are &quot;legends&quot; who consistently exceed expectations. This isn&apos;t honeymoon period enthusiasm—it&apos;s 
+                  sustained professional excellence that validates systematic approaches to Australian real estate outsourcing.
                 </p>
+
                 <p className="mt-4">
-                  This level of professional recognition demonstrates that when offshore teams possess deep industry knowledge combined with systematic business process expertise, they create strategic value that transforms outsourcing from cost reduction to competitive advantage.
+                  This level of professional recognition demonstrates that when offshore teams possess deep industry knowledge combined 
+                  with systematic business process expertise, they create strategic value that transforms outsourcing from cost reduction 
+                  to competitive advantage through our comprehensive property management virtual assistant solutions.
                 </p>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </section>
+
+        <Separator className="my-12" />
 
         {/* Australian Real Estate Industry Expertise */}
         <div className="mb-16">
@@ -248,7 +291,7 @@ export default function ExceptionalTeamPerformancePage() {
             <CardContent className="p-8">
               <div className="flex items-center mb-6">
                 <Home className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Century 21 Client Success: Australian Real Estate Industry Expertise</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Australian Real Estate Industry Expertise</h2>
               </div>
               <div className="prose prose-lg max-w-none text-gray-700">
                 <p className="mb-4">
@@ -276,7 +319,7 @@ export default function ExceptionalTeamPerformancePage() {
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <ImageIcon className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
+                      <Video className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-bold text-gray-900 mb-2">Marketing Support</h4>
                         <p className="text-gray-700 text-sm">Professional multimedia services tailored to Australian real estate marketing requirements</p>
@@ -340,13 +383,15 @@ export default function ExceptionalTeamPerformancePage() {
           </Card>
         </div>
 
+        <Separator className="my-12" />
+
         {/* Strategic Expansion */}
         <div className="mb-16">
           <Card className="border-lime-200 shadow-md">
             <CardContent className="p-8">
               <div className="flex items-center mb-6">
                 <Zap className="w-10 h-10 text-lime-600 mr-3" />
-                <h2 className="text-3xl font-bold text-gray-900">Century 21 Client Success: Strategic Expansion and Future Growth</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Strategic Expansion and Future Growth</h2>
               </div>
               <div className="prose prose-lg max-w-none text-gray-700">
                 <p className="mb-4">
@@ -367,14 +412,14 @@ export default function ExceptionalTeamPerformancePage() {
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <ImageIcon className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
+                      <Video className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-bold text-gray-900 mb-2">Creative Expansion</h4>
                         <p className="text-gray-700 text-sm">Enhanced multimedia capabilities for advanced property marketing and digital asset creation</p>
                       </div>
                     </div>
                     <div className="flex items-start">
-                      <Building className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
+                      <Building2 className="w-8 h-8 text-lime-600 mr-3 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-bold text-gray-900 mb-2">Department Specialization</h4>
                         <p className="text-gray-700 text-sm">Dedicated specialists for sales support, compliance management, and client communication</p>
@@ -441,12 +486,14 @@ export default function ExceptionalTeamPerformancePage() {
           </Card>
         </div>
 
+        <Separator className="my-12" />
+
         {/* What Legends Status Means */}
         <div className="mb-16">
           <Card className="border-lime-200 shadow-md">
             <CardContent className="p-8">
               <div className="flex items-center mb-6">
-                <Lightbulb className="w-10 h-10 text-lime-600 mr-3" />
+                <Target className="w-10 h-10 text-lime-600 mr-3" />
                 <h2 className="text-3xl font-bold text-gray-900">What &quot;Legends&quot; Status Really Means for Your Business</h2>
               </div>
               <div className="prose prose-lg max-w-none text-gray-700">
@@ -464,7 +511,7 @@ export default function ExceptionalTeamPerformancePage() {
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Why Century 21&apos;s Team Approach Delivers &quot;Legends&quot; Performance</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-start">
-                      <Building className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
+                      <Building2 className="w-6 h-6 text-lime-600 mr-2 mt-1 flex-shrink-0" />
                       <div>
                         <h4 className="font-bold text-gray-900">Strategic Team Structure</h4>
                         <p className="text-gray-700 text-sm">Property management + multimedia specialists create coordination that individual contractors can&apos;t match</p>
@@ -510,17 +557,24 @@ export default function ExceptionalTeamPerformancePage() {
         <div className="text-center bg-lime-600 rounded-2xl p-12 text-white shadow-lg">
           <h2 className="text-4xl font-bold mb-6">Ready to build your own team of &quot;legends&quot; who exceed expectations consistently?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Andrew&apos;s success model: strategic team structure, professional standards, systematic integration. Available for any Australian real estate business ready to invest in excellence.
+            Andrew&apos;s success model: strategic team structure, professional standards, systematic integration. Available for 
+            any Australian real estate business ready to invest in excellence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-lime-600 hover:bg-gray-100 px-8 py-4 text-lg font-bold">
+            <Link
+              href="/pricing"
+              className="inline-flex items-center px-8 py-4 bg-white text-lime-600 hover:bg-gray-100 font-bold text-lg rounded-lg transition-colors"
+            >
               <Phone className="w-5 h-5 mr-2" />
               Schedule Your Consultation
-            </Button>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-lime-600 px-8 py-4 text-lg font-bold">
-              <Home className="w-5 h-5 mr-2" />
-              Real Estate Solutions
-            </Button>
+            </Link>
+            <Link
+              href="/case-studies"
+              className="inline-flex items-center px-8 py-4 border-2 border-white text-white hover:bg-white hover:text-lime-600 font-bold text-lg rounded-lg transition-colors"
+            >
+              <Building2 className="w-5 h-5 mr-2" />
+              View More Case Studies
+            </Link>
           </div>
         </div>
       </div>

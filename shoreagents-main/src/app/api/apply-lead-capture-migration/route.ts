@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
+    void _request
     console.log('🔧 Applying lead capture migration...');
     
     const supabase = createClient();

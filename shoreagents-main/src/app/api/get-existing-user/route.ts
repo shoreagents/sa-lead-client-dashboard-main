@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
+    void _request
     // Get the most recent user from the database
     const existingUser = await prisma.user.findFirst({
       orderBy: { created_at: 'desc' },

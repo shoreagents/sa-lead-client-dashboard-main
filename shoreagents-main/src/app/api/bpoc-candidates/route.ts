@@ -55,7 +55,8 @@ function parseSalary(salaryString: string | null): number {
     salary = parseInt(numbers[0].replace(/,/g, ''))
   }
   
-  if (salary < 15000 || salary > 200000) {
+  // More flexible salary range - accept 5K to 500K PHP
+  if (salary < 5000 || salary > 500000) {
     return 0
   }
   
@@ -164,18 +165,22 @@ function calculateMatchScore(
   const candidate = candidatePosition.toLowerCase().trim()
   const target = targetRole.toLowerCase().trim()
   
-  let baseScore = 5 // Start with low score
+  let baseScore = 20 // Start with reasonable base score for any candidate
   
   // Define role synonyms for better matching
   const roleSynonyms: Record<string, string[]> = {
-    'human resources': ['hr', 'recruiter', 'recruitment', 'talent', 'people', 'hiring'],
-    'hr': ['human resources', 'recruiter', 'recruitment', 'talent'],
-    'developer': ['programmer', 'engineer', 'coder', 'software'],
-    'designer': ['design', 'ui', 'ux', 'graphic', 'visual'],
-    'marketing': ['digital marketing', 'seo', 'social media', 'content'],
-    'sales': ['business development', 'account', 'salesperson'],
-    'accountant': ['accounting', 'bookkeeper', 'finance', 'cpa'],
-    'customer service': ['customer support', 'support', 'service', 'help desk'],
+    'human resources': ['hr', 'recruiter', 'recruitment', 'talent', 'people', 'hiring', 'personnel'],
+    'hr': ['human resources', 'recruiter', 'recruitment', 'talent', 'people', 'hiring'],
+    'developer': ['programmer', 'engineer', 'coder', 'software', 'dev', 'development', 'coding'],
+    'designer': ['design', 'ui', 'ux', 'graphic', 'visual', 'creative', 'web design'],
+    'marketing': ['digital marketing', 'seo', 'social media', 'content', 'brand', 'growth', 'campaigns'],
+    'sales': ['business development', 'account', 'salesperson', 'bd', 'sales rep', 'commercial'],
+    'accountant': ['accounting', 'bookkeeper', 'finance', 'cpa', 'financial', 'accounts'],
+    'customer service': ['customer support', 'support', 'service', 'help desk', 'client support', 'customer care'],
+    'assistant': ['admin', 'administrative', 'va', 'virtual assistant', 'support staff'],
+    'manager': ['management', 'lead', 'supervisor', 'coordinator', 'team lead'],
+    'analyst': ['analysis', 'data', 'research', 'business intelligence', 'insights'],
+    'writer': ['content', 'copywriter', 'copy', 'content creator', 'author'],
   }
   
   // Check for synonym matches
@@ -483,9 +488,9 @@ export async function POST(request: NextRequest) {
         }
         
         // Experience level removed - only focus on position, description, and skills
-        const highMatchScore = matchScore >= 81  // Very strict for high matches to avoid mismatches
-        const similarPosition = matchScore >= 60  // Much stricter for similar positions
-        const isCompletelyUnrelated = matchScore < 50  // Much stricter to exclude irrelevant roles
+        const highMatchScore = matchScore >= 70  // More flexible for high matches
+        const similarPosition = matchScore >= 40  // Much more inclusive for similar positions
+        const isCompletelyUnrelated = matchScore < 30  // Only exclude very low matches
         
         if (isCompletelyUnrelated) {
           return null
@@ -503,7 +508,7 @@ export async function POST(request: NextRequest) {
             skills: candidate.skills_snapshot || [],
             overallScore: candidate.overall_score || 0,
             matchScore,
-            isRecommended: matchScore >= 81 && (candidate.overall_score || 0) >= 50,
+            isRecommended: matchScore >= 70 && (candidate.overall_score || 0) >= 30,
             avatar: candidate.avatar_url && candidate.avatar_url.trim() !== '' 
               ? (candidate.avatar_url.startsWith('http') 
                   ? candidate.avatar_url 
@@ -517,9 +522,9 @@ export async function POST(request: NextRequest) {
       .filter((candidate): candidate is CandidateRecommendation => candidate !== null)
     
     // Group candidates by match score ranges for diversity
-    const excellentMatches = candidatesWithScores.filter(c => c.matchScore >= 81)
-    const goodMatches = candidatesWithScores.filter(c => c.matchScore >= 60 && c.matchScore < 81)
-    const fairMatches = candidatesWithScores.filter(c => c.matchScore >= 50 && c.matchScore < 60)
+    const excellentMatches = candidatesWithScores.filter(c => c.matchScore >= 70)
+    const goodMatches = candidatesWithScores.filter(c => c.matchScore >= 50 && c.matchScore < 70)
+    const fairMatches = candidatesWithScores.filter(c => c.matchScore >= 30 && c.matchScore < 50)
     
     console.log(`📊 Match distribution - Excellent: ${excellentMatches.length}, Good: ${goodMatches.length}, Fair: ${fairMatches.length}`);
     
@@ -560,10 +565,10 @@ export async function POST(request: NextRequest) {
       })));
     }
     
-    // Apply final relevance filtering (much stricter matching for better results)
+    // Apply final relevance filtering (more flexible to show more candidates)
     const finalFilteredCandidates = recommendedCandidates.filter(c => {
-      // Much higher match score threshold to exclude irrelevant candidates
-      if (c.matchScore < 60) return false
+      // Lower match score threshold to show more candidates
+      if (c.matchScore < 30) return false
       
       // Use user's actual input to filter - NO hardcoded categories
       const candidatePos = c.position.toLowerCase()
@@ -578,7 +583,7 @@ export async function POST(request: NextRequest) {
                               targetRole.includes(candidatePos) ||
                               targetWords.some((targetWord: string) => 
                                 candidateWords.some((candidateWord: string) => 
-                                  targetWord.includes(candidateWord) || candidateWord.includes(candidateWord)
+                                  targetWord.includes(candidateWord) || candidateWord.includes(targetWord)
                                 )
                               )
       
@@ -590,12 +595,12 @@ export async function POST(request: NextRequest) {
         )
       )
       
-      // Much higher threshold for high match scores
-      const hasHighMatchScore = c.matchScore >= 80
+      // More flexible threshold for high match scores
+      const hasHighMatchScore = c.matchScore >= 60
       
-      // Include if: High match score OR (position match AND skills match)
-      // This ensures we only get candidates relevant to USER'S actual input
-      return hasHighMatchScore || (hasPositionMatch && hasRelevantSkills)
+      // Include if: High match score OR position match OR skills match
+      // Much more inclusive to show more candidates
+      return hasHighMatchScore || hasPositionMatch || hasRelevantSkills
     })
     
     console.log(`📋 BPOC Candidates API: Final filtering - ${recommendedCandidates.length} candidates → ${finalFilteredCandidates.length} final matches`);

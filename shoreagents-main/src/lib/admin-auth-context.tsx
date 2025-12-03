@@ -74,10 +74,16 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         .from('users')
         .select('*')
         .eq('auth_user_id', authUser.id)
-        .single()
+        .maybeSingle() // Use maybeSingle() - returns null if no record
 
       if (error) {
         console.error('Error fetching admin data:', error)
+        return null
+      }
+
+      // If no user record exists, return null
+      if (!data) {
+        console.log('Admin auth - No user record found')
         return null
       }
 
