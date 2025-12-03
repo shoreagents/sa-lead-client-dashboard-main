@@ -207,26 +207,46 @@ export async function GET(request: NextRequest) {
       }
 
       // Calculate completed games using the exact same logic as profile completion card
+      // Always calculate for owner, or if privacy allows
+      let gamesCompleted = 0
+      
+      // Check Typing Hero (same logic as profile completion card)
+      // Check if game stats were fetched (they might be null if privacy settings block them)
+      if (gameStats.typing_hero_stats) {
+        const typingWpm = gameStats.typing_hero_stats.best_wpm || gameStats.typing_hero_stats.latest_wpm || 0
+        if (typingWpm > 0) {
+          gamesCompleted++
+        }
+      }
+      
+      // Check DISC Personality (same logic as profile completion card)
+      if (gameStats.disc_personality_stats && gameStats.disc_personality_stats.primary_type) {
+        gamesCompleted++
+      }
+      
+      // If privacy settings hide games, set to 0 for non-owners
       if (!isOwner && privacySettings.games_completed === 'only-me') {
         completedGames = 0 // Hide the count
       } else {
-        // Use the same logic as profile completion card
-        let gamesCompleted = 0
-        
-        // Check Typing Hero (same logic as profile completion card)
-        if (gameStats.typing_hero_stats && 
-            (gameStats.typing_hero_stats.best_wpm > 0 || gameStats.typing_hero_stats.latest_wpm > 0)) {
-          gamesCompleted++
-        }
-        
-        // Check DISC Personality (same logic as profile completion card)
-        if (gameStats.disc_personality_stats && 
-            (gameStats.disc_personality_stats.primary_type || gameStats.disc_personality_stats.latest_primary_type)) {
-          gamesCompleted++
-        }
-        
         completedGames = gamesCompleted
       }
+      
+      console.log('🎮 Games completion calculation:', {
+        userId: user.id,
+        isOwner,
+        privacyGamesCompleted: privacySettings.games_completed,
+        typingStats: gameStats.typing_hero_stats ? {
+          best_wpm: gameStats.typing_hero_stats.best_wpm,
+          latest_wpm: gameStats.typing_hero_stats.latest_wpm,
+          hasStats: true
+        } : { hasStats: false },
+        discStats: gameStats.disc_personality_stats ? {
+          primary_type: gameStats.disc_personality_stats.primary_type,
+          hasStats: true
+        } : { hasStats: false },
+        gamesCompleted,
+        completedGames
+      })
 
       return NextResponse.json({ 
         user: {

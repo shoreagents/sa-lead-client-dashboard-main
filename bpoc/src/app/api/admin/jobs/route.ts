@@ -7,6 +7,31 @@ export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Starting admin jobs API...');
     
+    // Automatically close jobs with passed deadlines
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+      
+      const closeExpiredJobs = await pool.query(`
+        UPDATE job_requests 
+        SET status = 'closed', updated_at = NOW()
+        WHERE application_deadline IS NOT NULL
+          AND application_deadline < $1
+          AND status != 'closed'
+        RETURNING id, job_title, application_deadline
+      `, [today]);
+      
+      if (closeExpiredJobs.rows.length > 0) {
+        console.log(`✅ Automatically closed ${closeExpiredJobs.rows.length} job(s) with passed deadlines`);
+        closeExpiredJobs.rows.forEach((row: any) => {
+          console.log(`   - Job ID ${row.id} (${row.job_title}): deadline was ${row.application_deadline}`);
+        });
+      }
+    } catch (error) {
+      console.error('⚠️ Error auto-closing expired jobs:', error);
+      // Continue even if auto-closure fails
+    }
+    
     // Get jobs from job_requests table (only unprocessed ones)
     console.log('📊 Fetching unprocessed job_requests...');
     let jobRequestsResult;

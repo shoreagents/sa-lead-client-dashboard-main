@@ -20,7 +20,7 @@ export async function GET() {
             'applicants' as type,
             u.full_name as user_name,
             u.avatar_url as user_avatar,
-            'Applied for: ' || COALESCE(pjr.job_title, 'Job Position') as action,
+            'Applied for: ' || COALESCE(jr.job_title, 'Job Position') as action,
             NULL as score,
             a.created_at as activity_time
           FROM applications a

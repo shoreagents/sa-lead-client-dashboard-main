@@ -27,7 +27,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -971,6 +971,7 @@ export default function Header({}: HeaderProps) {
                   </Button>
                 </SheetTrigger>
                 <SheetContent className="w-[300px] bg-black border border-white/10">
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                   <div className="flex flex-col space-y-6 mt-6">
                     {/* Mobile User Info */}
                     {isAuthenticated && user && (
