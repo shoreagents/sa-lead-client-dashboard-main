@@ -921,6 +921,26 @@ export default function ProfilePage() {
         
         const data = await res.json();
         const user = data.user || {};
+        
+        // Recalculate completed_games if game_stats are available
+        if (user.game_stats) {
+          let gamesCompleted = 0;
+          
+          // Check Typing Hero
+          if (user.game_stats.typing_hero_stats && 
+              (user.game_stats.typing_hero_stats.best_wpm > 0 || user.game_stats.typing_hero_stats.latest_wpm > 0)) {
+            gamesCompleted++;
+          }
+          
+          // Check DISC Personality
+          if (user.game_stats.disc_personality_stats && 
+              user.game_stats.disc_personality_stats.primary_type) {
+            gamesCompleted++;
+          }
+          
+          user.completed_games = gamesCompleted;
+        }
+        
         setUserProfile(user);
         
         // Fetch game stats from leaderboard API to ensure accurate completion status
@@ -963,6 +983,23 @@ export default function ProfilePage() {
                       completed_sessions: discStats.completed_sessions || updatedUser.game_stats.disc_personality_stats?.completed_sessions || 0
                     };
                   }
+                  
+                  // Recalculate completed_games using the same logic as profile completion card
+                  let gamesCompleted = 0;
+                  
+                  // Check Typing Hero
+                  if (updatedUser.game_stats.typing_hero_stats && 
+                      (updatedUser.game_stats.typing_hero_stats.best_wpm > 0 || updatedUser.game_stats.typing_hero_stats.latest_wpm > 0)) {
+                    gamesCompleted++;
+                  }
+                  
+                  // Check DISC Personality
+                  if (updatedUser.game_stats.disc_personality_stats && 
+                      updatedUser.game_stats.disc_personality_stats.primary_type) {
+                    gamesCompleted++;
+                  }
+                  
+                  updatedUser.completed_games = gamesCompleted;
                   
                   setUserProfile(updatedUser);
                 }

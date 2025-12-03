@@ -1974,7 +1974,7 @@ function JobsPage() {
         <Dialog open={isEditJobDialogOpen} onOpenChange={setIsEditJobDialogOpen}>
           <DialogContent className="bg-[#0b0b0d] text-white border border-white/10 job-edit-modal-v2">
             <DialogHeader>
-              <DialogTitle>Edit Job</DialogTitle>
+              <DialogTitle className="sr-only">Edit Job</DialogTitle>
             </DialogHeader>
                          {/* Enhanced Header with buttons - always visible */}
              <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/10">
