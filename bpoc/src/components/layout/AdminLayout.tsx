@@ -22,7 +22,8 @@ import {
   UserCircle,
   ChevronLeft,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  MessageSquare
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -46,6 +47,7 @@ const platformItems: SidebarItem[] = [
   { title: 'Analysis', icon: BarChart3, href: '/admin/analysis' },
   { title: 'Jobs', icon: Briefcase, href: '/admin/jobs' },
   { title: 'Applicants', icon: Users, href: '/admin/applicants' },
+  { title: 'Interviews', icon: MessageSquare, href: '/admin/interviews' },
   { title: 'Games', icon: Gamepad2, href: '/admin/games' },
   { title: 'Leaderboards', icon: Trophy, href: '/admin/leaderboards' }
 ]
