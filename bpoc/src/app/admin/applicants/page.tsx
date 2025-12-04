@@ -39,6 +39,7 @@ type JobSummary = {
   work_arrangement?: string | null
   industry?: string | null
   department?: string | null
+  status?: string | null
 }
 
 type Application = {
@@ -58,6 +59,7 @@ export default function Page() {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [priorityFilter, setPriorityFilter] = useState<'all' | 'low' | 'medium' | 'high'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'hiring' | 'closed'>('all')
   const [sortBy, setSortBy] = useState<'applicants_desc' | 'deadline_asc' | 'deadline_desc' | 'priority_desc' | 'priority_asc'>('applicants_desc')
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
@@ -67,23 +69,33 @@ export default function Page() {
       try {
         setLoading(true)
         setError(null)
-        // Use public active jobs - show all jobs even with 0 applicants
-        const res = await fetch('/api/jobs/active', { cache: 'no-store' })
+        // Fetch all jobs including closed ones
+        const res = await fetch('/api/jobs/combined', { cache: 'no-store' })
         if (!res.ok) throw new Error('Failed to load jobs')
         const data = await res.json()
         const list: JobSummary[] = (data.jobs || [])
-          .map((j: any) => ({ 
-            id: String(j.id), 
-            company: j.company, 
-            title: j.title, 
-            applicants: Number(j.applicants || 0), 
-            priority: (j.priority || 'medium'),
-            application_deadline: j.application_deadline || null,
-            experience_level: j.experience_level || null,
-            work_arrangement: j.work_arrangement || null,
-            industry: j.industry || null,
-            department: j.department || null
-          }))
+          .map((j: any) => {
+            // Status is already mapped by the API:
+            // 'inactive' -> 'inactive' (New Job Request)
+            // 'active' or 'processed' -> 'hiring' (Active/Hiring)
+            // 'closed' -> 'closed' (Closed)
+            // Use the status directly from the API
+            const jobStatus = j.status || 'inactive'
+            
+            return { 
+              id: String(j.id), 
+              company: j.company, 
+              title: j.title, 
+              applicants: Number(j.applicants || 0), 
+              priority: (j.priority || 'medium'),
+              application_deadline: j.application_deadline || null,
+              experience_level: j.experience_level || null,
+              work_arrangement: j.work_arrangement || null,
+              industry: j.industry || null,
+              department: j.department || null,
+              status: jobStatus
+            }
+          })
         setJobs(list)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Failed to load jobs')
@@ -105,7 +117,21 @@ export default function Page() {
     let list = jobs.filter(j => {
       const matchesQuery = !q || j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q)
       const matchesPriority = priorityFilter === 'all' || j.priority === priorityFilter
-      return matchesQuery && matchesPriority
+      
+      // Status filtering logic:
+      // 'all' -> show all jobs (inactive, hiring, closed)
+      // 'hiring' -> show only 'hiring' status (active/processed jobs)
+      // 'closed' -> show only 'closed' status
+      let matchesStatus = true
+      if (statusFilter === 'all') {
+        matchesStatus = true // Show all statuses
+      } else if (statusFilter === 'hiring') {
+        matchesStatus = j.status === 'hiring' // Only show hiring (active/processed)
+      } else if (statusFilter === 'closed') {
+        matchesStatus = j.status === 'closed' // Only show closed
+      }
+      
+      return matchesQuery && matchesPriority && matchesStatus
     })
     const toNum = (d?: string | null) => (d ? new Date(d).getTime() : Number.POSITIVE_INFINITY)
     list = list.sort((a, b) => {
@@ -129,7 +155,7 @@ export default function Page() {
       }
     })
     return list
-  }, [jobs, search, priorityFilter, sortBy])
+  }, [jobs, search, priorityFilter, statusFilter, sortBy])
 
   // Pagination logic
   const totalPages = Math.ceil(visibleJobs.length / itemsPerPage)
@@ -140,7 +166,7 @@ export default function Page() {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [search, priorityFilter, sortBy])
+  }, [search, priorityFilter, statusFilter, sortBy])
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -312,6 +338,17 @@ export default function Page() {
                 />
               </div>
               
+              <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+                <SelectTrigger className="w-40 bg-white/5 border-transparent text-white focus:border-transparent focus:ring-0">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border-gray-700">
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="hiring">Hiring</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Select value={priorityFilter} onValueChange={(value: any) => setPriorityFilter(value)}>
                 <SelectTrigger className="w-40 bg-white/5 border-transparent text-white focus:border-transparent focus:ring-0">
                   <SelectValue placeholder="Priority" />
@@ -348,13 +385,14 @@ export default function Page() {
               {visibleJobs.length} results
             </Badge>
           </div>
-          {search || priorityFilter !== 'all' && (
+          {(search || priorityFilter !== 'all' || statusFilter !== 'all') && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
                 setSearch('')
                 setPriorityFilter('all')
+                setStatusFilter('all')
               }}
               className="text-gray-400 hover:text-white hover:bg-white/10"
             >
