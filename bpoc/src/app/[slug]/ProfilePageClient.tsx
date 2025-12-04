@@ -872,8 +872,110 @@ export default function ProfilePage() {
           
           if (res.ok) {
             const data = await res.json();
-            const user = data.user || {};
-            setUserProfile(user);
+            const profileUser = data.user || {};
+            
+            // Recalculate completed_games if game_stats are available
+            if (profileUser.game_stats) {
+              let gamesCompleted = 0;
+              
+              // Check Typing Hero
+              if (profileUser.game_stats.typing_hero_stats && 
+                  (profileUser.game_stats.typing_hero_stats.best_wpm > 0 || profileUser.game_stats.typing_hero_stats.latest_wpm > 0)) {
+                gamesCompleted++;
+              }
+              
+              // Check DISC Personality
+              if (profileUser.game_stats.disc_personality_stats && 
+                  profileUser.game_stats.disc_personality_stats.primary_type) {
+                gamesCompleted++;
+              }
+              
+              profileUser.completed_games = gamesCompleted;
+            }
+            
+            // Fetch game stats from leaderboard API to ensure accurate completion status
+            if (profileUser.id) {
+              try {
+                const scoreResponse = await fetch(`/api/leaderboards/user/${profileUser.id}`);
+                if (scoreResponse.ok) {
+                  const scoreData = await scoreResponse.json();
+                  setOverallScore(scoreData.overall?.overall_score || 0);
+                  setLeaderboardData(scoreData);
+                  
+                  // Populate game_stats from leaderboard API if not available from profile API
+                  if (scoreData.components) {
+                    const typingStats = scoreData.components.typing_hero?.details;
+                    const discStats = scoreData.components.disc_personality?.details;
+                    
+                    const updatedUser = { ...profileUser };
+                    updatedUser.game_stats = updatedUser.game_stats || {};
+                    
+                    // Populate typing hero stats if available from leaderboard (merge with existing)
+                    if (typingStats) {
+                      updatedUser.game_stats.typing_hero_stats = {
+                        ...updatedUser.game_stats.typing_hero_stats,
+                        best_wpm: typingStats.best_wpm ?? updatedUser.game_stats.typing_hero_stats?.best_wpm ?? 0,
+                        latest_wpm: typingStats.latest_wpm ?? typingStats.best_wpm ?? updatedUser.game_stats.typing_hero_stats?.latest_wpm ?? 0,
+                        avg_wpm: typingStats.avg_wpm ?? updatedUser.game_stats.typing_hero_stats?.avg_wpm ?? 0,
+                        best_accuracy: typingStats.best_accuracy ?? updatedUser.game_stats.typing_hero_stats?.best_accuracy ?? 0,
+                        total_sessions: typingStats.total_sessions ?? updatedUser.game_stats.typing_hero_stats?.total_sessions ?? 0,
+                        ai_analysis: typingStats.ai_analysis ?? updatedUser.game_stats.typing_hero_stats?.ai_analysis ?? null
+                      };
+                    }
+                    
+                    // Populate DISC stats if available from leaderboard (merge with existing)
+                    if (discStats) {
+                      updatedUser.game_stats.disc_personality_stats = {
+                        ...updatedUser.game_stats.disc_personality_stats,
+                        primary_type: discStats.latest_primary_type ?? updatedUser.game_stats.disc_personality_stats?.primary_type ?? null,
+                        best_confidence_score: discStats.best_confidence_score ?? updatedUser.game_stats.disc_personality_stats?.best_confidence_score ?? null,
+                        completed_sessions: discStats.completed_sessions ?? updatedUser.game_stats.disc_personality_stats?.completed_sessions ?? 0,
+                        latest_ai_assessment: discStats.latest_ai_assessment ?? updatedUser.game_stats.disc_personality_stats?.latest_ai_assessment ?? null,
+                        latest_d_score: discStats.latest_d_score ?? discStats.d_score ?? updatedUser.game_stats.disc_personality_stats?.latest_d_score ?? updatedUser.game_stats.disc_personality_stats?.d_score ?? 0,
+                        latest_i_score: discStats.latest_i_score ?? discStats.i_score ?? updatedUser.game_stats.disc_personality_stats?.latest_i_score ?? updatedUser.game_stats.disc_personality_stats?.i_score ?? 0,
+                        latest_s_score: discStats.latest_s_score ?? discStats.s_score ?? updatedUser.game_stats.disc_personality_stats?.latest_s_score ?? updatedUser.game_stats.disc_personality_stats?.s_score ?? 0,
+                        latest_c_score: discStats.latest_c_score ?? discStats.c_score ?? updatedUser.game_stats.disc_personality_stats?.latest_c_score ?? updatedUser.game_stats.disc_personality_stats?.c_score ?? 0,
+                        d: discStats.latest_d_score ?? discStats.d_score ?? updatedUser.game_stats.disc_personality_stats?.d ?? updatedUser.game_stats.disc_personality_stats?.d_score ?? 0,
+                        i: discStats.latest_i_score ?? discStats.i_score ?? updatedUser.game_stats.disc_personality_stats?.i ?? updatedUser.game_stats.disc_personality_stats?.i_score ?? 0,
+                        s: discStats.latest_s_score ?? discStats.s_score ?? updatedUser.game_stats.disc_personality_stats?.s ?? updatedUser.game_stats.disc_personality_stats?.s_score ?? 0,
+                        c: discStats.latest_c_score ?? discStats.c_score ?? updatedUser.game_stats.disc_personality_stats?.c ?? updatedUser.game_stats.disc_personality_stats?.c_score ?? 0,
+                        d_score: discStats.d_score ?? updatedUser.game_stats.disc_personality_stats?.d_score ?? 0,
+                        i_score: discStats.i_score ?? updatedUser.game_stats.disc_personality_stats?.i_score ?? 0,
+                        s_score: discStats.s_score ?? updatedUser.game_stats.disc_personality_stats?.s_score ?? 0,
+                        c_score: discStats.c_score ?? updatedUser.game_stats.disc_personality_stats?.c_score ?? 0,
+                        latest_animal: discStats.latest_animal ?? updatedUser.game_stats.disc_personality_stats?.latest_animal ?? null
+                      };
+                    }
+                    
+                    // Recalculate completed_games using the same logic as profile completion card
+                    let gamesCompleted = 0;
+                    
+                    // Check Typing Hero
+                    if (updatedUser.game_stats.typing_hero_stats && 
+                        (updatedUser.game_stats.typing_hero_stats.best_wpm > 0 || 
+                         updatedUser.game_stats.typing_hero_stats.latest_wpm > 0)) {
+                      gamesCompleted++;
+                    }
+                    
+                    // Check DISC Personality
+                    if (updatedUser.game_stats.disc_personality_stats && 
+                        updatedUser.game_stats.disc_personality_stats.primary_type) {
+                      gamesCompleted++;
+                    }
+                    
+                    updatedUser.completed_games = gamesCompleted;
+                    
+                    setUserProfile(updatedUser);
+                    return; // Exit early after setting updated profile
+                  }
+                }
+              } catch (error) {
+                console.log('Failed to fetch leaderboard data on refetch:', error);
+              }
+            }
+            
+            // If leaderboard data didn't update the profile, set the profile as-is
+            setUserProfile(profileUser);
           }
         } catch (error) {
           console.log('Failed to refetch profile:', error);
@@ -959,50 +1061,64 @@ export default function ProfilePage() {
                 const typingStats = scoreData.components.typing_hero?.details;
                 const discStats = scoreData.components.disc_personality?.details;
                 
-                if (typingStats || discStats) {
-                  const updatedUser = { ...user };
-                  updatedUser.game_stats = updatedUser.game_stats || {};
-                  
-                  // Populate typing hero stats if available from leaderboard
-                  if (typingStats && (typingStats.best_wpm > 0 || typingStats.latest_wpm > 0)) {
-                    updatedUser.game_stats.typing_hero_stats = {
-                      ...updatedUser.game_stats.typing_hero_stats,
-                      best_wpm: typingStats.best_wpm || updatedUser.game_stats.typing_hero_stats?.best_wpm || 0,
-                      latest_wpm: typingStats.latest_wpm || typingStats.best_wpm || updatedUser.game_stats.typing_hero_stats?.latest_wpm || 0,
-                      best_accuracy: typingStats.best_accuracy || updatedUser.game_stats.typing_hero_stats?.best_accuracy || 0,
-                      total_sessions: typingStats.total_sessions || updatedUser.game_stats.typing_hero_stats?.total_sessions || 0
-                    };
-                  }
-                  
-                  // Populate DISC stats if available from leaderboard
-                  if (discStats && discStats.latest_primary_type) {
-                    updatedUser.game_stats.disc_personality_stats = {
-                      ...updatedUser.game_stats.disc_personality_stats,
-                      primary_type: discStats.latest_primary_type || updatedUser.game_stats.disc_personality_stats?.primary_type || null,
-                      best_confidence_score: discStats.best_confidence_score || updatedUser.game_stats.disc_personality_stats?.best_confidence_score || null,
-                      completed_sessions: discStats.completed_sessions || updatedUser.game_stats.disc_personality_stats?.completed_sessions || 0
-                    };
-                  }
-                  
-                  // Recalculate completed_games using the same logic as profile completion card
-                  let gamesCompleted = 0;
-                  
-                  // Check Typing Hero
-                  if (updatedUser.game_stats.typing_hero_stats && 
-                      (updatedUser.game_stats.typing_hero_stats.best_wpm > 0 || updatedUser.game_stats.typing_hero_stats.latest_wpm > 0)) {
-                    gamesCompleted++;
-                  }
-                  
-                  // Check DISC Personality
-                  if (updatedUser.game_stats.disc_personality_stats && 
-                      updatedUser.game_stats.disc_personality_stats.primary_type) {
-                    gamesCompleted++;
-                  }
-                  
-                  updatedUser.completed_games = gamesCompleted;
-                  
-                  setUserProfile(updatedUser);
+                const updatedUser = { ...user };
+                updatedUser.game_stats = updatedUser.game_stats || {};
+                
+                // Populate typing hero stats if available from leaderboard (merge with existing)
+                if (typingStats) {
+                  updatedUser.game_stats.typing_hero_stats = {
+                    ...updatedUser.game_stats.typing_hero_stats,
+                    best_wpm: typingStats.best_wpm ?? updatedUser.game_stats.typing_hero_stats?.best_wpm ?? 0,
+                    latest_wpm: typingStats.latest_wpm ?? typingStats.best_wpm ?? updatedUser.game_stats.typing_hero_stats?.latest_wpm ?? 0,
+                    avg_wpm: typingStats.avg_wpm ?? updatedUser.game_stats.typing_hero_stats?.avg_wpm ?? 0,
+                    best_accuracy: typingStats.best_accuracy ?? updatedUser.game_stats.typing_hero_stats?.best_accuracy ?? 0,
+                    total_sessions: typingStats.total_sessions ?? updatedUser.game_stats.typing_hero_stats?.total_sessions ?? 0,
+                    ai_analysis: typingStats.ai_analysis ?? updatedUser.game_stats.typing_hero_stats?.ai_analysis ?? null
+                  };
                 }
+                
+                // Populate DISC stats if available from leaderboard (merge with existing)
+                if (discStats) {
+                  updatedUser.game_stats.disc_personality_stats = {
+                    ...updatedUser.game_stats.disc_personality_stats,
+                    primary_type: discStats.latest_primary_type ?? updatedUser.game_stats.disc_personality_stats?.primary_type ?? null,
+                    best_confidence_score: discStats.best_confidence_score ?? updatedUser.game_stats.disc_personality_stats?.best_confidence_score ?? null,
+                    completed_sessions: discStats.completed_sessions ?? updatedUser.game_stats.disc_personality_stats?.completed_sessions ?? 0,
+                    latest_ai_assessment: discStats.latest_ai_assessment ?? updatedUser.game_stats.disc_personality_stats?.latest_ai_assessment ?? null,
+                    latest_d_score: discStats.latest_d_score ?? discStats.d_score ?? updatedUser.game_stats.disc_personality_stats?.latest_d_score ?? updatedUser.game_stats.disc_personality_stats?.d_score ?? 0,
+                    latest_i_score: discStats.latest_i_score ?? discStats.i_score ?? updatedUser.game_stats.disc_personality_stats?.latest_i_score ?? updatedUser.game_stats.disc_personality_stats?.i_score ?? 0,
+                    latest_s_score: discStats.latest_s_score ?? discStats.s_score ?? updatedUser.game_stats.disc_personality_stats?.latest_s_score ?? updatedUser.game_stats.disc_personality_stats?.s_score ?? 0,
+                    latest_c_score: discStats.latest_c_score ?? discStats.c_score ?? updatedUser.game_stats.disc_personality_stats?.latest_c_score ?? updatedUser.game_stats.disc_personality_stats?.c_score ?? 0,
+                    d: discStats.latest_d_score ?? discStats.d_score ?? updatedUser.game_stats.disc_personality_stats?.d ?? updatedUser.game_stats.disc_personality_stats?.d_score ?? 0,
+                    i: discStats.latest_i_score ?? discStats.i_score ?? updatedUser.game_stats.disc_personality_stats?.i ?? updatedUser.game_stats.disc_personality_stats?.i_score ?? 0,
+                    s: discStats.latest_s_score ?? discStats.s_score ?? updatedUser.game_stats.disc_personality_stats?.s ?? updatedUser.game_stats.disc_personality_stats?.s_score ?? 0,
+                    c: discStats.latest_c_score ?? discStats.c_score ?? updatedUser.game_stats.disc_personality_stats?.c ?? updatedUser.game_stats.disc_personality_stats?.c_score ?? 0,
+                    d_score: discStats.d_score ?? updatedUser.game_stats.disc_personality_stats?.d_score ?? 0,
+                    i_score: discStats.i_score ?? updatedUser.game_stats.disc_personality_stats?.i_score ?? 0,
+                    s_score: discStats.s_score ?? updatedUser.game_stats.disc_personality_stats?.s_score ?? 0,
+                    c_score: discStats.c_score ?? updatedUser.game_stats.disc_personality_stats?.c_score ?? 0,
+                    latest_animal: discStats.latest_animal ?? updatedUser.game_stats.disc_personality_stats?.latest_animal ?? null
+                  };
+                }
+                
+                // Recalculate completed_games using the same logic as profile completion card
+                let gamesCompleted = 0;
+                
+                // Check Typing Hero
+                if (updatedUser.game_stats.typing_hero_stats && 
+                    (updatedUser.game_stats.typing_hero_stats.best_wpm > 0 || updatedUser.game_stats.typing_hero_stats.latest_wpm > 0)) {
+                  gamesCompleted++;
+                }
+                
+                // Check DISC Personality
+                if (updatedUser.game_stats.disc_personality_stats && 
+                    updatedUser.game_stats.disc_personality_stats.primary_type) {
+                  gamesCompleted++;
+                }
+                
+                updatedUser.completed_games = gamesCompleted;
+                
+                setUserProfile(updatedUser);
               }
             }
           } catch (error) {

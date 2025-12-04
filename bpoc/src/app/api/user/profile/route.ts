@@ -24,9 +24,15 @@ export async function GET(request: NextRequest) {
         u.id, u.email, u.first_name, u.last_name, u.full_name, u.location, u.avatar_url, u.phone, u.bio, u.position, u.completed_data, u.birthday, u.slug, u.created_at, u.updated_at,
         u.gender, u.gender_custom, u.username, u.company, u.admin_level,
         u.location_place_id, u.location_lat, u.location_lng, u.location_city, u.location_province, u.location_country, u.location_barangay, u.location_region,
-        COALESCE(uls.overall_score, 0) as overall_score
+        COALESCE(uls.overall_score, 0) as overall_score,
+        aar.overall_score as resume_score, aar.key_strengths, aar.strengths_analysis, aar.ats_compatibility_score, aar.content_quality_score, aar.professional_presentation_score, aar.skills_alignment_score,
+        aar.improvements, aar.recommendations, aar.improved_summary, aar.salary_analysis, aar.career_path, aar.section_analysis,
+        uws.current_employer, uws.current_position, uws.current_salary, uws.notice_period_days, uws.current_mood, uws.work_status, uws.preferred_shift, uws.expected_salary, uws.work_setup, 
+        uws.minimum_salary_range, uws.maximum_salary_range, uws.completed_data as work_status_completed_data
       FROM users u
       LEFT JOIN user_leaderboard_scores uls ON u.id = uls.user_id
+      LEFT JOIN ai_analysis_results aar ON u.id = aar.user_id
+      LEFT JOIN user_work_status uws ON u.id = uws.user_id
       WHERE u.id = $1
     `
     
@@ -54,6 +60,85 @@ export async function GET(request: NextRequest) {
     }
 
     const user = result.rows[0]
+
+    // Get game stats data (always fetch for candidate dashboard since user is always the owner)
+    let gameStats = {
+      disc_personality_stats: null,
+      typing_hero_stats: null
+    }
+
+    try {
+      // Fetch DISC Personality Stats
+      const discStatsRes = await pool.query(
+        'SELECT * FROM disc_personality_stats WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+        [user.id]
+      )
+      const ds = discStatsRes.rows[0] || null
+      if (ds) {
+        // Normalize stats so frontend always receives consistent keys
+        gameStats.disc_personality_stats = {
+          // Scores
+          d: ds.latest_d_score ?? ds.d ?? ds.d_score ?? 0,
+          i: ds.latest_i_score ?? ds.i ?? ds.i_score ?? 0,
+          s: ds.latest_s_score ?? ds.s ?? ds.s_score ?? 0,
+          c: ds.latest_c_score ?? ds.c ?? ds.c_score ?? 0,
+          // Types
+          primary_type: ds.latest_primary_type ?? ds.primary_style ?? null,
+          secondary_type: ds.latest_secondary_type ?? ds.secondary_style ?? null,
+          // Session/quality
+          confidence: ds.best_confidence_score ?? ds.consistency_index ?? null,
+          cultural_alignment: ds.cultural_alignment_score ?? null,
+          average_completion_time: ds.average_completion_time ?? null,
+          last_taken_at: ds.last_taken_at ?? null,
+          // XP/badges
+          total_xp: ds.total_xp ?? null,
+          latest_session_xp: ds.latest_session_xp ?? null,
+          badges_earned: ds.badges_earned ?? null,
+          // AI content
+          latest_ai_assessment: ds.latest_ai_assessment ?? null,
+          latest_bpo_roles: ds.latest_bpo_roles ?? null,
+          // Additional score fields for compatibility
+          latest_d_score: ds.latest_d_score ?? ds.d_score ?? 0,
+          latest_i_score: ds.latest_i_score ?? ds.i_score ?? 0,
+          latest_s_score: ds.latest_s_score ?? ds.s_score ?? 0,
+          latest_c_score: ds.latest_c_score ?? ds.c_score ?? 0,
+          d_score: ds.d_score ?? 0,
+          i_score: ds.i_score ?? 0,
+          s_score: ds.s_score ?? 0,
+          c_score: ds.c_score ?? 0,
+          latest_animal: ds.latest_animal ?? null,
+          completed_sessions: ds.completed_sessions ?? 0,
+          best_confidence_score: ds.best_confidence_score ?? null
+        }
+      } else {
+        gameStats.disc_personality_stats = null
+      }
+
+      // Fetch Typing Hero Stats
+      const typingStatsRes = await pool.query(
+        'SELECT * FROM typing_hero_stats WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+        [user.id]
+      )
+      gameStats.typing_hero_stats = typingStatsRes.rows[0] || null
+    } catch (gameStatsError: any) {
+      console.log('Game stats tables error:', gameStatsError)
+    }
+
+    // Calculate completed games using the exact same logic as profile completion card
+    let gamesCompleted = 0
+    
+    // Check Typing Hero
+    if (gameStats.typing_hero_stats) {
+      const typingWpm = gameStats.typing_hero_stats.best_wpm || gameStats.typing_hero_stats.latest_wpm || 0
+      if (typingWpm > 0) {
+        gamesCompleted++
+      }
+    }
+    
+    // Check DISC Personality
+    if (gameStats.disc_personality_stats && gameStats.disc_personality_stats.primary_type) {
+      gamesCompleted++
+    }
 
     const userProfile = {
       id: user.id,
@@ -84,7 +169,38 @@ export async function GET(request: NextRequest) {
       location_region: user.location_region,
       created_at: user.created_at,
       updated_at: user.updated_at,
-      overall_score: user.overall_score
+      overall_score: user.overall_score,
+      // Resume analysis data
+      resume_score: user.resume_score,
+      key_strengths: user.key_strengths,
+      strengths_analysis: user.strengths_analysis,
+      ats_compatibility_score: user.ats_compatibility_score,
+      content_quality_score: user.content_quality_score,
+      professional_presentation_score: user.professional_presentation_score,
+      skills_alignment_score: user.skills_alignment_score,
+      improvements: user.improvements,
+      recommendations: user.recommendations,
+      improved_summary: user.improved_summary,
+      salary_analysis: user.salary_analysis,
+      career_path: user.career_path,
+      section_analysis: user.section_analysis,
+      // Work status data
+      current_employer: user.current_employer,
+      current_position: user.current_position,
+      current_salary: user.current_salary,
+      notice_period_days: user.notice_period_days,
+      current_mood: user.current_mood,
+      work_status: user.work_status,
+      preferred_shift: user.preferred_shift,
+      expected_salary: user.expected_salary,
+      work_setup: user.work_setup,
+      minimum_salary_range: user.minimum_salary_range,
+      maximum_salary_range: user.maximum_salary_range,
+      work_status_completed_data: user.work_status_completed_data,
+      // Game stats data
+      game_stats: gameStats,
+      completed_games: gamesCompleted,
+      total_games: 2
     }
     
     console.log('✅ API: User profile loaded:', userProfile)

@@ -103,17 +103,23 @@ export async function GET(
       [typingStats, discStats] = await Promise.all([
         pool.query(`
           SELECT 
-            best_wpm, latest_wpm, best_accuracy, total_sessions,
+            best_wpm, latest_wpm, best_accuracy, total_sessions, avg_wpm, ai_analysis,
             created_at, updated_at
           FROM typing_hero_stats 
           WHERE user_id = $1
+          ORDER BY created_at DESC
+          LIMIT 1
         `, [userId]),
         pool.query(`
           SELECT 
             best_confidence_score, completed_sessions, latest_primary_type,
+            latest_ai_assessment, latest_d_score, latest_i_score, latest_s_score, latest_c_score,
+            d_score, i_score, s_score, c_score, latest_animal,
             created_at, updated_at
           FROM disc_personality_stats 
           WHERE user_id = $1
+          ORDER BY created_at DESC
+          LIMIT 1
         `, [userId])
       ])
       
@@ -263,8 +269,11 @@ export async function GET(
           score: leaderboardData.typing_hero_score,
           details: typingStats.rows[0] ? {
             best_wpm: typingStats.rows[0].best_wpm,
+            latest_wpm: typingStats.rows[0].latest_wpm,
+            avg_wpm: typingStats.rows[0].avg_wpm,
             best_accuracy: typingStats.rows[0].best_accuracy,
-            total_sessions: typingStats.rows[0].total_sessions
+            total_sessions: typingStats.rows[0].total_sessions,
+            ai_analysis: typingStats.rows[0].ai_analysis
           } : null
         },
         disc_personality: {
@@ -272,7 +281,17 @@ export async function GET(
           details: discStats.rows[0] ? {
             best_confidence_score: discStats.rows[0].best_confidence_score,
             completed_sessions: discStats.rows[0].completed_sessions,
-            latest_primary_type: discStats.rows[0].latest_primary_type
+            latest_primary_type: discStats.rows[0].latest_primary_type,
+            latest_ai_assessment: discStats.rows[0].latest_ai_assessment,
+            latest_d_score: discStats.rows[0].latest_d_score,
+            latest_i_score: discStats.rows[0].latest_i_score,
+            latest_s_score: discStats.rows[0].latest_s_score,
+            latest_c_score: discStats.rows[0].latest_c_score,
+            d_score: discStats.rows[0].d_score,
+            i_score: discStats.rows[0].i_score,
+            s_score: discStats.rows[0].s_score,
+            c_score: discStats.rows[0].c_score,
+            latest_animal: discStats.rows[0].latest_animal
           } : null
         },
         profile_completion: {

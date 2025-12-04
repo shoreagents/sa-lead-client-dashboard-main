@@ -23,7 +23,8 @@ import {
   ChevronDown,
   Gamepad2,
   Brain,
-  Calculator
+  Calculator,
+  LayoutDashboard
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -868,8 +869,6 @@ export default function Header({}: HeaderProps) {
           <div className="flex items-center space-x-4">
             {isAuthenticated && user ? (
               <div className="hidden md:flex items-center space-x-4">
-
-
                 {/* User Menu */}
                 <div className="relative group">
                   <button className="flex items-center space-x-2 glass-button px-3 py-2 rounded-lg">
@@ -930,6 +929,15 @@ export default function Header({}: HeaderProps) {
                     ))}
                   </div>
                 </div>
+
+                {/* Dashboard Link - Static link positioned on the right */}
+                <Link 
+                  href="/candidate-dashboard"
+                  className="flex items-center space-x-2 glass-button px-3 py-2 rounded-lg hover:bg-white/10 transition-all duration-200"
+                >
+                  <LayoutDashboard className="w-4 h-4 text-white" />
+                  <span className="text-sm font-medium text-white">Dashboard</span>
+                </Link>
               </div>
             ) : (
               <div className="hidden md:flex items-center space-x-2 ml-auto">
