@@ -3869,8 +3869,8 @@ export default function ProfilePage() {
                                 })()}
                               </div>
 
-                              {/* Animal Personality Reason */}
-                              {userProfile.game_stats.disc_personality_stats.latest_ai_assessment && (
+                              {/* Animal Personality Reason - Always show when DISC data exists */}
+                              {userProfile.game_stats?.disc_personality_stats && (
                                 <div className="mt-4 p-4 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-lg border border-blue-400/30">
                                   <button
                                     onClick={() => setIsAnimalReasonExpanded(!isAnimalReasonExpanded)}
@@ -3886,10 +3886,15 @@ export default function ProfilePage() {
                                       }`}
                                     />
                                   </button>
-                                  {isAnimalReasonExpanded && (
-                                    <div className="text-gray-300 text-sm leading-relaxed">
-                                    {(() => {
-                                      const assessment = userProfile.game_stats.disc_personality_stats.latest_ai_assessment;
+                                    {isAnimalReasonExpanded && (
+                                      <div className="text-gray-300 text-sm leading-relaxed">
+                                      {(() => {
+                                        const assessment = userProfile.game_stats?.disc_personality_stats?.latest_ai_assessment;
+                                        
+                                        // If no assessment, show fallback message
+                                        if (!assessment) {
+                                          return 'Detailed analysis will be available after completing the DISC assessment.';
+                                        }
                                       
                                       // Extract the comprehensive assessment and animal personality reason sections
                                       let comprehensiveContent = '';
@@ -4203,8 +4208,8 @@ export default function ProfilePage() {
                                 </div>
                               )}
 
-                              {/* Core Traits Section */}
-                              {userProfile.game_stats.disc_personality_stats.latest_ai_assessment && (
+                              {/* Core Traits Section - Always show when DISC data exists */}
+                              {userProfile.game_stats?.disc_personality_stats && (
                                 <div className="mt-4 p-4 bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg border border-green-400/30">
                                   <button
                                     onClick={() => setIsCoreTraitsExpanded(!isCoreTraitsExpanded)}
@@ -4223,7 +4228,12 @@ export default function ProfilePage() {
                                   {isCoreTraitsExpanded && (
                                     <div className="text-gray-300 text-sm leading-relaxed">
                                     {(() => {
-                                      const assessment = userProfile.game_stats.disc_personality_stats.latest_ai_assessment;
+                                      const assessment = userProfile.game_stats?.disc_personality_stats?.latest_ai_assessment;
+                                      
+                                      // If no assessment, show fallback message
+                                      if (!assessment) {
+                                        return 'Core traits analysis will be available after completing the DISC assessment.';
+                                      }
                                       
                                       // Extract the core traits section
                                       if (assessment.includes('CORE TRAITS')) {
@@ -4325,8 +4335,8 @@ export default function ProfilePage() {
                                 </div>
                               )}
 
-                              {/* Cultural Strengths Section */}
-                              {userProfile.game_stats.disc_personality_stats.latest_ai_assessment && (
+                              {/* Cultural Strengths Section - Always show when DISC data exists */}
+                              {userProfile.game_stats?.disc_personality_stats && (
                                 <div className="mt-4 p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-400/30">
                                   <button
                                     onClick={() => setIsCulturalStrengthsExpanded(!isCulturalStrengthsExpanded)}
@@ -4345,7 +4355,12 @@ export default function ProfilePage() {
                                   {isCulturalStrengthsExpanded && (
                                     <div className="text-gray-300 text-sm leading-relaxed">
                                     {(() => {
-                                      const assessment = userProfile.game_stats.disc_personality_stats.latest_ai_assessment;
+                                      const assessment = userProfile.game_stats?.disc_personality_stats?.latest_ai_assessment;
+                                      
+                                      // If no assessment, show fallback message
+                                      if (!assessment) {
+                                        return 'Cultural strengths analysis will be available after completing the DISC assessment.';
+                                      }
                                       
                                       // Extract the cultural strengths section
                                       if (assessment.includes('CULTURAL STRENGTHS')) {

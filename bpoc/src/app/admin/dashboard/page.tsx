@@ -618,8 +618,8 @@ export default function DashboardPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">Game User Distribution</CardTitle>
-                    <p className="text-sm text-gray-400">Number of users playing each game</p>
+                    <CardTitle className="text-white">User Registration Trends</CardTitle>
+                    <p className="text-sm text-gray-400">Daily new user signups</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <DropdownMenu>
@@ -630,17 +630,15 @@ export default function DashboardPage() {
                           className="border-white/10 text-white hover:bg-white/10"
                         >
                           <Calendar className="w-3 h-3 mr-2" />
-                          {gameRange === '7d' ? 'Last 7d' : gameRange === '30d' ? 'Last 30d' : gameRange === '90d' ? 'Last 90d' : gameRange === '1y' ? 'Last 1y' : 'All time'}
+                          {registrationsRange === '7d' ? 'Last 7d' : registrationsRange === '30d' ? 'Last 30d' : 'Last 90d'}
                           <ChevronDown className="w-3 h-3 ml-2" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-gray-900 border-white/10 text-white">
                         <DropdownMenuLabel>Time Range</DropdownMenuLabel>
-                        <DropdownMenuItem className={gameRange==='7d' ? 'bg-white/20' : ''} onClick={() => setGameRange('7d')}>Last 7d</DropdownMenuItem>
-                        <DropdownMenuItem className={gameRange==='30d' ? 'bg-white/20' : ''} onClick={() => setGameRange('30d')}>Last 30d</DropdownMenuItem>
-                        <DropdownMenuItem className={gameRange==='90d' ? 'bg-white/20' : ''} onClick={() => setGameRange('90d')}>Last 90d</DropdownMenuItem>
-                        <DropdownMenuItem className={gameRange==='1y' ? 'bg-white/20' : ''} onClick={() => setGameRange('1y')}>Last 1y</DropdownMenuItem>
-                        <DropdownMenuItem className={gameRange==='all' ? 'bg-white/20' : ''} onClick={() => setGameRange('all')}>All time</DropdownMenuItem>
+                        <DropdownMenuItem className={registrationsRange==='7d' ? 'bg-white/20' : ''} onClick={() => setRegistrationsRange('7d')}>Last 7d</DropdownMenuItem>
+                        <DropdownMenuItem className={registrationsRange==='30d' ? 'bg-white/20' : ''} onClick={() => setRegistrationsRange('30d')}>Last 30d</DropdownMenuItem>
+                        <DropdownMenuItem className={registrationsRange==='90d' ? 'bg-white/20' : ''} onClick={() => setRegistrationsRange('90d')}>Last 90d</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -648,20 +646,18 @@ export default function DashboardPage() {
               </CardHeader>
                                              <CardContent>
                   <div className="h-64 bg-white/5 rounded-lg p-4">
-                    {gamePerformance.length > 0 ? (
-                      <BarChartComponent 
-                        data={gamePerformance.map((game, index) => ({
-                          name: game.displayName || game.gameType,
-                          users: game.userCount || 0,
-                          gameType: game.gameType,
-                          displayText: `${game.userCount} users`
+                    {userRegistrationTrends.length > 0 ? (
+                      <AreaChartComponent 
+                        data={userRegistrationTrends.map((trend, index) => ({
+                          name: trend.displayDate,
+                          registrations: trend.count
                         }))}
-                        dataKey="users"
+                        dataKey="registrations"
                         fill="#10b981"
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full text-gray-400">
-                        <p>No game data available</p>
+                        <p>No registration data available</p>
                       </div>
                     )}
                   </div>
@@ -727,8 +723,8 @@ export default function DashboardPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">User Registration Trends</CardTitle>
-                    <p className="text-sm text-gray-400">Daily new user signups</p>
+                    <CardTitle className="text-white">Game User Distribution</CardTitle>
+                    <p className="text-sm text-gray-400">Number of users playing each game</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <DropdownMenu>
@@ -739,15 +735,17 @@ export default function DashboardPage() {
                           className="border-white/10 text-white hover:bg-white/10"
                         >
                           <Calendar className="w-3 h-3 mr-2" />
-                          {registrationsRange === '7d' ? 'Last 7d' : registrationsRange === '30d' ? 'Last 30d' : 'Last 90d'}
+                          {gameRange === '7d' ? 'Last 7d' : gameRange === '30d' ? 'Last 30d' : gameRange === '90d' ? 'Last 90d' : gameRange === '1y' ? 'Last 1y' : 'All time'}
                           <ChevronDown className="w-3 h-3 ml-2" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-gray-900 border-white/10 text-white">
                         <DropdownMenuLabel>Time Range</DropdownMenuLabel>
-                        <DropdownMenuItem className={registrationsRange==='7d' ? 'bg-white/20' : ''} onClick={() => setRegistrationsRange('7d')}>Last 7d</DropdownMenuItem>
-                        <DropdownMenuItem className={registrationsRange==='30d' ? 'bg-white/20' : ''} onClick={() => setRegistrationsRange('30d')}>Last 30d</DropdownMenuItem>
-                        <DropdownMenuItem className={registrationsRange==='90d' ? 'bg-white/20' : ''} onClick={() => setRegistrationsRange('90d')}>Last 90d</DropdownMenuItem>
+                        <DropdownMenuItem className={gameRange==='7d' ? 'bg-white/20' : ''} onClick={() => setGameRange('7d')}>Last 7d</DropdownMenuItem>
+                        <DropdownMenuItem className={gameRange==='30d' ? 'bg-white/20' : ''} onClick={() => setGameRange('30d')}>Last 30d</DropdownMenuItem>
+                        <DropdownMenuItem className={gameRange==='90d' ? 'bg-white/20' : ''} onClick={() => setGameRange('90d')}>Last 90d</DropdownMenuItem>
+                        <DropdownMenuItem className={gameRange==='1y' ? 'bg-white/20' : ''} onClick={() => setGameRange('1y')}>Last 1y</DropdownMenuItem>
+                        <DropdownMenuItem className={gameRange==='all' ? 'bg-white/20' : ''} onClick={() => setGameRange('all')}>All time</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -755,18 +753,20 @@ export default function DashboardPage() {
               </CardHeader>
                              <CardContent>
                  <div className="h-64 bg-white/5 rounded-lg p-4">
-                   {userRegistrationTrends.length > 0 ? (
-                     <AreaChartComponent 
-                       data={userRegistrationTrends.map((trend, index) => ({
-                         name: trend.displayDate,
-                         registrations: trend.count
+                   {gamePerformance.length > 0 ? (
+                     <BarChartComponent 
+                       data={gamePerformance.map((game, index) => ({
+                         name: game.displayName || game.gameType,
+                         users: game.userCount || 0,
+                         gameType: game.gameType,
+                         displayText: `${game.userCount} users`
                        }))}
-                       dataKey="registrations"
+                       dataKey="users"
                        fill="#10b981"
                      />
                    ) : (
                      <div className="flex items-center justify-center h-full text-gray-400">
-                       <p>No registration data available</p>
+                       <p>No game data available</p>
                      </div>
                    )}
                  </div>

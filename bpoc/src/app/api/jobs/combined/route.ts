@@ -14,12 +14,12 @@ function formatSalary(currency: string, min: number | null, max: number | null, 
 
 export async function GET(_request: NextRequest) {
   try {
-    // Fetch from job_requests (all active jobs - includes both 'active' and 'processed' status)
+    // Fetch from job_requests (all jobs - includes 'inactive', 'active', 'processed', and 'closed' status)
     const jobRequestsRes = await pool.query(`
       SELECT jr.*, m.company AS company_name
       FROM job_requests jr
       LEFT JOIN members m ON m.company_id = jr.company_id
-      WHERE jr.status IN ('active', 'processed')
+      WHERE jr.status IN ('inactive', 'active', 'processed', 'closed')
       ORDER BY jr.created_at DESC
     `)
 
@@ -74,7 +74,7 @@ export async function GET(_request: NextRequest) {
         employmentType,
         postedDays,
         applicants: realApplicants,
-        status: row.status || 'hiring',
+        status: row.status === 'closed' ? 'closed' : (row.status === 'active' || row.status === 'processed' ? 'hiring' : 'inactive'),
         priority,
         application_deadline: row.application_deadline,
         experience_level: row.experience_level,

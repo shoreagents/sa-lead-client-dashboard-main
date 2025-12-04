@@ -111,11 +111,11 @@ export async function POST(request: NextRequest) {
         const job = jobRequestCheck.rows[0]
         // Accept both 'active' and 'processed' status jobs (both are active/hiring)
         if (job.status !== 'active' && job.status !== 'processed') {
-          return NextResponse.json({ 
-            error: 'This job is not available',
-            details: 'This job is not active and cannot be applied to.'
-          }, { status: 400 })
-        }
+            return NextResponse.json({ 
+              error: 'This job is not available',
+              details: 'This job is not active and cannot be applied to.'
+            }, { status: 400 })
+          }
         jobType = 'job_request'
         console.log('📝 Job found in job_requests:', numericJobId)
       } else {

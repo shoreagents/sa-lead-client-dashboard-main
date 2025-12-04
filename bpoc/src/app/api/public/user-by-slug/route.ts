@@ -108,45 +108,21 @@ export async function GET(request: NextRequest) {
       }
 
       // Get game completion data - only if user exists
+      // Note: We'll calculate completed games after we fetch the game stats data
+      // to use the exact same logic as the profile completion card
       let completedGames = 0
-      try {
-        const gameCompletionRes = await client.query(
-          `SELECT 
-            (SELECT COUNT(*) FROM bpoc_cultural_sessions WHERE user_id = $1) +
-            (SELECT COUNT(*) FROM disc_personality_sessions WHERE user_id = $1) +
-            (SELECT COUNT(*) FROM typing_hero_sessions WHERE user_id = $1) +
-            (SELECT COUNT(*) FROM ultimate_sessions WHERE user_id = $1) as total_sessions`,
-          [user.id]
-        )
-        
-        // We'll calculate completed games after we fetch the game stats data
-        // to use the exact same logic as the profile completion card
-        completedGames = 0
-      } catch (gameError) {
-        console.log('Game sessions tables might not exist:', gameError)
-        completedGames = 0
-      }
 
       const totalGames = 2
 
       // Get game stats data
       let gameStats = {
-        bpoc_cultural_stats: null,
         disc_personality_stats: null,
-        typing_hero_stats: null,
-        ultimate_stats: null
+        typing_hero_stats: null
       }
 
       try {
         // Only fetch game stats if user is owner or games are public
         if (isOwner || privacySettings.games_completed === 'public') {
-          // Fetch BPOC Cultural Stats
-          const bpocStatsRes = await client.query(
-            'SELECT * FROM bpoc_cultural_stats WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
-            [user.id]
-          )
-          gameStats.bpoc_cultural_stats = bpocStatsRes.rows[0] || null
-
           // Fetch DISC Personality Stats
           const discStatsRes = await client.query(
             'SELECT * FROM disc_personality_stats WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
@@ -187,23 +163,9 @@ export async function GET(request: NextRequest) {
             [user.id]
           )
           gameStats.typing_hero_stats = typingStatsRes.rows[0] || null
-
-          // Fetch Ultimate Stats
-          const ultimateStatsRes = await client.query(
-            'SELECT * FROM ultimate_stats WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
-            [user.id]
-          )
-          gameStats.ultimate_stats = ultimateStatsRes.rows[0] || null
-
-          // Fetch BPOC Cultural Results
-          const bpocResultsRes = await client.query(
-            'SELECT result_json FROM bpoc_cultural_results WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
-            [user.id]
-          )
-          gameStats.bpoc_cultural_results = bpocResultsRes.rows[0]?.result_json || null
         }
-      } catch (gameStatsError) {
-        console.log('Game stats tables might not exist:', gameStatsError)
+      } catch (gameStatsError: any) {
+        console.log('Game stats tables error:', gameStatsError)
       }
 
       // Calculate completed games using the exact same logic as profile completion card

@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Processed jobs are now in job_requests, so skip this section
-      processedJobsResult = { rows: [] };
+          processedJobsResult = { rows: [] };
 
       // Check recruiter_jobs table
       if (recruiterJobIds.length > 0) {
